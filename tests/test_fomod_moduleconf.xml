@@ -1,0 +1,105 @@
+﻿<!-- Created with FOMOD Creation Tool 1.7.0.37 [http://www.nexusmods.com/fallout4/mods/6821] -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://qconsulting.ca/fo3/ModConfig5.0.xsd">
+    <moduleName>xavbio's meshes for 3BA</moduleName>
+    <installSteps order="Explicit">
+        <installStep name="xavbio's mods installed">
+            <optionalFileGroups order="Explicit">
+                <group name="Mods" type="SelectAny">
+                    <plugins order="Explicit">
+                        <plugin name="Ancient Nord Armors">
+                            <description></description>
+                            <image path="fomod\91136-1683833629-107808357_png.jpg" />
+                            <conditionFlags>
+                                <flag name="1">On</flag>
+                            </conditionFlags>
+                            <typeDescriptor>
+                                <type name="Optional"/>
+                            </typeDescriptor>
+                        </plugin>
+                        <plugin name="Imperial Armors">
+                            <description></description>
+                            <image path="fomod\86097-1677724584-1488206295_png.jpg" />
+                            <conditionFlags>
+                                <flag name="2">On</flag>
+                            </conditionFlags>
+                            <typeDescriptor>
+                                <type name="Optional"/>
+                            </typeDescriptor>
+                        </plugin>
+                    </plugins>
+                </group>
+            </optionalFileGroups>
+        </installStep>
+        <installStep name="Ancient Nord Armors">
+            <visible>
+                <dependencies operator="And">
+                    <flagDependency flag="1" value="On"/>
+                </dependencies>
+            </visible>
+            <optionalFileGroups order="Explicit">
+                <group name="Conversions" type="SelectAny">
+                    <plugins order="Explicit">
+                        <plugin name="Ancient Nord Armors">
+                            <description></description>
+                            <files>
+                                <folder source="1. Ancient Nord Armor\CalienteTools" destination="CalienteTools" priority="0" />
+                            </files>
+                            <typeDescriptor>
+                                <type name="Optional"/>
+                            </typeDescriptor>
+                        </plugin>
+                    </plugins>
+                </group>
+            </optionalFileGroups>
+        </installStep>
+        <installStep name="Imperial Armors">
+            <visible>
+                <dependencies operator="And">
+                    <flagDependency flag="2" value="On"/>
+                </dependencies>
+            </visible>
+            <optionalFileGroups order="Explicit">
+                <group name="Conversions" type="SelectAny">
+                    <plugins order="Explicit">
+                        <plugin name="Tullius / Penitus Oculatus">
+                            <description></description>
+                            <files>
+                                <folder source="2. Imperial Armors\2a. Tullius\CalienteTools" destination="CalienteTools" priority="0" />
+                            </files>
+                            <typeDescriptor>
+                                <type name="Optional"/>
+                            </typeDescriptor>
+                        </plugin>
+                        <plugin name="Imperial - Heavy / Studded / Light">
+                            <description></description>
+                            <files>
+                                <folder source="2. Imperial Armors\2b. Imperial\CalienteTools" destination="CalienteTools" priority="0" />
+                            </files>
+                            <typeDescriptor>
+                                <type name="Optional"/>
+                            </typeDescriptor>
+                        </plugin>
+                        <plugin name="Falx Carius">
+                            <description></description>
+                            <files>
+                                <folder source="2. Imperial Armors\2c. Carius\CalienteTools" destination="CalienteTools" priority="0" />
+                            </files>
+                            <typeDescriptor>
+                                <type name="Optional"/>
+                            </typeDescriptor>
+                        </plugin>
+                        <plugin name="Lord's Mail *">
+                            <description>CC Content</description>
+                            <files>
+                                <folder source="2. Imperial Armors\2d. Lord's Mail\CalienteTools" destination="CalienteTools" priority="0" />
+                            </files>
+                            <typeDescriptor>
+                                <type name="Optional"/>
+                            </typeDescriptor>
+                        </plugin>
+                    </plugins>
+                </group>
+            </optionalFileGroups>
+        </installStep>
+    </installSteps>
+</config>
