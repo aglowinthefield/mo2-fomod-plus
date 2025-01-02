@@ -1,0 +1,20 @@
+﻿<fomod>
+    <Name>Ancient Nord Armors and Weapons Retexture SE</Name>
+    <Author>xavbio</Author>
+    <Version>1.0</Version>
+    <Website>https://www.nexusmods.com/skyrimspecialedition/mods/91136</Website>
+    <Description>This mod retextures the Ancient Nord armor, Ancient Nord Weapons, Nord Hero Weapons, Helm of Yngol, Draugr's armor and CC Fishing's Ancient Nord weapons and Nord hero weapons. I also added an optional mesh replacer to add pants to the Ancient Nord armor. Also contains optional retextures for Legacy of the dragonborn﻿'s Azhidal armor (same as Nordic Wanderer equipments' armor), Gauldur Blackblade, Gauldur Blackbow and Honed Ancient Nord Greatsword of Scorching,  Skyrim Immersive Creatures﻿'s Hoary Nord armor and Yngol's armor, Nordic Wanderer Equipment SSE's Nordic Wanderer armor (same as LOTD's Azhidal armor), Elsopa's Quivers Redone SE's Ancient Nord quiver and Nord hero quiver and a patch for Cathedral Armory. Everything in this is textures only, outside of the optional pants replacer. It is safe to add or remove from your game at any time. I do not touch the Draugr NPCs themselves, only their armor. So it is compatible with any Draugr Retexture / replacer﻿
+
+        The textures for the Ancient Nord armor are based on Cabal120's aMidianBorn Book of Silence﻿. I used their normal maps as a base to create my retexture. Everything else is based on vanilla textures.
+
+        Works with every mod that also works with vanilla textures, such as Heavy armory and animated armory. If you see any major stretching or dark spots when using a mesh replacer, please let me know by linking the mod in the comments and posting a picture of the bugged area (please spoiler the picture to not take too much space) and I will see if I can fix it.
+
+        Fomod lets you pick and choose what you want.
+
+        Textures are 2k except Chest armor textures, which are 4k.
+
+        Half-res version available in Optional files (Chest, weapons and shield are 2k, everything else is 1k)</Description>
+    <Groups>
+        <element>models and Textures</element>
+    </Groups>
+</fomod>

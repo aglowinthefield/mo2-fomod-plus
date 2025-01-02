@@ -47,7 +47,7 @@ private:
  * @return the entry corresponding to the fomod directory in the tree, or a null
  * pointer if the entry was not found.
  */
-  [[nodiscard]] std::shared_ptr<const IFileTree> findFomodDirectory(std::shared_ptr<const IFileTree> tree) const;
+  [[nodiscard]] static std::shared_ptr<const IFileTree> findFomodDirectory(const std::shared_ptr<const IFileTree> &tree);
 };
 
 #endif //INSTALLERFOMODPLUS_H

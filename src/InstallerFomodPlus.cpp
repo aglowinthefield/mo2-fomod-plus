@@ -17,7 +17,7 @@ bool InstallerFomodPlus::isArchiveSupported(std::shared_ptr<const IFileTree> tre
 }
 
 QList<PluginSetting> InstallerFomodPlus::settings() const {
-  return QList<PluginSetting>();
+  return {};
 }
 
 IPluginInstaller::EInstallResult InstallerFomodPlus::install(GuessedValue<QString> &modName,
@@ -31,7 +31,7 @@ IPluginInstaller::EInstallResult InstallerFomodPlus::install(GuessedValue<QStrin
 
   log::debug("InstallerFomodPlus::install - tree size: {}", tree->size());
 
-  return EInstallResult::RESULT_NOTATTEMPTED;
+  return RESULT_NOTATTEMPTED;
 }
 
 void InstallerFomodPlus::onInstallationStart(QString const &archive, bool reinstallation,
@@ -44,8 +44,8 @@ void InstallerFomodPlus::onInstallationEnd(EInstallResult result, IModInterface 
 }
 
 // Borrowed from https://github.com/ModOrganizer2/modorganizer-installer_fomod/blob/master/src/installerfomod.cpp
-std::shared_ptr<const IFileTree> InstallerFomodPlus::findFomodDirectory(std::shared_ptr<const IFileTree> tree) const {
-  auto entry = tree->find(StringConstants::FomodFiles::FOMOD_DIR, FileTreeEntry::DIRECTORY);
+std::shared_ptr<const IFileTree> InstallerFomodPlus::findFomodDirectory(const std::shared_ptr<const IFileTree> &tree) {
+  const auto entry = tree->find(StringConstants::FomodFiles::FOMOD_DIR, FileTreeEntry::DIRECTORY);
 
   if (entry != nullptr) {
     return entry->astree();
