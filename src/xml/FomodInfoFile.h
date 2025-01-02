@@ -8,12 +8,12 @@
 class FomodInfoFile {
 public:
     bool deserialize(const std::string& filePath);
-    const std::string& getName() const { return name; }
-    const std::string& getAuthor() const { return author; }
-    const std::string& getVersion() const { return version; }
-    const std::string& getWebsite() const { return website; }
-    const std::string& getDescription() const { return description; }
-    const std::vector<std::string>& getGroups() const { return groups; }
+    [[nodiscard]] const std::string& getName() const { return name; }
+    [[nodiscard]] const std::string& getAuthor() const { return author; }
+    [[nodiscard]] const std::string& getVersion() const { return version; }
+    [[nodiscard]] const std::string& getWebsite() const { return website; }
+    [[nodiscard]] const std::string& getDescription() const { return description; }
+    [[nodiscard]] const std::vector<std::string>& getGroups() const { return groups; }
 
 private:
     std::string name;

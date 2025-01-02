@@ -24,7 +24,7 @@ bool FomodInfoFile::deserialize(const std::string &filePath) {
     description = fomodNode.child("Description").text().as_string();
 
     for (pugi::xml_node groupNode : fomodNode.child("Groups").children("element")) {
-        groups.push_back(groupNode.text().as_string());
+        groups.emplace_back(groupNode.text().as_string());
     }
 
     return true;
