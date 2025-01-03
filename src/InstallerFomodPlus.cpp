@@ -1,6 +1,12 @@
-﻿#include <log.h>
+﻿#include "InstallerFomodPlus.h"
 
-#include "InstallerFomodPlus.h"
+#include <iinstallationmanager.h>
+#include <log.h>
+#include <QEventLoop>
+#include <xml/FomodInfoFile.h>
+#include <xml/ModuleConfiguration.h>
+
+#include "FomodInstallerWindow.h"
 #include "stringconstants.h"
 
 bool InstallerFomodPlus::init(IOrganizer *organizer) {
@@ -23,6 +29,37 @@ QList<PluginSetting> InstallerFomodPlus::settings() const {
 IPluginInstaller::EInstallResult InstallerFomodPlus::install(GuessedValue<QString> &modName,
   std::shared_ptr<IFileTree> &tree, QString &version, int &nexusID) {
 
+  const auto fomodDir = findFomodDirectory(tree);
+  if (fomodDir == nullptr) {
+    log::error("InstallerFomodPlus::install - fomod directory not found");
+    return RESULT_FAILED;
+  }
+
+  const auto infoXML = fomodDir->find(StringConstants::FomodFiles::INFO_XML, FileTreeEntry::FILE);
+  const auto moduleConfig = fomodDir->find(StringConstants::FomodFiles::MODULE_CONFIG, FileTreeEntry::FILE);
+
+  // Extract files first.
+  auto paths = manager()->extractFiles({infoXML, moduleConfig});
+
+  // parse xml
+  auto infoFile = FomodInfoFile();
+  if (!infoFile.deserialize(paths.first().toStdString())) {
+    log::debug("Could not deserialize info file. See logs for more information.");
+    return RESULT_FAILED;
+  }
+
+  auto moduleConfiguration = ModuleConfiguration();
+  if (!moduleConfiguration.deserialize(paths.last().toStdString())) {
+    log::debug("Could not deserialize ModuleConfig file. See logs for more information.");
+    return RESULT_FAILED;
+  }
+
+  // create ui & pass xml classes to ui
+  const auto window = std::make_shared<FomodInstallerWindow>(this, modName, tree,
+    std::make_unique<ModuleConfiguration>(moduleConfiguration),
+    std::make_unique<FomodInfoFile>(infoFile)
+  );
+
   log::debug("InstallerFomodPlus::install - modName: {}, version: {}, nexusID: {}",
              modName->toStdString(),
              version.toStdString(),
@@ -31,6 +68,9 @@ IPluginInstaller::EInstallResult InstallerFomodPlus::install(GuessedValue<QStrin
 
   log::debug("InstallerFomodPlus::install - tree size: {}", tree->size());
 
+  if (const QDialog::DialogCode result = showInstallerWindow(window); result == QDialog::Accepted) {
+    return RESULT_SUCCESS;
+  }
   return RESULT_NOTATTEMPTED;
 }
 
@@ -56,3 +96,16 @@ std::shared_ptr<const IFileTree> InstallerFomodPlus::findFomodDirectory(const st
   }
   return nullptr;
 }
+
+QDialog::DialogCode InstallerFomodPlus::showInstallerWindow(const std::shared_ptr<FomodInstallerWindow>& window) {
+  log::debug("InstallerFomodPlus::showInstallerWindow - entering function");
+  QEventLoop loop;
+  connect(window.get(), &QDialog::accepted, &loop, &QEventLoop::quit);
+  connect(window.get(), &QDialog::rejected, &loop, &QEventLoop::quit);
+  log::debug("InstallerFomodPlus::showInstallerWindow - starting event loop");
+  window->show();
+  loop.exec();
+  log::debug("InstallerFomodPlus::showInstallerWindow - event loop finished");
+  return static_cast<QDialog::DialogCode>(window->result());
+}
+

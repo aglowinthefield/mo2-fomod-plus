@@ -1,7 +1,10 @@
-﻿#include "ModuleConfiguration.h"
+﻿#include <log.h>
+#include "ModuleConfiguration.h"
+
+using namespace MOBase;
 
 bool PluginType::deserialize(pugi::xml_node &node) {
-  std::string typeStr = node.attribute("name").as_string();
+  const std::string typeStr = node.attribute("name").as_string();
   if (typeStr == "Required")           name = PluginTypeEnum::Required;
   else if (typeStr == "Optional")      name = PluginTypeEnum::Optional;
   else if (typeStr == "Recommended")   name = PluginTypeEnum::Recommended;
@@ -144,16 +147,15 @@ bool StepList::deserialize(pugi::xml_node &node) {
 
 bool ModuleConfiguration::deserialize(const std::string &filePath) {
   pugi::xml_document doc;
-  pugi::xml_parse_result result = doc.load_file(filePath.c_str());
 
-  if (!result) {
-    std::cerr << "XML parsed with errors: " << result.description() << std::endl;
+  if (const pugi::xml_parse_result result = doc.load_file(filePath.c_str()); !result) {
+    log::error("XML parsed with errors: {}", result.description());
     return false;
   }
 
   const pugi::xml_node configNode = doc.child("config");
   if (!configNode) {
-    std::cerr << "No <config> node found" << std::endl;
+    log::error("No <config> node found");
     return false;
   }
 

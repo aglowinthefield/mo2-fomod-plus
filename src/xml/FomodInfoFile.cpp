@@ -1,5 +1,8 @@
 ﻿#include "FomodInfoFile.h"
+#include <log.h>
 #include <pugixml.hpp>
+
+using namespace MOBase;
 
 bool FomodInfoFile::deserialize(const std::string &filePath) {
     pugi::xml_document doc;
@@ -7,13 +10,13 @@ bool FomodInfoFile::deserialize(const std::string &filePath) {
     const pugi::xml_parse_result result = doc.load_file(filePath.c_str());
 
     if (!result) {
-        std::cerr << "XML parsed with errors: " << result.description() << std::endl;
+        log::error("XML parsed with errors: {}", result.description());
         return false;
     }
 
     const pugi::xml_node fomodNode = doc.child("fomod");
     if (!fomodNode) {
-        std::cerr << "No <fomod> node found" << std::endl;
+        log::error("No <config> node found");
         return false;
     }
 

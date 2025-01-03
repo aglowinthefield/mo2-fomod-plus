@@ -6,6 +6,11 @@
 #include <iplugin.h>
 #include <iplugininstaller.h>
 #include <iplugininstallersimple.h>
+#include <QDialog>
+
+#include "FomodInstallerWindow.h"
+
+class FomodInstallerWindow;
 
 using namespace MOBase;
 
@@ -27,7 +32,7 @@ public:
   [[nodiscard]] QString description() const override { return StringConstants::Plugin::DESCRIPTION; }
   [[nodiscard]] VersionInfo version() const override { return {1, 0, 0, VersionInfo::RELEASE_FINAL}; }
   [[nodiscard]] unsigned int priority() const override { return 120; /* Above installer_fomod's highest priority. */ }
-  [[nodiscard]] bool isManualInstaller() const override { return false; };
+  [[nodiscard]] bool isManualInstaller() const override { return false; }
 
   [[nodiscard]] bool isArchiveSupported(std::shared_ptr<const IFileTree> tree) const override;
   [[nodiscard]] QList<PluginSetting> settings() const override;
@@ -48,6 +53,9 @@ private:
  * pointer if the entry was not found.
  */
   [[nodiscard]] static std::shared_ptr<const IFileTree> findFomodDirectory(const std::shared_ptr<const IFileTree> &tree);
+
+
+  [[nodiscard]] static QDialog::DialogCode showInstallerWindow(const std::shared_ptr<FomodInstallerWindow>& window);
 };
 
 #endif //INSTALLERFOMODPLUS_H
