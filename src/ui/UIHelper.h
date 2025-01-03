@@ -5,6 +5,11 @@
 #include <QPushButton>
 #include <Qlabel>
 
+namespace UiConstants {
+  constexpr int WINDOW_MIN_WIDTH = 1024;
+  constexpr int WINDOW_MIN_HEIGHT = 768;
+}
+
 class UIHelper {
 public:
   static QPushButton* createButton(const QString& text, QWidget* parent = nullptr) {

@@ -100,8 +100,8 @@ std::shared_ptr<const IFileTree> InstallerFomodPlus::findFomodDirectory(const st
 QDialog::DialogCode InstallerFomodPlus::showInstallerWindow(const std::shared_ptr<FomodInstallerWindow>& window) {
   log::debug("InstallerFomodPlus::showInstallerWindow - entering function");
   QEventLoop loop;
-  connect(window.get(), &QDialog::accepted, &loop, &QEventLoop::quit);
-  connect(window.get(), &QDialog::rejected, &loop, &QEventLoop::quit);
+  connect(window.get(), SIGNAL(accepted()), &loop, SLOT(quit()));
+  connect(window.get(), SIGNAL(rejected()), &loop, SLOT(quit()));
   log::debug("InstallerFomodPlus::showInstallerWindow - starting event loop");
   window->show();
   loop.exec();

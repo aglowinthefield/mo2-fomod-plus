@@ -12,7 +12,7 @@ FomodInstallerWindow::FomodInstallerWindow(InstallerFomodPlus *installer, const 
                                                              mFomodFile(std::move(fomodFile)),
                                                              mInfoFile(std::move(infoFile)) {
 
-  QVBoxLayout *layout = new QVBoxLayout(this);
+  const auto layout = new QVBoxLayout(this);
 
   QLabel *label = UIHelper::createLabel("Fomod Installer", this);
   layout->addWidget(label);
@@ -23,8 +23,8 @@ FomodInstallerWindow::FomodInstallerWindow(InstallerFomodPlus *installer, const 
   QPushButton *rejectButton = UIHelper::createButton("Reject", this);
   layout->addWidget(rejectButton);
 
-  connect(acceptButton, &QPushButton::clicked, this, &QDialog::accept);
-  connect(rejectButton, &QPushButton::clicked, this, &QDialog::reject);
+  connect(acceptButton, SIGNAL(clicked()), this, SLOT(accept()));
+  connect(rejectButton, SIGNAL(clicked()), this, SLOT(reject()));
 
   setLayout(layout);
 
