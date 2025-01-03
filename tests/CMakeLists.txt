@@ -19,8 +19,10 @@ enable_testing()
 
 add_executable(runTests
         ${CMAKE_CURRENT_SOURCE_DIR}/../tests/test_fomod_info_file.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/../tests/test_module_configuration.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../tests/test_moduleconf_xavbio.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../src/xml/FomodInfoFile.cpp
+        ../src/xml/ModuleConfiguration.cpp
+        test_moduleconf_lux.cpp
 )
 
 target_link_libraries(runTests gtest gtest_main pugixml)
