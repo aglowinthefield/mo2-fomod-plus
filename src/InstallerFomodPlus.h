@@ -9,10 +9,13 @@
 #include <QDialog>
 
 #include "FomodInstallerWindow.h"
+#include "xml/FomodInfoFile.h"
+#include "xml/ModuleConfiguration.h"
 
 class FomodInstallerWindow;
 
 using namespace MOBase;
+using namespace std;
 
 class InstallerFomodPlus final : public IPluginInstallerSimple
 {
@@ -52,10 +55,11 @@ private:
  * @return the entry corresponding to the fomod directory in the tree, or a null
  * pointer if the entry was not found.
  */
-  [[nodiscard]] static std::shared_ptr<const IFileTree> findFomodDirectory(const std::shared_ptr<const IFileTree> &tree);
+  [[nodiscard]] static shared_ptr<const IFileTree> findFomodDirectory(const shared_ptr<const IFileTree> &tree);
 
+  [[nodiscard]] static QDialog::DialogCode showInstallerWindow(const shared_ptr<FomodInstallerWindow>& window);
 
-  [[nodiscard]] static QDialog::DialogCode showInstallerWindow(const std::shared_ptr<FomodInstallerWindow>& window);
+  [[nodiscard]] pair<unique_ptr<FomodInfoFile>, unique_ptr<ModuleConfiguration>> parseFomodFiles(const shared_ptr<IFileTree> &tree) const;
 };
 
 #endif //INSTALLERFOMODPLUS_H

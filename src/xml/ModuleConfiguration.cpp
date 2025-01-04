@@ -145,6 +145,10 @@ bool StepList::deserialize(pugi::xml_node &node) {
   return true;
 }
 
+ModuleConfiguration::~ModuleConfiguration() {
+  log::debug("Deleting ModuleConfiguration");
+}
+
 bool ModuleConfiguration::deserialize(const std::string &filePath) {
   pugi::xml_document doc;
 

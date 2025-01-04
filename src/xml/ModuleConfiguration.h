@@ -158,6 +158,8 @@ public:
 
 class ModuleConfiguration {
 public:
+  ModuleConfiguration();
+  ~ModuleConfiguration();
   std::string moduleName;
   HeaderImage moduleImage;
   CompositeDependency moduleDependencies;

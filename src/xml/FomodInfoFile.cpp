@@ -4,6 +4,15 @@
 
 using namespace MOBase;
 
+FomodInfoFile::FomodInfoFile() {
+    log::debug("Creating FomodInfoFile");
+}
+
+FomodInfoFile::~FomodInfoFile() {
+    log::debug("Deleting FomodInfoFile");
+    // do nothing. for debugging only
+}
+
 bool FomodInfoFile::deserialize(const std::string &filePath) {
     pugi::xml_document doc;
     // ReSharper disable once CppTooWideScopeInitStatement

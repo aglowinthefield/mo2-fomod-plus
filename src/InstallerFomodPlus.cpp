@@ -26,52 +26,80 @@ QList<PluginSetting> InstallerFomodPlus::settings() const {
   return {};
 }
 
+/**
+ *
+ * @param modName
+ * @param tree
+ * @param version
+ * @param nexusID
+ * @return
+ */
 IPluginInstaller::EInstallResult InstallerFomodPlus::install(GuessedValue<QString> &modName,
   std::shared_ptr<IFileTree> &tree, QString &version, int &nexusID) {
-
-  const auto fomodDir = findFomodDirectory(tree);
-  if (fomodDir == nullptr) {
-    log::error("InstallerFomodPlus::install - fomod directory not found");
-    return RESULT_FAILED;
-  }
-
-  const auto infoXML = fomodDir->find(StringConstants::FomodFiles::INFO_XML, FileTreeEntry::FILE);
-  const auto moduleConfig = fomodDir->find(StringConstants::FomodFiles::MODULE_CONFIG, FileTreeEntry::FILE);
-
-  // Extract files first.
-  auto paths = manager()->extractFiles({infoXML, moduleConfig});
-
-  // parse xml
-  auto infoFile = FomodInfoFile();
-  if (!infoFile.deserialize(paths.first().toStdString())) {
-    log::debug("Could not deserialize info file. See logs for more information.");
-    return RESULT_FAILED;
-  }
-
-  auto moduleConfiguration = ModuleConfiguration();
-  if (!moduleConfiguration.deserialize(paths.last().toStdString())) {
-    log::debug("Could not deserialize ModuleConfig file. See logs for more information.");
-    return RESULT_FAILED;
-  }
-
-  // create ui & pass xml classes to ui
-  const auto window = std::make_shared<FomodInstallerWindow>(this, modName, tree,
-    std::make_unique<ModuleConfiguration>(moduleConfiguration),
-    std::make_unique<FomodInfoFile>(infoFile)
-  );
 
   log::debug("InstallerFomodPlus::install - modName: {}, version: {}, nexusID: {}",
              modName->toStdString(),
              version.toStdString(),
              nexusID
   );
-
   log::debug("InstallerFomodPlus::install - tree size: {}", tree->size());
 
-  if (const QDialog::DialogCode result = showInstallerWindow(window); result == QDialog::Accepted) {
+  auto [infoFile, moduleConfigFile] = parseFomodFiles(tree);
+
+  if (infoFile == nullptr || moduleConfigFile == nullptr) {
+    // Do we want to fail if no info.xml? probably for now. something to consider here.
+    return RESULT_FAILED;
+  }
+  // create ui & pass xml classes to ui
+  const auto window = std::make_shared<FomodInstallerWindow>(this, modName, tree, std::move(moduleConfigFile), std::move(infoFile));
+
+  const QDialog::DialogCode result = showInstallerWindow(window);
+  if (result == QDialog::Accepted) {
     return RESULT_SUCCESS;
   }
   return RESULT_NOTATTEMPTED;
+}
+
+/**
+ *
+ * @param tree
+ * @return
+ */
+std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration>> InstallerFomodPlus::parseFomodFiles(
+  const std::shared_ptr<IFileTree> &tree) const {
+  const auto fomodDir = findFomodDirectory(tree);
+  if (fomodDir == nullptr) {
+    log::error("InstallerFomodPlus::install - fomod directory not found");
+    return {nullptr, nullptr};
+  }
+
+  const auto infoXML = fomodDir->find(
+    StringConstants::FomodFiles::INFO_XML,
+    FileTreeEntry::FILE
+    );
+  const auto moduleConfig = fomodDir->find(
+    StringConstants::FomodFiles::MODULE_CONFIG,
+    FileTreeEntry::FILE
+    );
+
+  // Extract files first.
+  auto paths = manager()->extractFiles({infoXML, moduleConfig});
+
+  // parse xml
+  auto infoFile = std::make_unique<FomodInfoFile>();
+  if (!infoFile->deserialize(paths.first().toStdString())) {
+    log::debug("Could not deserialize info file. See logs for more information.");
+    return {nullptr, nullptr};
+  }
+
+  auto moduleConfiguration = std::make_unique<ModuleConfiguration>();
+  if (!moduleConfiguration->deserialize(paths.last().toStdString())) {
+    log::debug("Could not deserialize ModuleConfig file. See logs for more information.");
+    return {nullptr, nullptr};
+  }
+
+  return {std::move(infoFile), std::move(moduleConfiguration)};
+
 }
 
 void InstallerFomodPlus::onInstallationStart(QString const &archive, bool reinstallation,

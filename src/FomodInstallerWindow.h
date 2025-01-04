@@ -1,11 +1,14 @@
 ﻿#ifndef FOMODINSTALLERWINDOW_H
 #define FOMODINSTALLERWINDOW_H
 
+#include <qboxlayout.h>
+
 #include "InstallerFomodPlus.h"
 #include "xml/ModuleConfiguration.h"
 #include "xml/FomodInfoFile.h"
 
 #include <QDialog>
+#include <QWidget>
 
 #include "FomodInstallerWindow.h"
 
@@ -38,12 +41,73 @@ public:
                        std::unique_ptr<FomodInfoFile> infoFile,
                        QWidget *parent = nullptr);
 
+
+  // So InstallerFomodPlus can check if the user wants to manually install
+  [[nodiscard]] bool getIsManualInstall() const {
+    return mIsManualInstall;
+  }
+
 private:
   InstallerFomodPlus *mInstaller;
   GuessedValue<QString> mModName;
   std::shared_ptr<IFileTree> mTree;
   std::unique_ptr<ModuleConfiguration> mFomodFile;
   std::unique_ptr<FomodInfoFile> mInfoFile;
+
+  // Meta
+  bool mIsManualInstall{};
+
+  // Buttons
+  QWidget* mNextInstallButton{};
+  QWidget* mBackButton{};
+  QWidget* mCancelButton{};
+  QWidget* mManualButton{};
+
+  void setupUi();
+
+  /**
+   * Render the outer container which will have:
+   *   - the left pane (containing the selected plugin / page info and image)
+   *   - the right pane (containing the step, groups, and plugins)
+   *   - the bottom row for various data + buttons
+   */
+  QBoxLayout *createContainerLayout();
+
+  [[nodiscard]] QWidget* createBottomRow();
+
+  /**
+   * A step will have a name, a list of groups, and a list of plugins.
+   * It will also be in charge of rendering a left pane with some arguments TODO
+   *
+   */
+  QWidget* renderStep();
+
+  /**
+   * A group will have a name, a type, and a list of plugins.
+   *
+   */
+  QWidget* renderGroup();
+
+  /**
+   * A plugin will have a name, a description, an image, and a type descriptor.
+   * It will have conditions TODO
+   *
+   */
+  QWidget* renderPlugin(); // Plugins will emit a signal to
+
+
+  /*
+   * Actions
+   */
+  void onCancelClicked() {
+    this->reject();
+  }
+
+  void onManualClicked() {
+    mIsManualInstall = true;
+    this->reject();
+  }
+
 };
 
 
