@@ -5,7 +5,6 @@
 #include "XmlParseException.h";
 
 
-
 bool PluginType::deserialize(pugi::xml_node &node) {
   const std::string typeStr = node.attribute("name").as_string();
   if (typeStr == "Required")           name = PluginTypeEnum::Required;
@@ -39,7 +38,11 @@ bool CompositeDependency::deserialize(pugi::xml_node &node) {
     flagDep.deserialize(flagNode);
     flagDependencies.push_back(flagDep);
   }
-  operatorType = node.attribute("operator").as_string();
+
+  const std::string operatorStr = node.attribute("operator").as_string();
+  if (operatorStr == "And") operatorType = OperatorTypeEnum::AND;
+  else if (operatorStr == "Or") operatorType = OperatorTypeEnum::OR;
+
   return true;
 }
 

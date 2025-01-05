@@ -15,6 +15,11 @@ protected:
   XmlDeserializable() = default;
 };
 
+enum class OperatorTypeEnum {
+  AND,
+  OR
+};
+
 enum class PluginTypeEnum {
   Required,
   Optional,
@@ -50,7 +55,7 @@ class CompositeDependency : public XmlDeserializable {
 public:
   std::vector<FileDependency> fileDependencies;
   std::vector<FlagDependency> flagDependencies;
-  std::string operatorType;
+  OperatorTypeEnum operatorType;
 
   bool deserialize(pugi::xml_node &node) override;
 };
