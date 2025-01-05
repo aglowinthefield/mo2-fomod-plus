@@ -104,6 +104,20 @@ public:
   bool deserialize(pugi::xml_node &node) override;
 };
 
+class File : public XmlDeserializable {
+public:
+  std::string source;
+  std::string destination;
+  int priority{0};
+  bool deserialize(pugi::xml_node &node) override;
+};
+
+class FileList : public XmlDeserializable {
+public:
+  std::vector<File> files;
+  bool deserialize(pugi::xml_node &node) override;
+};
+
 class Plugin : public XmlDeserializable {
 public:
   std::string description;
@@ -141,7 +155,7 @@ public:
 
 class InstallStep : public XmlDeserializable {
 public:
-  CompositeDependency visible;
+  DependencyPattern visible;
   GroupList optionalFileGroups;
   std::string name;
 
@@ -158,8 +172,6 @@ public:
 
 class ModuleConfiguration {
 public:
-  ModuleConfiguration();
-  ~ModuleConfiguration();
   std::string moduleName;
   HeaderImage moduleImage;
   CompositeDependency moduleDependencies;

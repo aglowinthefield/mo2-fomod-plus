@@ -1,5 +1,6 @@
 ﻿#include "FomodInstallerWindow.h"
 #include "ui/UIHelper.h"
+#include "xml/ModuleConfiguration.h"
 
 #include <QVBoxLayout>
 
@@ -26,6 +27,20 @@ FomodInstallerWindow::FomodInstallerWindow(InstallerFomodPlus *installer, const 
   const auto containerLayout = createContainerLayout();
   setLayout(containerLayout);
 
+  // Create qstacked widget
+  // Create a widget for each step
+  // Only add the ones that have no condition or some kind of dependency
+  // Evaluate the dependencies on some regular interval
+
+}
+
+void FomodInstallerWindow::onNextClicked() {
+}
+
+void FomodInstallerWindow::onBackClicked() {
+}
+
+void FomodInstallerWindow::updateButtons() {
 }
 
 void FomodInstallerWindow::setupUi() {
@@ -104,10 +119,10 @@ QWidget* FomodInstallerWindow::renderStep() {
   return nullptr;
 }
 
-QWidget* FomodInstallerWindow::renderGroup() {
+QWidget* FomodInstallerWindow::renderGroup(Group&) {
   return nullptr;
 }
 
-QWidget* FomodInstallerWindow::renderPlugin() {
+QWidget* FomodInstallerWindow::renderPlugin(Plugin&) {
   return nullptr;
 }

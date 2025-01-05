@@ -9,6 +9,7 @@
 
 #include <QDialog>
 #include <QWidget>
+#include <QStackedWidget>
 
 #include "FomodInstallerWindow.h"
 
@@ -47,6 +48,13 @@ public:
     return mIsManualInstall;
   }
 
+private slots:
+  void onNextClicked();
+  void onBackClicked();
+  void onInstallClicked() { this->accept(); }
+  void onCancelClicked() { this->reject(); }
+  void onManualClicked() { mIsManualInstall = true; this->reject(); }
+
 private:
   InstallerFomodPlus *mInstaller;
   GuessedValue<QString> mModName;
@@ -62,7 +70,16 @@ private:
   QWidget* mBackButton{};
   QWidget* mCancelButton{};
   QWidget* mManualButton{};
+  void updateButtons();
 
+  // Widgets
+  QStackedWidget* mStackedWidget{};
+  QWidget* mLeftPane{};
+  int mCurrentStepIndex{};
+
+
+
+  // Fn
   void setupUi();
 
   /**
@@ -86,27 +103,14 @@ private:
    * A group will have a name, a type, and a list of plugins.
    *
    */
-  QWidget* renderGroup();
+  QWidget* renderGroup(Group &group);
 
   /**
    * A plugin will have a name, a description, an image, and a type descriptor.
    * It will have conditions TODO
    *
    */
-  QWidget* renderPlugin(); // Plugins will emit a signal to
-
-
-  /*
-   * Actions
-   */
-  void onCancelClicked() {
-    this->reject();
-  }
-
-  void onManualClicked() {
-    mIsManualInstall = true;
-    this->reject();
-  }
+  QWidget* renderPlugin(Plugin &plugin); // Plugins will emit a signal to
 
 };
 

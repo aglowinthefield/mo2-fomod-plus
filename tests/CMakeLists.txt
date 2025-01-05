@@ -6,7 +6,6 @@ include(FetchContent)
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(CMAKE_MINIMUM_REQUIRED_VERSION 3.30)
 
-
 FetchContent_Declare(
         googletest
         GIT_REPOSITORY https://github.com/google/googletest.git
@@ -17,6 +16,8 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
+find_package(Qt6 COMPONENTS Core Gui REQUIRED)
+
 add_executable(runTests
         ${CMAKE_CURRENT_SOURCE_DIR}/../tests/test_fomod_info_file.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../tests/test_moduleconf_xavbio.cpp
@@ -25,5 +26,6 @@ add_executable(runTests
         test_moduleconf_lux.cpp
 )
 
-target_link_libraries(runTests gtest gtest_main pugixml)
+
+target_link_libraries(runTests gtest gtest_main pugixml Qt6::Core Qt6::Gui)
 add_test(NAME runTests COMMAND runTests)

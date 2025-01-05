@@ -55,3 +55,9 @@ TEST_F(ModuleConfigurationTest_Xavbio, SecondPluginImagePath) {
     EXPECT_EQ(moduleConfig.installSteps.installSteps[0].optionalFileGroups.groups[0].plugins.plugins[1].image.path,
               "fomod\\86097-1677724584-1488206295_png.jpg");
 }
+
+TEST_F(ModuleConfigurationTest_Xavbio, SecondStepVisibleFlag) {
+    EXPECT_EQ(moduleConfig.installSteps.installSteps[1].visible.dependencies.operatorType, "And");
+    EXPECT_EQ(moduleConfig.installSteps.installSteps[1].visible.dependencies.flagDependencies[0].flag, "1");
+    EXPECT_EQ(moduleConfig.installSteps.installSteps[1].visible.dependencies.flagDependencies[0].value, "On");
+}

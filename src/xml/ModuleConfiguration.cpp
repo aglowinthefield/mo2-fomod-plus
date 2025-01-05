@@ -1,7 +1,10 @@
-﻿#include <log.h>
-#include "ModuleConfiguration.h"
+﻿#include "ModuleConfiguration.h"
 
-using namespace MOBase;
+#include <format>
+
+#include "XmlParseException.h";
+
+
 
 bool PluginType::deserialize(pugi::xml_node &node) {
   const std::string typeStr = node.attribute("name").as_string();
@@ -14,14 +17,14 @@ bool PluginType::deserialize(pugi::xml_node &node) {
 }
 
 bool FileDependency::deserialize(pugi::xml_node &node) {
-  file = node.child("file").text().as_string();
-  state = node.child("state").text().as_string();
+  file = node.attribute("file").as_string();
+  state = node.attribute("state").as_string();
   return true;
 }
 
 bool FlagDependency::deserialize(pugi::xml_node &node) {
-  flag = node.child("flag").text().as_string();
-  value = node.child("value").text().as_string();
+  flag = node.attribute("flag").as_string();
+  value = node.attribute("value").as_string();
   return true;
 }
 
@@ -36,11 +39,12 @@ bool CompositeDependency::deserialize(pugi::xml_node &node) {
     flagDep.deserialize(flagNode);
     flagDependencies.push_back(flagDep);
   }
-  operatorType = node.child("operatorType").text().as_string();
+  operatorType = node.attribute("operator").as_string();
   return true;
 }
 
 bool DependencyPattern::deserialize(pugi::xml_node &node) {
+  if (!node) return false;
   pugi::xml_node dependenciesNode = node.child("dependencies");
   pugi::xml_node typeNode = node.child("type");
   dependencies.deserialize(dependenciesNode);
@@ -86,6 +90,23 @@ bool HeaderImage::deserialize(pugi::xml_node &node) {
   height = node.attribute("height").as_int();
   return true;
 }
+
+bool FileList::deserialize(pugi::xml_node &node) {
+  for (pugi::xml_node fileNode: node.children("file")) {
+    File file;
+    file.deserialize(fileNode);
+    files.push_back(file);
+  }
+  return true;
+}
+
+bool File::deserialize(pugi::xml_node &node) {
+  source = node.attribute("source").as_string();
+  destination = node.attribute("destination").as_string();
+  priority = node.attribute("priority").as_int();
+  return true;
+}
+
 
 bool Plugin::deserialize(pugi::xml_node &node) {
   pugi::xml_node imageNode = node.child("image");
@@ -145,22 +166,16 @@ bool StepList::deserialize(pugi::xml_node &node) {
   return true;
 }
 
-ModuleConfiguration::~ModuleConfiguration() {
-  log::debug("Deleting ModuleConfiguration");
-}
-
 bool ModuleConfiguration::deserialize(const std::string &filePath) {
   pugi::xml_document doc;
 
   if (const pugi::xml_parse_result result = doc.load_file(filePath.c_str()); !result) {
-    log::error("XML parsed with errors: {}", result.description());
-    return false;
+    throw XmlParseException(std::format("XML parsed with errors: {}", result.description()));
   }
 
   const pugi::xml_node configNode = doc.child("config");
   if (!configNode) {
-    log::error("No <config> node found");
-    return false;
+    throw XmlParseException("No <config> node found");
   }
 
   moduleName = configNode.child("moduleName").text().as_string();

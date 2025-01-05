@@ -3,12 +3,12 @@
 #include <filesystem>
 #include "../src/xml/ModuleConfiguration.h"
 
-class ModuleConfigurationTest_Lux : public ::testing::Test {
+class ModuleConfigurationTest_Lux : public testing::Test {
 protected:
     void SetUp() override {
         // Load the XML file
-    std::string filePath = (std::filesystem::path(__FILE__).parent_path() / "test_moduleconf_lux.xml").string();
-    pugi::xml_parse_result result = doc.load_file(filePath.c_str());
+    const std::string filePath = (std::filesystem::path(__FILE__).parent_path() / "test_moduleconf_lux.xml").string();
+    const pugi::xml_parse_result result = doc.load_file(filePath.c_str());
     ASSERT_TRUE(result) << "Failed to load XML file: " << result.description();
     configNode = doc.child("config");
     ASSERT_TRUE(configNode) << "No <config> node found";
@@ -20,7 +20,7 @@ protected:
 
 TEST_F(ModuleConfigurationTest_Lux, DeserializeModuleConfiguration) {
     ModuleConfiguration moduleConfig;
-    std::string filePath = (std::filesystem::path(__FILE__).parent_path() / "test_moduleconf_lux.xml").string();
+    const std::string filePath = (std::filesystem::path(__FILE__).parent_path() / "test_moduleconf_lux.xml").string();
     ASSERT_TRUE(moduleConfig.deserialize(filePath));
 
     EXPECT_EQ(moduleConfig.moduleName, "Lux (patch hub)");

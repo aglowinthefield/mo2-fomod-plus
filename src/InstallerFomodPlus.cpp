@@ -5,6 +5,7 @@
 #include <QEventLoop>
 #include <xml/FomodInfoFile.h>
 #include <xml/ModuleConfiguration.h>
+#include <xml/XmlParseException.h>
 
 #include "FomodInstallerWindow.h"
 #include "stringconstants.h"
@@ -87,17 +88,21 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration>> 
 
   // parse xml
   auto infoFile = std::make_unique<FomodInfoFile>();
-  if (!infoFile->deserialize(paths.first().toStdString())) {
-    log::debug("Could not deserialize info file. See logs for more information.");
+  try {
+    infoFile->deserialize(paths.first().toStdString());
+  } catch (XmlParseException &e) {
+    log::error("InstallerFomodPlus::install - error parsing info.xml: {}", e.what());
     return {nullptr, nullptr};
   }
 
   auto moduleConfiguration = std::make_unique<ModuleConfiguration>();
-  if (!moduleConfiguration->deserialize(paths.last().toStdString())) {
-    log::debug("Could not deserialize ModuleConfig file. See logs for more information.");
+  try {
+    moduleConfiguration->deserialize(paths.last().toStdString());
+  } catch (XmlParseException &e) {
+    log::error("InstallerFomodPlus::install - error parsing moduleConfig.xml: {}", e.what());
     return {nullptr, nullptr};
-  }
 
+  }
   return {std::move(infoFile), std::move(moduleConfiguration)};
 
 }
