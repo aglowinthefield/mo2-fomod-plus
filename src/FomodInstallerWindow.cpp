@@ -1,11 +1,13 @@
 ﻿#include "FomodInstallerWindow.h"
 #include "ui/UIHelper.h"
 #include "xml/ModuleConfiguration.h"
+#include <log.h>
 
 #include <QVBoxLayout>
 #include <QComboBox>
 #include <QCompleter>
 #include <QSizePolicy>
+#include <QGroupBox>
 
 /**
  * 
@@ -27,20 +29,22 @@ FomodInstallerWindow::FomodInstallerWindow(InstallerFomodPlus *installer, const 
 
   setupUi();
 
-  const auto containerLayout = createContainerLayout();
-  setLayout(containerLayout);
 
   // Create qstackedwidget
   // Create a widget for each step
   // Only add the ones that have no condition or some kind of dependency
   // Evaluate the dependencies on some regular interval
+  mInstallStepStack = new QStackedWidget(this);
+
+  const auto containerLayout = createContainerLayout();
+  setLayout(containerLayout);
 
 }
 
 void FomodInstallerWindow::onNextClicked() {
-  if (mCurrentStepIndex < mStackedWidget->count() - 1) {
+  if (mCurrentStepIndex < mInstallStepStack->count() - 1) {
     mCurrentStepIndex++;
-    mStackedWidget->setCurrentIndex(mCurrentStepIndex);
+    mInstallStepStack->setCurrentIndex(mCurrentStepIndex);
     updateButtons();
   }
 }
@@ -48,7 +52,7 @@ void FomodInstallerWindow::onNextClicked() {
 void FomodInstallerWindow::onBackClicked() {
   if (mCurrentStepIndex > 0) {
     mCurrentStepIndex--;
-    mStackedWidget->setCurrentIndex(mCurrentStepIndex);
+    mInstallStepStack->setCurrentIndex(mCurrentStepIndex);
     updateButtons();
   }
 }
@@ -58,7 +62,30 @@ void FomodInstallerWindow::updateButtons() {
 
 void FomodInstallerWindow::setupUi() {
   setMinimumSize(UiConstants::WINDOW_MIN_WIDTH, UiConstants::WINDOW_MIN_HEIGHT);
+  setWindowTitle(mModName);
   setWindowModality(Qt::NonModal); // To allow scrolling modlist without closing the window
+}
+
+// mInstallStepStack must be initialized before calling this
+void FomodInstallerWindow::updateInstallStepStack() {
+  if (!mInstallStepStack) {
+    log::error("updateInstallStepStack called with no initialized mInstallStepStack. tf?");
+    return;
+  }
+
+  auto steps = mFomodFile->installSteps.installSteps; // copy the array to do the specified order w/o sorting
+
+  auto compare = [this](const InstallStep& a, const InstallStep& b) {
+    switch (mFomodFile->installSteps.order) {
+      case OrderTypeEnum::Ascending:
+        return a.name < b.name;
+      case OrderTypeEnum::Descending:
+        return a.name > b.name;
+      case OrderTypeEnum::Explicit:
+        default:
+          return false; // No sorting for explicit order
+    }
+  };
 }
 
 /*
@@ -124,7 +151,6 @@ QWidget* FomodInstallerWindow::createCenterRow() {
   // add panes to layout
   centerMainLayout->addLayout(leftPane);
   centerMainLayout->addLayout(rightPane);
-
 
   centerRow->setLayout(centerMainLayout);
   return centerRow;
@@ -233,8 +259,20 @@ QWidget* FomodInstallerWindow::createBottomRow() {
   return bottomRow;
 }
 
-QWidget* FomodInstallerWindow::renderStep() {
-  return nullptr;
+QWidget* FomodInstallerWindow::createStepWidget(const InstallStep& installStep) {
+  // QGroupBox
+  const QString stepName = QString::fromStdString(installStep.name);
+  const auto stepBox = new QGroupBox(stepName, this);
+
+  const auto stepBoxLayout = new QVBoxLayout(stepBox);
+
+  for (auto group : installStep.optionalFileGroups.groups) {
+    const auto groupSection = renderGroup(group);
+    stepBoxLayout->addWidget(groupSection);
+  }
+
+  stepBox->setLayout(stepBoxLayout);
+  return stepBox;
 }
 
 QWidget* FomodInstallerWindow::renderGroup(Group&) {

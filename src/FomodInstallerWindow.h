@@ -74,14 +74,13 @@ private:
   void updateButtons();
 
   // Widgets
-  QStackedWidget* mStackedWidget{};
+  QStackedWidget* mInstallStepStack{};
   QWidget* mLeftPane{};
   int mCurrentStepIndex{};
 
-
-
   // Fn
   void setupUi();
+  void updateInstallStepStack();
 
   /**
    * Render the outer container which will have:
@@ -104,7 +103,7 @@ private:
    * It will also be in charge of rendering a left pane with some arguments TODO
    *
    */
-  QWidget* renderStep();
+  QWidget* createStepWidget(const InstallStep& installStep);
 
   /**
    * A group will have a name, a type, and a list of plugins.

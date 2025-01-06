@@ -15,9 +15,38 @@ protected:
   XmlDeserializable() = default;
 };
 
+
 enum class OperatorTypeEnum {
   AND,
   OR
+};
+
+enum class OrderTypeEnum {
+  Explicit,
+  Ascending,
+  Descending
+};
+
+template <typename T>
+class OrderedContents {
+public:
+  OrderTypeEnum order;
+
+  OrderedContents() : order(OrderTypeEnum::Ascending) {}
+  explicit OrderedContents(const OrderTypeEnum orderType): order(orderType) {}
+
+  template <typename Accessor>
+  bool compare(const T& a, const T& b, Accessor accessor) const {
+    switch (order) {
+      case OrderTypeEnum::Ascending:
+        return accessor(a) < accessor(b);
+      case OrderTypeEnum::Descending:
+        return accessor(a) > accessor(b);
+      case OrderTypeEnum::Explicit:
+      default:
+        return false; // No sorting for explicit order
+    }
+  }
 };
 
 enum class PluginTypeEnum {
@@ -28,14 +57,14 @@ enum class PluginTypeEnum {
   CouldBeUsable
 };
 
-class PluginType : public XmlDeserializable {
+class PluginType final : public XmlDeserializable {
 public:
   PluginTypeEnum name;
 
   bool deserialize(pugi::xml_node &node) override;
 };
 
-class FileDependency : public XmlDeserializable {
+class FileDependency final : public XmlDeserializable {
 public:
   std::string file;
   std::string state;
@@ -43,7 +72,7 @@ public:
   bool deserialize(pugi::xml_node &node) override;
 };
 
-class FlagDependency : public XmlDeserializable {
+class FlagDependency final : public XmlDeserializable {
 public:
   std::string flag;
   std::string value;
@@ -51,7 +80,7 @@ public:
   bool deserialize(pugi::xml_node &node) override;
 };
 
-class CompositeDependency : public XmlDeserializable {
+class CompositeDependency final : public XmlDeserializable {
 public:
   std::vector<FileDependency> fileDependencies;
   std::vector<FlagDependency> flagDependencies;
@@ -60,7 +89,7 @@ public:
   bool deserialize(pugi::xml_node &node) override;
 };
 
-class DependencyPattern : public XmlDeserializable {
+class DependencyPattern final : public XmlDeserializable {
 public:
   CompositeDependency dependencies;
   PluginType type;
@@ -69,14 +98,14 @@ public:
 };
 
 
-class DependencyPatternList : public XmlDeserializable {
+class DependencyPatternList final : public XmlDeserializable {
 public:
   std::vector<DependencyPattern> patterns;
 
   bool deserialize(pugi::xml_node &node) override;
 };
 
-class DependencyPluginType : public XmlDeserializable {
+class DependencyPluginType final : public XmlDeserializable {
 public:
   PluginType defaultType;
   DependencyPatternList patterns;
@@ -84,7 +113,7 @@ public:
   bool deserialize(pugi::xml_node &node) override;
 };
 
-class PluginTypeDescriptor : public XmlDeserializable {
+class PluginTypeDescriptor final : public XmlDeserializable {
 public:
   DependencyPluginType dependencyType;
   PluginType type;
@@ -92,14 +121,14 @@ public:
   bool deserialize(pugi::xml_node &node) override;
 };
 
-class Image : public XmlDeserializable {
+class Image final : public XmlDeserializable {
 public:
   std::string path;
 
   bool deserialize(pugi::xml_node &node) override;
 };
 
-class HeaderImage : public XmlDeserializable {
+class HeaderImage final : public XmlDeserializable {
 public:
   std::string path;
   bool showImage;
@@ -109,7 +138,7 @@ public:
   bool deserialize(pugi::xml_node &node) override;
 };
 
-class File : public XmlDeserializable {
+class File final : public XmlDeserializable {
 public:
   std::string source;
   std::string destination;
@@ -117,13 +146,13 @@ public:
   bool deserialize(pugi::xml_node &node) override;
 };
 
-class FileList : public XmlDeserializable {
+class FileList final : public XmlDeserializable {
 public:
   std::vector<File> files;
   bool deserialize(pugi::xml_node &node) override;
 };
 
-class Plugin : public XmlDeserializable {
+class Plugin final : public XmlDeserializable {
 public:
   std::string description;
   Image image;
@@ -133,15 +162,15 @@ public:
   bool deserialize(pugi::xml_node &node) override;
 };
 
-class PluginList : public XmlDeserializable {
+class PluginList final : public XmlDeserializable, public OrderedContents<Plugin>{
 public:
   std::vector<Plugin> plugins;
-  std::string order;
+  OrderTypeEnum order;
 
   bool deserialize(pugi::xml_node &node) override;
 };
 
-class Group : public XmlDeserializable {
+class Group final : public XmlDeserializable {
 public:
   PluginList plugins;
   std::string name;
@@ -150,15 +179,15 @@ public:
   bool deserialize(pugi::xml_node &node) override;
 };
 
-class GroupList : public XmlDeserializable {
+class GroupList final : public XmlDeserializable, public OrderedContents<Group> {
 public:
   std::vector<Group> groups;
-  std::string order;
+  OrderTypeEnum order;
 
   bool deserialize(pugi::xml_node &node) override;
 };
 
-class InstallStep : public XmlDeserializable {
+class InstallStep final : public XmlDeserializable {
 public:
   DependencyPattern visible;
   GroupList optionalFileGroups;
@@ -167,10 +196,10 @@ public:
   bool deserialize(pugi::xml_node &node) override;
 };
 
-class StepList : public XmlDeserializable {
+class StepList final : public XmlDeserializable, public OrderedContents<InstallStep> {
 public:
   std::vector<InstallStep> installSteps;
-  std::string order;
+  OrderTypeEnum order;
 
   bool deserialize(pugi::xml_node &node) override;
 };

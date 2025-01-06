@@ -2,6 +2,7 @@
 #include <format>
 #include "../stringconstants.h"
 #include "XmlParseException.h"
+#include "XmlHelper.h"
 
 using namespace StringConstants::FomodFiles;
 
@@ -136,7 +137,7 @@ bool PluginList::deserialize(pugi::xml_node &node) {
     plugin.deserialize(pluginNode);
     plugins.push_back(plugin);
   }
-  order = node.attribute("order").as_string();
+  order = XmlHelper::getOrderType(node.attribute("order").as_string());
   return true;
 }
 
@@ -154,7 +155,7 @@ bool GroupList::deserialize(pugi::xml_node &node) {
     group.deserialize(groupNode);
     groups.push_back(group);
   }
-  order = node.attribute("order").as_string();
+  order = XmlHelper::getOrderType(node.attribute("order").as_string());
   return true;
 }
 
@@ -173,7 +174,7 @@ bool StepList::deserialize(pugi::xml_node &node) {
     step.deserialize(stepNode);
     installSteps.push_back(step);
   }
-  order = node.attribute("order").as_string();
+  order = XmlHelper::getOrderType(node.attribute("order").as_string());
   return true;
 }
 
