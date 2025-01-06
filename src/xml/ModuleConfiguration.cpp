@@ -7,6 +7,14 @@
 
 using namespace StringConstants::FomodFiles;
 
+static GroupTypeEnum groupTypeFromString(const std::string &groupType) {
+  if (groupType == "SelectAny") return SelectAny;
+  if (groupType == "SelectAll") return SelectAll;
+  if (groupType == "SelectExactlyOne") return SelectExactlyOne;
+  if (groupType == "SelectAtMostOne") return SelectAtMostOne;
+  if (groupType == "SelectAtLeastOne") return SelectAtLeastOne;
+  return SelectAny; // is this a sane default? probably
+}
 
 bool PluginType::deserialize(pugi::xml_node &node) {
   const std::string typeStr = node.attribute("name").as_string();
@@ -146,7 +154,7 @@ bool Group::deserialize(pugi::xml_node &node) {
   pugi::xml_node pluginsNode = node.child("plugins");
   plugins.deserialize(pluginsNode);
   name = node.attribute("name").as_string();
-  type = node.attribute("type").as_string();
+  type = groupTypeFromString(node.attribute("type").as_string());
   return true;
 }
 

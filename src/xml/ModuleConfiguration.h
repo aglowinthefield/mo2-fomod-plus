@@ -17,6 +17,14 @@ protected:
 };
 
 
+enum GroupTypeEnum {
+  SelectAny,
+  SelectAll,
+  SelectExactlyOne,
+  SelectAtMostOne,
+  SelectAtLeastOne
+};
+
 enum class OperatorTypeEnum {
   AND,
   OR
@@ -175,7 +183,7 @@ class Group final : public XmlDeserializable {
 public:
   PluginList plugins;
   std::string name;
-  std::string type;
+  GroupTypeEnum type;
 
   bool deserialize(pugi::xml_node &node) override;
 };

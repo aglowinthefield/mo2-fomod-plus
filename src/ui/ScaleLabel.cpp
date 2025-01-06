@@ -4,14 +4,10 @@
 // Taken from https://github.com/ModOrganizer2/modorganizer-installer_fomod/blob/master/src/scalelabel.h
 static bool isResourceMovie(const QString& path)
 {
-  for (QByteArray format : QMovie::supportedFormats()) {
-    QString fileExtension = "." + QString::fromUtf8(format);
-    if (path.endsWith(fileExtension)) {
-      return true;
-    }
-  }
-
-  return false;
+  const auto formats = QMovie::supportedFormats();
+  return std::any_of(formats.begin(), formats.end(), [&path](const QByteArray& format) {
+    return path.endsWith("." + QString::fromUtf8(format));
+  });
 }
 
 ScaleLabel::ScaleLabel(QWidget* parent) : QLabel(parent) {}

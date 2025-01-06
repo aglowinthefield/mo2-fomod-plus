@@ -11,6 +11,9 @@
 #include <QGroupBox>
 #include <QTextEdit>
 #include <QLabel>
+#include <QButtonGroup>
+#include <QRadioButton>
+#include <QCheckBox>
 
 /**
  * 
@@ -255,7 +258,8 @@ QWidget* FomodInstallerWindow::createBottomRow() {
   mNextInstallButton = UIHelper::createButton("Next", bottomRow);
   mCancelButton      = UIHelper::createButton("Cancel", bottomRow);
 
-  // TODO: Connect the others.
+  connect(mNextInstallButton, SIGNAL(clicked()), this, SLOT(onNextClicked()));
+  connect(mBackButton, SIGNAL(clicked()), this, SLOT(onBackClicked()));
   connect(mCancelButton, SIGNAL(clicked()), this, SLOT(reject()));
 
   layout->addWidget(mBackButton);
@@ -302,10 +306,7 @@ QWidget* FomodInstallerWindow::createRightPane() {
 }
 
 QWidget* FomodInstallerWindow::createStepWidget(const InstallStep& installStep) {
-  // QGroupBox
-  const QString stepName = QString::fromStdString(installStep.name);
-  const auto stepBox = new QGroupBox(stepName, this);
-
+  const auto stepBox = new QGroupBox(QString::fromStdString(installStep.name), this);
   const auto stepBoxLayout = new QVBoxLayout(stepBox);
 
   for (auto group : installStep.optionalFileGroups.groups) {
@@ -317,8 +318,30 @@ QWidget* FomodInstallerWindow::createStepWidget(const InstallStep& installStep) 
   return stepBox;
 }
 
-QWidget* FomodInstallerWindow::renderGroup(Group&) {
-  return nullptr;
+QWidget* FomodInstallerWindow::renderGroup(const Group& group) {
+  const auto groupBox = new QGroupBox(QString::fromStdString(group.name), this);
+  const auto groupBoxLayout = new QVBoxLayout(groupBox);
+
+  if (group.type == GroupTypeEnum::SelectExactlyOne) {
+    // Create a button group for radio buttons
+    auto* buttonGroup = new QButtonGroup(groupBox);
+    buttonGroup->setExclusive(true); // Ensure only one button can be selected
+
+    for (const auto& plugin : group.plugins.plugins) {
+      auto* radioButton = new QRadioButton(QString::fromStdString(plugin.name), groupBox);
+      buttonGroup->addButton(radioButton);
+      groupBoxLayout->addWidget(radioButton);
+    }
+  } else {
+    // Create checkboxes
+    for (const auto& plugin : group.plugins.plugins) {
+      auto* checkBox = new QCheckBox(QString::fromStdString(plugin.name), groupBox);
+      groupBoxLayout->addWidget(checkBox);
+    }
+  }
+
+  groupBox->setLayout(groupBoxLayout);
+  return groupBox;
 }
 
 QWidget* FomodInstallerWindow::renderPlugin(Plugin&) {

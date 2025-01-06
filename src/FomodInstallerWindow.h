@@ -95,7 +95,7 @@ private:
   QWidget *createRightPane();
 
   QWidget*               createStepWidget(const InstallStep& installStep);
-  QWidget*               renderGroup(Group &group);
+  QWidget*               renderGroup(const Group &group);
   QWidget*               renderPlugin(Plugin &plugin); // Plugins will emit a signal to
 
 };
