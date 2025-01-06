@@ -1,8 +1,6 @@
-﻿//
-// Created by tomau on 1/3/2025.
-//
+﻿#include "UIHelper.h"
 
-#include "UIHelper.h"
+#include <QDir>
 
 QPushButton* UIHelper::createButton(const QString& text, QWidget* parent = nullptr) {
   const auto button = new QPushButton(text, parent);
@@ -24,6 +22,10 @@ QLabel* UIHelper::createHyperlink(const QString& url, QWidget* parent = nullptr)
   label->setOpenExternalLinks(true);
   label->setTextFormat(Qt::RichText);
   return label;
+}
+
+QString UIHelper::getFullImagePath(const QString &fomodPath, const QString &imagePath) {
+  return QDir::tempPath() + "/" + fomodPath + "/" + imagePath;
 }
 
 void UIHelper::setGlobalAlignment(QBoxLayout* layout, const Qt::Alignment alignment) {

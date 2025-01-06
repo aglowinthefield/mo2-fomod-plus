@@ -3,6 +3,7 @@
 #include "../stringconstants.h"
 #include "XmlParseException.h"
 #include "XmlHelper.h"
+#include <QDir>
 
 using namespace StringConstants::FomodFiles;
 
@@ -206,4 +207,23 @@ bool ModuleConfiguration::deserialize(const std::string &filePath) {
   installSteps.deserialize(installStepsNode);
 
   return true;
+}
+
+Plugin ModuleConfiguration::getFirstPlugin() {
+  if (installSteps.installSteps.empty() ||
+    installSteps.installSteps.front().optionalFileGroups.groups.empty() ||
+    installSteps.installSteps.front().optionalFileGroups.groups.front().plugins.plugins.empty()) {
+    return Plugin(); // Return a default-constructed Plugin object
+    }
+
+  return installSteps.installSteps.front()
+    .optionalFileGroups.groups.front()
+    .plugins.plugins.front();
+}
+
+QString ModuleConfiguration::getImageForPlugin(const Plugin &plugin) const {
+  if (plugin.image.path.empty()) {
+    return QString::fromStdString(moduleImage.path);
+  }
+  return QString::fromStdString(plugin.image.path);
 }

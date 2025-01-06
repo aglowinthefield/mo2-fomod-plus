@@ -5,6 +5,7 @@
 #include <vector>
 #include <pugixml.hpp>
 #include <iostream>
+#include <qstring.h>
 
 class XmlDeserializable {
 public:
@@ -213,7 +214,12 @@ public:
   StepList installSteps;
 
   bool deserialize(const std::string &filePath);
+
+  Plugin getFirstPlugin();
+
+  QString getImageForPlugin(const Plugin &plugin) const;
 };
+
 
 
 #endif //MODULECONFIGURATION_H

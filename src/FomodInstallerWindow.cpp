@@ -2,26 +2,31 @@
 #include "ui/UIHelper.h"
 #include "xml/ModuleConfiguration.h"
 #include <log.h>
+#include "ui/ScaleLabel.h"
 
 #include <QVBoxLayout>
 #include <QComboBox>
 #include <QCompleter>
 #include <QSizePolicy>
 #include <QGroupBox>
+#include <QTextEdit>
+#include <QLabel>
 
 /**
  * 
  * @param installer 
  * @param modName 
- * @param tree 
+ * @param tree
+ * @param fomodPath
  * @param fomodFile 
  * @param infoFile 
  * @param parent 
  */
 FomodInstallerWindow::FomodInstallerWindow(InstallerFomodPlus *installer, const GuessedValue<QString> &modName,
-  const std::shared_ptr<IFileTree> &tree, std::unique_ptr<ModuleConfiguration> fomodFile,
+  const std::shared_ptr<IFileTree> &tree, const QString& fomodPath, std::unique_ptr<ModuleConfiguration> fomodFile,
   std::unique_ptr<FomodInfoFile> infoFile, QWidget *parent): QDialog(parent),
                                                              mInstaller(installer),
+                                                             mFomodPath(fomodPath),
                                                              mModName(modName),
                                                              mTree(tree),
                                                              mFomodFile(std::move(fomodFile)),
@@ -30,11 +35,8 @@ FomodInstallerWindow::FomodInstallerWindow(InstallerFomodPlus *installer, const 
   setupUi();
 
 
-  // Create qstackedwidget
-  // Create a widget for each step
-  // Only add the ones that have no condition or some kind of dependency
-  // Evaluate the dependencies on some regular interval
   mInstallStepStack = new QStackedWidget(this);
+  updateInstallStepStack();
 
   const auto containerLayout = createContainerLayout();
   setLayout(containerLayout);
@@ -73,19 +75,21 @@ void FomodInstallerWindow::updateInstallStepStack() {
     return;
   }
 
-  auto steps = mFomodFile->installSteps.installSteps; // copy the array to do the specified order w/o sorting
-
-  auto compare = [this](const InstallStep& a, const InstallStep& b) {
-    switch (mFomodFile->installSteps.order) {
-      case OrderTypeEnum::Ascending:
-        return a.name < b.name;
-      case OrderTypeEnum::Descending:
-        return a.name > b.name;
-      case OrderTypeEnum::Explicit:
-        default:
-          return false; // No sorting for explicit order
-    }
+  auto& steps = mFomodFile->installSteps; // TODO: Evaluate if we want to copy this array instead.
+  auto compare = [&steps](const InstallStep &a, const InstallStep &b) {
+    return steps.compare(a, b, [](const InstallStep& step) { return step.name; });
   };
+
+  // I'm not sure if any modern FOMODs use anything other than Explicit, but hey, it's there.
+  if (steps.order != OrderTypeEnum::Explicit) {
+    ranges::sort(steps.installSteps, compare);
+  }
+
+  // Create the widgets for each step. Not sure if we need these as member variables. Try it like this for now.
+  for (auto installStep : steps.installSteps) {
+    mInstallStepStack->addWidget(createStepWidget(installStep));
+  }
+  mInstallStepStack->setCurrentIndex(mCurrentStepIndex);
 }
 
 /*
@@ -133,7 +137,7 @@ QBoxLayout *FomodInstallerWindow::createContainerLayout() {
   layout->addWidget(bottomRow);
 
   // any extra layout setup :)
-  UIHelper::setDebugBorders(this);
+  // UIHelper::setDebugBorders(this);
   return layout;
 }
 
@@ -143,14 +147,18 @@ QWidget* FomodInstallerWindow::createCenterRow() {
   auto* centerMainLayout = new QHBoxLayout(centerRow);
 
   // add the left pane
-  const auto leftPane = new QVBoxLayout(centerRow);
+  const auto leftPaneLayout = new QVBoxLayout(centerRow);
+  const auto leftPane = createLeftPane();
+  leftPaneLayout->addWidget(leftPane, 1);
 
   // add the right pane (to be the anchor for renderStep)
-  const auto rightPane = new QVBoxLayout(centerRow);
+  const auto rightPaneLayout = new QVBoxLayout(centerRow);
+  const auto rightPane = createRightPane();
+  rightPaneLayout->addWidget(rightPane, 1);
 
   // add panes to layout
-  centerMainLayout->addLayout(leftPane);
-  centerMainLayout->addLayout(rightPane);
+  centerMainLayout->addLayout(leftPaneLayout, 1);
+  centerMainLayout->addLayout(rightPaneLayout, 1);
 
   centerRow->setLayout(centerMainLayout);
   return centerRow;
@@ -232,7 +240,6 @@ QComboBox* FomodInstallerWindow::createModNameComboBox() {
 }
 
 QWidget* FomodInstallerWindow::createBottomRow() {
-
   // In vanilla FOMOD installer, left has the Manual button, right has back, next/install, and cancel buttons
   const auto bottomRow = new QWidget(this);
   auto* layout = new QHBoxLayout(bottomRow);
@@ -257,6 +264,41 @@ QWidget* FomodInstallerWindow::createBottomRow() {
 
   bottomRow->setLayout(layout);
   return bottomRow;
+}
+
+QWidget* FomodInstallerWindow::createLeftPane() {
+  const auto leftPane = new QWidget(this);
+  auto* layout = new QVBoxLayout(leftPane);
+
+  const auto firstPlugin = mFomodFile->getFirstPlugin();
+
+  const auto defaultText = QString::fromStdString(firstPlugin.description);
+
+  // Add description box
+  // Initialize with defaults (the first plugin's description (which defaults to the module image otherwise))
+  const auto descriptionBox = new QTextEdit(defaultText, leftPane);
+  layout->addWidget(descriptionBox);
+
+  // Add image
+  // Initialize with defaults (the first plugin's image)
+  const auto imageLabel = new ScaleLabel(leftPane);
+  imageLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+  const auto image = mFomodFile->getImageForPlugin(firstPlugin);
+  const auto imagePath = UIHelper::getFullImagePath(mFomodPath, image);
+  imageLabel->setScalableResource(imagePath);
+  layout->addWidget(imageLabel);
+
+  return leftPane;
+}
+
+QWidget* FomodInstallerWindow::createRightPane() {
+  const auto rightPane = new QWidget(this);
+  auto* layout = new QVBoxLayout(rightPane);
+
+  layout->addWidget(mInstallStepStack);
+
+  return rightPane;
 }
 
 QWidget* FomodInstallerWindow::createStepWidget(const InstallStep& installStep) {

@@ -33,12 +33,13 @@ class InstallerFomodPlus;
  * This class is primarily intended to provide a user interface and functionality
  * to process and run the FOMOD installer in a structured manner.
  */
-class FomodInstallerWindow : public QDialog {
+class FomodInstallerWindow final : public QDialog {
   Q_OBJECT
 public:
   FomodInstallerWindow(InstallerFomodPlus *installer,
                        const GuessedValue<QString> &modName,
                        const std::shared_ptr<IFileTree> &tree,
+                       const QString& fomodPath,
                        std::unique_ptr<ModuleConfiguration> fomodFile,
                        std::unique_ptr<FomodInfoFile> infoFile,
                        QWidget *parent = nullptr);
@@ -58,6 +59,7 @@ private slots:
 
 private:
   InstallerFomodPlus *mInstaller;
+  QString mFomodPath;
   GuessedValue<QString> mModName;
   std::shared_ptr<IFileTree> mTree;
   std::unique_ptr<ModuleConfiguration> mFomodFile;
@@ -82,41 +84,19 @@ private:
   void setupUi();
   void updateInstallStepStack();
 
-  /**
-   * Render the outer container which will have:
-   *   - the left pane (containing the selected plugin / page info and image)
-   *   - the right pane (containing the step, groups, and plugins)
-   *   - the bottom row for various data + buttons
-   */
-  QBoxLayout *createContainerLayout();
-
-  QWidget *createCenterRow();
-
-  QWidget *createTopRow();
-
-  QComboBox *createModNameComboBox();
-
+  QBoxLayout*            createContainerLayout();
+  QWidget*               createCenterRow();
+  QWidget*               createTopRow();
+  QComboBox*             createModNameComboBox();
   [[nodiscard]] QWidget* createBottomRow();
 
-  /**
-   * A step will have a name, a list of groups, and a list of plugins.
-   * It will also be in charge of rendering a left pane with some arguments TODO
-   *
-   */
-  QWidget* createStepWidget(const InstallStep& installStep);
+  QWidget *createLeftPane();
 
-  /**
-   * A group will have a name, a type, and a list of plugins.
-   *
-   */
-  QWidget* renderGroup(Group &group);
+  QWidget *createRightPane();
 
-  /**
-   * A plugin will have a name, a description, an image, and a type descriptor.
-   * It will have conditions TODO
-   *
-   */
-  QWidget* renderPlugin(Plugin &plugin); // Plugins will emit a signal to
+  QWidget*               createStepWidget(const InstallStep& installStep);
+  QWidget*               renderGroup(Group &group);
+  QWidget*               renderPlugin(Plugin &plugin); // Plugins will emit a signal to
 
 };
 

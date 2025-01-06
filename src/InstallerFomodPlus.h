@@ -46,6 +46,7 @@ public:
 private:
 
   IOrganizer* m_Organizer = nullptr;
+  QString mFomodPath{};
 
   /**
  * @brief Retrieve the tree entry corresponding to the fomod directory.
@@ -59,7 +60,10 @@ private:
 
   [[nodiscard]] static QDialog::DialogCode showInstallerWindow(const shared_ptr<FomodInstallerWindow>& window);
 
-  [[nodiscard]] pair<unique_ptr<FomodInfoFile>, unique_ptr<ModuleConfiguration>> parseFomodFiles(const shared_ptr<IFileTree> &tree) const;
+  [[nodiscard]] pair<unique_ptr<FomodInfoFile>, unique_ptr<ModuleConfiguration>> parseFomodFiles(const shared_ptr<IFileTree> &tree);
+
+  static void appendImageFiles(vector<shared_ptr<const FileTreeEntry>>& entries, const shared_ptr<const IFileTree> &tree);
+
 };
 
 #endif //INSTALLERFOMODPLUS_H

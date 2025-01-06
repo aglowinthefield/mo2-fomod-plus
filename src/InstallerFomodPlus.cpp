@@ -52,7 +52,14 @@ IPluginInstaller::EInstallResult InstallerFomodPlus::install(GuessedValue<QStrin
     return RESULT_FAILED;
   }
   // create ui & pass xml classes to ui
-  const auto window = std::make_shared<FomodInstallerWindow>(this, modName, tree, std::move(moduleConfigFile), std::move(infoFile));
+  const auto window = std::make_shared<FomodInstallerWindow>(
+    this,
+    modName,
+    tree,
+    mFomodPath,
+    std::move(moduleConfigFile),
+    std::move(infoFile)
+  );
 
   const QDialog::DialogCode result = showInstallerWindow(window);
   if (result == QDialog::Accepted) {
@@ -67,12 +74,15 @@ IPluginInstaller::EInstallResult InstallerFomodPlus::install(GuessedValue<QStrin
  * @return
  */
 std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration>> InstallerFomodPlus::parseFomodFiles(
-  const std::shared_ptr<IFileTree> &tree) const {
+  const std::shared_ptr<IFileTree> &tree) {
   const auto fomodDir = findFomodDirectory(tree);
   if (fomodDir == nullptr) {
     log::error("InstallerFomodPlus::install - fomod directory not found");
     return {nullptr, nullptr};
   }
+
+  // This is a strange place to set this value but okay for now.
+  mFomodPath = fomodDir->parent()->path();
 
   const auto infoXML = fomodDir->find(
     StringConstants::FomodFiles::INFO_XML,
@@ -84,12 +94,15 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration>> 
     );
 
   // Extract files first.
-  auto paths = manager()->extractFiles({infoXML, moduleConfig});
+  vector toExtract = {infoXML, moduleConfig};
+  appendImageFiles(toExtract, tree);
+  const auto paths = manager()->extractFiles(toExtract);
 
   // parse xml
+  // Paths are in the order {infoXml, moduleConfigXml, ...images}
   auto infoFile = std::make_unique<FomodInfoFile>();
   try {
-    infoFile->deserialize(paths.first().toStdString());
+    infoFile->deserialize(paths.at(0).toStdString());
   } catch (XmlParseException &e) {
     log::error("InstallerFomodPlus::install - error parsing info.xml: {}", e.what());
     return {nullptr, nullptr};
@@ -97,7 +110,7 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration>> 
 
   auto moduleConfiguration = std::make_unique<ModuleConfiguration>();
   try {
-    moduleConfiguration->deserialize(paths.last().toStdString());
+    moduleConfiguration->deserialize(paths.at(1).toStdString());
   } catch (XmlParseException &e) {
     log::error("InstallerFomodPlus::install - error parsing moduleConfig.xml: {}", e.what());
     return {nullptr, nullptr};
@@ -107,8 +120,22 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration>> 
 
 }
 
+// Taken from https://github.com/ModOrganizer2/modorganizer-installer_fomod/blob/master/src/installerfomod.cpp#L123
+void InstallerFomodPlus::appendImageFiles(vector<shared_ptr<const FileTreeEntry>> &entries,
+  const shared_ptr<const IFileTree> &tree) {
+
+  static std::set<QString, FileNameComparator> imageSuffixes{"png", "jpg", "jpeg", "gif", "bmp"};
+  for (auto entry : *tree) {
+    if (entry->isDir()) {
+      appendImageFiles(entries, entry->astree());
+    } else if (imageSuffixes.contains(entry->suffix())) {
+      entries.push_back(entry);
+    }
+  }
+}
+
 void InstallerFomodPlus::onInstallationStart(QString const &archive, bool reinstallation,
-  IModInterface *currentMod) {
+                                             IModInterface *currentMod) {
   IPluginInstallerSimple::onInstallationStart(archive, reinstallation, currentMod);
 }
 
