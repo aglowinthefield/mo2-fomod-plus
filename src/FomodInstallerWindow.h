@@ -11,6 +11,8 @@
 #include <QDialog>
 #include <QWidget>
 #include <QStackedWidget>
+#include <QTextEdit>
+#include <ui/ScaleLabel.h>
 
 #include "FomodInstallerWindow.h"
 
@@ -78,26 +80,25 @@ private:
   // Widgets
   QStackedWidget* mInstallStepStack{};
   QWidget* mLeftPane{};
+  QTextEdit* mDescriptionBox{};
+  ScaleLabel* mImageLabel{};
   int mCurrentStepIndex{};
 
   // Fn
   void setupUi();
   void updateInstallStepStack();
+  void updateDisplayForActivePlugin(const Plugin &plugin) const;
 
-  QBoxLayout*            createContainerLayout();
-  QWidget*               createCenterRow();
-  QWidget*               createTopRow();
-  QComboBox*             createModNameComboBox();
-  [[nodiscard]] QWidget* createBottomRow();
-
-  QWidget *createLeftPane();
-
-  QWidget *createRightPane();
-
-  QWidget*               createStepWidget(const InstallStep& installStep);
-  QWidget*               renderGroup(const Group &group);
-  QWidget*               renderPlugin(Plugin &plugin); // Plugins will emit a signal to
-
+  [[nodiscard]] QBoxLayout* createContainerLayout();
+  [[nodiscard]] QWidget*    createCenterRow();
+  [[nodiscard]] QWidget*    createTopRow();
+  [[nodiscard]] QComboBox*  createModNameComboBox();
+  [[nodiscard]] QWidget*    createBottomRow();
+  [[nodiscard]] QWidget*    createLeftPane();
+  [[nodiscard]] QWidget*    createRightPane();
+  [[nodiscard]] QWidget*    createStepWidget(const InstallStep& installStep);
+  [[nodiscard]] QWidget*    renderGroup(const Group &group);
+  [[nodiscard]] QWidget*    renderPlugin(Plugin &plugin); // Plugins will emit a signal to
 };
 
 

@@ -217,14 +217,14 @@ bool ModuleConfiguration::deserialize(const std::string &filePath) {
   return true;
 }
 
-Plugin ModuleConfiguration::getFirstPlugin() {
+Plugin ModuleConfiguration::getFirstPluginForStepIndex(const int index) {
   if (installSteps.installSteps.empty() ||
-    installSteps.installSteps.front().optionalFileGroups.groups.empty() ||
-    installSteps.installSteps.front().optionalFileGroups.groups.front().plugins.plugins.empty()) {
+    installSteps.installSteps.at(index).optionalFileGroups.groups.empty() ||
+    installSteps.installSteps.at(index).optionalFileGroups.groups.front().plugins.plugins.empty()) {
     return Plugin(); // Return a default-constructed Plugin object
-    }
+  }
 
-  return installSteps.installSteps.front()
+  return installSteps.installSteps.at(index)
     .optionalFileGroups.groups.front()
     .plugins.plugins.front();
 }

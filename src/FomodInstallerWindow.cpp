@@ -14,6 +14,7 @@
 #include <QButtonGroup>
 #include <QRadioButton>
 #include <QCheckBox>
+#include <QScrollArea>
 
 /**
  * 
@@ -51,6 +52,7 @@ void FomodInstallerWindow::onNextClicked() {
     mCurrentStepIndex++;
     mInstallStepStack->setCurrentIndex(mCurrentStepIndex);
     updateButtons();
+    updateDisplayForActivePlugin(mFomodFile->getFirstPluginForStepIndex(mCurrentStepIndex));
   }
 }
 
@@ -59,6 +61,7 @@ void FomodInstallerWindow::onBackClicked() {
     mCurrentStepIndex--;
     mInstallStepStack->setCurrentIndex(mCurrentStepIndex);
     updateButtons();
+    updateDisplayForActivePlugin(mFomodFile->getFirstPluginForStepIndex(mCurrentStepIndex));
   }
 }
 
@@ -232,6 +235,7 @@ QComboBox* FomodInstallerWindow::createModNameComboBox() {
   modNameComboBox->setEditable(true);
 
   // To show the 'best' guess first, we reverse the variant order
+  // TODO: Pick the proper guess based on quality instead and sort by quality?
   std::vector variants(mModName.variants().begin(), mModName.variants().end());
   ranges::reverse(variants);
 
@@ -274,24 +278,20 @@ QWidget* FomodInstallerWindow::createLeftPane() {
   const auto leftPane = new QWidget(this);
   auto* layout = new QVBoxLayout(leftPane);
 
-  const auto firstPlugin = mFomodFile->getFirstPlugin();
-
-  const auto defaultText = QString::fromStdString(firstPlugin.description);
+  const auto firstPlugin = mFomodFile->getFirstPluginForStepIndex(0);
 
   // Add description box
   // Initialize with defaults (the first plugin's description (which defaults to the module image otherwise))
-  const auto descriptionBox = new QTextEdit(defaultText, leftPane);
-  layout->addWidget(descriptionBox);
+  mDescriptionBox = new QTextEdit("", leftPane);
+  layout->addWidget(mDescriptionBox);
 
   // Add image
   // Initialize with defaults (the first plugin's image)
-  const auto imageLabel = new ScaleLabel(leftPane);
-  imageLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  mImageLabel = new ScaleLabel(leftPane);
+  mImageLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  layout->addWidget(mImageLabel);
 
-  const auto image = mFomodFile->getImageForPlugin(firstPlugin);
-  const auto imagePath = UIHelper::getFullImagePath(mFomodPath, image);
-  imageLabel->setScalableResource(imagePath);
-  layout->addWidget(imageLabel);
+  updateDisplayForActivePlugin(firstPlugin);
 
   return leftPane;
 }
@@ -309,20 +309,31 @@ QWidget* FomodInstallerWindow::createStepWidget(const InstallStep& installStep) 
   const auto stepBox = new QGroupBox(QString::fromStdString(installStep.name), this);
   const auto stepBoxLayout = new QVBoxLayout(stepBox);
 
+  auto* scrollArea = new QScrollArea(stepBox);
+  scrollArea->setWidgetResizable(true);
+
+  const auto scrollAreaContent = new QWidget(scrollArea);
+  auto* scrollAreaLayout = new QVBoxLayout(scrollAreaContent);
+
   for (auto group : installStep.optionalFileGroups.groups) {
     const auto groupSection = renderGroup(group);
-    stepBoxLayout->addWidget(groupSection);
+    scrollAreaLayout->addWidget(groupSection);
   }
 
+  scrollAreaContent->setLayout(scrollAreaLayout);
+  scrollArea->setWidget(scrollAreaContent);
+
+  stepBoxLayout->addWidget(scrollArea);
   stepBox->setLayout(stepBoxLayout);
   return stepBox;
 }
 
 QWidget* FomodInstallerWindow::renderGroup(const Group& group) {
   const auto groupBox = new QGroupBox(QString::fromStdString(group.name), this);
+
   const auto groupBoxLayout = new QVBoxLayout(groupBox);
 
-  if (group.type == GroupTypeEnum::SelectExactlyOne) {
+  if (group.type == SelectExactlyOne) {
     // Create a button group for radio buttons
     auto* buttonGroup = new QButtonGroup(groupBox);
     buttonGroup->setExclusive(true); // Ensure only one button can be selected
@@ -342,6 +353,14 @@ QWidget* FomodInstallerWindow::renderGroup(const Group& group) {
 
   groupBox->setLayout(groupBoxLayout);
   return groupBox;
+}
+
+// Updates the image and description field for a given plugin. Also use this on initialization of those widgets.
+void FomodInstallerWindow::updateDisplayForActivePlugin(const Plugin& plugin) const {
+  mDescriptionBox->setText(QString::fromStdString(plugin.description));
+  const auto image = mFomodFile->getImageForPlugin(plugin);
+  const auto imagePath = UIHelper::getFullImagePath(mFomodPath, image);
+  mImageLabel->setScalableResource(imagePath);
 }
 
 QWidget* FomodInstallerWindow::renderPlugin(Plugin&) {

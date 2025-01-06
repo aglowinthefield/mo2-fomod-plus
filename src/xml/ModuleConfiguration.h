@@ -223,8 +223,7 @@ public:
 
   bool deserialize(const std::string &filePath);
 
-  Plugin getFirstPlugin();
-
+  Plugin getFirstPluginForStepIndex(int index);
   QString getImageForPlugin(const Plugin &plugin) const;
 };
 
