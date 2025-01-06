@@ -3,6 +3,9 @@
 #include "xml/ModuleConfiguration.h"
 
 #include <QVBoxLayout>
+#include <QComboBox>
+#include <QCompleter>
+#include <QSizePolicy>
 
 /**
  * 
@@ -27,7 +30,7 @@ FomodInstallerWindow::FomodInstallerWindow(InstallerFomodPlus *installer, const 
   const auto containerLayout = createContainerLayout();
   setLayout(containerLayout);
 
-  // Create qstacked widget
+  // Create qstackedwidget
   // Create a widget for each step
   // Only add the ones that have no condition or some kind of dependency
   // Evaluate the dependencies on some regular interval
@@ -35,19 +38,27 @@ FomodInstallerWindow::FomodInstallerWindow(InstallerFomodPlus *installer, const 
 }
 
 void FomodInstallerWindow::onNextClicked() {
+  if (mCurrentStepIndex < mStackedWidget->count() - 1) {
+    mCurrentStepIndex++;
+    mStackedWidget->setCurrentIndex(mCurrentStepIndex);
+    updateButtons();
+  }
 }
 
 void FomodInstallerWindow::onBackClicked() {
+  if (mCurrentStepIndex > 0) {
+    mCurrentStepIndex--;
+    mStackedWidget->setCurrentIndex(mCurrentStepIndex);
+    updateButtons();
+  }
 }
 
 void FomodInstallerWindow::updateButtons() {
 }
 
 void FomodInstallerWindow::setupUi() {
-
   setMinimumSize(UiConstants::WINDOW_MIN_WIDTH, UiConstants::WINDOW_MIN_HEIGHT);
   setWindowModality(Qt::NonModal); // To allow scrolling modlist without closing the window
-
 }
 
 /*
@@ -81,10 +92,117 @@ void FomodInstallerWindow::setupUi() {
 QBoxLayout *FomodInstallerWindow::createContainerLayout() {
 
   const auto layout = new QVBoxLayout(this);
+
+  // add top row here.
+  const auto topRow = createTopRow();
+  layout->addWidget(topRow);
+
+  // middle area takes up the bulk of space. maybe 5x the size of the top row
+  const auto centerRow = createCenterRow();
+  layout->addWidget(centerRow, 1); // stretch 1 here so the others are static size
+
+  // bottom row
   const auto bottomRow = createBottomRow();
   layout->addWidget(bottomRow);
-  return layout;
 
+  // any extra layout setup :)
+  UIHelper::setDebugBorders(this);
+  return layout;
+}
+
+QWidget* FomodInstallerWindow::createCenterRow() {
+
+  const auto centerRow = new QWidget(this);
+  auto* centerMainLayout = new QHBoxLayout(centerRow);
+
+  // add the left pane
+  const auto leftPane = new QVBoxLayout(centerRow);
+
+  // add the right pane (to be the anchor for renderStep)
+  const auto rightPane = new QVBoxLayout(centerRow);
+
+  // add panes to layout
+  centerMainLayout->addLayout(leftPane);
+  centerMainLayout->addLayout(rightPane);
+
+
+  centerRow->setLayout(centerMainLayout);
+  return centerRow;
+
+}
+
+QWidget* FomodInstallerWindow::createTopRow() {
+
+  const auto topRow = new QWidget(this);
+
+  auto* mainHLayout = new QHBoxLayout(topRow);
+
+  /*
+   * Holds the name (label), author, version, and website
+   */
+  auto* metadataLayout = new QHBoxLayout();
+
+  // left side metadata. just the titles of the metadata
+  auto* labelsColumn = new QVBoxLayout();
+  QLabel* nameLabel         = UIHelper::createLabel("Name:", topRow);
+  QLabel* authorLabel       = UIHelper::createLabel("Author:", topRow);
+  QLabel* versionLabel      = UIHelper::createLabel("Version:", topRow);
+  QLabel* websiteLabel      = UIHelper::createLabel("Website:", topRow);
+
+  labelsColumn->addWidget(nameLabel);
+  labelsColumn->addWidget(authorLabel);
+  labelsColumn->addWidget(versionLabel);
+  labelsColumn->addWidget(websiteLabel);
+
+  UIHelper::reduceLabelPadding(labelsColumn);
+  UIHelper::setGlobalAlignment(labelsColumn, Qt::AlignTop);
+
+  // the values of the metadata MINUS the search box
+  auto* valuesColumn = new QVBoxLayout();
+  QLabel* emptyLabel        = UIHelper::createLabel("", topRow);
+  QLabel* authorValueLabel  = UIHelper::createLabel(mInfoFile->getAuthor().c_str(), topRow);
+  QLabel* versionValueLabel = UIHelper::createLabel(mInfoFile->getVersion().c_str(), topRow);
+  QLabel* websiteValueLabel = UIHelper::createHyperlink(mInfoFile->getWebsite().c_str(), topRow);
+
+  valuesColumn->addWidget(emptyLabel);
+  valuesColumn->addWidget(authorValueLabel);
+  valuesColumn->addWidget(versionValueLabel);
+  valuesColumn->addWidget(websiteValueLabel);
+
+  // We want these cleanup fns to be at the layout level directly containing the labels.
+  // Since we aren't recursing down the UI forever we can't just call it for mainHLayout.
+  UIHelper::reduceLabelPadding(valuesColumn);
+  UIHelper::setGlobalAlignment(valuesColumn, Qt::AlignTop);
+
+  metadataLayout->addLayout(labelsColumn);
+  metadataLayout->addLayout(valuesColumn);
+
+  mainHLayout->addLayout(metadataLayout);
+
+  // Now make the search bar layout
+  auto* modNameComboBox = createModNameComboBox();
+  mainHLayout->addWidget(modNameComboBox);
+  UIHelper::setGlobalAlignment(mainHLayout, Qt::AlignTop);
+
+  // Extra stuff
+  topRow->setLayout(mainHLayout);
+  topRow->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  return topRow;
+}
+
+QComboBox* FomodInstallerWindow::createModNameComboBox() {
+  auto* modNameComboBox = new QComboBox(this);
+  modNameComboBox->setEditable(true);
+
+  // To show the 'best' guess first, we reverse the variant order
+  std::vector variants(mModName.variants().begin(), mModName.variants().end());
+  ranges::reverse(variants);
+
+  for (const auto& variant : variants) {
+    modNameComboBox->addItem(variant);
+  }
+  modNameComboBox->completer()->setCaseSensitivity(Qt::CaseSensitive);
+  return modNameComboBox;
 }
 
 QWidget* FomodInstallerWindow::createBottomRow() {

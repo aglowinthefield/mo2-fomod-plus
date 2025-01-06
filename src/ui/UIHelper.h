@@ -4,24 +4,21 @@
 
 #include <QPushButton>
 #include <Qlabel>
+#include <QVBoxLayout>
 
 namespace UiConstants {
-  constexpr int WINDOW_MIN_WIDTH = 1024;
-  constexpr int WINDOW_MIN_HEIGHT = 768;
+  constexpr int WINDOW_MIN_WIDTH = 1000;
+  constexpr int WINDOW_MIN_HEIGHT = 700;
 }
 
 class UIHelper {
 public:
-  static QPushButton* createButton(const QString& text, QWidget* parent = nullptr) {
-    QPushButton* button = new QPushButton(text, parent);
-    return button;
-  }
-
-  static QLabel* createLabel(const QString& text, QWidget* parent = nullptr) {
-    QLabel* label = new QLabel(text, parent);
-    return label;
-  }
-
+  static QPushButton *createButton(const QString &text, QWidget *parent);
+  static QLabel *createLabel(const QString &text, QWidget *parent);
+  static QLabel *createHyperlink(const QString &url, QWidget *parent);
+  static void setGlobalAlignment(QBoxLayout *layout, Qt::Alignment alignment);
+  static void setDebugBorders(QWidget *widget);
+  static void reduceLabelPadding(const QLayout *layout);
 };
 
 #endif //UIHELPER_H

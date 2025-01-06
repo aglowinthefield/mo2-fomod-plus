@@ -12,6 +12,12 @@ namespace StringConstants {
         constexpr auto FOMOD_DIR = "fomod";
         constexpr auto INFO_XML = "info.xml";
         constexpr auto MODULE_CONFIG = "ModuleConfig.xml";
+
+        constexpr auto TYPE_REQUIRED = "Required";
+        constexpr auto TYPE_OPTIONAL = "Optional";
+        constexpr auto TYPE_RECOMMENDED = "Recommended";
+        constexpr auto TYPE_NOT_USABLE = "NotUsable";
+        constexpr auto TYPE_COULD_BE_USABLE = "CouldBeUsable";
     }
 
     // Add more nested namespaces as needed

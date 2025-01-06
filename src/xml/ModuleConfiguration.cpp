@@ -1,17 +1,18 @@
 ﻿#include "ModuleConfiguration.h"
-
 #include <format>
+#include "../stringconstants.h"
+#include "XmlParseException.h"
 
-#include "XmlParseException.h";
+using namespace StringConstants::FomodFiles;
 
 
 bool PluginType::deserialize(pugi::xml_node &node) {
   const std::string typeStr = node.attribute("name").as_string();
-  if (typeStr == "Required")           name = PluginTypeEnum::Required;
-  else if (typeStr == "Optional")      name = PluginTypeEnum::Optional;
-  else if (typeStr == "Recommended")   name = PluginTypeEnum::Recommended;
-  else if (typeStr == "NotUsable")     name = PluginTypeEnum::NotUsable;
-  else if (typeStr == "CouldBeUsable") name = PluginTypeEnum::CouldBeUsable;
+  if (typeStr == TYPE_REQUIRED)             name = PluginTypeEnum::Required;
+  else if (typeStr == TYPE_OPTIONAL)        name = PluginTypeEnum::Optional;
+  else if (typeStr == TYPE_RECOMMENDED)     name = PluginTypeEnum::Recommended;
+  else if (typeStr == TYPE_NOT_USABLE)      name = PluginTypeEnum::NotUsable;
+  else if (typeStr == TYPE_COULD_BE_USABLE) name = PluginTypeEnum::CouldBeUsable;
   return true;
 }
 
@@ -96,6 +97,13 @@ bool HeaderImage::deserialize(pugi::xml_node &node) {
 
 bool FileList::deserialize(pugi::xml_node &node) {
   for (pugi::xml_node fileNode: node.children("file")) {
+    File file;
+    file.deserialize(fileNode);
+    files.push_back(file);
+  }
+
+  // TODO: Is this the best way to handle folders? Should work for now but we'll see.
+  for (pugi::xml_node fileNode: node.children("folder")) {
     File file;
     file.deserialize(fileNode);
     files.push_back(file);

@@ -2,6 +2,7 @@
 #define FOMODINSTALLERWINDOW_H
 
 #include <qboxlayout.h>
+#include <qcombobox.h>
 
 #include "InstallerFomodPlus.h"
 #include "xml/ModuleConfiguration.h"
@@ -89,6 +90,12 @@ private:
    *   - the bottom row for various data + buttons
    */
   QBoxLayout *createContainerLayout();
+
+  QWidget *createCenterRow();
+
+  QWidget *createTopRow();
+
+  QComboBox *createModNameComboBox();
 
   [[nodiscard]] QWidget* createBottomRow();
 
