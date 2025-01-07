@@ -49,20 +49,15 @@ FomodInstallerWindow::FomodInstallerWindow(InstallerFomodPlus *installer, const 
 }
 
 void FomodInstallerWindow::onNextClicked() {
-  log::debug("Total stack widget count: {}",  mInstallStepStack->count());
   if (mCurrentStepIndex < mInstallStepStack->count() - 1) {
-    log::debug("Transitioning from step index {}",  mCurrentStepIndex);
-
     // TODO: Check visibility condition for the next step
     mCurrentStepIndex++;
-    log::debug("Current step: {}",  mCurrentStepIndex);
     mInstallStepStack->setCurrentIndex(mCurrentStepIndex);
 
     updateButtons();
     updateDisplayForActivePlugin(mFomodFile->getFirstPluginForStepIndex(mCurrentStepIndex));
   } else if (mCurrentStepIndex == mInstallStepStack->count() - 1) {
-    log::debug("Last step reached. Accepting dialog.");
-    this->accept();
+    onInstallClicked();
   }
 }
 
