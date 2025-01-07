@@ -49,7 +49,7 @@ public:
 
 
   // So InstallerFomodPlus can check if the user wants to manually install
-  [[nodiscard]] bool getIsManualInstall() const {
+  [[nodiscard]] bool isManualInstall() const {
     return mIsManualInstall;
   }
 

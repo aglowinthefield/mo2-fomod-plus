@@ -61,9 +61,11 @@ IPluginInstaller::EInstallResult InstallerFomodPlus::install(GuessedValue<QStrin
     std::move(infoFile)
   );
 
-  const QDialog::DialogCode result = showInstallerWindow(window);
-  if (result == QDialog::Accepted) {
+  if (const QDialog::DialogCode result = showInstallerWindow(window); result == QDialog::Accepted) {
     return RESULT_SUCCESS;
+  }
+  if (window->isManualInstall()) {
+    return RESULT_MANUALREQUESTED;
   }
   return RESULT_NOTATTEMPTED;
 }
