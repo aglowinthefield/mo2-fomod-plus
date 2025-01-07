@@ -333,27 +333,54 @@ QWidget* FomodInstallerWindow::renderGroup(const Group& group) {
 
   const auto groupBoxLayout = new QVBoxLayout(groupBox);
 
-  if (group.type == SelectExactlyOne) {
-    // Create a button group for radio buttons
-    auto* buttonGroup = new QButtonGroup(groupBox);
-    buttonGroup->setExclusive(true); // Ensure only one button can be selected
-
-    for (const auto& plugin : group.plugins.plugins) {
-      auto* radioButton = new QRadioButton(QString::fromStdString(plugin.name), groupBox);
-      buttonGroup->addButton(radioButton);
-      groupBoxLayout->addWidget(radioButton);
-    }
-  } else {
-    // Create checkboxes
-    for (const auto& plugin : group.plugins.plugins) {
-      auto* checkBox = new QCheckBox(QString::fromStdString(plugin.name), groupBox);
-      groupBoxLayout->addWidget(checkBox);
-    }
+  switch (group.type) {
+    case SelectAny:
+      renderSelectAny(groupBox, groupBoxLayout, group);
+      break;
+    case SelectAll:
+      break;
+    case SelectExactlyOne:
+      renderSelectExactlyOne(groupBox, groupBoxLayout, group);
+      break;
+    case SelectAtMostOne:
+      renderSelectAtMostOne(groupBox, groupBoxLayout, group);
+      break;
+    case SelectAtLeastOne:
+      break;
+    default: ;
   }
 
   groupBox->setLayout(groupBoxLayout);
   return groupBox;
 }
+
+QButtonGroup* FomodInstallerWindow::renderSelectExactlyOne(QWidget *parent, QLayout* parentLayout, const Group &group) {
+  auto* buttonGroup = new QButtonGroup(parent);
+  buttonGroup->setExclusive(true); // Ensure only one button can be selected
+
+  for (const auto& plugin : group.plugins.plugins) {
+    auto* radioButton = new QRadioButton(QString::fromStdString(plugin.name), parent);
+    buttonGroup->addButton(radioButton);
+    parentLayout->addWidget(radioButton);
+  }
+  return buttonGroup;
+}
+
+void FomodInstallerWindow::renderSelectAtMostOne(QWidget *parent, QLayout* parentLayout, const Group &group) {
+  // Same thing but with an extra 'None' option at the end
+  auto* buttonGroup = renderSelectExactlyOne(parent, parentLayout, group);
+  auto* noneButton = new QRadioButton("None", parent);
+  buttonGroup->addButton(noneButton);
+  parentLayout->addWidget(noneButton);
+}
+
+void FomodInstallerWindow::renderSelectAny(QWidget* parent, QLayout* parentLayout, const Group& group) {
+  for (const auto& plugin : group.plugins.plugins) {
+    auto* checkBox = new QCheckBox(QString::fromStdString(plugin.name), parent);
+    parentLayout->addWidget(checkBox);
+  }
+}
+
 
 // Updates the image and description field for a given plugin. Also use this on initialization of those widgets.
 void FomodInstallerWindow::updateDisplayForActivePlugin(const Plugin& plugin) const {

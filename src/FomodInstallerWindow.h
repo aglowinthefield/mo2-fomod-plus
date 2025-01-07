@@ -2,6 +2,7 @@
 #define FOMODINSTALLERWINDOW_H
 
 #include <qboxlayout.h>
+#include <qbuttongroup.h>
 #include <qcombobox.h>
 
 #include "InstallerFomodPlus.h"
@@ -98,6 +99,13 @@ private:
   [[nodiscard]] QWidget*    createRightPane();
   [[nodiscard]] QWidget*    createStepWidget(const InstallStep& installStep);
   [[nodiscard]] QWidget*    renderGroup(const Group &group);
+
+  static QButtonGroup *renderSelectExactlyOne(QWidget *parent, QLayout *parentLayout, const Group &group);
+
+  static void renderSelectAtMostOne(QWidget *parent, QLayout *parentLayout, const Group &group);
+
+  static void renderSelectAny(QWidget *parent, QLayout *parentLayout, const Group &group);
+
   [[nodiscard]] QWidget*    renderPlugin(Plugin &plugin); // Plugins will emit a signal to
 };
 
