@@ -15,6 +15,7 @@
 #include <QRadioButton>
 #include <QCheckBox>
 #include <QScrollArea>
+#include <utility>
 
 /**
  * 
@@ -26,15 +27,22 @@
  * @param infoFile 
  * @param parent 
  */
-FomodInstallerWindow::FomodInstallerWindow(InstallerFomodPlus *installer, const GuessedValue<QString> &modName,
-  const std::shared_ptr<IFileTree> &tree, const QString& fomodPath, std::unique_ptr<ModuleConfiguration> fomodFile,
-  std::unique_ptr<FomodInfoFile> infoFile, QWidget *parent): QDialog(parent),
-                                                             mInstaller(installer),
-                                                             mFomodPath(fomodPath),
-                                                             mModName(modName),
-                                                             mTree(tree),
-                                                             mFomodFile(std::move(fomodFile)),
-                                                             mInfoFile(std::move(infoFile)) {
+FomodInstallerWindow::FomodInstallerWindow(
+  InstallerFomodPlus *installer,
+  const GuessedValue<QString> &modName,
+  const std::shared_ptr<IFileTree> &tree,
+  QString fomodPath,
+  IOrganizer* organizer,
+  std::unique_ptr<ModuleConfiguration> fomodFile,
+  std::unique_ptr<FomodInfoFile> infoFile,
+  QWidget *parent): QDialog(parent),
+                                                     mInstaller(installer),
+                                                     mFomodPath(std::move(fomodPath)),
+                                                     mModName(modName),
+                                                     mTree(tree),
+                                                     mFomodFile(std::move(fomodFile)),
+                                                     mInfoFile(std::move(infoFile)),
+                                                     mOrganizer(organizer) {
 
   setupUi();
 
@@ -109,7 +117,7 @@ void FomodInstallerWindow::updateInstallStepStack() {
   }
 
   // Create the widgets for each step. Not sure if we need these as member variables. Try it like this for now.
-  for (auto installStep : steps.installSteps) {
+  for (const auto& installStep : steps.installSteps) {
     mInstallStepStack->addWidget(createStepWidget(installStep));
   }
   mInstallStepStack->setCurrentIndex(mCurrentStepIndex);
@@ -333,7 +341,7 @@ QWidget* FomodInstallerWindow::createStepWidget(const InstallStep& installStep) 
   const auto scrollAreaContent = new QWidget(scrollArea);
   auto* scrollAreaLayout = new QVBoxLayout(scrollAreaContent);
 
-  for (auto group : installStep.optionalFileGroups.groups) {
+  for (const auto& group : installStep.optionalFileGroups.groups) {
     const auto groupSection = renderGroup(group);
     scrollAreaLayout->addWidget(groupSection);
   }
@@ -404,10 +412,7 @@ void FomodInstallerWindow::renderSelectAny(QWidget* parent, QLayout* parentLayou
 void FomodInstallerWindow::updateDisplayForActivePlugin(const Plugin& plugin) const {
   mDescriptionBox->setText(QString::fromStdString(plugin.description));
   const auto image = mFomodFile->getImageForPlugin(plugin);
-  const auto imagePath = UIHelper::getFullImagePath(mFomodPath, image);
+  const auto imagePath = UIHelper::getFullImagePath(mFomodPath, QString::fromStdString(image));
   mImageLabel->setScalableResource(imagePath);
 }
 
-QWidget* FomodInstallerWindow::renderPlugin(Plugin&) {
-  return nullptr;
-}

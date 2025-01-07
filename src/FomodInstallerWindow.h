@@ -42,7 +42,8 @@ public:
   FomodInstallerWindow(InstallerFomodPlus *installer,
                        const GuessedValue<QString> &modName,
                        const std::shared_ptr<IFileTree> &tree,
-                       const QString& fomodPath,
+                       QString fomodPath,
+                       IOrganizer* organizer,
                        std::unique_ptr<ModuleConfiguration> fomodFile,
                        std::unique_ptr<FomodInfoFile> infoFile,
                        QWidget *parent = nullptr);
@@ -67,6 +68,7 @@ private:
   std::shared_ptr<IFileTree> mTree;
   std::unique_ptr<ModuleConfiguration> mFomodFile;
   std::unique_ptr<FomodInfoFile> mInfoFile;
+  IOrganizer* mOrganizer;
 
   // Meta
   bool mIsManualInstall{};
@@ -103,10 +105,7 @@ private:
   static QButtonGroup *renderSelectExactlyOne(QWidget *parent, QLayout *parentLayout, const Group &group);
 
   static void renderSelectAtMostOne(QWidget *parent, QLayout *parentLayout, const Group &group);
-
   static void renderSelectAny(QWidget *parent, QLayout *parentLayout, const Group &group);
-
-  [[nodiscard]] QWidget*    renderPlugin(Plugin &plugin); // Plugins will emit a signal to
 };
 
 

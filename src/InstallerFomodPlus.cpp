@@ -51,12 +51,14 @@ IPluginInstaller::EInstallResult InstallerFomodPlus::install(GuessedValue<QStrin
     // Do we want to fail if no info.xml? probably for now. something to consider here.
     return RESULT_FAILED;
   }
+
   // create ui & pass xml classes to ui
   const auto window = std::make_shared<FomodInstallerWindow>(
     this,
     modName,
     tree,
     mFomodPath,
+    m_Organizer,
     std::move(moduleConfigFile),
     std::move(infoFile)
   );

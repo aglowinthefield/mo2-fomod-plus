@@ -5,7 +5,6 @@
 #include <vector>
 #include <pugixml.hpp>
 #include <iostream>
-#include <qstring.h>
 
 class XmlDeserializable {
 public:
@@ -15,7 +14,6 @@ public:
 protected:
   XmlDeserializable() = default;
 };
-
 
 enum GroupTypeEnum {
   SelectAny,
@@ -34,6 +32,12 @@ enum class OrderTypeEnum {
   Explicit,
   Ascending,
   Descending
+};
+
+enum class FileDependencyTypeEnum {
+  Missing,
+  Inactive,
+  Active
 };
 
 template <typename T>
@@ -76,7 +80,7 @@ public:
 class FileDependency final : public XmlDeserializable {
 public:
   std::string file;
-  std::string state;
+  FileDependencyTypeEnum state;
 
   bool deserialize(pugi::xml_node &node) override;
 };
@@ -223,8 +227,8 @@ public:
 
   bool deserialize(const std::string &filePath);
 
-  Plugin getFirstPluginForStepIndex(int index);
-  QString getImageForPlugin(const Plugin &plugin) const;
+  [[nodiscard]] Plugin getFirstPluginForStepIndex(int index);
+  [[nodiscard]] std::string getImageForPlugin(const Plugin &plugin) const;
 };
 
 

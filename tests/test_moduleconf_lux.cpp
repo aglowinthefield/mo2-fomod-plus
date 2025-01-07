@@ -25,7 +25,7 @@ TEST_F(ModuleConfigurationTest_Lux, DeserializeModuleConfiguration) {
 
     EXPECT_EQ(moduleConfig.moduleName, "Lux (patch hub)");
     EXPECT_EQ(moduleConfig.moduleImage.path, "fomod\\Screenshots\\Header LUX patch hub.jpg");
-    EXPECT_EQ(moduleConfig.installSteps.order, "Explicit");
+    EXPECT_EQ(moduleConfig.installSteps.order, OrderTypeEnum::Explicit);
 
     // Check the first install step
     ASSERT_EQ(moduleConfig.installSteps.installSteps.size(), 5);
@@ -36,7 +36,7 @@ TEST_F(ModuleConfigurationTest_Lux, DeserializeModuleConfiguration) {
     ASSERT_EQ(firstStep.optionalFileGroups.groups.size(), 46); // yep. i counted this.
     const Group &firstGroup = firstStep.optionalFileGroups.groups[0];
     EXPECT_EQ(firstGroup.name, "4thUnknown");
-    EXPECT_EQ(firstGroup.type, "SelectAny");
+    EXPECT_EQ(firstGroup.type, GroupTypeEnum::SelectAny);
 
     // Check the first plugin in the first group
     ASSERT_EQ(firstGroup.plugins.plugins.size(), 2); // Adjust this based on actual data
@@ -60,8 +60,8 @@ TEST_F(ModuleConfigurationTest_Lux, DeserializeGroup) {
     ASSERT_TRUE(group.deserialize(groupNode));
 
     EXPECT_EQ(group.name, "4thUnknown");
-    EXPECT_EQ(group.type, "SelectAny");
-    EXPECT_EQ(group.plugins.order, "Explicit");
+    EXPECT_EQ(group.type, GroupTypeEnum::SelectAny);
+    EXPECT_EQ(group.plugins.order, OrderTypeEnum::Explicit);
 }
 
 TEST_F(ModuleConfigurationTest_Lux, DeserializeInstallStep) {
@@ -71,21 +71,22 @@ TEST_F(ModuleConfigurationTest_Lux, DeserializeInstallStep) {
     ASSERT_TRUE(installStep.deserialize(installStepNode));
 
     EXPECT_EQ(installStep.name, "Authors collections of mods");
-    EXPECT_EQ(installStep.optionalFileGroups.order, "Explicit");
+    EXPECT_EQ(installStep.optionalFileGroups.order, OrderTypeEnum::Explicit);
 }
 
 TEST_F(ModuleConfigurationTest_Lux, DeserializeDependencies) {
-    pugi::xml_node dependencyNode = configNode.child("installSteps").child("installStep").child("optionalFileGroups").child("group").child("plugins").child("plugin").child("typeDescriptor").child("dependencyType").child("patterns").child("pattern").child("dependencies");
+    const pugi::xml_node dependencyNode = configNode.child("installSteps").child("installStep").child("optionalFileGroups").child("group").child("plugins").child("plugin").child("typeDescriptor").child("dependencyType").child("patterns").child("pattern").child("dependencies");
     ASSERT_TRUE(dependencyNode) << "No <dependencies> node found";
 
-    std::string operatorType = dependencyNode.attribute("operator").as_string();
-    EXPECT_EQ(operatorType, "And"); // Replace with actual expected operator
+    const std::string operatorType = dependencyNode.attribute("operator").as_string();
+    EXPECT_EQ(operatorType, "And");
 
     pugi::xml_node fileDependencyNode = dependencyNode.child("fileDependency");
     ASSERT_TRUE(fileDependencyNode) << "No <fileDependency> node found";
 
-    std::string file = fileDependencyNode.attribute("file").as_string();
-    std::string state = fileDependencyNode.attribute("state").as_string();
-    EXPECT_EQ(file, "1SixthHouse.esp"); // Replace with actual expected file
-    EXPECT_EQ(state, "Active"); // Replace with actual expected state
+    FileDependency fileDependency;
+    ASSERT_TRUE(fileDependency.deserialize(fileDependencyNode));
+
+    EXPECT_EQ(fileDependency.state, FileDependencyTypeEnum::Active);
+    EXPECT_EQ(fileDependency.file, "1SixthHouse.esp");
 }

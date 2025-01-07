@@ -3,7 +3,7 @@
 #include "../stringconstants.h"
 #include "XmlParseException.h"
 #include "XmlHelper.h"
-#include <QDir>
+// #include <QDir>
 
 using namespace StringConstants::FomodFiles;
 
@@ -28,7 +28,19 @@ bool PluginType::deserialize(pugi::xml_node &node) {
 
 bool FileDependency::deserialize(pugi::xml_node &node) {
   file = node.attribute("file").as_string();
-  state = node.attribute("state").as_string();
+  // ReSharper disable once CppTooWideScopeInitStatement
+  // Do not use 'auto' for these. it will break equality checks
+  const std::string stateStr = node.attribute("state").as_string();
+
+  // TODO: Do we want to initialize this in case it's missing? I doubt this would happen.
+  std::cout << "stateStr: '" << stateStr << "'" << std::endl; // Debug print
+
+  if (stateStr == "Missing")
+    state = FileDependencyTypeEnum::Missing;
+  else if (stateStr == "Inactive")
+    state = FileDependencyTypeEnum::Inactive;
+  else if (stateStr == "Active")
+    state = FileDependencyTypeEnum::Active;
   return true;
 }
 
@@ -221,7 +233,7 @@ Plugin ModuleConfiguration::getFirstPluginForStepIndex(const int index) {
   if (installSteps.installSteps.empty() ||
     installSteps.installSteps.at(index).optionalFileGroups.groups.empty() ||
     installSteps.installSteps.at(index).optionalFileGroups.groups.front().plugins.plugins.empty()) {
-    return Plugin(); // Return a default-constructed Plugin object
+    return {}; // Return a default-constructed Plugin object
   }
 
   return installSteps.installSteps.at(index)
@@ -229,9 +241,9 @@ Plugin ModuleConfiguration::getFirstPluginForStepIndex(const int index) {
     .plugins.plugins.front();
 }
 
-QString ModuleConfiguration::getImageForPlugin(const Plugin &plugin) const {
+std::string ModuleConfiguration::getImageForPlugin(const Plugin &plugin) const {
   if (plugin.image.path.empty()) {
-    return QString::fromStdString(moduleImage.path);
+    return moduleImage.path;
   }
-  return QString::fromStdString(plugin.image.path);
+  return plugin.image.path;
 }

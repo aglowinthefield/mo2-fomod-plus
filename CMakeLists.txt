@@ -5,10 +5,9 @@ include(FetchContent)
 set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/install")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "D:/Modding/MO2/plugins/fomod_plus")
 
-# Enable debug symbols for RelWithDebInfo
-if (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
-endif()
+# For some reason MSVC doesn't get picked up by CLion.
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zi /Od")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /Zi /O2")
 
 if(DEFINED DEPENDENCIES_DIR)
     include(${DEPENDENCIES_DIR}/modorganizer_super/cmake_common/mo2.cmake)
