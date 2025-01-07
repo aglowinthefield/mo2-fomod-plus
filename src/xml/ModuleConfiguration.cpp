@@ -1,6 +1,6 @@
 ﻿#include "ModuleConfiguration.h"
 #include <format>
-#include "../stringconstants.h"
+#include "../util/stringutil.h"
 #include "XmlParseException.h"
 #include "XmlHelper.h"
 // #include <QDir>

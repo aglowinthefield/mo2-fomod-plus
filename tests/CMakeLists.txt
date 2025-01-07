@@ -27,6 +27,7 @@ add_executable(runTests
         ${CMAKE_CURRENT_SOURCE_DIR}/../src/xml/FomodInfoFile.cpp
         ../src/xml/ModuleConfiguration.cpp
         test_moduleconf_lux.cpp
+        test_stringutil.cpp
 )
 
 

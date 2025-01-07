@@ -8,7 +8,7 @@
 #include <xml/XmlParseException.h>
 
 #include "FomodInstallerWindow.h"
-#include "stringconstants.h"
+#include "util/stringutil.h"
 
 bool InstallerFomodPlus::init(IOrganizer *organizer) {
   m_Organizer = organizer;

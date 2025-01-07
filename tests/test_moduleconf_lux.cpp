@@ -75,7 +75,9 @@ TEST_F(ModuleConfigurationTest_Lux, DeserializeInstallStep) {
 }
 
 TEST_F(ModuleConfigurationTest_Lux, DeserializeDependencies) {
-    const pugi::xml_node dependencyNode = configNode.child("installSteps").child("installStep").child("optionalFileGroups").child("group").child("plugins").child("plugin").child("typeDescriptor").child("dependencyType").child("patterns").child("pattern").child("dependencies");
+    const pugi::xml_node dependencyNode = configNode.child("installSteps").child("installStep").
+            child("optionalFileGroups").child("group").child("plugins").child("plugin").child("typeDescriptor").
+            child("dependencyType").child("patterns").child("pattern").child("dependencies");
     ASSERT_TRUE(dependencyNode) << "No <dependencies> node found";
 
     const std::string operatorType = dependencyNode.attribute("operator").as_string();

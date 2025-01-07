@@ -37,7 +37,8 @@ enum class OrderTypeEnum {
 enum class FileDependencyTypeEnum {
   Missing,
   Inactive,
-  Active
+  Active,
+  UNKNOWN_STATE
 };
 
 template <typename T>

@@ -18,6 +18,10 @@ public:
   void setFlag(const string& flag, const string& value);
   [[nodiscard]] string getFlag(const string& flag) const;
 
+  FileDependencyTypeEnum getFileDependencyStateForPlugin(const string& pluginName) const;
+
+  MOBase::IOrganizer* getOrganizer() const { return mOrganizer; }
+
 private:
   MOBase::IOrganizer* mOrganizer;
   unordered_map<string, string> mFlags;

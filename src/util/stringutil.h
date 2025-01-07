@@ -1,5 +1,6 @@
 ﻿#ifndef STRINGCONSTANTS_H
 #define STRINGCONSTANTS_H
+#include <string>
 
 namespace StringConstants {
     namespace Plugin {
@@ -21,6 +22,16 @@ namespace StringConstants {
     }
 
     // Add more nested namespaces as needed
+}
+
+static std::string trim_copy(std::string s) {
+  s.erase(s.begin(), std::ranges::find_if(s, [](const unsigned char ch) {
+    return !std::isspace(ch);
+  }));
+  s.erase(std::find_if(s.rbegin(), s.rend(), [](const unsigned char ch) {
+    return !std::isspace(ch);
+  }).base(), s.end());
+  return s;
 }
 
 #endif //STRINGCONSTANTS_H

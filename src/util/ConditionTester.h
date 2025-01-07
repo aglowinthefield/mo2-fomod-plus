@@ -10,6 +10,10 @@ public:
   explicit ConditionTester(DialogStateManager* stateManager) : mStateManager(stateManager) {}
   bool isStepVisible(const InstallStep& step) const;
 
+  bool testFlagDependency(const FlagDependency &flagDependency) const;
+
+  bool testFileDependency(const FileDependency &fileDependency) const;
+
 private:
   DialogStateManager* mStateManager;
   std::unordered_map<std::string, std::string> mFlags;
