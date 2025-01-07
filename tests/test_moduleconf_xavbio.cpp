@@ -61,3 +61,11 @@ TEST_F(ModuleConfigurationTest_Xavbio, SecondStepVisibleFlag) {
     EXPECT_EQ(moduleConfig.installSteps.installSteps[1].visible.dependencies.flagDependencies[0].flag, "1");
     EXPECT_EQ(moduleConfig.installSteps.installSteps[1].visible.dependencies.flagDependencies[0].value, "On");
 }
+
+TEST_F(ModuleConfigurationTest_Xavbio, ConditionFlag) {
+
+    const auto flags = moduleConfig.installSteps.installSteps[0].optionalFileGroups.groups[0].plugins.plugins[0].conditionFlags.flags;
+
+    EXPECT_EQ(flags[0].name, "1");
+    EXPECT_EQ(flags[0].value, "On");
+}

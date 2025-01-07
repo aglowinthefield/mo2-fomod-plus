@@ -23,7 +23,8 @@
  * @param modName 
  * @param tree
  * @param fomodPath
- * @param fomodFile 
+ * @param organizer
+ * @param fomodFile
  * @param infoFile 
  * @param parent 
  */

@@ -166,12 +166,29 @@ public:
   bool deserialize(pugi::xml_node &node) override;
 };
 
+// <flag name="2">On</flag>
+class ConditionFlag final : public XmlDeserializable {
+public:
+  std::string name;
+  std::string value;
+
+  bool deserialize(pugi::xml_node &node) override;
+};
+
+class ConditionFlagList final : public XmlDeserializable {
+public:
+  std::vector<ConditionFlag> flags;
+
+  bool deserialize(pugi::xml_node &node) override;
+};
+
 class Plugin final : public XmlDeserializable {
 public:
   std::string description;
   Image image;
   PluginTypeDescriptor typeDescriptor;
   std::string name;
+  ConditionFlagList conditionFlags;
 
   bool deserialize(pugi::xml_node &node) override;
 };

@@ -26,8 +26,14 @@ bool PluginType::deserialize(pugi::xml_node &node) {
   return true;
 }
 
+/*
+ * NOTE: We call 'trim()' on all error-prone fields that rely on user-input. I'm assuming these FOMODs are created with
+ * the FOMOD creation tool, so I won't trim things like flags that the tool sets for the user.
+ */
+
 bool FileDependency::deserialize(pugi::xml_node &node) {
   file = node.attribute("file").as_string();
+  trim(file);
   // ReSharper disable once CppTooWideScopeInitStatement
   // Do not use 'auto' for these. it will break equality checks
   const std::string stateStr = node.attribute("state").as_string();
@@ -47,6 +53,7 @@ bool FileDependency::deserialize(pugi::xml_node &node) {
 bool FlagDependency::deserialize(pugi::xml_node &node) {
   flag = node.attribute("flag").as_string();
   value = node.attribute("value").as_string();
+  trim({ flag, value });
   return true;
 }
 
@@ -133,6 +140,22 @@ bool FileList::deserialize(pugi::xml_node &node) {
   return true;
 }
 
+// <flag name="2">On</flag>
+bool ConditionFlag::deserialize(pugi::xml_node &node) {
+  name = node.attribute("name").as_string();
+  value = node.child_value(); //
+  return true;
+}
+
+bool ConditionFlagList::deserialize(pugi::xml_node &node) {
+  for (pugi::xml_node flagNode : node.children("flag")) {
+    ConditionFlag flag;
+    flag.deserialize(flagNode);
+    flags.emplace_back(flag);
+  }
+  return true;
+}
+
 bool File::deserialize(pugi::xml_node &node) {
   source = node.attribute("source").as_string();
   destination = node.attribute("destination").as_string();
@@ -144,11 +167,13 @@ bool File::deserialize(pugi::xml_node &node) {
 bool Plugin::deserialize(pugi::xml_node &node) {
   pugi::xml_node imageNode = node.child("image");
   pugi::xml_node typeDescriptorNode = node.child("typeDescriptor");
+  pugi::xml_node conditionFlagsNode = node.child("conditionFlags");
 
   description = node.child("description").text().as_string();
   image.deserialize(imageNode);
   typeDescriptor.deserialize(typeDescriptorNode);
   name = node.attribute("name").as_string();
+  conditionFlags.deserialize(conditionFlagsNode);
   return true;
 }
 

@@ -3,6 +3,8 @@
 #include <format>
 #include <pugixml.hpp>
 
+#include "../util/stringutil.h"
+
 bool FomodInfoFile::deserialize(const std::string &filePath) {
     pugi::xml_document doc;
     // ReSharper disable once CppTooWideScopeInitStatement
@@ -22,6 +24,8 @@ bool FomodInfoFile::deserialize(const std::string &filePath) {
     version = fomodNode.child("Version").text().as_string();
     website = fomodNode.child("Website").text().as_string();
     description = fomodNode.child("Description").text().as_string();
+
+    trim({name, author, version, website, description});
 
     for (pugi::xml_node groupNode : fomodNode.child("Groups").children("element")) {
         groups.emplace_back(groupNode.text().as_string());

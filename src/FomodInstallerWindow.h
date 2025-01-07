@@ -16,6 +16,8 @@
 #include <ui/ScaleLabel.h>
 
 #include "FomodInstallerWindow.h"
+#include "util/ConditionTester.h"
+#include "util/DialogStateManager.h"
 
 using namespace MOBase;
 
@@ -69,6 +71,8 @@ private:
   std::unique_ptr<ModuleConfiguration> mFomodFile;
   std::unique_ptr<FomodInfoFile> mInfoFile;
   IOrganizer* mOrganizer;
+  DialogStateManager mStateManager{mOrganizer};
+  ConditionTester mConditionTester{&mStateManager};
 
   // Meta
   bool mIsManualInstall{};
