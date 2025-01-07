@@ -45,14 +45,24 @@ FomodInstallerWindow::FomodInstallerWindow(InstallerFomodPlus *installer, const 
   const auto containerLayout = createContainerLayout();
   setLayout(containerLayout);
 
+  updateButtons();
 }
 
 void FomodInstallerWindow::onNextClicked() {
+  log::debug("Total stack widget count: {}",  mInstallStepStack->count());
   if (mCurrentStepIndex < mInstallStepStack->count() - 1) {
+    log::debug("Transitioning from step index {}",  mCurrentStepIndex);
+
+    // TODO: Check visibility condition for the next step
     mCurrentStepIndex++;
+    log::debug("Current step: {}",  mCurrentStepIndex);
     mInstallStepStack->setCurrentIndex(mCurrentStepIndex);
+
     updateButtons();
     updateDisplayForActivePlugin(mFomodFile->getFirstPluginForStepIndex(mCurrentStepIndex));
+  } else if (mCurrentStepIndex == mInstallStepStack->count() - 1) {
+    log::debug("Last step reached. Accepting dialog.");
+    this->accept();
   }
 }
 
@@ -65,7 +75,19 @@ void FomodInstallerWindow::onBackClicked() {
   }
 }
 
-void FomodInstallerWindow::updateButtons() {
+void FomodInstallerWindow::updateButtons() const {
+  // TODO: Is this annoying to set every time even if it's already enabled? I hate to waste cycles but it's probably trivial.
+  if (mCurrentStepIndex == 0) {
+    mBackButton->setEnabled(false);
+  } else {
+    mBackButton->setEnabled(true);
+  }
+
+  if (mCurrentStepIndex == mInstallStepStack->count() - 1) {
+    mNextInstallButton->setText("Install");
+  } else {
+    mNextInstallButton->setText("Next");
+  }
 }
 
 void FomodInstallerWindow::setupUi() {

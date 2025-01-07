@@ -72,11 +72,11 @@ private:
   bool mIsManualInstall{};
 
   // Buttons
-  QWidget* mNextInstallButton{};
-  QWidget* mBackButton{};
-  QWidget* mCancelButton{};
-  QWidget* mManualButton{};
-  void updateButtons();
+  QPushButton* mNextInstallButton{};
+  QPushButton* mBackButton{};
+  QPushButton* mCancelButton{};
+  QPushButton* mManualButton{};
+  void updateButtons() const;
 
   // Widgets
   QStackedWidget* mInstallStepStack{};
