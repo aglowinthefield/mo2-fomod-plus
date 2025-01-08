@@ -54,20 +54,42 @@ FomodInstallerWindow::FomodInstallerWindow(
   const auto containerLayout = createContainerLayout();
   setLayout(containerLayout);
 
+  updateNextVisibleStepIndex();
   updateButtons();
 }
 
 void FomodInstallerWindow::onNextClicked() {
-  if (mCurrentStepIndex < mInstallStepStack->count() - 1) {
+  updateNextVisibleStepIndex();
+  if (mCurrentStepIndex < mNextStepIndex) {
     // TODO: Check visibility condition for the next step
-    mCurrentStepIndex++;
     mInstallStepStack->setCurrentIndex(mCurrentStepIndex);
 
     updateButtons();
     updateDisplayForActivePlugin(mFomodFile->getFirstPluginForStepIndex(mCurrentStepIndex));
-  } else if (mCurrentStepIndex == mInstallStepStack->count() - 1) {
+  } else if (mCurrentStepIndex == mNextStepIndex) {
     onInstallClicked();
   }
+}
+
+// Call in constructor and any time a flag changes or page is turned
+void FomodInstallerWindow::updateNextVisibleStepIndex() {
+  const int maxPossibleIndex = mInstallStepStack->count() - 1;
+  int nextIndex = mCurrentStepIndex + 1;
+  if (nextIndex > maxPossibleIndex) {
+    mNextStepIndex = mCurrentStepIndex;
+    return;
+  }
+
+
+  // TODO: This "sort of" works. It will always show install until we auto-select the first option for SelectX
+  while (!mConditionTester.isStepVisible(mFomodFile->installSteps.installSteps[nextIndex])) {
+    nextIndex++;
+    if (nextIndex > maxPossibleIndex) {
+      mNextStepIndex = mCurrentStepIndex;
+      return;
+    }
+  }
+  mNextStepIndex = nextIndex;
 }
 
 void FomodInstallerWindow::onBackClicked() {
@@ -87,7 +109,7 @@ void FomodInstallerWindow::updateButtons() const {
     mBackButton->setEnabled(true);
   }
 
-  if (mCurrentStepIndex == mInstallStepStack->count() - 1) {
+  if (mCurrentStepIndex == mNextStepIndex) {
     mNextInstallButton->setText("Install");
   } else {
     mNextInstallButton->setText("Next");
@@ -357,7 +379,6 @@ QWidget* FomodInstallerWindow::createStepWidget(const InstallStep& installStep) 
 
 QWidget* FomodInstallerWindow::renderGroup(const Group& group) {
   const auto groupBox = new QGroupBox(QString::fromStdString(group.name), this);
-
   const auto groupBoxLayout = new QVBoxLayout(groupBox);
 
   switch (group.type) {

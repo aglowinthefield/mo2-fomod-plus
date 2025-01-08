@@ -1,11 +1,21 @@
 ﻿#include "ModuleConfiguration.h"
+
+#include <windows.h>
 #include <format>
+#include <sstream>
+
 #include "../util/stringutil.h"
 #include "XmlParseException.h"
 #include "XmlHelper.h"
 // #include <QDir>
 
 using namespace StringConstants::FomodFiles;
+void debugPrint(const std::string& message) {
+  std::wstring wmessage(message.begin(), message.end());
+  OutputDebugString(wmessage.c_str());
+}
+
+
 
 static GroupTypeEnum groupTypeFromString(const std::string &groupType) {
   if (groupType == "SelectAny") return SelectAny;
@@ -38,9 +48,6 @@ bool FileDependency::deserialize(pugi::xml_node &node) {
   // Do not use 'auto' for these. it will break equality checks
   const std::string stateStr = node.attribute("state").as_string();
 
-  // TODO: Do we want to initialize this in case it's missing? I doubt this would happen.
-  std::cout << "stateStr: '" << stateStr << "'" << std::endl; // Debug print
-
   if (stateStr == "Missing")
     state = FileDependencyTypeEnum::Missing;
   else if (stateStr == "Inactive")
@@ -63,11 +70,14 @@ bool CompositeDependency::deserialize(pugi::xml_node &node) {
     fileDep.deserialize(fileNode);
     fileDependencies.push_back(fileDep);
   }
+  std::cout << "Number of fileDependencies: " << fileDependencies.size() << std::endl;
+
   for (pugi::xml_node flagNode: node.children("flagDependency")) {
     FlagDependency flagDep;
     flagDep.deserialize(flagNode);
     flagDependencies.push_back(flagDep);
   }
+  std::cout << "Number of flagDependencies: " << flagDependencies.size() << std::endl;
 
   const std::string operatorStr = node.attribute("operator").as_string();
   if (operatorStr == "And") operatorType = OperatorTypeEnum::AND;
@@ -125,17 +135,13 @@ bool HeaderImage::deserialize(pugi::xml_node &node) {
 }
 
 bool FileList::deserialize(pugi::xml_node &node) {
-  for (pugi::xml_node fileNode: node.children("file")) {
-    File file;
-    file.deserialize(fileNode);
-    files.push_back(file);
-  }
-
-  // TODO: Is this the best way to handle folders? Should work for now but we'll see.
-  for (pugi::xml_node fileNode: node.children("folder")) {
-    File file;
-    file.deserialize(fileNode);
-    files.push_back(file);
+  for (pugi::xml_node childNode : node.children()) {
+    if (std::string(childNode.name()) == "folder"
+      || std::string(childNode.name()) == "file") {
+      File file;
+      file.deserialize(childNode);
+      files.emplace_back(file);
+    }
   }
   return true;
 }

@@ -39,7 +39,7 @@ void ScaleLabel::setStatic(bool isStatic)
 {
   misStatic = isStatic;
 
-  if (auto m = movie()) {
+  if (const auto m = movie()) {
     if (isStatic) {
       m->stop();
     } else {
@@ -50,7 +50,7 @@ void ScaleLabel::setStatic(bool isStatic)
 
 void ScaleLabel::setScalableMovie(const QString& path)
 {
-  QMovie* m = new QMovie(path);
+  const auto m = new QMovie(path);
   if (!m->isValid()) {
     qWarning(">%s< is an invalid movie. Reason: %s", qUtf8Printable(path),
              m->lastErrorString().toStdString().c_str());
@@ -72,8 +72,7 @@ void ScaleLabel::setScalableMovie(const QString& path)
 
 void ScaleLabel::setScalableImage(const QString& path)
 {
-  QImage image(path);
-  if (image.isNull()) {
+  if (QImage image(path); image.isNull()) {
     qWarning(">%s< is a null image", qUtf8Printable(path));
   } else {
     mUnscaledImage = image;
@@ -83,7 +82,7 @@ void ScaleLabel::setScalableImage(const QString& path)
 
 void ScaleLabel::resizeEvent(QResizeEvent* event)
 {
-  if (auto m = movie()) {
+  if (const auto m = movie()) {
     m->stop();
     m->setScaledSize(mOriginalMovieSize.scaled(event->size(), Qt::KeepAspectRatio));
     m->start();
@@ -95,8 +94,7 @@ void ScaleLabel::resizeEvent(QResizeEvent* event)
       m->stop();
     }
   }
-  auto p = pixmap();
-  if (!p.isNull()) {
+  if (auto p = pixmap(); !p.isNull()) {
     setPixmap(
         QPixmap::fromImage(mUnscaledImage).scaled(event->size(), Qt::KeepAspectRatio));
   }

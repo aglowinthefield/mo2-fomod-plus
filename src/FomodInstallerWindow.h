@@ -58,6 +58,9 @@ public:
 
 private slots:
   void onNextClicked();
+
+  void updateNextVisibleStepIndex();
+
   void onBackClicked();
   void onInstallClicked() { this->accept(); }
   void onCancelClicked() { this->reject(); }
@@ -90,6 +93,7 @@ private:
   QTextEdit* mDescriptionBox{};
   ScaleLabel* mImageLabel{};
   int mCurrentStepIndex{};
+  int mNextStepIndex{};
 
   // Fn
   void setupUi();

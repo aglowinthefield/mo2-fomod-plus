@@ -240,7 +240,7 @@ public:
   std::string moduleName;
   HeaderImage moduleImage;
   CompositeDependency moduleDependencies;
-  PluginList requiredInstallFiles;
+  FileList requiredInstallFiles;
   StepList installSteps;
 
   bool deserialize(const std::string &filePath);

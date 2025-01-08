@@ -2,6 +2,7 @@
 add_library(fomod_plus SHARED)
 set_property(TARGET fomod_plus PROPERTY CXX_STANDARD 20)
 
+set(CMAKE_GENERATOR_PLATFORM x64)
 target_include_directories(
         fomod_plus
         PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
