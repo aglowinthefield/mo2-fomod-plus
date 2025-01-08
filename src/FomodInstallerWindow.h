@@ -74,8 +74,7 @@ private:
   std::unique_ptr<ModuleConfiguration> mFomodFile;
   std::unique_ptr<FomodInfoFile> mInfoFile;
   IOrganizer* mOrganizer;
-  DialogStateManager mStateManager{mOrganizer};
-  ConditionTester mConditionTester{&mStateManager};
+  DialogStateManager mStateManager{mOrganizer, (std::move(mFomodFile))};
 
   // Meta
   bool mIsManualInstall{};

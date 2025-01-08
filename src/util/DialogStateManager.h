@@ -4,27 +4,27 @@
 #include <string>
 #include <unordered_map>
 
-#include "xml/ModuleConfiguration.h"
-
-// I have some sort of aversion to all the ::. Maybe I have that tiny hole phobia lol
-using std::string;
-using std::unordered_map;
+#include "FlagMap.h"
+#include "ConditionTester.h"
 
 class DialogStateManager {
 public:
-  // TODO: Maybe we can limit the scope of what this state manager pulls in.
-  explicit DialogStateManager(MOBase::IOrganizer* organizer) : mOrganizer(organizer) {}
+  explicit DialogStateManager(MOBase::IOrganizer* organizer, std::unique_ptr<ModuleConfiguration> fomodFile)
+  : mOrganizer(organizer),
+    mFomodFile(std::move(fomodFile)) {
+    mConditionTester = new ConditionTester(organizer);
+  }
 
-  void setFlag(const string& flag, const string& value);
-  [[nodiscard]] string getFlag(const string& flag) const;
+  bool isStepVisible(const InstallStep &step);
 
-  FileDependencyTypeEnum getFileDependencyStateForPlugin(const string& pluginName) const;
-
-  MOBase::IOrganizer* getOrganizer() const { return mOrganizer; }
+  void setFlag(const std::string &flag, const std::string &value);
+  std::string getFlag(const std::string &flag);
 
 private:
   MOBase::IOrganizer* mOrganizer;
-  unordered_map<string, string> mFlags;
+  std::unique_ptr<ModuleConfiguration> mFomodFile;
+  FlagMap mFlags;
+  ConditionTester* mConditionTester;
 };
 
 

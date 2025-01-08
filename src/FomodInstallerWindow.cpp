@@ -61,7 +61,6 @@ FomodInstallerWindow::FomodInstallerWindow(
 void FomodInstallerWindow::onNextClicked() {
   updateNextVisibleStepIndex();
   if (mCurrentStepIndex < mNextStepIndex) {
-    // TODO: Check visibility condition for the next step
     mInstallStepStack->setCurrentIndex(mCurrentStepIndex);
 
     updateButtons();
@@ -82,7 +81,7 @@ void FomodInstallerWindow::updateNextVisibleStepIndex() {
   }
 
   // TODO: This "sort of" works. It will always show install until we auto-select the first option for SelectX
-  while (!mConditionTester.isStepVisible(mFomodFile->installSteps.installSteps[nextIndex])) {
+  while (!mStateManager.isStepVisible(mFomodFile->installSteps.installSteps[nextIndex])) {
     nextIndex++;
     if (nextIndex > maxPossibleIndex) {
       mNextStepIndex = mCurrentStepIndex;
@@ -102,7 +101,6 @@ void FomodInstallerWindow::onBackClicked() {
 }
 
 void FomodInstallerWindow::updateButtons() const {
-  // TODO: Is this annoying to set every time even if it's already enabled? I hate to waste cycles but it's probably trivial.
   if (mCurrentStepIndex == 0) {
     mBackButton->setEnabled(false);
   } else {
