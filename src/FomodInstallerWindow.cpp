@@ -75,11 +75,11 @@ void FomodInstallerWindow::onNextClicked() {
 void FomodInstallerWindow::updateNextVisibleStepIndex() {
   const int maxPossibleIndex = mInstallStepStack->count() - 1;
   int nextIndex = mCurrentStepIndex + 1;
+  // for single-page FOMODs
   if (nextIndex > maxPossibleIndex) {
     mNextStepIndex = mCurrentStepIndex;
     return;
   }
-
 
   // TODO: This "sort of" works. It will always show install until we auto-select the first option for SelectX
   while (!mConditionTester.isStepVisible(mFomodFile->installSteps.installSteps[nextIndex])) {

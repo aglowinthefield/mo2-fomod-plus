@@ -1,21 +1,12 @@
 ﻿#include "ModuleConfiguration.h"
 
-#include <windows.h>
 #include <format>
-#include <sstream>
 
 #include "../util/stringutil.h"
 #include "XmlParseException.h"
 #include "XmlHelper.h"
-// #include <QDir>
 
 using namespace StringConstants::FomodFiles;
-void debugPrint(const std::string& message) {
-  std::wstring wmessage(message.begin(), message.end());
-  OutputDebugString(wmessage.c_str());
-}
-
-
 
 static GroupTypeEnum groupTypeFromString(const std::string &groupType) {
   if (groupType == "SelectAny") return SelectAny;
@@ -33,6 +24,16 @@ bool PluginType::deserialize(pugi::xml_node &node) {
   else if (typeStr == TYPE_RECOMMENDED)     name = PluginTypeEnum::Recommended;
   else if (typeStr == TYPE_NOT_USABLE)      name = PluginTypeEnum::NotUsable;
   else if (typeStr == TYPE_COULD_BE_USABLE) name = PluginTypeEnum::CouldBeUsable;
+  return true;
+}
+
+template <typename T>
+bool deserializeList(pugi::xml_node &node, const char* childName, std::vector<T> &list) {
+  for (pugi::xml_node childNode : node.children(childName)) {
+    T item;
+    item.deserialize(childNode);
+    list.push_back(item);
+  }
   return true;
 }
 
@@ -65,19 +66,8 @@ bool FlagDependency::deserialize(pugi::xml_node &node) {
 }
 
 bool CompositeDependency::deserialize(pugi::xml_node &node) {
-  for (pugi::xml_node fileNode: node.children("fileDependency")) {
-    FileDependency fileDep;
-    fileDep.deserialize(fileNode);
-    fileDependencies.push_back(fileDep);
-  }
-  std::cout << "Number of fileDependencies: " << fileDependencies.size() << std::endl;
-
-  for (pugi::xml_node flagNode: node.children("flagDependency")) {
-    FlagDependency flagDep;
-    flagDep.deserialize(flagNode);
-    flagDependencies.push_back(flagDep);
-  }
-  std::cout << "Number of flagDependencies: " << flagDependencies.size() << std::endl;
+  deserializeList(node, "fileDependency", fileDependencies);
+  deserializeList(node, "flagDependency", flagDependencies);
 
   const std::string operatorStr = node.attribute("operator").as_string();
   if (operatorStr == "And") operatorType = OperatorTypeEnum::AND;
@@ -96,12 +86,7 @@ bool DependencyPattern::deserialize(pugi::xml_node &node) {
 }
 
 bool DependencyPatternList::deserialize(pugi::xml_node &node) {
-  for (pugi::xml_node patternNode: node.children("pattern")) {
-    DependencyPattern pattern;
-    pattern.deserialize(patternNode);
-    patterns.push_back(pattern);
-  }
-  return true;
+  return deserializeList(node, "pattern" ,patterns);
 }
 
 bool DependencyPluginType::deserialize(pugi::xml_node &node) {
@@ -154,12 +139,7 @@ bool ConditionFlag::deserialize(pugi::xml_node &node) {
 }
 
 bool ConditionFlagList::deserialize(pugi::xml_node &node) {
-  for (pugi::xml_node flagNode : node.children("flag")) {
-    ConditionFlag flag;
-    flag.deserialize(flagNode);
-    flags.emplace_back(flag);
-  }
-  return true;
+  return deserializeList(node, "flag", flags);
 }
 
 bool File::deserialize(pugi::xml_node &node) {
@@ -184,11 +164,7 @@ bool Plugin::deserialize(pugi::xml_node &node) {
 }
 
 bool PluginList::deserialize(pugi::xml_node &node) {
-  for (pugi::xml_node pluginNode: node.children("plugin")) {
-    Plugin plugin;
-    plugin.deserialize(pluginNode);
-    plugins.push_back(plugin);
-  }
+  deserializeList(node, "plugin", plugins);
   order = XmlHelper::getOrderType(node.attribute("order").as_string());
   return true;
 }
@@ -202,11 +178,7 @@ bool Group::deserialize(pugi::xml_node &node) {
 }
 
 bool GroupList::deserialize(pugi::xml_node &node) {
-  for (pugi::xml_node groupNode: node.children("group")) {
-    Group group;
-    group.deserialize(groupNode);
-    groups.push_back(group);
-  }
+  deserializeList(node, "group", groups);
   order = XmlHelper::getOrderType(node.attribute("order").as_string());
   return true;
 }
@@ -221,11 +193,7 @@ bool InstallStep::deserialize(pugi::xml_node &node) {
 }
 
 bool StepList::deserialize(pugi::xml_node &node) {
-  for (pugi::xml_node stepNode: node.children("installStep")) {
-    InstallStep step;
-    step.deserialize(stepNode);
-    installSteps.push_back(step);
-  }
+  deserializeList(node, "installStep", installSteps);
   order = XmlHelper::getOrderType(node.attribute("order").as_string());
   return true;
 }
