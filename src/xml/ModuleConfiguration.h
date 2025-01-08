@@ -15,6 +15,12 @@ protected:
   XmlDeserializable() = default;
 };
 
+class Interactable {
+public:
+  bool selected = false;
+  bool disabled = false;
+};
+
 enum GroupTypeEnum {
   SelectAny,
   SelectAll,
@@ -189,6 +195,7 @@ public:
   PluginTypeDescriptor typeDescriptor;
   std::string name;
   ConditionFlagList conditionFlags;
+  FileList files;
 
   bool deserialize(pugi::xml_node &node) override;
 };

@@ -56,4 +56,10 @@ TEST_F(ModuleConfPrecision, PatternDependencies) {
     EXPECT_EQ(pattern.dependencies.fileDependencies[2].state, FileDependencyTypeEnum::Active);
     EXPECT_EQ(pattern.dependencies.fileDependencies[3].file, "UltimateCombat.esp");
     EXPECT_EQ(pattern.dependencies.fileDependencies[3].state, FileDependencyTypeEnum::Inactive);
+    // <files>
+    //     <folder source="Compatibility\TK Dodge Ultimate Combat" destination="Nemesis_Engine" priority="0" />
+    // </files>
+    EXPECT_EQ(tkDodge.files.files[0].source, "Compatibility\\TK Dodge Ultimate Combat");
+    EXPECT_EQ(tkDodge.files.files[0].destination, "Nemesis_Engine");
+    EXPECT_EQ(tkDodge.files.files[0].priority, 0);
 }

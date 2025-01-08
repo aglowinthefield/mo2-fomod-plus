@@ -154,12 +154,14 @@ bool Plugin::deserialize(pugi::xml_node &node) {
   pugi::xml_node imageNode = node.child("image");
   pugi::xml_node typeDescriptorNode = node.child("typeDescriptor");
   pugi::xml_node conditionFlagsNode = node.child("conditionFlags");
+  pugi::xml_node filesNode = node.child("files");
 
   description = node.child("description").text().as_string();
   image.deserialize(imageNode);
   typeDescriptor.deserialize(typeDescriptorNode);
   name = node.attribute("name").as_string();
   conditionFlags.deserialize(conditionFlagsNode);
+  files.deserialize(filesNode);
   return true;
 }
 
