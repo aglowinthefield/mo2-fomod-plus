@@ -9,18 +9,23 @@
 
 class ConditionTester {
 public:
-  bool isStepVisible(FlagMap &flags, const InstallStep &step) const;
+  explicit ConditionTester(MOBase::IOrganizer* organizer) : mOrganizer(organizer) {}
 
-  static bool testFlagDependency(FlagMap &flags, const FlagDependency &flagDependency);
-  bool testFileDependency(const FileDependency &fileDependency) const;
+  bool testCompositeDependency(const FlagMap &flags, const CompositeDependency &compositeDependency) const;
+
+  bool isStepVisible(const FlagMap &flags, const InstallStep &step) const;
+
+  static bool testFlagDependency(FlagMap flags, const FlagDependency &flagDependency);
+  [[nodiscard]] bool testFileDependency(const FileDependency &fileDependency) const;
 
 private:
-  explicit ConditionTester(MOBase::IOrganizer* organizer) : mOrganizer(organizer) {}
   MOBase::IOrganizer* mOrganizer;
 
-  friend class DialogStateManager;
+  friend class FomodViewModel;
 
-  FileDependencyTypeEnum getFileDependencyStateForPlugin(const std::string& pluginName) const;
+  [[nodiscard]] FileDependencyTypeEnum getFileDependencyStateForPlugin(const std::string& pluginName) const;
+
+  PluginTypeEnum getPluginTypeDescriptorState(const Plugin &plugin, const FlagMap &flags) const;
 };
 
 

@@ -16,8 +16,7 @@
 #include <ui/ScaleLabel.h>
 
 #include "FomodInstallerWindow.h"
-#include "util/ConditionTester.h"
-#include "util/DialogStateManager.h"
+#include "ui/FomodViewModel.h"
 
 using namespace MOBase;
 
@@ -44,10 +43,8 @@ public:
   FomodInstallerWindow(InstallerFomodPlus *installer,
                        const GuessedValue<QString> &modName,
                        const std::shared_ptr<IFileTree> &tree,
-                       QString fomodPath,
-                       IOrganizer* organizer,
-                       std::unique_ptr<ModuleConfiguration> fomodFile,
-                       std::unique_ptr<FomodInfoFile> infoFile,
+                       const QString &fomodPath,
+                       const std::shared_ptr<FomodViewModel> &viewModel,
                        QWidget *parent = nullptr);
 
 
@@ -61,7 +58,7 @@ private slots:
 
   void updateNextVisibleStepIndex();
 
-  void onBackClicked();
+  void onBackClicked() const;
   void onInstallClicked() { this->accept(); }
   void onCancelClicked() { this->reject(); }
   void onManualClicked() { mIsManualInstall = true; this->reject(); }
@@ -71,10 +68,7 @@ private:
   QString mFomodPath;
   GuessedValue<QString> mModName;
   std::shared_ptr<IFileTree> mTree;
-  std::unique_ptr<ModuleConfiguration> mFomodFile;
-  std::unique_ptr<FomodInfoFile> mInfoFile;
-  IOrganizer* mOrganizer;
-  DialogStateManager mStateManager{mOrganizer, (std::move(mFomodFile))};
+  std::shared_ptr<FomodViewModel> mViewModel;
 
   // Meta
   bool mIsManualInstall{};
@@ -91,13 +85,11 @@ private:
   QWidget* mLeftPane{};
   QTextEdit* mDescriptionBox{};
   ScaleLabel* mImageLabel{};
-  int mCurrentStepIndex{};
-  int mNextStepIndex{};
 
   // Fn
   void setupUi();
   void updateInstallStepStack();
-  void updateDisplayForActivePlugin(const Plugin &plugin) const;
+  void updateDisplayForActivePlugin() const;
 
   [[nodiscard]] QBoxLayout* createContainerLayout();
   [[nodiscard]] QWidget*    createCenterRow();
@@ -106,13 +98,13 @@ private:
   [[nodiscard]] QWidget*    createBottomRow();
   [[nodiscard]] QWidget*    createLeftPane();
   [[nodiscard]] QWidget*    createRightPane();
-  [[nodiscard]] QWidget*    createStepWidget(const InstallStep& installStep);
-  [[nodiscard]] QWidget*    renderGroup(const Group &group);
+  [[nodiscard]] QWidget*    createStepWidget(const StepViewModel &installStep);
+  [[nodiscard]] QWidget*    renderGroup(const GroupViewModel *group);
 
-  static QButtonGroup *renderSelectExactlyOne(QWidget *parent, QLayout *parentLayout, const Group &group);
+  static QButtonGroup *renderSelectExactlyOne(QWidget *parent, QLayout *parentLayout, const GroupViewModel &group);
 
-  static void renderSelectAtMostOne(QWidget *parent, QLayout *parentLayout, const Group &group);
-  static void renderSelectAny(QWidget *parent, QLayout *parentLayout, const Group &group);
+  static void renderSelectAtMostOne(QWidget *parent, QLayout *parentLayout, const GroupViewModel &group);
+  static void renderSelectAny(QWidget *parent, QLayout *parentLayout, const GroupViewModel &group);
 };
 
 

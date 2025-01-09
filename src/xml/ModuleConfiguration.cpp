@@ -230,6 +230,14 @@ bool ModuleConfiguration::deserialize(const std::string &filePath) {
   return true;
 }
 
+ModuleConfiguration::ModuleConfiguration() {
+  std::cout << "ModuleConfiguration constructor called" << std::endl;
+}
+
+ModuleConfiguration::~ModuleConfiguration() {
+  std::cout << "ModuleConfiguration destructor called" << std::endl;
+}
+
 Plugin ModuleConfiguration::getFirstPluginForStepIndex(const int index) {
   if (installSteps.installSteps.empty() ||
     installSteps.installSteps.at(index).optionalFileGroups.groups.empty() ||

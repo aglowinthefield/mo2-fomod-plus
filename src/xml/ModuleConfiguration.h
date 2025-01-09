@@ -15,12 +15,6 @@ protected:
   XmlDeserializable() = default;
 };
 
-class Interactable {
-public:
-  bool selected = false;
-  bool disabled = false;
-};
-
 enum GroupTypeEnum {
   SelectAny,
   SelectAll,
@@ -251,6 +245,10 @@ public:
   StepList installSteps;
 
   bool deserialize(const std::string &filePath);
+
+  ModuleConfiguration();
+
+  ~ModuleConfiguration();
 
   [[nodiscard]] Plugin getFirstPluginForStepIndex(int index);
   [[nodiscard]] std::string getImageForPlugin(const Plugin &plugin) const;

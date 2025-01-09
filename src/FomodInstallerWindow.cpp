@@ -17,33 +17,30 @@
 #include <QScrollArea>
 #include <utility>
 
+#include "ui/FomodViewModel.h"
+
 /**
  * 
  * @param installer 
  * @param modName 
  * @param tree
  * @param fomodPath
- * @param organizer
- * @param fomodFile
- * @param infoFile 
- * @param parent 
+ * @param viewModel
+ * @param parent
  */
 FomodInstallerWindow::FomodInstallerWindow(
   InstallerFomodPlus *installer,
   const GuessedValue<QString> &modName,
   const std::shared_ptr<IFileTree> &tree,
-  QString fomodPath,
-  IOrganizer* organizer,
-  std::unique_ptr<ModuleConfiguration> fomodFile,
-  std::unique_ptr<FomodInfoFile> infoFile,
+  const QString &fomodPath,
+  const std::shared_ptr<FomodViewModel> &viewModel,
   QWidget *parent): QDialog(parent),
                                                      mInstaller(installer),
-                                                     mFomodPath(std::move(fomodPath)),
+                                                     mFomodPath(fomodPath),
                                                      mModName(modName),
                                                      mTree(tree),
-                                                     mFomodFile(std::move(fomodFile)),
-                                                     mInfoFile(std::move(infoFile)),
-                                                     mOrganizer(organizer) {
+                                                     mViewModel(viewModel)
+                                                      {
 
   setupUi();
 
@@ -60,12 +57,12 @@ FomodInstallerWindow::FomodInstallerWindow(
 
 void FomodInstallerWindow::onNextClicked() {
   updateNextVisibleStepIndex();
-  if (mCurrentStepIndex < mNextStepIndex) {
-    mInstallStepStack->setCurrentIndex(mCurrentStepIndex);
-
+  if (mViewModel->getCurrentStepIndex() < mNextStepIndex) {
+    mViewModel->setCurrentStepIndex(mNextStepIndex);
+    mInstallStepStack->setCurrentIndex(mViewModel->getCurrentStepIndex());
     updateButtons();
-    updateDisplayForActivePlugin(mFomodFile->getFirstPluginForStepIndex(mCurrentStepIndex));
-  } else if (mCurrentStepIndex == mNextStepIndex) {
+    updateDisplayForActivePlugin();
+  } else if (mViewModel->getCurrentStepIndex() == mNextStepIndex) {
     onInstallClicked();
   }
 }
@@ -73,41 +70,30 @@ void FomodInstallerWindow::onNextClicked() {
 // Call in constructor and any time a flag changes or page is turned
 void FomodInstallerWindow::updateNextVisibleStepIndex() {
   const int maxPossibleIndex = mInstallStepStack->count() - 1;
-  int nextIndex = mCurrentStepIndex + 1;
-  // for single-page FOMODs
-  if (nextIndex > maxPossibleIndex) {
-    mNextStepIndex = mCurrentStepIndex;
-    return;
+  int nextIndex = mViewModel->getCurrentStepIndex() + 1;
+
+  while (nextIndex <= maxPossibleIndex && !mViewModel->isStepVisible(nextIndex)) {
+    nextIndex++;
   }
 
-  // TODO: This "sort of" works. It will always show install until we auto-select the first option for SelectX
-  while (!mStateManager.isStepVisible(mFomodFile->installSteps.installSteps[nextIndex])) {
-    nextIndex++;
-    if (nextIndex > maxPossibleIndex) {
-      mNextStepIndex = mCurrentStepIndex;
-      return;
-    }
-  }
-  mNextStepIndex = nextIndex;
+  mNextStepIndex = (nextIndex > maxPossibleIndex) ? mViewModel->getCurrentStepIndex() : nextIndex;
 }
 
-void FomodInstallerWindow::onBackClicked() {
-  if (mCurrentStepIndex > 0) {
-    mCurrentStepIndex--;
-    mInstallStepStack->setCurrentIndex(mCurrentStepIndex);
-    updateButtons();
-    updateDisplayForActivePlugin(mFomodFile->getFirstPluginForStepIndex(mCurrentStepIndex));
-  }
+void FomodInstallerWindow::onBackClicked() const {
+  mViewModel->onBackPressed();
+  mInstallStepStack->setCurrentIndex(mViewModel->getCurrentStepIndex());
+  updateButtons();
+  updateDisplayForActivePlugin();
 }
 
 void FomodInstallerWindow::updateButtons() const {
-  if (mCurrentStepIndex == 0) {
+  if (mViewModel->getCurrentStepIndex() == 0) {
     mBackButton->setEnabled(false);
   } else {
     mBackButton->setEnabled(true);
   }
 
-  if (mCurrentStepIndex == mNextStepIndex) {
+  if (mViewModel->getCurrentStepIndex() == mNextStepIndex) {
     mNextInstallButton->setText("Install");
   } else {
     mNextInstallButton->setText("Next");
@@ -126,22 +112,11 @@ void FomodInstallerWindow::updateInstallStepStack() {
     log::error("updateInstallStepStack called with no initialized mInstallStepStack. tf?");
     return;
   }
-
-  auto& steps = mFomodFile->installSteps; // TODO: Evaluate if we want to copy this array instead.
-  auto compare = [&steps](const InstallStep &a, const InstallStep &b) {
-    return steps.compare(a, b, [](const InstallStep& step) { return step.name; });
-  };
-
-  // I'm not sure if any modern FOMODs use anything other than Explicit, but hey, it's there.
-  if (steps.order != OrderTypeEnum::Explicit) {
-    ranges::sort(steps.installSteps, compare);
-  }
-
   // Create the widgets for each step. Not sure if we need these as member variables. Try it like this for now.
-  for (const auto& installStep : steps.installSteps) {
+  for (const auto& steps = mViewModel->getSteps(); const auto& installStep : steps) {
     mInstallStepStack->addWidget(createStepWidget(installStep));
   }
-  mInstallStepStack->setCurrentIndex(mCurrentStepIndex);
+  mInstallStepStack->setCurrentIndex(mViewModel->getCurrentStepIndex());
 }
 
 /*
@@ -180,14 +155,14 @@ QBoxLayout *FomodInstallerWindow::createContainerLayout() {
   const auto topRow = createTopRow();
   layout->addWidget(topRow);
 
-  // middle area takes up the bulk of space. maybe 5x the size of the top row
-  const auto centerRow = createCenterRow();
-  layout->addWidget(centerRow, 1); // stretch 1 here so the others are static size
-
-  // bottom row
-  const auto bottomRow = createBottomRow();
-  layout->addWidget(bottomRow);
-
+  // // middle area takes up the bulk of space. maybe 5x the size of the top row
+  // const auto centerRow = createCenterRow();
+  // layout->addWidget(centerRow, 1); // stretch 1 here so the others are static size
+  //
+  // // bottom row
+  // const auto bottomRow = createBottomRow();
+  // layout->addWidget(bottomRow);
+  //
   // any extra layout setup :)
   // UIHelper::setDebugBorders(this);
   return layout;
@@ -246,9 +221,10 @@ QWidget* FomodInstallerWindow::createTopRow() {
   // the values of the metadata MINUS the search box
   auto* valuesColumn = new QVBoxLayout();
   QLabel* emptyLabel        = UIHelper::createLabel("", topRow);
-  QLabel* authorValueLabel  = UIHelper::createLabel(mInfoFile->getAuthor().c_str(), topRow);
-  QLabel* versionValueLabel = UIHelper::createLabel(mInfoFile->getVersion().c_str(), topRow);
-  QLabel* websiteValueLabel = UIHelper::createHyperlink(mInfoFile->getWebsite().c_str(), topRow);
+  // TODO Maybe these should have getters. idc at this point
+  QLabel* authorValueLabel  = UIHelper::createLabel(mViewModel->getInfoViewModel().getAuthor().c_str(), topRow);
+  QLabel* versionValueLabel = UIHelper::createLabel(mViewModel->getInfoViewModel().getVersion().c_str(), topRow);
+  QLabel* websiteValueLabel = UIHelper::createHyperlink(mViewModel->getInfoViewModel().getWebsite().c_str(), topRow);
 
   valuesColumn->addWidget(emptyLabel);
   valuesColumn->addWidget(authorValueLabel);
@@ -325,8 +301,6 @@ QWidget* FomodInstallerWindow::createLeftPane() {
   const auto leftPane = new QWidget(this);
   auto* layout = new QVBoxLayout(leftPane);
 
-  const auto firstPlugin = mFomodFile->getFirstPluginForStepIndex(0);
-
   // Add description box
   // Initialize with defaults (the first plugin's description (which defaults to the module image otherwise))
   mDescriptionBox = new QTextEdit("", leftPane);
@@ -338,7 +312,7 @@ QWidget* FomodInstallerWindow::createLeftPane() {
   mImageLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   layout->addWidget(mImageLabel);
 
-  updateDisplayForActivePlugin(firstPlugin);
+  updateDisplayForActivePlugin();
 
   return leftPane;
 }
@@ -352,8 +326,8 @@ QWidget* FomodInstallerWindow::createRightPane() {
   return rightPane;
 }
 
-QWidget* FomodInstallerWindow::createStepWidget(const InstallStep& installStep) {
-  const auto stepBox = new QGroupBox(QString::fromStdString(installStep.name), this);
+QWidget* FomodInstallerWindow::createStepWidget(const StepViewModel& installStep) {
+  const auto stepBox = new QGroupBox(QString::fromStdString(installStep.getName()), this);
   const auto stepBoxLayout = new QVBoxLayout(stepBox);
 
   auto* scrollArea = new QScrollArea(stepBox);
@@ -362,8 +336,8 @@ QWidget* FomodInstallerWindow::createStepWidget(const InstallStep& installStep) 
   const auto scrollAreaContent = new QWidget(scrollArea);
   auto* scrollAreaLayout = new QVBoxLayout(scrollAreaContent);
 
-  for (const auto& group : installStep.optionalFileGroups.groups) {
-    const auto groupSection = renderGroup(group);
+  for (const auto group : installStep.getGroups()) {
+    const auto groupSection = renderGroup(&group);
     scrollAreaLayout->addWidget(groupSection);
   }
 
@@ -375,21 +349,21 @@ QWidget* FomodInstallerWindow::createStepWidget(const InstallStep& installStep) 
   return stepBox;
 }
 
-QWidget* FomodInstallerWindow::renderGroup(const Group& group) {
-  const auto groupBox = new QGroupBox(QString::fromStdString(group.name), this);
+QWidget* FomodInstallerWindow::renderGroup(const GroupViewModel* group) {
+  const auto groupBox = new QGroupBox(QString::fromStdString(group->getName()), this);
   const auto groupBoxLayout = new QVBoxLayout(groupBox);
 
-  switch (group.type) {
+  switch (group->getType()) {
     case SelectAny:
-      renderSelectAny(groupBox, groupBoxLayout, group);
+      renderSelectAny(groupBox, groupBoxLayout, *group);
       break;
     case SelectAll:
       break;
     case SelectExactlyOne:
-      renderSelectExactlyOne(groupBox, groupBoxLayout, group);
+      renderSelectExactlyOne(groupBox, groupBoxLayout, *group);
       break;
     case SelectAtMostOne:
-      renderSelectAtMostOne(groupBox, groupBoxLayout, group);
+      renderSelectAtMostOne(groupBox, groupBoxLayout, *group);
       break;
     case SelectAtLeastOne:
       break;
@@ -400,38 +374,40 @@ QWidget* FomodInstallerWindow::renderGroup(const Group& group) {
   return groupBox;
 }
 
-QButtonGroup* FomodInstallerWindow::renderSelectExactlyOne(QWidget *parent, QLayout* parentLayout, const Group &group) {
+QButtonGroup* FomodInstallerWindow::renderSelectExactlyOne(QWidget *parent, QLayout* parentLayout, const GroupViewModel &group) {
   auto* buttonGroup = new QButtonGroup(parent);
   buttonGroup->setExclusive(true); // Ensure only one button can be selected
 
-  for (const auto& plugin : group.plugins.plugins) {
-    auto* radioButton = new QRadioButton(QString::fromStdString(plugin.name), parent);
+  for (const auto plugin : group.getPlugins()) {
+    auto* radioButton = new QRadioButton(QString::fromStdString(plugin.getName()), parent);
     buttonGroup->addButton(radioButton);
     parentLayout->addWidget(radioButton);
   }
   return buttonGroup;
 }
 
-void FomodInstallerWindow::renderSelectAtMostOne(QWidget *parent, QLayout* parentLayout, const Group &group) {
+void FomodInstallerWindow::renderSelectAtMostOne(QWidget *parent, QLayout* parentLayout, const GroupViewModel &group) {
   // Same thing but with an extra 'None' option at the end
+  // TODO: Move this to the ViewModel. We want to control the None plugin here.
   auto* buttonGroup = renderSelectExactlyOne(parent, parentLayout, group);
   auto* noneButton = new QRadioButton("None", parent);
   buttonGroup->addButton(noneButton);
   parentLayout->addWidget(noneButton);
 }
 
-void FomodInstallerWindow::renderSelectAny(QWidget* parent, QLayout* parentLayout, const Group& group) {
-  for (const auto& plugin : group.plugins.plugins) {
-    auto* checkBox = new QCheckBox(QString::fromStdString(plugin.name), parent);
+void FomodInstallerWindow::renderSelectAny(QWidget* parent, QLayout* parentLayout, const GroupViewModel &group) {
+  for (const auto& plugin : group.getPlugins()) {
+    auto* checkBox = new QCheckBox(QString::fromStdString(plugin.getName()), parent);
     parentLayout->addWidget(checkBox);
   }
 }
 
 
 // Updates the image and description field for a given plugin. Also use this on initialization of those widgets.
-void FomodInstallerWindow::updateDisplayForActivePlugin(const Plugin& plugin) const {
-  mDescriptionBox->setText(QString::fromStdString(plugin.description));
-  const auto image = mFomodFile->getImageForPlugin(plugin);
+void FomodInstallerWindow::updateDisplayForActivePlugin() const {
+  const auto& plugin = mViewModel->getActivePlugin();
+  mDescriptionBox->setText(QString::fromStdString(plugin->getName()));
+  const auto image = plugin->getImagePath();
   const auto imagePath = UIHelper::getFullImagePath(mFomodPath, QString::fromStdString(image));
   mImageLabel->setScalableResource(imagePath);
 }

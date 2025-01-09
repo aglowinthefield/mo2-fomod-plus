@@ -8,6 +8,7 @@
 #include <xml/XmlParseException.h>
 
 #include "FomodInstallerWindow.h"
+#include "ui/FomodViewModel.h"
 #include "util/stringutil.h"
 
 bool InstallerFomodPlus::init(IOrganizer *organizer) {
@@ -53,14 +54,13 @@ IPluginInstaller::EInstallResult InstallerFomodPlus::install(GuessedValue<QStrin
   }
 
   // create ui & pass xml classes to ui
+  auto fomodViewModel = FomodViewModel::create(m_Organizer, moduleConfigFile, infoFile);
   const auto window = std::make_shared<FomodInstallerWindow>(
     this,
     modName,
     tree,
     mFomodPath,
-    m_Organizer,
-    std::move(moduleConfigFile),
-    std::move(infoFile)
+    fomodViewModel
   );
 
   if (const QDialog::DialogCode result = showInstallerWindow(window); result == QDialog::Accepted) {
@@ -77,7 +77,7 @@ IPluginInstaller::EInstallResult InstallerFomodPlus::install(GuessedValue<QStrin
  * @param tree
  * @return
  */
-std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration>> InstallerFomodPlus::parseFomodFiles(
+std::pair<std::shared_ptr<FomodInfoFile>, std::shared_ptr<ModuleConfiguration>> InstallerFomodPlus::parseFomodFiles(
   const std::shared_ptr<IFileTree> &tree) {
   const auto fomodDir = findFomodDirectory(tree);
   if (fomodDir == nullptr) {
@@ -104,7 +104,7 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration>> 
 
   // parse xml
   // Paths are in the order {infoXml, moduleConfigXml, ...images}
-  auto infoFile = std::make_unique<FomodInfoFile>();
+  auto infoFile = std::make_shared<FomodInfoFile>();
   try {
     infoFile->deserialize(paths.at(0).toStdString());
   } catch (XmlParseException &e) {
@@ -112,7 +112,7 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration>> 
     return {nullptr, nullptr};
   }
 
-  auto moduleConfiguration = std::make_unique<ModuleConfiguration>();
+  auto moduleConfiguration = std::make_shared<ModuleConfiguration>();
   try {
     moduleConfiguration->deserialize(paths.at(1).toStdString());
   } catch (XmlParseException &e) {
