@@ -47,19 +47,26 @@ bool ConditionTester::testFileDependency(const FileDependency& fileDependency) c
 }
 
 FileDependencyTypeEnum ConditionTester::getFileDependencyStateForPlugin(const std::string &pluginName) const {
+  if (const auto it = pluginStateCache.find(pluginName); it != pluginStateCache.end()) {
+    return it->second;
+  }
+
   const QFlags<MOBase::IPluginList::PluginState> pluginState = mOrganizer->pluginList()->state(QString::fromStdString(pluginName));
 
+  FileDependencyTypeEnum state;
+
   if (pluginState & MOBase::IPluginList::STATE_MISSING) {
-    return FileDependencyTypeEnum::Missing;
-  }
-  if (pluginState & MOBase::IPluginList::STATE_INACTIVE) {
-    return FileDependencyTypeEnum::Inactive;
-  }
-  if (pluginState & MOBase::IPluginList::STATE_ACTIVE) {
-    return FileDependencyTypeEnum::Active;
+    state = FileDependencyTypeEnum::Missing;
+  } else if (pluginState & MOBase::IPluginList::STATE_INACTIVE) {
+    state = FileDependencyTypeEnum::Inactive;
+  } else if (pluginState & MOBase::IPluginList::STATE_ACTIVE) {
+    state = FileDependencyTypeEnum::Active;
+  } else {
+    state = FileDependencyTypeEnum::UNKNOWN_STATE;
   }
 
-  return FileDependencyTypeEnum::UNKNOWN_STATE;
+  pluginStateCache[pluginName] = state;
+  return state;
 }
 
 PluginTypeEnum ConditionTester::getPluginTypeDescriptorState(const Plugin &plugin, const FlagMap &flags) const {
