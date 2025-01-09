@@ -65,6 +65,13 @@ void FomodInstallerWindow::onNextClicked() {
   }
 }
 
+void FomodInstallerWindow::onPluginToggled(const bool selected, const std::shared_ptr<GroupViewModel> &group,
+  const std::shared_ptr<PluginViewModel> &plugin) const {
+  std::cout << "Selected? " << selected << std::endl;
+  mViewModel->togglePlugin(group, plugin, selected);
+  updateButtons();
+}
+
 void FomodInstallerWindow::onBackClicked() const {
   mViewModel->stepBack();
   mInstallStepStack->setCurrentIndex(mViewModel->getCurrentStepIndex());
@@ -360,12 +367,35 @@ QWidget* FomodInstallerWindow::renderGroup(const std::shared_ptr<GroupViewModel>
   return groupBox;
 }
 
+QRadioButton* FomodInstallerWindow::createPluginRadioButton(const std::shared_ptr<PluginViewModel> &plugin, const std::shared_ptr<GroupViewModel> &group, QWidget* parent) {
+  auto* radioButton = new QRadioButton(QString::fromStdString(plugin->getName()), parent);
+  radioButton->setEnabled(plugin->isEnabled());
+  radioButton->setChecked(plugin->isSelected());
+  // Bind to model function
+  connect(radioButton, &QRadioButton::toggled, this, [this, group, plugin](const bool checked) {
+    onPluginToggled(checked, group, plugin);
+  });
+
+  return radioButton;
+}
+
+QCheckBox* FomodInstallerWindow::createPluginCheckBox(const std::shared_ptr<PluginViewModel> &plugin, const std::shared_ptr<GroupViewModel> &group, QWidget* parent) {
+  auto* checkBox = new QCheckBox(QString::fromStdString(plugin->getName()), parent);
+  checkBox->setEnabled(plugin->isEnabled());
+  checkBox->setChecked(plugin->isSelected());
+  // Bind to model function
+  connect(checkBox, &QCheckBox::stateChanged, this, [this, group, plugin](const int state) {
+    onPluginToggled((state == Qt::Checked), group, plugin);
+  });
+  return checkBox;
+}
+
 QButtonGroup* FomodInstallerWindow::renderSelectExactlyOne(QWidget *parent, QLayout* parentLayout, const std::shared_ptr<GroupViewModel> &group) {
   auto* buttonGroup = new QButtonGroup(parent);
   buttonGroup->setExclusive(true); // Ensure only one button can be selected
 
   for (const auto plugin : group->getPlugins()) {
-    auto* radioButton = new QRadioButton(QString::fromStdString(plugin->getName()), parent);
+    auto* radioButton = createPluginRadioButton(plugin, group, parent);
     buttonGroup->addButton(radioButton);
     parentLayout->addWidget(radioButton);
   }
@@ -383,8 +413,8 @@ void FomodInstallerWindow::renderSelectAtMostOne(QWidget *parent, QLayout* paren
 
 void FomodInstallerWindow::renderSelectAny(QWidget* parent, QLayout* parentLayout, const std::shared_ptr<GroupViewModel> &group) {
   for (const auto& plugin : group->getPlugins()) {
-    auto* checkBox = new QCheckBox(QString::fromStdString(plugin->getName()), parent);
-    parentLayout->addWidget(checkBox);
+    auto* checkbox = createPluginCheckBox(plugin, group, parent);
+    parentLayout->addWidget(checkbox);
   }
 }
 

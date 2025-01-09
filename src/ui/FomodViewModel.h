@@ -133,6 +133,9 @@ public:
   [[nodiscard]] int getCurrentStepIndex() const { return mCurrentStepIndex; }
   [[deprecated]] void setCurrentStepIndex(const int index) { mCurrentStepIndex = index; }
   [[nodiscard]] bool isStepVisible(int stepIndex) const;
+
+  void updateVisibleSteps();
+
   [[nodiscard]] NEXT_OP getNextOp() const { return mNextOp; }
 
   // Flags
@@ -148,10 +151,15 @@ public:
   // Interactions
   void stepBack();
 
+  bool isLastVisibleStep() const;
+
   void stepForward();
+
+  void calculateNextStepIndex();
+
   void collectFlags();
 
-  void togglePlugin(std::shared_ptr<GroupViewModel>, const std::shared_ptr<PluginViewModel> &plugin, bool enabled);
+  void togglePlugin(std::shared_ptr<GroupViewModel>, const std::shared_ptr<PluginViewModel> &plugin, bool selected);
 
   void constructInitialStates();
 
@@ -165,13 +173,16 @@ private:
   ConditionTester mConditionTester;
 
   // Internal only
+  // TODO: This is a LOT of shared_ptr nonsense. It works for now but I need to understand it better to fix it.
   InfoViewModel mInfoViewModel;
   std::vector<std::shared_ptr<StepViewModel>> mSteps;
   std::shared_ptr<PluginViewModel> mActivePlugin = nullptr;
   std::shared_ptr<StepViewModel> mActiveStep = nullptr;
+  std::vector<int> mVisibleStepIndices;
 
   // Indices
   int mCurrentStepIndex{0};
+  int mNextStepIndex{0};
   NEXT_OP mNextOp{NEXT_OP::NEXT};
 
 

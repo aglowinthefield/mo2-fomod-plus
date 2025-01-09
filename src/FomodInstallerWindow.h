@@ -3,6 +3,7 @@
 
 #include <qboxlayout.h>
 #include <qbuttongroup.h>
+#include <qcheckbox.h>
 #include <qcombobox.h>
 
 #include "InstallerFomodPlus.h"
@@ -10,6 +11,7 @@
 #include "xml/FomodInfoFile.h"
 
 #include <QDialog>
+#include <qradiobutton.h>
 #include <QWidget>
 #include <QStackedWidget>
 #include <QTextEdit>
@@ -55,6 +57,8 @@ public:
 
 private slots:
   void onNextClicked();
+  void onPluginToggled(bool selected, const std::shared_ptr<GroupViewModel> &group, const std::shared_ptr<PluginViewModel> &plugin) const;
+
 
   // void updateNextVisibleStepIndex();
 
@@ -101,10 +105,15 @@ private:
   [[nodiscard]] QWidget*    createStepWidget(const std::shared_ptr<StepViewModel> &installStep);
   [[nodiscard]] QWidget*    renderGroup(const std::shared_ptr<GroupViewModel> &group);
 
-  static QButtonGroup *renderSelectExactlyOne(QWidget *parent, QLayout *parentLayout, const std::shared_ptr<GroupViewModel> &group);
+  QRadioButton *createPluginRadioButton(const std::shared_ptr<PluginViewModel> &plugin, const std::shared_ptr<GroupViewModel> &group, QWidget *parent);
 
-  static void renderSelectAtMostOne(QWidget *parent, QLayout *parentLayout, const std::shared_ptr<GroupViewModel> &group);
-  static void renderSelectAny(QWidget *parent, QLayout *parentLayout, const std::shared_ptr<GroupViewModel> &group);
+  QCheckBox *createPluginCheckBox(const std::shared_ptr<PluginViewModel> &plugin,
+                                  const std::shared_ptr<GroupViewModel> &group, QWidget *parent);
+
+  QButtonGroup *renderSelectExactlyOne(QWidget *parent, QLayout *parentLayout, const std::shared_ptr<GroupViewModel> &group);
+
+  void renderSelectAtMostOne(QWidget *parent, QLayout *parentLayout, const std::shared_ptr<GroupViewModel> &group);
+  void renderSelectAny(QWidget *parent, QLayout *parentLayout, const std::shared_ptr<GroupViewModel> &group);
 };
 
 
