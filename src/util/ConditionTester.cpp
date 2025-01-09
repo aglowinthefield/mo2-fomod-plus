@@ -32,8 +32,8 @@ bool ConditionTester::testCompositeDependency(const FlagMap& flags, const Compos
 
 
 [[deprecated("Use testCompositeDependency() directly instead")]]
-bool ConditionTester::isStepVisible(const FlagMap &flags, const InstallStep &step) const {
-  return testCompositeDependency(flags, step.visible.dependencies);
+bool ConditionTester::isStepVisible(const FlagMap &flags, const InstallStep* step) const {
+  return testCompositeDependency(flags, step->visible.dependencies);
 }
 
 bool ConditionTester::testFlagDependency(FlagMap flags, const FlagDependency& flagDependency) {

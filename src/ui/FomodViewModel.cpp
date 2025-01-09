@@ -22,8 +22,9 @@ std::shared_ptr<FomodViewModel> FomodViewModel::create(MOBase::IOrganizer *organ
   const std::shared_ptr<ModuleConfiguration> &fomodFile, const std::shared_ptr<FomodInfoFile> &infoFile) {
   auto viewModel = std::make_shared<FomodViewModel>(organizer, fomodFile, infoFile);
   viewModel->createStepViewModels(fomodFile);
-  viewModel->mActiveStep = &viewModel->mSteps.at(0);
-  viewModel->mActivePlugin = &viewModel->getFirstPluginForActiveStep();
+  viewModel->mActiveStep = viewModel->mSteps.at(0);
+  viewModel->mActivePlugin = viewModel->getFirstPluginForActiveStep();
+  std::cout << "Active Plugin: " << viewModel->mActivePlugin->getName() << std::endl;
   return viewModel;
 }
 
@@ -33,19 +34,19 @@ FomodViewModel::~FomodViewModel() {
 }
 
 
-PluginViewModel &FomodViewModel::getFirstPluginForActiveStep() const {
+std::shared_ptr<PluginViewModel> FomodViewModel::getFirstPluginForActiveStep() const {
   if (mSteps.empty()) {
     throw std::runtime_error("No steps found in FomodViewModel");
   }
-  return mSteps[mCurrentStepIndex].groups.at(0).getPlugins().at(0);
+  return mActiveStep->getGroups().at(0)->getPlugins().at(0);
 }
 
 void FomodViewModel::collectFlags() {
   if (mSteps.empty()) {
     return;
   }
-  for (auto step : mSteps) {
-    for (auto flagDependency : step.installStep.visible.dependencies.flagDependencies) {
+  for (const auto step : mSteps) {
+    for (auto flagDependency : step->installStep->visible.dependencies.flagDependencies) {
       mFlags.setFlag(flagDependency.flag, "");
     }
   }
@@ -53,9 +54,9 @@ void FomodViewModel::collectFlags() {
 
 // onpluginselected should also take a group option to set the values for the other plugins, possibly
 // TODO: Handle groups later
-void FomodViewModel::togglePlugin(GroupViewModel&, PluginViewModel& plugin, bool enabled) {
-  plugin.setEnabled(enabled);
-  for (auto flag : plugin.getPlugin().conditionFlags.flags) {
+void FomodViewModel::togglePlugin(std::shared_ptr<GroupViewModel>, const std::shared_ptr<PluginViewModel> &plugin, const bool enabled) {
+  plugin->setEnabled(enabled);
+  for (auto flag : plugin->getPlugin()->conditionFlags.flags) {
     if (enabled) {
       mFlags.setFlag(flag.name, flag.value);
     } else {
@@ -66,9 +67,9 @@ void FomodViewModel::togglePlugin(GroupViewModel&, PluginViewModel& plugin, bool
 
 void FomodViewModel::constructInitialStates() {
   // For each group, "select" the correct plugin based on the spec.
-  for (auto step : mSteps) {
-    for (auto group : step.getGroups()) {
-      switch (group.getType()) {
+  for (const auto step : mSteps) {
+    for (auto group : step->getGroups()) {
+      switch (group->getType()) {
         case SelectExactlyOne:
           // Mark the first option that doesn't fail its condition as active
           break;
@@ -76,7 +77,7 @@ void FomodViewModel::constructInitialStates() {
           break;
         case SelectAll:
           // set every plugin in this group to be checked and disabled
-            for (auto plugin : group.getPlugins()) {
+            for (auto plugin : group->getPlugins()) {
               togglePlugin(group, plugin, true);
             }
           break;
@@ -88,46 +89,59 @@ void FomodViewModel::constructInitialStates() {
 }
 
 void FomodViewModel::createStepViewModels(const std::shared_ptr<ModuleConfiguration> &fomodFile) {
-  std::vector<StepViewModel> stepViewModels;
+  shared_ptr_list<StepViewModel> stepViewModels;
 
-  for (const InstallStep& installStep : fomodFile->installSteps.installSteps) {
-    std::vector<GroupViewModel> groupViewModels;
+  for (const auto& installStep : fomodFile->installSteps.installSteps) {
+    std::vector<std::shared_ptr<GroupViewModel>> groupViewModels;
 
     for (const auto& group : installStep.optionalFileGroups.groups) {
-      std::vector<PluginViewModel> pluginViewModels;
+      std::vector<std::shared_ptr<PluginViewModel>> pluginViewModels;
 
       for (const auto& plugin : group.plugins.plugins) {
-        const auto pluginViewModel = PluginViewModel(plugin, false, true);
+        auto pluginViewModel = std::make_shared<PluginViewModel>(std::make_shared<Plugin>(plugin), false, true);
         pluginViewModels.emplace_back(pluginViewModel); // Assuming default values for selected and enabled
       }
-      const auto groupViewModel = GroupViewModel(group, std::move(pluginViewModels));
+      auto groupViewModel = std::make_shared<GroupViewModel>(std::make_shared<Group>(group), std::move(pluginViewModels));
       groupViewModels.emplace_back(groupViewModel);
     }
-    const auto stepViewModel = StepViewModel(installStep, std::move(groupViewModels));
+    auto stepViewModel = std::make_shared<StepViewModel>(std::make_shared<InstallStep>(installStep), std::move(groupViewModels));
     stepViewModels.emplace_back(stepViewModel);
   }
   // TODO Sort the view models here, maybe
   collectFlags();
-
-  mSteps = stepViewModels;
+  mSteps = std::move(stepViewModels);
 }
 
 bool FomodViewModel::isStepVisible(const int stepIndex) const {
-  const auto step = mSteps[stepIndex].installStep;
-  return mConditionTester.isStepVisible(mFlags, step);
+  const auto step = mSteps[stepIndex]->installStep;
+  return mConditionTester.isStepVisible(mFlags, step.get());
 }
 
-void FomodViewModel::onBackPressed() {
+void FomodViewModel::stepBack() {
   if (mCurrentStepIndex <= 0) {
     return;
   }
 
   // TODO: go back to previously visible step
   // we need to set up the initial state of the viewmodel first.
-  mCurrentStepIndex--;
+  while (!isStepVisible(mCurrentStepIndex - 1)) {
+    mCurrentStepIndex--;
+  }
+  mActiveStep = mSteps[mCurrentStepIndex];
+  mNextOp = (mCurrentStepIndex == mSteps.size() - 1) ? NEXT_OP::INSTALL : NEXT_OP::NEXT;
 }
 
-void FomodViewModel::onNextInstallPressed() {
+void FomodViewModel::stepForward() {
+  if (mCurrentStepIndex >= mSteps.size() - 1) {
+    return;
+  }
+
+  // While step isn't visible, increment
+  while (!isStepVisible(mCurrentStepIndex + 1) && mCurrentStepIndex < mSteps.size() - 1) {
+    mCurrentStepIndex++;
+  }
+  mActiveStep = mSteps[mCurrentStepIndex];
+  mNextOp = (mCurrentStepIndex == mSteps.size() - 1) ? NEXT_OP::INSTALL : NEXT_OP::NEXT;
 }
 
 void FomodViewModel::setFlag(const std::string &flag, const std::string &value) {

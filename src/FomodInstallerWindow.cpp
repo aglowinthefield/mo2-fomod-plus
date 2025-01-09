@@ -51,36 +51,22 @@ FomodInstallerWindow::FomodInstallerWindow(
   const auto containerLayout = createContainerLayout();
   setLayout(containerLayout);
 
-  updateNextVisibleStepIndex();
   updateButtons();
 }
 
 void FomodInstallerWindow::onNextClicked() {
-  updateNextVisibleStepIndex();
-  if (mViewModel->getCurrentStepIndex() < mNextStepIndex) {
-    mViewModel->setCurrentStepIndex(mNextStepIndex);
+  if (mViewModel->getNextOp() == NEXT_OP::NEXT) {
+    mViewModel->stepForward();
     mInstallStepStack->setCurrentIndex(mViewModel->getCurrentStepIndex());
     updateButtons();
     updateDisplayForActivePlugin();
-  } else if (mViewModel->getCurrentStepIndex() == mNextStepIndex) {
+  } else {
     onInstallClicked();
   }
 }
 
-// Call in constructor and any time a flag changes or page is turned
-void FomodInstallerWindow::updateNextVisibleStepIndex() {
-  const int maxPossibleIndex = mInstallStepStack->count() - 1;
-  int nextIndex = mViewModel->getCurrentStepIndex() + 1;
-
-  while (nextIndex <= maxPossibleIndex && !mViewModel->isStepVisible(nextIndex)) {
-    nextIndex++;
-  }
-
-  mNextStepIndex = (nextIndex > maxPossibleIndex) ? mViewModel->getCurrentStepIndex() : nextIndex;
-}
-
 void FomodInstallerWindow::onBackClicked() const {
-  mViewModel->onBackPressed();
+  mViewModel->stepBack();
   mInstallStepStack->setCurrentIndex(mViewModel->getCurrentStepIndex());
   updateButtons();
   updateDisplayForActivePlugin();
@@ -93,7 +79,7 @@ void FomodInstallerWindow::updateButtons() const {
     mBackButton->setEnabled(true);
   }
 
-  if (mViewModel->getCurrentStepIndex() == mNextStepIndex) {
+  if (mViewModel->getNextOp() == NEXT_OP::INSTALL) {
     mNextInstallButton->setText("Install");
   } else {
     mNextInstallButton->setText("Next");
@@ -155,16 +141,16 @@ QBoxLayout *FomodInstallerWindow::createContainerLayout() {
   const auto topRow = createTopRow();
   layout->addWidget(topRow);
 
-  // // middle area takes up the bulk of space. maybe 5x the size of the top row
-  // const auto centerRow = createCenterRow();
-  // layout->addWidget(centerRow, 1); // stretch 1 here so the others are static size
-  //
-  // // bottom row
-  // const auto bottomRow = createBottomRow();
-  // layout->addWidget(bottomRow);
-  //
-  // any extra layout setup :)
-  // UIHelper::setDebugBorders(this);
+  // middle area takes up the bulk of space. maybe 5x the size of the top row
+  const auto centerRow = createCenterRow();
+  layout->addWidget(centerRow, 1); // stretch 1 here so the others are static size
+
+  // bottom row
+  const auto bottomRow = createBottomRow();
+  layout->addWidget(bottomRow);
+
+  // NOTE: Disable after debug done
+  UIHelper::setDebugBorders(this);
   return layout;
 }
 
@@ -326,8 +312,8 @@ QWidget* FomodInstallerWindow::createRightPane() {
   return rightPane;
 }
 
-QWidget* FomodInstallerWindow::createStepWidget(const StepViewModel& installStep) {
-  const auto stepBox = new QGroupBox(QString::fromStdString(installStep.getName()), this);
+QWidget* FomodInstallerWindow::createStepWidget(const std::shared_ptr<StepViewModel> &installStep) {
+  const auto stepBox = new QGroupBox(QString::fromStdString(installStep->getName()), this);
   const auto stepBoxLayout = new QVBoxLayout(stepBox);
 
   auto* scrollArea = new QScrollArea(stepBox);
@@ -336,8 +322,8 @@ QWidget* FomodInstallerWindow::createStepWidget(const StepViewModel& installStep
   const auto scrollAreaContent = new QWidget(scrollArea);
   auto* scrollAreaLayout = new QVBoxLayout(scrollAreaContent);
 
-  for (const auto group : installStep.getGroups()) {
-    const auto groupSection = renderGroup(&group);
+  for (const auto group : installStep->getGroups()) {
+    const auto groupSection = renderGroup(group);
     scrollAreaLayout->addWidget(groupSection);
   }
 
@@ -349,21 +335,21 @@ QWidget* FomodInstallerWindow::createStepWidget(const StepViewModel& installStep
   return stepBox;
 }
 
-QWidget* FomodInstallerWindow::renderGroup(const GroupViewModel* group) {
+QWidget* FomodInstallerWindow::renderGroup(const std::shared_ptr<GroupViewModel> &group) {
   const auto groupBox = new QGroupBox(QString::fromStdString(group->getName()), this);
   const auto groupBoxLayout = new QVBoxLayout(groupBox);
 
   switch (group->getType()) {
     case SelectAny:
-      renderSelectAny(groupBox, groupBoxLayout, *group);
+      renderSelectAny(groupBox, groupBoxLayout, group);
       break;
     case SelectAll:
       break;
     case SelectExactlyOne:
-      renderSelectExactlyOne(groupBox, groupBoxLayout, *group);
+      renderSelectExactlyOne(groupBox, groupBoxLayout, group);
       break;
     case SelectAtMostOne:
-      renderSelectAtMostOne(groupBox, groupBoxLayout, *group);
+      renderSelectAtMostOne(groupBox, groupBoxLayout, group);
       break;
     case SelectAtLeastOne:
       break;
@@ -374,19 +360,19 @@ QWidget* FomodInstallerWindow::renderGroup(const GroupViewModel* group) {
   return groupBox;
 }
 
-QButtonGroup* FomodInstallerWindow::renderSelectExactlyOne(QWidget *parent, QLayout* parentLayout, const GroupViewModel &group) {
+QButtonGroup* FomodInstallerWindow::renderSelectExactlyOne(QWidget *parent, QLayout* parentLayout, const std::shared_ptr<GroupViewModel> &group) {
   auto* buttonGroup = new QButtonGroup(parent);
   buttonGroup->setExclusive(true); // Ensure only one button can be selected
 
-  for (const auto plugin : group.getPlugins()) {
-    auto* radioButton = new QRadioButton(QString::fromStdString(plugin.getName()), parent);
+  for (const auto plugin : group->getPlugins()) {
+    auto* radioButton = new QRadioButton(QString::fromStdString(plugin->getName()), parent);
     buttonGroup->addButton(radioButton);
     parentLayout->addWidget(radioButton);
   }
   return buttonGroup;
 }
 
-void FomodInstallerWindow::renderSelectAtMostOne(QWidget *parent, QLayout* parentLayout, const GroupViewModel &group) {
+void FomodInstallerWindow::renderSelectAtMostOne(QWidget *parent, QLayout* parentLayout, const std::shared_ptr<GroupViewModel> &group) {
   // Same thing but with an extra 'None' option at the end
   // TODO: Move this to the ViewModel. We want to control the None plugin here.
   auto* buttonGroup = renderSelectExactlyOne(parent, parentLayout, group);
@@ -395,9 +381,9 @@ void FomodInstallerWindow::renderSelectAtMostOne(QWidget *parent, QLayout* paren
   parentLayout->addWidget(noneButton);
 }
 
-void FomodInstallerWindow::renderSelectAny(QWidget* parent, QLayout* parentLayout, const GroupViewModel &group) {
-  for (const auto& plugin : group.getPlugins()) {
-    auto* checkBox = new QCheckBox(QString::fromStdString(plugin.getName()), parent);
+void FomodInstallerWindow::renderSelectAny(QWidget* parent, QLayout* parentLayout, const std::shared_ptr<GroupViewModel> &group) {
+  for (const auto& plugin : group->getPlugins()) {
+    auto* checkBox = new QCheckBox(QString::fromStdString(plugin->getName()), parent);
     parentLayout->addWidget(checkBox);
   }
 }
@@ -406,7 +392,7 @@ void FomodInstallerWindow::renderSelectAny(QWidget* parent, QLayout* parentLayou
 // Updates the image and description field for a given plugin. Also use this on initialization of those widgets.
 void FomodInstallerWindow::updateDisplayForActivePlugin() const {
   const auto& plugin = mViewModel->getActivePlugin();
-  mDescriptionBox->setText(QString::fromStdString(plugin->getName()));
+  mDescriptionBox->setText(QString::fromStdString(plugin->getDescription()));
   const auto image = plugin->getImagePath();
   const auto imagePath = UIHelper::getFullImagePath(mFomodPath, QString::fromStdString(image));
   mImageLabel->setScalableResource(imagePath);

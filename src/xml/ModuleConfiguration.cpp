@@ -201,16 +201,20 @@ bool StepList::deserialize(pugi::xml_node &node) {
 }
 
 bool ModuleConfiguration::deserialize(const std::string &filePath) {
-  pugi::xml_document doc;
+  pugi::xml_document doc_;
 
-  if (const pugi::xml_parse_result result = doc.load_file(filePath.c_str()); !result) {
+  if (const pugi::xml_parse_result result = doc_.load_file(filePath.c_str()); !result) {
     throw XmlParseException(std::format("XML parsed with errors: {}", result.description()));
   }
 
-  const pugi::xml_node configNode = doc.child("config");
+  pugi::xml_document doc;
+  doc.reset(doc_);
+
+  const pugi::xml_node configNode = doc_.child("config");
   if (!configNode) {
     throw XmlParseException("No <config> node found");
   }
+
 
   moduleName = configNode.child("moduleName").text().as_string();
 

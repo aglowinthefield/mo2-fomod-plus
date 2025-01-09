@@ -7,6 +7,9 @@
 #include "../util/ConditionTester.h"
 #include "xml/FomodInfoFile.h"
 
+template<typename T>
+using shared_ptr_list = std::vector<std::shared_ptr<T>>;
+
 /*
 --------------------------------------------------------------------------------
                                 Plugins
@@ -14,20 +17,21 @@
 */
 class PluginViewModel {
 public:
-  PluginViewModel(const Plugin &plugin_, const bool selected, bool)
-    : plugin(plugin_), selected(selected), enabled(true) {
+  PluginViewModel(std::shared_ptr<Plugin> plugin_, const bool selected, bool)
+    : plugin(std::move(plugin_)), selected(selected), enabled(true) {
   }
 
   void setSelected(const bool selected) { this->selected = selected; }
   void setEnabled(const bool enabled)   { this->enabled = enabled; }
-  [[nodiscard]] std::string getName() const           { return plugin.description; }
-  [[nodiscard]] std::string getImagePath() const      { return plugin.image.path; }
-  [[nodiscard]] bool isSelected() const               { return selected; }
-  [[nodiscard]] bool isEnabled() const                { return enabled; }
-  [[nodiscard]] Plugin getPlugin() const              { return plugin; }
+  [[nodiscard]] std::string getName() const               { return plugin->name; }
+  [[nodiscard]] std::string getDescription() const        { return plugin->description; }
+  [[nodiscard]] std::string getImagePath() const          { return plugin->image.path; }
+  [[nodiscard]] bool isSelected() const                   { return selected; }
+  [[nodiscard]] bool isEnabled() const                    { return enabled; }
+  [[nodiscard]] std::shared_ptr<Plugin> getPlugin() const { return plugin; }
 
 private:
-  const Plugin plugin;
+  const std::shared_ptr<Plugin> plugin;
   bool selected;
   bool enabled;
 };
@@ -39,15 +43,15 @@ private:
 */
 class GroupViewModel {
 public:
-  GroupViewModel(const Group &group_, std::vector<PluginViewModel> plugins)
-    : plugins(std::move(plugins)), group(group_) {}
+  GroupViewModel(std::shared_ptr<Group> group_, shared_ptr_list<PluginViewModel> plugins)
+    : plugins(std::move(plugins)), group(std::move(group_)) {}
 
-  [[nodiscard]] std::string getName() const { return group.name; }
-  [[nodiscard]] GroupTypeEnum getType() const { return group.type; }
-  [[nodiscard]] std::vector <PluginViewModel> getPlugins() const { return plugins; }
+  [[nodiscard]] std::string getName() const { return group->name; }
+  [[nodiscard]] GroupTypeEnum getType() const { return group->type; }
+  [[nodiscard]] shared_ptr_list<PluginViewModel> getPlugins() const { return plugins; }
 private:
-  std::vector<PluginViewModel> plugins;
-  const Group group;
+  shared_ptr_list<PluginViewModel> plugins;
+  std::shared_ptr<Group> group;
 };
 
 /*
@@ -57,15 +61,15 @@ private:
 */
 class StepViewModel {
 public:
-  StepViewModel(const InstallStep &installStep_, const std::vector<GroupViewModel> &groups)
-    : installStep(installStep_), groups(groups) {}
+  StepViewModel(std::shared_ptr<InstallStep> installStep_, const shared_ptr_list<GroupViewModel> &groups)
+    : installStep(std::move(installStep_)), groups(groups) {}
 
-  [[nodiscard]] std::string getName() const { return installStep.name; }
-  [[nodiscard]] std::vector<GroupViewModel> getGroups() const { return groups; }
+  [[nodiscard]] std::string getName() const { return installStep->name; }
+  [[nodiscard]] shared_ptr_list<GroupViewModel> getGroups() const { return groups; }
 
-  const InstallStep installStep;
-  bool isVisible = true;
-  std::vector<GroupViewModel> groups;
+  const std::shared_ptr<InstallStep> installStep;
+  // bool isVisible = true;
+  shared_ptr_list<GroupViewModel> groups;
 };
 
 /*
@@ -103,6 +107,8 @@ private:
                                View Model
 --------------------------------------------------------------------------------
 */
+enum class NEXT_OP { NEXT, INSTALL };
+
 class FomodViewModel {
 public:
 
@@ -119,31 +125,33 @@ public:
 
   ~FomodViewModel();
 
-  [[nodiscard]] PluginViewModel &getFirstPluginForActiveStep() const;
+  [[nodiscard]] std::shared_ptr<PluginViewModel> getFirstPluginForActiveStep() const;
 
 
   // Steps
-  [[nodiscard]] const std::vector<StepViewModel>& getSteps() const { return mSteps; }
+  [[nodiscard]] shared_ptr_list<StepViewModel> getSteps() const { return mSteps; }
   [[nodiscard]] int getCurrentStepIndex() const { return mCurrentStepIndex; }
-  void setCurrentStepIndex(const int index) { mCurrentStepIndex = index; }
+  [[deprecated]] void setCurrentStepIndex(const int index) { mCurrentStepIndex = index; }
   [[nodiscard]] bool isStepVisible(int stepIndex) const;
+  [[nodiscard]] NEXT_OP getNextOp() const { return mNextOp; }
 
   // Flags
   void setFlag(const std::string &flag, const std::string &value);
   std::string getFlag(const std::string &flag);
 
   // Plugins
-  [[nodiscard]] PluginViewModel* getActivePlugin() const { return mActivePlugin; }
+  [[nodiscard]] std::shared_ptr<PluginViewModel> getActivePlugin() const { return mActivePlugin; }
 
   // Info
   [[nodiscard]] InfoViewModel getInfoViewModel() const { return mInfoViewModel; }
 
   // Interactions
-  void onBackPressed();
-  void onNextInstallPressed();
+  void stepBack();
+
+  void stepForward();
   void collectFlags();
 
-  void togglePlugin(GroupViewModel &group, PluginViewModel &plugin, bool enabled);
+  void togglePlugin(std::shared_ptr<GroupViewModel>, const std::shared_ptr<PluginViewModel> &plugin, bool enabled);
 
   void constructInitialStates();
 
@@ -158,12 +166,14 @@ private:
 
   // Internal only
   InfoViewModel mInfoViewModel;
-  std::vector<StepViewModel> mSteps;
-  PluginViewModel* mActivePlugin = nullptr;
-  StepViewModel* mActiveStep = nullptr;
+  std::vector<std::shared_ptr<StepViewModel>> mSteps;
+  std::shared_ptr<PluginViewModel> mActivePlugin = nullptr;
+  std::shared_ptr<StepViewModel> mActiveStep = nullptr;
 
   // Indices
-  int mCurrentStepIndex = 0;
+  int mCurrentStepIndex{0};
+  NEXT_OP mNextOp{NEXT_OP::NEXT};
+
 
   void createStepViewModels(const std::shared_ptr<ModuleConfiguration> &fomodFile);
 };

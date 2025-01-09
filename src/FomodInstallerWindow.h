@@ -56,7 +56,7 @@ public:
 private slots:
   void onNextClicked();
 
-  void updateNextVisibleStepIndex();
+  // void updateNextVisibleStepIndex();
 
   void onBackClicked() const;
   void onInstallClicked() { this->accept(); }
@@ -98,13 +98,13 @@ private:
   [[nodiscard]] QWidget*    createBottomRow();
   [[nodiscard]] QWidget*    createLeftPane();
   [[nodiscard]] QWidget*    createRightPane();
-  [[nodiscard]] QWidget*    createStepWidget(const StepViewModel &installStep);
-  [[nodiscard]] QWidget*    renderGroup(const GroupViewModel *group);
+  [[nodiscard]] QWidget*    createStepWidget(const std::shared_ptr<StepViewModel> &installStep);
+  [[nodiscard]] QWidget*    renderGroup(const std::shared_ptr<GroupViewModel> &group);
 
-  static QButtonGroup *renderSelectExactlyOne(QWidget *parent, QLayout *parentLayout, const GroupViewModel &group);
+  static QButtonGroup *renderSelectExactlyOne(QWidget *parent, QLayout *parentLayout, const std::shared_ptr<GroupViewModel> &group);
 
-  static void renderSelectAtMostOne(QWidget *parent, QLayout *parentLayout, const GroupViewModel &group);
-  static void renderSelectAny(QWidget *parent, QLayout *parentLayout, const GroupViewModel &group);
+  static void renderSelectAtMostOne(QWidget *parent, QLayout *parentLayout, const std::shared_ptr<GroupViewModel> &group);
+  static void renderSelectAny(QWidget *parent, QLayout *parentLayout, const std::shared_ptr<GroupViewModel> &group);
 };
 
 
