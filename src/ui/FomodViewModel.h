@@ -114,13 +114,13 @@ public:
 
   FomodViewModel(
     MOBase::IOrganizer* organizer,
-    const std::shared_ptr<ModuleConfiguration> &fomodFile,
-    const std::shared_ptr<FomodInfoFile> &infoFile);
+    std::unique_ptr<ModuleConfiguration> fomodFile,
+    std::unique_ptr<FomodInfoFile> infoFile);
 
   static std::shared_ptr<FomodViewModel> create(
-    MOBase::IOrganizer* organizer,
-    const std::shared_ptr<ModuleConfiguration> &fomodFile,
-    const std::shared_ptr<FomodInfoFile> &infoFile);
+    MOBase::IOrganizer *organizer,
+    std::unique_ptr<ModuleConfiguration> fomodFile,
+    std::unique_ptr<FomodInfoFile> infoFile);
 
 
   ~FomodViewModel();
@@ -159,8 +159,8 @@ private:
 
   // Constructor members
   MOBase::IOrganizer* mOrganizer = nullptr;
-  std::shared_ptr<ModuleConfiguration> mFomodFile;
-  std::shared_ptr<FomodInfoFile> mInfoFile;
+  std::unique_ptr<ModuleConfiguration> mFomodFile;
+  std::unique_ptr<FomodInfoFile> mInfoFile;
   FlagMap mFlags;
   ConditionTester mConditionTester;
 
@@ -175,7 +175,7 @@ private:
   NEXT_OP mNextOp{NEXT_OP::NEXT};
 
 
-  void createStepViewModels(const std::shared_ptr<ModuleConfiguration> &fomodFile);
+  void createStepViewModels();
 };
 
 

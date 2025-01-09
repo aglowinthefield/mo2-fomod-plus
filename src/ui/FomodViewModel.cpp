@@ -7,9 +7,12 @@
  * @param fomodFile 
  * @param infoFile 
  */
-FomodViewModel::FomodViewModel(MOBase::IOrganizer *organizer, const std::shared_ptr<ModuleConfiguration> &fomodFile,
-                               const std::shared_ptr<FomodInfoFile> &infoFile)
-: mOrganizer(organizer), mFomodFile(fomodFile), mInfoFile(infoFile), mConditionTester(organizer), mInfoViewModel(infoFile) {}
+FomodViewModel::FomodViewModel(MOBase::IOrganizer *organizer,
+                               std::unique_ptr<ModuleConfiguration> fomodFile,
+                               std::unique_ptr<FomodInfoFile> infoFile)
+: mOrganizer(organizer), mFomodFile(std::move(fomodFile)), mInfoFile(std::move(infoFile)), mConditionTester(organizer),
+  mInfoViewModel(std::move(infoFile)) {
+}
 
 /**
  *
@@ -19,9 +22,10 @@ FomodViewModel::FomodViewModel(MOBase::IOrganizer *organizer, const std::shared_
  * @return
  */
 std::shared_ptr<FomodViewModel> FomodViewModel::create(MOBase::IOrganizer *organizer,
-  const std::shared_ptr<ModuleConfiguration> &fomodFile, const std::shared_ptr<FomodInfoFile> &infoFile) {
-  auto viewModel = std::make_shared<FomodViewModel>(organizer, fomodFile, infoFile);
-  viewModel->createStepViewModels(fomodFile);
+                                                       std::unique_ptr<ModuleConfiguration> fomodFile,
+                                                       std::unique_ptr<FomodInfoFile> infoFile) {
+  auto viewModel = std::make_shared<FomodViewModel>(organizer, std::move(fomodFile), std::move(infoFile));
+  viewModel->createStepViewModels();
   viewModel->mActiveStep = viewModel->mSteps.at(0);
   viewModel->mActivePlugin = viewModel->getFirstPluginForActiveStep();
   std::cout << "Active Plugin: " << viewModel->mActivePlugin->getName() << std::endl;
@@ -88,10 +92,10 @@ void FomodViewModel::constructInitialStates() {
   }
 }
 
-void FomodViewModel::createStepViewModels(const std::shared_ptr<ModuleConfiguration> &fomodFile) {
+void FomodViewModel::createStepViewModels() {
   shared_ptr_list<StepViewModel> stepViewModels;
 
-  for (const auto& installStep : fomodFile->installSteps.installSteps) {
+  for (const auto& installStep : mFomodFile->installSteps.installSteps) {
     std::vector<std::shared_ptr<GroupViewModel>> groupViewModels;
 
     for (const auto& group : installStep.optionalFileGroups.groups) {
