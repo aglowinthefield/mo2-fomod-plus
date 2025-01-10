@@ -6,7 +6,6 @@
 #include <iplugin.h>
 #include <iplugininstaller.h>
 #include <iplugininstallersimple.h>
-#include <QDialog>
 
 #include "FomodInstallerWindow.h"
 #include "xml/FomodInfoFile.h"
@@ -30,11 +29,11 @@ public:
   bool init(IOrganizer *organizer) override;
 
   // constant values
-  [[nodiscard]] QString name() const override { return StringConstants::Plugin::NAME; }
-  [[nodiscard]] QString author() const override { return StringConstants::Plugin::AUTHOR; }
-  [[nodiscard]] QString description() const override { return StringConstants::Plugin::DESCRIPTION; }
-  [[nodiscard]] VersionInfo version() const override { return {1, 0, 0, VersionInfo::RELEASE_FINAL}; }
-  [[nodiscard]] unsigned int priority() const override { return 120; /* Above installer_fomod's highest priority. */ }
+  [[nodiscard]] QString name() const override           { return StringConstants::Plugin::NAME; }
+  [[nodiscard]] QString author() const override         { return StringConstants::Plugin::AUTHOR; }
+  [[nodiscard]] QString description() const override    { return StringConstants::Plugin::DESCRIPTION; }
+  [[nodiscard]] VersionInfo version() const override    { return {1, 0, 0, VersionInfo::RELEASE_FINAL}; }
+  [[nodiscard]] unsigned int priority() const override  { return 120; /* Above installer_fomod's highest priority. */ }
   [[nodiscard]] bool isManualInstaller() const override { return false; }
 
   [[nodiscard]] bool isArchiveSupported(std::shared_ptr<const IFileTree> tree) const override;

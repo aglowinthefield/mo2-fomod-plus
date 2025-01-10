@@ -32,11 +32,11 @@ FomodInstallerWindow::FomodInstallerWindow(
   InstallerFomodPlus *installer,
   const GuessedValue<QString> &modName,
   const std::shared_ptr<IFileTree> &tree,
-  const QString &fomodPath,
+  QString fomodPath,
   const std::shared_ptr<FomodViewModel> &viewModel,
   QWidget *parent): QDialog(parent),
                                                      mInstaller(installer),
-                                                     mFomodPath(fomodPath),
+                                                     mFomodPath(std::move(fomodPath)),
                                                      mModName(modName),
                                                      mTree(tree),
                                                      mViewModel(viewModel)

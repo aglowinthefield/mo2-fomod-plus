@@ -48,8 +48,8 @@ void FomodViewModel::collectFlags() {
   if (mSteps.empty()) {
     return;
   }
-  for (const auto step : mSteps) {
-    for (auto flagDependency : step->installStep->visible.dependencies.flagDependencies) {
+  for (const auto& step : mSteps) {
+    for (const auto& flagDependency : step->installStep->visible.dependencies.flagDependencies) {
       mFlags.setFlag(flagDependency.flag, "");
     }
   }
@@ -57,12 +57,12 @@ void FomodViewModel::collectFlags() {
 
 void FomodViewModel::constructInitialStates() {
   // For each group, "select" the correct plugin based on the spec.
-  for (const auto step : mSteps) {
-    for (const auto group : step->getGroups()) {
+  for (const auto& step : mSteps) {
+    for (const auto& group : step->getGroups()) {
       switch (group->getType()) {
         case SelectExactlyOne:
           // Mark the first option that doesn't fail its condition as active
-          for (auto plugin : group->getPlugins()) {
+          for (const auto& plugin : group->getPlugins()) {
             if (mConditionTester.getPluginTypeDescriptorState(plugin->getPlugin(), mFlags) != PluginTypeEnum::NotUsable) {
               togglePlugin(group, plugin, true);
               break;
@@ -73,7 +73,7 @@ void FomodViewModel::constructInitialStates() {
           break;
         case SelectAll:
           // set every plugin in this group to be checked and disabled
-            for (auto plugin : group->getPlugins()) {
+            for (const auto& plugin : group->getPlugins()) {
               togglePlugin(group, plugin, true);
               plugin->setEnabled(false);
             }
@@ -112,9 +112,9 @@ void FomodViewModel::createStepViewModels() {
 
 // onpluginselected should also take a group option to set the values for the other plugins, possibly
 // TODO: Handle groups later
-void FomodViewModel::togglePlugin(std::shared_ptr<GroupViewModel>, const std::shared_ptr<PluginViewModel> &plugin, const bool selected) {
+void FomodViewModel::togglePlugin(const std::shared_ptr<GroupViewModel>&, const std::shared_ptr<PluginViewModel> &plugin, const bool selected) {
   plugin->setSelected(selected);
-  for (auto flag : plugin->getPlugin()->conditionFlags.flags) {
+  for (const auto& flag : plugin->getPlugin()->conditionFlags.flags) {
     if (selected) {
       mFlags.setFlag(flag.name, flag.value);
     } else {

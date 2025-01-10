@@ -5,7 +5,7 @@
 static bool isResourceMovie(const QString& path)
 {
   const auto formats = QMovie::supportedFormats();
-  return std::any_of(formats.begin(), formats.end(), [&path](const QByteArray& format) {
+  return std::ranges::any_of(formats, [&path](const QByteArray& format) {
     return path.endsWith("." + QString::fromUtf8(format));
   });
 }
@@ -14,7 +14,7 @@ ScaleLabel::ScaleLabel(QWidget* parent) : QLabel(parent) {}
 
 void ScaleLabel::setScalableResource(const QString& path)
 {
-  if (auto m = movie()) {
+  if (const auto m = movie()) {
     setMovie(nullptr);
     delete m;
     mOriginalMovieSize = QSize();
@@ -35,7 +35,7 @@ void ScaleLabel::setScalableResource(const QString& path)
   }
 }
 
-void ScaleLabel::setStatic(bool isStatic)
+void ScaleLabel::setStatic(const bool isStatic)
 {
   misStatic = isStatic;
 
@@ -72,7 +72,7 @@ void ScaleLabel::setScalableMovie(const QString& path)
 
 void ScaleLabel::setScalableImage(const QString& path)
 {
-  if (QImage image(path); image.isNull()) {
+  if (const QImage image(path); image.isNull()) {
     qWarning(">%s< is a null image", qUtf8Printable(path));
   } else {
     mUnscaledImage = image;
@@ -94,7 +94,7 @@ void ScaleLabel::resizeEvent(QResizeEvent* event)
       m->stop();
     }
   }
-  if (auto p = pixmap(); !p.isNull()) {
+  if (const auto p = pixmap(); !p.isNull()) {
     setPixmap(
         QPixmap::fromImage(mUnscaledImage).scaled(event->size(), Qt::KeepAspectRatio));
   }

@@ -8,11 +8,9 @@
 
 #include "InstallerFomodPlus.h"
 #include "xml/ModuleConfiguration.h"
-#include "xml/FomodInfoFile.h"
 
 #include <QDialog>
 #include <qradiobutton.h>
-#include <QWidget>
 #include <QStackedWidget>
 #include <QTextEdit>
 #include <ui/ScaleLabel.h>
@@ -45,7 +43,7 @@ public:
   FomodInstallerWindow(InstallerFomodPlus *installer,
                        const GuessedValue<QString> &modName,
                        const std::shared_ptr<IFileTree> &tree,
-                       const QString &fomodPath,
+                       QString fomodPath,
                        const std::shared_ptr<FomodViewModel> &viewModel,
                        QWidget *parent = nullptr);
 

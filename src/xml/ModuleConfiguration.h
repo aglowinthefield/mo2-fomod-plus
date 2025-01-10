@@ -246,10 +246,6 @@ public:
 
   bool deserialize(const std::string &filePath);
 
-  ModuleConfiguration();
-
-  ~ModuleConfiguration();
-
   [[nodiscard]] Plugin getFirstPluginForStepIndex(int index);
   [[nodiscard]] std::string getImageForPlugin(const Plugin &plugin) const;
 };

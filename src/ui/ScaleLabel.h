@@ -2,7 +2,6 @@
 #define SCALELABEL_H
 
 // Taken from https://github.com/ModOrganizer2/modorganizer-installer_fomod/blob/master/src/scalelabel.h
-#include <QImage>
 #include <QLabel>
 #include <QMovie>
 
@@ -14,10 +13,8 @@ public:
 
   void setScalableResource(const QString& path);
   void setStatic(bool isStatic);
-  signals:
 
-  public slots:
-  protected:
+protected:
   void resizeEvent(QResizeEvent* event) override;
 
 private:

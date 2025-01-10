@@ -90,10 +90,10 @@ public:
   }
 
   // Accessor methods
-  std::string getName() const { return mName; }
-  std::string getVersion() const { return mVersion; }
-  std::string getAuthor() const { return mAuthor; }
-  std::string getWebsite() const { return mWebsite; }
+  [[nodiscard]] std::string getName() const    { return mName; }
+  [[nodiscard]] std::string getVersion() const { return mVersion; }
+  [[nodiscard]] std::string getAuthor() const  { return mAuthor; }
+  [[nodiscard]] std::string getWebsite() const { return mWebsite; }
 
 private:
   std::string mName;
@@ -153,7 +153,7 @@ public:
 
   void collectFlags();
 
-  void togglePlugin(std::shared_ptr<GroupViewModel>, const std::shared_ptr<PluginViewModel> &plugin, bool selected);
+  void togglePlugin(const std::shared_ptr<GroupViewModel>&, const std::shared_ptr<PluginViewModel> &plugin, bool selected);
 
   void constructInitialStates();
 

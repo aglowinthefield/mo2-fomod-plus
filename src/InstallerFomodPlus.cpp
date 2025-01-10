@@ -138,12 +138,12 @@ void InstallerFomodPlus::appendImageFiles(vector<shared_ptr<const FileTreeEntry>
   }
 }
 
-void InstallerFomodPlus::onInstallationStart(QString const &archive, bool reinstallation,
+void InstallerFomodPlus::onInstallationStart(QString const &archive, const bool reinstallation,
                                              IModInterface *currentMod) {
   IPluginInstallerSimple::onInstallationStart(archive, reinstallation, currentMod);
 }
 
-void InstallerFomodPlus::onInstallationEnd(EInstallResult result, IModInterface *newMod) {
+void InstallerFomodPlus::onInstallationEnd(const EInstallResult result, IModInterface *newMod) {
   IPluginInstallerSimple::onInstallationEnd(result, newMod);
 }
 
