@@ -157,6 +157,7 @@ public:
   std::string source;
   std::string destination;
   int priority{0};
+  bool isFolder;
   bool deserialize(pugi::xml_node &node) override;
 };
 

@@ -146,6 +146,7 @@ bool File::deserialize(pugi::xml_node &node) {
   source = node.attribute("source").as_string();
   destination = node.attribute("destination").as_string();
   priority = node.attribute("priority").as_int();
+  isFolder = strcmp(node.name(), "folder") == 0;
   return true;
 }
 
