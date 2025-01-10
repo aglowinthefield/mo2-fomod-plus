@@ -157,6 +157,8 @@ public:
 
   void constructInitialStates();
 
+  void processPluginConditions();
+
 private:
 
   // Constructor members

@@ -11,6 +11,8 @@
 #include "xml/FomodInfoFile.h"
 #include "xml/ModuleConfiguration.h"
 
+#include <QDialog>
+
 class FomodInstallerWindow;
 
 using namespace MOBase;

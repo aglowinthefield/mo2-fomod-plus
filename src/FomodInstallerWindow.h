@@ -16,6 +16,7 @@
 #include <ui/ScaleLabel.h>
 
 #include "FomodInstallerWindow.h"
+#include "lib/FileInstaller.h"
 #include "ui/FomodViewModel.h"
 
 using namespace MOBase;
@@ -53,6 +54,8 @@ public:
     return mIsManualInstall;
   }
 
+  std::shared_ptr<FileInstaller> getInstaller() { return mFileInstaller; }
+
 private slots:
   void onNextClicked();
   void onPluginToggled(bool selected, const std::shared_ptr<GroupViewModel> &group, const std::shared_ptr<PluginViewModel> &plugin) const;
@@ -61,9 +64,9 @@ private slots:
   // void updateNextVisibleStepIndex();
 
   void onBackClicked() const;
-  void onInstallClicked() { this->accept(); }
   void onCancelClicked() { this->reject(); }
   void onManualClicked() { mIsManualInstall = true; this->reject(); }
+  void onInstallClicked() { this->accept(); }
 
 private:
   InstallerFomodPlus *mInstaller;
@@ -71,6 +74,7 @@ private:
   GuessedValue<QString> mModName;
   std::shared_ptr<IFileTree> mTree;
   std::shared_ptr<FomodViewModel> mViewModel;
+  std::shared_ptr<FileInstaller> mFileInstaller;
 
   // Meta
   bool mIsManualInstall{};
@@ -107,6 +111,9 @@ private:
 
   QCheckBox *createPluginCheckBox(const std::shared_ptr<PluginViewModel> &plugin,
                                   const std::shared_ptr<GroupViewModel> &group, QWidget *parent);
+
+  void renderSelectAtLeastOne(QWidget *parent, QLayout *parentLayout,
+                              const std::shared_ptr<GroupViewModel> &group);
 
   QButtonGroup *renderSelectExactlyOne(QWidget *parent, QLayout *parentLayout, const std::shared_ptr<GroupViewModel> &group);
 

@@ -31,7 +31,6 @@ std::shared_ptr<FomodViewModel> FomodViewModel::create(MOBase::IOrganizer *organ
                                                        std::unique_ptr<FomodInfoFile> infoFile) {
   auto viewModel = std::make_shared<FomodViewModel>(organizer, std::move(fomodFile), std::move(infoFile));
   viewModel->createStepViewModels();
-  viewModel->constructInitialStates();
   viewModel->mActiveStep = viewModel->mSteps.at(0);
   viewModel->mActivePlugin = viewModel->getFirstPluginForActiveStep();
   std::cout << "Active Plugin: " << viewModel->mActivePlugin->getName() << std::endl;
@@ -70,6 +69,11 @@ void FomodViewModel::constructInitialStates() {
           }
           break;
         case SelectAtLeastOne:
+          if (group->getPlugins().size() == 1) {
+            group->getPlugins()[0]->setEnabled(false);
+            group->getPlugins()[0]->setSelected(true);
+            break;
+          }
           break;
         case SelectAll:
           // set every plugin in this group to be checked and disabled
@@ -83,6 +87,10 @@ void FomodViewModel::constructInitialStates() {
       }
     }
   }
+}
+
+void FomodViewModel::processPluginConditions() {
+
 }
 
 void FomodViewModel::createStepViewModels() {
@@ -105,9 +113,11 @@ void FomodViewModel::createStepViewModels() {
     stepViewModels.emplace_back(stepViewModel);
   }
   // TODO Sort the view models here, maybe
+  mSteps = std::move(stepViewModels);
   collectFlags();
   updateVisibleSteps();
-  mSteps = std::move(stepViewModels);
+  constructInitialStates();
+  processPluginConditions();
 }
 
 // TODO: Handle groups later
