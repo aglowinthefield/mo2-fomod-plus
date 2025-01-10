@@ -2,7 +2,7 @@
 #include "../src/xml/ModuleConfiguration.h"
 #include <filesystem>
 
-class MCCityTrees : public ::testing::Test {
+class MCCityTrees : public testing::Test {
 protected:
   ModuleConfiguration moduleConfig;
 

@@ -2,6 +2,8 @@
 #define FILEINSTALLER_H
 #include <ifiletree.h>
 
+#include "ConditionTester.h"
+#include "FlagMap.h"
 #include "xml/ModuleConfiguration.h"
 
 
@@ -19,14 +21,27 @@
 // - Copy all conditionalInstall files
 // - Copy all selected files from steps that were visible to the user at the point of install
 
+class StepViewModel;
+
 class FileInstaller {
 public:
-  FileInstaller(const std::shared_ptr<MOBase::IFileTree> &fileTree, std::unique_ptr<ModuleConfiguration> fomodFile);
+  FileInstaller(
+    MOBase::IOrganizer* organizer,
+    const std::shared_ptr<MOBase::IFileTree> &fileTree,
+    std::unique_ptr<ModuleConfiguration> fomodFile,
+    const std::vector<std::shared_ptr<StepViewModel>> &steps);
   std::shared_ptr<MOBase::IFileTree> install();
 
+
 private:
+  MOBase::IOrganizer* mOrganizer;
   std::shared_ptr<MOBase::IFileTree> mFileTree;
   std::unique_ptr<ModuleConfiguration> mFomodFile;
+  FlagMap mFlagMap;
+  ConditionTester mConditionTester;
+  std::vector<std::shared_ptr<StepViewModel>> mSteps; // TODO: Maybe this is nasty. Idk.
+
+  std::vector<File> collectFilesToInstall() const;
 };
 
 
