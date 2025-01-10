@@ -131,6 +131,16 @@ bool FileList::deserialize(pugi::xml_node &node) {
   return true;
 }
 
+bool ConditionalFileInstallPattern::deserialize(pugi::xml_node &node) {
+  pugi::xml_node dependenciesNode = node.child("dependencies");
+  pugi::xml_node filesNode = node.child("files");
+
+  dependencies.deserialize(dependenciesNode);
+  files.deserialize(filesNode);
+
+  return true;
+}
+
 // <flag name="2">On</flag>
 bool ConditionFlag::deserialize(pugi::xml_node &node) {
   name = node.attribute("name").as_string();
@@ -195,6 +205,12 @@ bool InstallStep::deserialize(pugi::xml_node &node) {
   return true;
 }
 
+bool ConditionalFileInstall::deserialize(pugi::xml_node &node) {
+  pugi::xml_node patternsNode = node.child("patterns");
+  deserializeList(patternsNode, "pattern", patterns);
+  return true;
+}
+
 bool StepList::deserialize(pugi::xml_node &node) {
   deserializeList(node, "installStep", installSteps);
   order = XmlHelper::getOrderType(node.attribute("order").as_string());
@@ -231,6 +247,9 @@ bool ModuleConfiguration::deserialize(const std::string &filePath) {
 
   pugi::xml_node installStepsNode = configNode.child("installSteps");
   installSteps.deserialize(installStepsNode);
+
+  pugi::xml_node conditionalFileInstallsNode = configNode.child("conditionalFileInstalls");
+  conditionalFileInstalls.deserialize(conditionalFileInstallsNode);
 
   return true;
 }

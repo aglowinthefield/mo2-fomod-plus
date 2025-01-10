@@ -161,9 +161,17 @@ public:
   bool deserialize(pugi::xml_node &node) override;
 };
 
+
 class FileList final : public XmlDeserializable {
 public:
   std::vector<File> files;
+  bool deserialize(pugi::xml_node &node) override;
+};
+
+class ConditionalFileInstallPattern final : public XmlDeserializable {
+public:
+  CompositeDependency dependencies;
+  FileList files;
   bool deserialize(pugi::xml_node &node) override;
 };
 
@@ -229,6 +237,12 @@ public:
   bool deserialize(pugi::xml_node &node) override;
 };
 
+class ConditionalFileInstall final : public XmlDeserializable {
+public:
+  std::vector<ConditionalFileInstallPattern> patterns;
+  bool deserialize(pugi::xml_node &node) override;
+};
+
 class StepList final : public XmlDeserializable, public OrderedContents<InstallStep> {
 public:
   std::vector<InstallStep> installSteps;
@@ -244,6 +258,7 @@ public:
   CompositeDependency moduleDependencies;
   FileList requiredInstallFiles;
   StepList installSteps;
+  ConditionalFileInstall conditionalFileInstalls;
 
   bool deserialize(const std::string &filePath);
 

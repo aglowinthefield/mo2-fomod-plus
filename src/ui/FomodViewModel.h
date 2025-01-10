@@ -173,11 +173,11 @@ private:
   std::shared_ptr<PluginViewModel> mActivePlugin = nullptr; // TODO: This will update on hover and click
   std::shared_ptr<StepViewModel> mActiveStep = nullptr;
   std::vector<int> mVisibleStepIndices;
+  void createStepViewModels();
 
   // Indices
   int mCurrentStepIndex{0};
 
-  void createStepViewModels();
 };
 
 
