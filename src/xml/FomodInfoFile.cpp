@@ -3,7 +3,7 @@
 #include <format>
 #include <pugixml.hpp>
 
-#include "../util/stringutil.h"
+#include "../lib/stringutil.h"
 
 bool FomodInfoFile::deserialize(const std::string &filePath) {
     pugi::xml_document doc;

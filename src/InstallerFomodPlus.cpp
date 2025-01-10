@@ -9,7 +9,7 @@
 
 #include "FomodInstallerWindow.h"
 #include "ui/FomodViewModel.h"
-#include "util/stringutil.h"
+#include "lib/stringutil.h"
 
 bool InstallerFomodPlus::init(IOrganizer *organizer) {
   m_Organizer = organizer;

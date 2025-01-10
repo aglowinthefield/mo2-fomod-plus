@@ -3,8 +3,8 @@
 #include <imoinfo.h>
 #include <string>
 
-#include "../util/FlagMap.h"
-#include "../util/ConditionTester.h"
+#include "../lib/FlagMap.h"
+#include "../lib/ConditionTester.h"
 #include "xml/FomodInfoFile.h"
 
 template<typename T>

@@ -110,7 +110,6 @@ void FomodViewModel::createStepViewModels() {
   mSteps = std::move(stepViewModels);
 }
 
-
 // onpluginselected should also take a group option to set the values for the other plugins, possibly
 // TODO: Handle groups later
 void FomodViewModel::togglePlugin(std::shared_ptr<GroupViewModel>, const std::shared_ptr<PluginViewModel> &plugin, const bool selected) {
