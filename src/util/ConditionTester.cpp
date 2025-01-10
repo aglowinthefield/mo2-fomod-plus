@@ -69,7 +69,7 @@ FileDependencyTypeEnum ConditionTester::getFileDependencyStateForPlugin(const st
   return state;
 }
 
-PluginTypeEnum ConditionTester::getPluginTypeDescriptorState(const Plugin &plugin, const FlagMap &flags) const {
+PluginTypeEnum ConditionTester::getPluginTypeDescriptorState(const std::shared_ptr<Plugin> &plugin, const FlagMap &flags) const {
   // NOTE: A plugin's ConditionFlags aren't the same thing as a step visibility one.
   // A plugin's ConditionFlags are toggled based on the selection state of the plugin
   // We only evaluate the typeDescriptor here.
@@ -79,10 +79,10 @@ PluginTypeEnum ConditionTester::getPluginTypeDescriptorState(const Plugin &plugi
 
   // TODO: Cache the fileDependencyStates
 
-  for (auto pattern : plugin.typeDescriptor.dependencyType.patterns.patterns) {
+  for (auto pattern : plugin->typeDescriptor.dependencyType.patterns.patterns) {
     if (testCompositeDependency(flags, pattern.dependencies)) {
       return pattern.type.name;
     }
   }
-  return plugin.typeDescriptor.dependencyType.defaultType.name;
+  return plugin->typeDescriptor.dependencyType.defaultType.name;
 }

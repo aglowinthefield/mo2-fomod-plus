@@ -25,7 +25,7 @@ private:
 
   [[nodiscard]] FileDependencyTypeEnum getFileDependencyStateForPlugin(const std::string& pluginName) const;
 
-  PluginTypeEnum getPluginTypeDescriptorState(const Plugin &plugin, const FlagMap &flags) const;
+  PluginTypeEnum getPluginTypeDescriptorState(const std::shared_ptr<Plugin> &plugin, const FlagMap &flags) const;
   mutable std::unordered_map<std::string, FileDependencyTypeEnum> pluginStateCache;
 
 };

@@ -122,7 +122,9 @@ public:
     std::unique_ptr<ModuleConfiguration> fomodFile,
     std::unique_ptr<FomodInfoFile> infoFile);
 
-  [[nodiscard]] std::shared_ptr<PluginViewModel> getFirstPluginForActiveStep() const;
+  [[nodiscard]] std::shared_ptr<PluginViewModel> getFirstPluginForActiveStep() const {
+    return mActiveStep->getGroups().at(0)->getPlugins().at(0);
+  };
 
   // Steps
   [[nodiscard]] shared_ptr_list<StepViewModel> getSteps() const { return mSteps; }
@@ -168,7 +170,7 @@ private:
   // TODO: This is a LOT of shared_ptr nonsense. It works for now but I need to understand it better to fix it.
   InfoViewModel mInfoViewModel;
   std::vector<std::shared_ptr<StepViewModel>> mSteps;
-  std::shared_ptr<PluginViewModel> mActivePlugin = nullptr;
+  std::shared_ptr<PluginViewModel> mActivePlugin = nullptr; // TODO: This will update on hover and click
   std::shared_ptr<StepViewModel> mActiveStep = nullptr;
   std::vector<int> mVisibleStepIndices;
 

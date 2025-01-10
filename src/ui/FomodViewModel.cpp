@@ -31,6 +31,7 @@ std::shared_ptr<FomodViewModel> FomodViewModel::create(MOBase::IOrganizer *organ
                                                        std::unique_ptr<FomodInfoFile> infoFile) {
   auto viewModel = std::make_shared<FomodViewModel>(organizer, std::move(fomodFile), std::move(infoFile));
   viewModel->createStepViewModels();
+  viewModel->constructInitialStates();
   viewModel->mActiveStep = viewModel->mSteps.at(0);
   viewModel->mActivePlugin = viewModel->getFirstPluginForActiveStep();
   std::cout << "Active Plugin: " << viewModel->mActivePlugin->getName() << std::endl;
@@ -61,6 +62,12 @@ void FomodViewModel::constructInitialStates() {
       switch (group->getType()) {
         case SelectExactlyOne:
           // Mark the first option that doesn't fail its condition as active
+          for (auto plugin : group->getPlugins()) {
+            if (mConditionTester.getPluginTypeDescriptorState(plugin->getPlugin(), mFlags) != PluginTypeEnum::NotUsable) {
+              togglePlugin(group, plugin, true);
+              break;
+            }
+          }
           break;
         case SelectAtLeastOne:
           break;
@@ -104,14 +111,6 @@ void FomodViewModel::createStepViewModels() {
 }
 
 
-std::shared_ptr<PluginViewModel> FomodViewModel::getFirstPluginForActiveStep() const {
-  if (mSteps.empty()) {
-    throw std::runtime_error("No steps found in FomodViewModel");
-  }
-  return mActiveStep->getGroups().at(0)->getPlugins().at(0);
-}
-
-
 // onpluginselected should also take a group option to set the values for the other plugins, possibly
 // TODO: Handle groups later
 void FomodViewModel::togglePlugin(std::shared_ptr<GroupViewModel>, const std::shared_ptr<PluginViewModel> &plugin, const bool selected) {
@@ -123,6 +122,7 @@ void FomodViewModel::togglePlugin(std::shared_ptr<GroupViewModel>, const std::sh
       mFlags.setFlag(flag.name, "");
     }
   }
+  mActivePlugin = plugin;
   updateVisibleSteps();
 }
 
@@ -160,6 +160,7 @@ void FomodViewModel::stepBack() {
   if (it != mVisibleStepIndices.end() && it != mVisibleStepIndices.begin()) {
     mCurrentStepIndex = *std::prev(it);
     mActiveStep = mSteps[mCurrentStepIndex];
+    mActivePlugin = getFirstPluginForActiveStep();
   }
 }
 
@@ -168,6 +169,7 @@ void FomodViewModel::stepForward() {
   if (it != mVisibleStepIndices.end() && std::next(it) != mVisibleStepIndices.end()) {
     mCurrentStepIndex = *std::next(it);
     mActiveStep = mSteps[mCurrentStepIndex];
+    mActivePlugin = getFirstPluginForActiveStep();
   }
 }
 
