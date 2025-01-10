@@ -122,11 +122,7 @@ public:
     std::unique_ptr<ModuleConfiguration> fomodFile,
     std::unique_ptr<FomodInfoFile> infoFile);
 
-
-  ~FomodViewModel();
-
   [[nodiscard]] std::shared_ptr<PluginViewModel> getFirstPluginForActiveStep() const;
-
 
   // Steps
   [[nodiscard]] shared_ptr_list<StepViewModel> getSteps() const { return mSteps; }
@@ -135,8 +131,6 @@ public:
   [[nodiscard]] bool isStepVisible(int stepIndex) const;
 
   void updateVisibleSteps();
-
-  [[nodiscard]] NEXT_OP getNextOp() const { return mNextOp; }
 
   // Flags
   void setFlag(const std::string &flag, const std::string &value);
@@ -154,8 +148,6 @@ public:
   bool isLastVisibleStep() const;
 
   void stepForward();
-
-  void calculateNextStepIndex();
 
   void collectFlags();
 
@@ -182,9 +174,6 @@ private:
 
   // Indices
   int mCurrentStepIndex{0};
-  int mNextStepIndex{0};
-  NEXT_OP mNextOp{NEXT_OP::NEXT};
-
 
   void createStepViewModels();
 };

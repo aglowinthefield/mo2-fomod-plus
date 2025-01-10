@@ -1,6 +1,11 @@
 ﻿#include "FomodViewModel.h"
 #include "xml/ModuleConfiguration.h"
 
+/*
+--------------------------------------------------------------------------------
+                               Lifecycle
+--------------------------------------------------------------------------------
+*/
 /**
  * 
  * @param organizer
@@ -28,23 +33,15 @@ std::shared_ptr<FomodViewModel> FomodViewModel::create(MOBase::IOrganizer *organ
   viewModel->createStepViewModels();
   viewModel->mActiveStep = viewModel->mSteps.at(0);
   viewModel->mActivePlugin = viewModel->getFirstPluginForActiveStep();
-  viewModel->calculateNextStepIndex();
   std::cout << "Active Plugin: " << viewModel->mActivePlugin->getName() << std::endl;
   return viewModel;
 }
 
-
-FomodViewModel::~FomodViewModel() {
-  std::cout << "FomodViewModel destructor called" << std::endl;
-}
-
-
-std::shared_ptr<PluginViewModel> FomodViewModel::getFirstPluginForActiveStep() const {
-  if (mSteps.empty()) {
-    throw std::runtime_error("No steps found in FomodViewModel");
-  }
-  return mActiveStep->getGroups().at(0)->getPlugins().at(0);
-}
+/*
+--------------------------------------------------------------------------------
+                               Initialization
+--------------------------------------------------------------------------------
+*/
 
 void FomodViewModel::collectFlags() {
   if (mSteps.empty()) {
@@ -55,20 +52,6 @@ void FomodViewModel::collectFlags() {
       mFlags.setFlag(flagDependency.flag, "");
     }
   }
-}
-
-// onpluginselected should also take a group option to set the values for the other plugins, possibly
-// TODO: Handle groups later
-void FomodViewModel::togglePlugin(std::shared_ptr<GroupViewModel>, const std::shared_ptr<PluginViewModel> &plugin, const bool selected) {
-  plugin->setSelected(selected);
-  for (auto flag : plugin->getPlugin()->conditionFlags.flags) {
-    if (selected) {
-      mFlags.setFlag(flag.name, flag.value);
-    } else {
-      mFlags.setFlag(flag.name, "");
-    }
-  }
-  updateVisibleSteps();
 }
 
 void FomodViewModel::constructInitialStates() {
@@ -120,6 +103,35 @@ void FomodViewModel::createStepViewModels() {
   mSteps = std::move(stepViewModels);
 }
 
+
+std::shared_ptr<PluginViewModel> FomodViewModel::getFirstPluginForActiveStep() const {
+  if (mSteps.empty()) {
+    throw std::runtime_error("No steps found in FomodViewModel");
+  }
+  return mActiveStep->getGroups().at(0)->getPlugins().at(0);
+}
+
+
+// onpluginselected should also take a group option to set the values for the other plugins, possibly
+// TODO: Handle groups later
+void FomodViewModel::togglePlugin(std::shared_ptr<GroupViewModel>, const std::shared_ptr<PluginViewModel> &plugin, const bool selected) {
+  plugin->setSelected(selected);
+  for (auto flag : plugin->getPlugin()->conditionFlags.flags) {
+    if (selected) {
+      mFlags.setFlag(flag.name, flag.value);
+    } else {
+      mFlags.setFlag(flag.name, "");
+    }
+  }
+  updateVisibleSteps();
+}
+
+
+/*
+--------------------------------------------------------------------------------
+                               Step Visibility
+--------------------------------------------------------------------------------
+*/
 bool FomodViewModel::isStepVisible(const int stepIndex) const {
   const auto step = mSteps[stepIndex]->installStep;
   return mConditionTester.isStepVisible(mFlags, step.get());
@@ -134,16 +146,21 @@ void FomodViewModel::updateVisibleSteps() {
   }
 }
 
+bool FomodViewModel::isLastVisibleStep() const {
+  return !mVisibleStepIndices.empty() && mCurrentStepIndex == mVisibleStepIndices.back();
+}
+
+/*
+--------------------------------------------------------------------------------
+                               Navigation
+--------------------------------------------------------------------------------
+*/
 void FomodViewModel::stepBack() {
   const auto it = std::ranges::find(mVisibleStepIndices, mCurrentStepIndex);
   if (it != mVisibleStepIndices.end() && it != mVisibleStepIndices.begin()) {
     mCurrentStepIndex = *std::prev(it);
     mActiveStep = mSteps[mCurrentStepIndex];
   }
-}
-
-bool FomodViewModel::isLastVisibleStep() const {
-  return !mVisibleStepIndices.empty() && mCurrentStepIndex == mVisibleStepIndices.back();
 }
 
 void FomodViewModel::stepForward() {
@@ -154,20 +171,11 @@ void FomodViewModel::stepForward() {
   }
 }
 
-void FomodViewModel::calculateNextStepIndex() {
-  mNextStepIndex = mCurrentStepIndex;
-
-  while (mNextStepIndex + 1 < mSteps.size() && !isStepVisible(mNextStepIndex + 1)) {
-    mNextStepIndex++;
-  }
-
-  if (mNextStepIndex == mCurrentStepIndex) {
-    mNextOp = NEXT_OP::INSTALL;
-  } else {
-    mNextOp = NEXT_OP::NEXT;
-  }
-}
-
+/*
+--------------------------------------------------------------------------------
+                               Flags
+--------------------------------------------------------------------------------
+*/
 void FomodViewModel::setFlag(const std::string &flag, const std::string &value) {
   mFlags.setFlag(flag, value);
 }

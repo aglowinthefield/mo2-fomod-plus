@@ -55,7 +55,7 @@ FomodInstallerWindow::FomodInstallerWindow(
 }
 
 void FomodInstallerWindow::onNextClicked() {
-  if (mViewModel->getNextOp() == NEXT_OP::NEXT) {
+  if (!mViewModel->isLastVisibleStep()) {
     mViewModel->stepForward();
     mInstallStepStack->setCurrentIndex(mViewModel->getCurrentStepIndex());
     updateButtons();
@@ -86,7 +86,7 @@ void FomodInstallerWindow::updateButtons() const {
     mBackButton->setEnabled(true);
   }
 
-  if (mViewModel->getNextOp() == NEXT_OP::INSTALL) {
+  if (mViewModel->isLastVisibleStep()) {
     mNextInstallButton->setText("Install");
   } else {
     mNextInstallButton->setText("Next");
@@ -157,7 +157,7 @@ QBoxLayout *FomodInstallerWindow::createContainerLayout() {
   layout->addWidget(bottomRow);
 
   // NOTE: Disable after debug done
-  UIHelper::setDebugBorders(this);
+  // UIHelper::setDebugBorders(this);
   return layout;
 }
 
@@ -214,7 +214,6 @@ QWidget* FomodInstallerWindow::createTopRow() {
   // the values of the metadata MINUS the search box
   auto* valuesColumn = new QVBoxLayout();
   QLabel* emptyLabel        = UIHelper::createLabel("", topRow);
-  // TODO Maybe these should have getters. idc at this point
   QLabel* authorValueLabel  = UIHelper::createLabel(mViewModel->getInfoViewModel().getAuthor().c_str(), topRow);
   QLabel* versionValueLabel = UIHelper::createLabel(mViewModel->getInfoViewModel().getVersion().c_str(), topRow);
   QLabel* websiteValueLabel = UIHelper::createHyperlink(mViewModel->getInfoViewModel().getWebsite().c_str(), topRow);
