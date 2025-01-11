@@ -29,13 +29,22 @@ std::shared_ptr<IFileTree> FileInstaller::install() const {
   for (const auto& file : filesToInstall) {
     if (file.isFolder) {
       const auto path = getQualifiedFilePath(file.source);
-      const auto source = mFileTree->find(QString::fromStdString(path), FileTreeEntry::DIRECTORY);
-      if (source == nullptr) {
+      const auto sourceDir = mFileTree->findDirectory(QString::fromStdString(path));
+      if (sourceDir == nullptr) {
         std::cerr << "Could not find source folder: " << file.source << std::endl;
         continue; // TODO: Return errors somehow. Maybe in a pair of filetree and errors
       }
-      installTree->addDirectory(QString::fromStdString(file.destination));
-      // Do I need to add every file in this directory?
+      const auto targetNode = installTree->addDirectory(QString::fromStdString(file.destination));
+
+      sourceDir->walk(
+        [&targetNode](QString const &currentPath, const std::shared_ptr<const FileTreeEntry> &entry) {
+        std::cout << "Walking: " << currentPath.toStdString() << std::endl;
+        std::cout << "Looking at: " << entry->name().toStdString() << std::endl;
+        if (!entry->isDir()) {
+          targetNode->copy(entry, ""); // need to do merge policy after overwrites/priorities are settled
+        }
+        return IFileTree::WalkReturn::CONTINUE;
+      });
 
     }
   }

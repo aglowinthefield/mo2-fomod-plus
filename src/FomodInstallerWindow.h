@@ -58,7 +58,7 @@ public:
 private slots:
   void onNextClicked();
   void onPluginToggled(bool selected, const std::shared_ptr<GroupViewModel> &group, const std::shared_ptr<PluginViewModel> &plugin) const;
-  void updateModName(const QString& name) {
+  void updateModName(const QString& name) const {
     mModName.update(name, GUESS_USER);
   }
 
