@@ -42,7 +42,7 @@ class FomodInstallerWindow final : public QDialog {
   Q_OBJECT
 public:
   FomodInstallerWindow(InstallerFomodPlus *installer,
-                       const GuessedValue<QString> &modName,
+                       GuessedValue<QString> &modName,
                        const std::shared_ptr<IFileTree> &tree,
                        QString fomodPath,
                        const std::shared_ptr<FomodViewModel> &viewModel,
@@ -53,28 +53,28 @@ public:
   [[nodiscard]] bool isManualInstall() const {
     return mIsManualInstall;
   }
-
-  std::shared_ptr<FileInstaller> getInstaller() { return mFileInstaller; }
+  [[nodiscard]] std::shared_ptr<FileInstaller> getFileInstaller() const { return mViewModel->getFileInstaller(); }
 
 private slots:
   void onNextClicked();
   void onPluginToggled(bool selected, const std::shared_ptr<GroupViewModel> &group, const std::shared_ptr<PluginViewModel> &plugin) const;
+  void updateModName(const QString& name) {
+    mModName.update(name, GUESS_USER);
+  }
 
-
-  // void updateNextVisibleStepIndex();
 
   void onBackClicked() const;
   void onCancelClicked() { this->reject(); }
   void onManualClicked() { mIsManualInstall = true; this->reject(); }
-  void onInstallClicked() { this->accept(); }
+  void onInstallClicked();
+
 
 private:
   InstallerFomodPlus *mInstaller;
   QString mFomodPath;
-  GuessedValue<QString> mModName;
+  GuessedValue<QString>& mModName;
   std::shared_ptr<IFileTree> mTree;
   std::shared_ptr<FomodViewModel> mViewModel;
-  std::shared_ptr<FileInstaller> mFileInstaller;
 
   // Meta
   bool mIsManualInstall{};
@@ -90,6 +90,7 @@ private:
   QStackedWidget* mInstallStepStack{};
   QWidget* mLeftPane{};
   QTextEdit* mDescriptionBox{};
+  QComboBox* mModNameInput{};
   ScaleLabel* mImageLabel{};
 
   // Fn

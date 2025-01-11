@@ -64,6 +64,9 @@ IPluginInstaller::EInstallResult InstallerFomodPlus::install(GuessedValue<QStrin
   );
 
   if (const QDialog::DialogCode result = showInstallerWindow(window); result == QDialog::Accepted) {
+    // modname was updated in window
+    const std::shared_ptr<IFileTree> installTree = window->getFileInstaller()->install();
+    tree = installTree;
     return RESULT_SUCCESS;
   }
   if (window->isManualInstall()) {

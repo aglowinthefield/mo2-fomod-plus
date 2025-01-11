@@ -5,6 +5,7 @@
 
 #include "../lib/FlagMap.h"
 #include "../lib/ConditionTester.h"
+#include "lib/FileInstaller.h"
 #include "xml/FomodInfoFile.h"
 
 template<typename T>
@@ -124,7 +125,7 @@ public:
 
   [[nodiscard]] std::shared_ptr<PluginViewModel> getFirstPluginForActiveStep() const {
     return mActiveStep->getGroups().at(0)->getPlugins().at(0);
-  };
+  }
 
   // Steps
   [[nodiscard]] shared_ptr_list<StepViewModel> getSteps() const { return mSteps; }
@@ -133,6 +134,8 @@ public:
   [[nodiscard]] bool isStepVisible(int stepIndex) const;
 
   void updateVisibleSteps();
+  void preinstall(const std::shared_ptr<MOBase::IFileTree> &tree, const QString& fomodPath);
+  std::shared_ptr<FileInstaller> getFileInstaller() { return mFileInstaller; }
 
   // Flags
   void setFlag(const std::string &flag, const std::string &value);
@@ -146,18 +149,9 @@ public:
 
   // Interactions
   void stepBack();
-
-  bool isLastVisibleStep() const;
-
   void stepForward();
-
-  void collectFlags();
-
+  bool isLastVisibleStep() const;
   void togglePlugin(const std::shared_ptr<GroupViewModel>&, const std::shared_ptr<PluginViewModel> &plugin, bool selected);
-
-  void constructInitialStates();
-
-  void processPluginConditions();
 
 private:
 
@@ -175,7 +169,12 @@ private:
   std::shared_ptr<PluginViewModel> mActivePlugin = nullptr; // TODO: This will update on hover and click
   std::shared_ptr<StepViewModel> mActiveStep = nullptr;
   std::vector<int> mVisibleStepIndices;
+  std::shared_ptr<FileInstaller> mFileInstaller = nullptr;
+
   void createStepViewModels();
+  void collectFlags();
+  void constructInitialStates();
+  void processPluginConditions();
 
   // Indices
   int mCurrentStepIndex{0};

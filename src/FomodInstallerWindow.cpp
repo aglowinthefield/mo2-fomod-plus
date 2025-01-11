@@ -30,7 +30,7 @@
  */
 FomodInstallerWindow::FomodInstallerWindow(
   InstallerFomodPlus *installer,
-  const GuessedValue<QString> &modName,
+  GuessedValue<QString> &modName,
   const std::shared_ptr<IFileTree> &tree,
   QString fomodPath,
   const std::shared_ptr<FomodViewModel> &viewModel,
@@ -75,6 +75,14 @@ void FomodInstallerWindow::onBackClicked() const {
   mInstallStepStack->setCurrentIndex(mViewModel->getCurrentStepIndex());
   updateButtons();
   updateDisplayForActivePlugin();
+}
+
+void FomodInstallerWindow::onInstallClicked() {
+  mModName.update(mModNameInput->currentText(), GUESS_USER);
+  mViewModel->preinstall(mTree, mFomodPath);
+  // now the installer is available in the outer scope
+  // the outer scope should call getFileInstaller() and install there.
+  this->accept();
 }
 
 void FomodInstallerWindow::updateButtons() const {
@@ -239,19 +247,19 @@ QWidget *FomodInstallerWindow::createTopRow() {
 }
 
 QComboBox *FomodInstallerWindow::createModNameComboBox() {
-  auto *modNameComboBox = new QComboBox(this);
-  modNameComboBox->setEditable(true);
+  mModNameInput = new QComboBox(this);
+  mModNameInput->setEditable(true);
 
   // To show the 'best' guess first, we reverse the variant order
   // TODO: Pick the proper guess based on quality instead and sort by quality?
-  std::vector variants(mModName.variants().begin(), mModName.variants().end());
-  ranges::reverse(variants);
+  // std::vector variants(mModName.variants().begin(), mModName.variants().end());
+  // ranges::reverse(variants);
 
-  for (const auto &variant: variants) {
-    modNameComboBox->addItem(variant);
+  for (const auto &variant: mModName.variants()) {
+    mModNameInput->addItem(variant);
   }
-  modNameComboBox->completer()->setCaseSensitivity(Qt::CaseSensitive);
-  return modNameComboBox;
+  mModNameInput->completer()->setCaseSensitivity(Qt::CaseSensitive);
+  return mModNameInput;
 }
 
 QWidget *FomodInstallerWindow::createBottomRow() {
@@ -322,7 +330,7 @@ QWidget *FomodInstallerWindow::createStepWidget(const std::shared_ptr<StepViewMo
   const auto scrollAreaContent = new QWidget(scrollArea);
   auto *scrollAreaLayout = new QVBoxLayout(scrollAreaContent);
 
-  for (const auto group: installStep->getGroups()) {
+  for (const auto& group: installStep->getGroups()) {
     const auto groupSection = renderGroup(group);
     scrollAreaLayout->addWidget(groupSection);
   }

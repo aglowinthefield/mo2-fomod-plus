@@ -27,14 +27,18 @@ class FileInstaller {
 public:
   FileInstaller(
     MOBase::IOrganizer* organizer,
+    const QString &fomodPath,
     const std::shared_ptr<MOBase::IFileTree> &fileTree,
     std::unique_ptr<ModuleConfiguration> fomodFile,
     const std::vector<std::shared_ptr<StepViewModel>> &steps);
-  std::shared_ptr<MOBase::IFileTree> install();
 
+  std::shared_ptr<MOBase::IFileTree> install() const;
+
+  std::string getQualifiedFilePath(const std::string &treePath) const;
 
 private:
   MOBase::IOrganizer* mOrganizer;
+  QString mFomodPath;
   std::shared_ptr<MOBase::IFileTree> mFileTree;
   std::unique_ptr<ModuleConfiguration> mFomodFile;
   FlagMap mFlagMap;
