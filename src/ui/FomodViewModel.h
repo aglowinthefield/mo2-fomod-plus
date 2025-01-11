@@ -154,6 +154,7 @@ public:
   void stepForward();
   bool isLastVisibleStep() const;
   void togglePlugin(const std::shared_ptr<GroupViewModel>&, const std::shared_ptr<PluginViewModel> &plugin, bool selected);
+  void setActivePlugin(const std::shared_ptr<PluginViewModel> &plugin) { mActivePlugin = plugin; }
 
 private:
 

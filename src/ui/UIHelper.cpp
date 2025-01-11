@@ -1,6 +1,18 @@
 ﻿#include "UIHelper.h"
 
+#include <qcoreevent.h>
 #include <QDir>
+
+HoverEventFilter::HoverEventFilter(const std::shared_ptr<PluginViewModel>& plugin, QObject* parent)
+  : QObject(parent), mPlugin(plugin) {}
+
+bool HoverEventFilter::eventFilter(QObject* obj, QEvent* event) {
+  if (event->type() == QEvent::HoverEnter) {
+    emit hovered(mPlugin);
+    return true;
+  }
+  return QObject::eventFilter(obj, event);
+}
 
 QPushButton* UIHelper::createButton(const QString& text, QWidget* parent = nullptr) {
   const auto button = new QPushButton(text, parent);

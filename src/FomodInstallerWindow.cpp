@@ -70,6 +70,11 @@ void FomodInstallerWindow::onPluginToggled(const bool selected, const std::share
   updateButtons();
 }
 
+void FomodInstallerWindow::onPluginHovered(const std::shared_ptr<PluginViewModel> &plugin) const {
+  mViewModel->setActivePlugin(plugin);
+  updateDisplayForActivePlugin();
+}
+
 void FomodInstallerWindow::onBackClicked() const {
   mViewModel->stepBack();
   mInstallStepStack->setCurrentIndex(mViewModel->getCurrentStepIndex());
@@ -387,11 +392,16 @@ QRadioButton *FomodInstallerWindow::createPluginRadioButton(const std::shared_pt
 QCheckBox *FomodInstallerWindow::createPluginCheckBox(const std::shared_ptr<PluginViewModel> &plugin,
                                                       const std::shared_ptr<GroupViewModel> &group, QWidget *parent) {
   auto *checkBox = new QCheckBox(QString::fromStdString(plugin->getName()), parent);
+
+  // Make the hover stuff work
+  auto* hoverFilter = new HoverEventFilter(plugin, this);
+  checkBox->installEventFilter(hoverFilter);
+  connect(hoverFilter, &HoverEventFilter::hovered, this, &FomodInstallerWindow::onPluginHovered);
+
   checkBox->setEnabled(plugin->isEnabled());
   checkBox->setChecked(plugin->isSelected());
-  // Bind to model function
   connect(checkBox, &QCheckBox::stateChanged, this, [this, group, plugin](const int state) {
-    onPluginToggled((state == Qt::Checked), group, plugin);
+    onPluginToggled(state == Qt::Checked, group, plugin);
   });
   return checkBox;
 }
