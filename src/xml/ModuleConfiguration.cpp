@@ -253,22 +253,3 @@ bool ModuleConfiguration::deserialize(const std::string &filePath) {
 
   return true;
 }
-
-Plugin ModuleConfiguration::getFirstPluginForStepIndex(const int index) {
-  if (installSteps.installSteps.empty() ||
-    installSteps.installSteps.at(index).optionalFileGroups.groups.empty() ||
-    installSteps.installSteps.at(index).optionalFileGroups.groups.front().plugins.plugins.empty()) {
-    return {}; // Return a default-constructed Plugin object
-  }
-
-  return installSteps.installSteps.at(index)
-    .optionalFileGroups.groups.front()
-    .plugins.plugins.front();
-}
-
-std::string ModuleConfiguration::getImageForPlugin(const Plugin &plugin) const {
-  if (plugin.image.path.empty()) {
-    return moduleImage.path;
-  }
-  return plugin.image.path;
-}

@@ -442,7 +442,7 @@ void FomodInstallerWindow::renderSelectAny(QWidget *parent, QLayout *parentLayou
 void FomodInstallerWindow::updateDisplayForActivePlugin() const {
   const auto &plugin = mViewModel->getActivePlugin();
   mDescriptionBox->setText(QString::fromStdString(plugin->getDescription()));
-  const auto image = plugin->getImagePath();
+  const auto image = mViewModel->getDisplayImage();
   const auto imagePath = UIHelper::getFullImagePath(mFomodPath, QString::fromStdString(image));
   mImageLabel->setScalableResource(imagePath);
 }

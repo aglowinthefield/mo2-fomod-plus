@@ -261,9 +261,6 @@ public:
   ConditionalFileInstall conditionalFileInstalls;
 
   bool deserialize(const std::string &filePath);
-
-  [[nodiscard]] Plugin getFirstPluginForStepIndex(int index);
-  [[nodiscard]] std::string getImageForPlugin(const Plugin &plugin) const;
 };
 
 

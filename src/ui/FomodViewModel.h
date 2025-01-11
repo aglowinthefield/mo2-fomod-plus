@@ -141,6 +141,8 @@ public:
   void setFlag(const std::string &flag, const std::string &value);
   std::string getFlag(const std::string &flag);
 
+  std::string getDisplayImage() const;
+
   // Plugins
   [[nodiscard]] std::shared_ptr<PluginViewModel> getActivePlugin() const { return mActivePlugin; }
 

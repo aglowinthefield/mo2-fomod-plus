@@ -71,7 +71,7 @@ void FomodViewModel::constructInitialStates() {
         case SelectAtLeastOne:
           if (group->getPlugins().size() == 1) {
             group->getPlugins()[0]->setEnabled(false);
-            group->getPlugins()[0]->setSelected(true);
+            togglePlugin(group, group->getPlugins()[0], true);
             break;
           }
           break;
@@ -90,6 +90,25 @@ void FomodViewModel::constructInitialStates() {
 }
 
 void FomodViewModel::processPluginConditions() {
+  for (const auto stepViewModel : mSteps) {
+    for (const auto groupViewModel : stepViewModel->getGroups()) {
+      for (auto pluginViewModel : groupViewModel->getPlugins()) {
+        const auto typeDescriptor = mConditionTester.getPluginTypeDescriptorState(pluginViewModel->getPlugin(), mFlags);
+        if (typeDescriptor == PluginTypeEnum::NotUsable) {
+          pluginViewModel->setEnabled(false);
+          togglePlugin(groupViewModel, pluginViewModel, false);
+        }
+        if (typeDescriptor == PluginTypeEnum::Recommended) {
+          pluginViewModel->setEnabled(true);
+          togglePlugin(groupViewModel, pluginViewModel, true);
+        }
+        if (typeDescriptor == PluginTypeEnum::Required) {
+          pluginViewModel->setEnabled(false);
+          togglePlugin(groupViewModel, pluginViewModel, true);
+        }
+      }
+    }
+  }
 
 }
 
@@ -198,3 +217,22 @@ std::string FomodViewModel::getFlag(const std::string &flag) {
   return mFlags.getFlag(flag);
 }
 
+/*
+--------------------------------------------------------------------------------
+                               Display
+--------------------------------------------------------------------------------
+*/
+std::string FomodViewModel::getDisplayImage() const {
+  // if the active plugin has an image, return it
+  if (!mActivePlugin->getImagePath().empty()) {
+    return mActivePlugin->getImagePath();
+  }
+
+  // otherwise show the default fomod image if we're on step 1.
+  if (mCurrentStepIndex == 0) {
+    return mFomodFile->moduleImage.path;
+  }
+
+  // otherwise nothin'
+  return "";
+}
