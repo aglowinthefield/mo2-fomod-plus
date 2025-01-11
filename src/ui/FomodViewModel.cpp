@@ -155,7 +155,7 @@ void FomodViewModel::updateVisibleSteps() {
 }
 
 void FomodViewModel::preinstall(const std::shared_ptr<MOBase::IFileTree> &tree, const QString &fomodPath) {
-  mFileInstaller = std::make_shared<FileInstaller>(mOrganizer, fomodPath, tree, std::move(mFomodFile), mSteps);
+  mFileInstaller = std::make_shared<FileInstaller>(mOrganizer, fomodPath, tree, std::move(mFomodFile), mFlags, mSteps);
 }
 
 bool FomodViewModel::isLastVisibleStep() const {

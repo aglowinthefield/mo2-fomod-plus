@@ -9,9 +9,11 @@ FileInstaller::FileInstaller(
   const QString &fomodPath,
   const std::shared_ptr<IFileTree> &fileTree,
   std::unique_ptr<ModuleConfiguration> fomodFile,
+  const FlagMap &flagMap,
   const std::vector<std::shared_ptr<StepViewModel> > &steps) : mOrganizer(organizer), mFomodPath(fomodPath),
                                                                mFileTree(fileTree),
                                                                mFomodFile(std::move(fomodFile)),
+                                                               mFlagMap(flagMap),
                                                                mConditionTester(organizer), mSteps(steps) {
 }
 
@@ -20,38 +22,24 @@ std::shared_ptr<IFileTree> FileInstaller::install() const {
   std::cout << "Installing " << filesToInstall.size() << " files" << std::endl;
 
   // update the file tree with the new files
-  std::shared_ptr<IFileTree> installTree = mFileTree->createOrphanTree();
+  const std::shared_ptr<IFileTree> installTree = mFileTree->createOrphanTree();
 
-  // We need to prepend the fomod path to whatever source we reference. Guess we're passing that path around.
-
-  // VERY BASIC INSTALLATION
-  // TODO: Needs lots of work. Just want to see default behaviors first
   for (const auto& file : filesToInstall) {
-    if (file.isFolder) {
-      const auto path = getQualifiedFilePath(file.source);
-      const auto sourceDir = mFileTree->findDirectory(QString::fromStdString(path));
-      if (sourceDir == nullptr) {
-        std::cerr << "Could not find source folder: " << file.source << std::endl;
-        continue; // TODO: Return errors somehow. Maybe in a pair of filetree and errors
-      }
-      const auto targetNode = installTree->addDirectory(QString::fromStdString(file.destination));
-
-      sourceDir->walk(
-        [&targetNode](QString const &currentPath, const std::shared_ptr<const FileTreeEntry> &entry) {
-        std::cout << "Walking: " << currentPath.toStdString() << std::endl;
-        std::cout << "Looking at: " << entry->name().toStdString() << std::endl;
-        if (!entry->isDir()) {
-          targetNode->copy(entry, ""); // need to do merge policy after overwrites/priorities are settled
-        }
-        return IFileTree::WalkReturn::CONTINUE;
-      });
-
+    const auto sourcePath = getQualifiedFilePath(file.source);
+    const auto sourceNode = mFileTree->find(QString::fromStdString(sourcePath));
+    if (sourceNode == nullptr) {
+      std::cerr << "Could not find source: " << file.source << std::endl;
+      continue;
     }
+
+    const auto targetPath = QString::fromStdString(file.destination);
+    installTree->copy(sourceNode, targetPath, IFileTree::InsertPolicy::MERGE);
   }
   return installTree;
 }
 
 std::string FileInstaller::getQualifiedFilePath(const std::string &treePath) const {
+  // We need to prepend the fomod path to whatever source we reference. Guess we're passing that path around.
   return mFomodPath.toStdString() + "/" + treePath;
 }
 

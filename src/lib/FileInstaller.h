@@ -30,6 +30,7 @@ public:
     const QString &fomodPath,
     const std::shared_ptr<MOBase::IFileTree> &fileTree,
     std::unique_ptr<ModuleConfiguration> fomodFile,
+    const FlagMap& flagMap,
     const std::vector<std::shared_ptr<StepViewModel>> &steps);
 
   std::shared_ptr<MOBase::IFileTree> install() const;
