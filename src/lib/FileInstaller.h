@@ -1,6 +1,7 @@
 ﻿#ifndef FILEINSTALLER_H
 #define FILEINSTALLER_H
 #include <ifiletree.h>
+#include <nlohmann/json.hpp>
 
 #include "ConditionTester.h"
 #include "FlagMap.h"
@@ -35,6 +36,34 @@ public:
 
   std::shared_ptr<MOBase::IFileTree> install() const;
 
+  void writeFomodJsonToFile(const std::string &filePath) const;
+
+  /**
+   * @brief Create a 'fomod.json' file to add to the base of the installTree. Functionally similar to MO2's meta.ini.
+   *
+   * Until there's more utility in the JSON structure itself, it will simply be of this format:
+   * @code
+   * {
+   *  "steps": [
+   *    {
+   *      "name": "Step 1",
+   *      "groups": [
+   *        {
+   *          "name": "Group 1",
+   *          "plugins: [
+   *            "Plugin1.esp",
+   *            "Plugin2.esp"
+   *          ]
+   *        }
+   *      ]
+   *    }
+   *  ]
+   * }
+   * @endcode
+   *
+   * @return nhlohmann::json
+   */
+  nlohmann::json generateFomodJsonFile() const;
   std::string getQualifiedFilePath(const std::string &treePath) const;
 
 private:

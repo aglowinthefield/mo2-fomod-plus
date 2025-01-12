@@ -6,25 +6,33 @@
                                Lifecycle
 --------------------------------------------------------------------------------
 */
+
 /**
- * 
- * @param organizer
- * @param fomodFile 
- * @param infoFile 
+ * @brief FomodViewModel constructor
+ *
+ * @note DO NOT USE DIRECTLY. We should only use FomodViewModel::create() to create a new instance.
+ * @see FomodViewModel::create
+ *
+ * @param organizer The organizer instance passed from the IInstaller
+ * @param fomodFile The ModuleConfiguration instance created from the raw ModuleConfiguration.xml file
+ * @param infoFile  The FomodInfoFile instance created from the raw info.xml file
+ *
+ * @return A FomodViewModel instance
  */
 FomodViewModel::FomodViewModel(MOBase::IOrganizer *organizer,
                                std::unique_ptr<ModuleConfiguration> fomodFile,
                                std::unique_ptr<FomodInfoFile> infoFile)
-: mOrganizer(organizer), mFomodFile(std::move(fomodFile)), mInfoFile(std::move(infoFile)), mConditionTester(organizer),
-  mInfoViewModel(std::move(infoFile)) {
+  : mOrganizer(organizer), mFomodFile(std::move(fomodFile)), mInfoFile(std::move(infoFile)),
+    mConditionTester(organizer),
+    mInfoViewModel(std::move(infoFile)) {
 }
 
 /**
  *
- * @param organizer
- * @param fomodFile
- * @param infoFile
- * @return
+ * @param organizer The organizer instance passed from the IInstaller
+ * @param fomodFile The ModuleConfiguration instance created from the raw ModuleConfiguration.xml file
+ * @param infoFile  The FomodInfoFile instance created from the raw info.xml file
+ * @return A shared pointer to the FomodViewModel instance
  */
 std::shared_ptr<FomodViewModel> FomodViewModel::create(MOBase::IOrganizer *organizer,
                                                        std::unique_ptr<ModuleConfiguration> fomodFile,
@@ -42,17 +50,6 @@ std::shared_ptr<FomodViewModel> FomodViewModel::create(MOBase::IOrganizer *organ
                                Initialization
 --------------------------------------------------------------------------------
 */
-
-void FomodViewModel::collectFlags() {
-  if (mSteps.empty()) {
-    return;
-  }
-  for (const auto& step : mSteps) {
-    for (const auto& flagDependency : step->installStep->visible.dependencies.flagDependencies) {
-      mFlags.setFlag(flagDependency.flag, "");
-    }
-  }
-}
 
 void FomodViewModel::constructInitialStates() {
   // For each group, "select" the correct plugin based on the spec.
@@ -136,7 +133,6 @@ void FomodViewModel::createStepViewModels() {
   }
   // TODO Sort the view models here, maybe
   mSteps = std::move(stepViewModels);
-  collectFlags();
   updateVisibleSteps();
   constructInitialStates();
   processPluginConditions();
@@ -146,11 +142,7 @@ void FomodViewModel::createStepViewModels() {
 void FomodViewModel::togglePlugin(const std::shared_ptr<GroupViewModel>&, const std::shared_ptr<PluginViewModel> &plugin, const bool selected) {
   plugin->setSelected(selected);
   for (const auto& flag : plugin->getPlugin()->conditionFlags.flags) {
-    if (selected) {
-      mFlags.setFlag(flag.name, flag.value);
-    } else {
-      mFlags.setFlag(flag.name, "");
-    }
+    mFlags.setFlag(flag.name, selected ? flag.value : "");
   }
   mActivePlugin = plugin;
   updateVisibleSteps();

@@ -27,8 +27,9 @@ FetchContent_Declare(
         GIT_TAG v1.14
 )
 
-FetchContent_MakeAvailable(pugixml)
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
+FetchContent_MakeAvailable(pugixml json)
 
 add_subdirectory(src)
 add_subdirectory(tests)
-target_link_libraries(fomod_plus PRIVATE pugixml)
+target_link_libraries(fomod_plus PRIVATE pugixml nlohmann_json::nlohmann_json)

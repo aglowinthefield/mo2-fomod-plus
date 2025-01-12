@@ -2,18 +2,17 @@
 #include <QResizeEvent>
 
 // Taken from https://github.com/ModOrganizer2/modorganizer-installer_fomod/blob/master/src/scalelabel.h
-static bool isResourceMovie(const QString& path)
-{
+static bool isResourceMovie(const QString &path) {
   const auto formats = QMovie::supportedFormats();
-  return std::ranges::any_of(formats, [&path](const QByteArray& format) {
+  return std::ranges::any_of(formats, [&path](const QByteArray &format) {
     return path.endsWith("." + QString::fromUtf8(format));
   });
 }
 
-ScaleLabel::ScaleLabel(QWidget* parent) : QLabel(parent) {}
+ScaleLabel::ScaleLabel(QWidget *parent) : QLabel(parent) {
+}
 
-void ScaleLabel::setScalableResource(const QString& path)
-{
+void ScaleLabel::setScalableResource(const QString &path) {
   if (const auto m = movie()) {
     setMovie(nullptr);
     delete m;
@@ -35,8 +34,7 @@ void ScaleLabel::setScalableResource(const QString& path)
   }
 }
 
-void ScaleLabel::setStatic(const bool isStatic)
-{
+void ScaleLabel::setStatic(const bool isStatic) {
   misStatic = isStatic;
 
   if (const auto m = movie()) {
@@ -48,8 +46,7 @@ void ScaleLabel::setStatic(const bool isStatic)
   }
 }
 
-void ScaleLabel::setScalableMovie(const QString& path)
-{
+void ScaleLabel::setScalableMovie(const QString &path) {
   const auto m = new QMovie(path);
   if (!m->isValid()) {
     qWarning(">%s< is an invalid movie. Reason: %s", qUtf8Printable(path),
@@ -70,8 +67,7 @@ void ScaleLabel::setScalableMovie(const QString& path)
   }
 }
 
-void ScaleLabel::setScalableImage(const QString& path)
-{
+void ScaleLabel::setScalableImage(const QString &path) {
   if (const QImage image(path); image.isNull()) {
     qWarning(">%s< is a null image", qUtf8Printable(path));
   } else {
@@ -80,8 +76,7 @@ void ScaleLabel::setScalableImage(const QString& path)
   }
 }
 
-void ScaleLabel::resizeEvent(QResizeEvent* event)
-{
+void ScaleLabel::resizeEvent(QResizeEvent *event) {
   if (const auto m = movie()) {
     m->stop();
     m->setScaledSize(mOriginalMovieSize.scaled(event->size(), Qt::KeepAspectRatio));
@@ -96,6 +91,6 @@ void ScaleLabel::resizeEvent(QResizeEvent* event)
   }
   if (const auto p = pixmap(); !p.isNull()) {
     setPixmap(
-        QPixmap::fromImage(mUnscaledImage).scaled(event->size(), Qt::KeepAspectRatio));
+      QPixmap::fromImage(mUnscaledImage).scaled(event->size(), Qt::KeepAspectRatio));
   }
 }

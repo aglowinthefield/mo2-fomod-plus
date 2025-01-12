@@ -154,16 +154,12 @@ void FomodInstallerWindow::updateInstallStepStack() {
 QBoxLayout *FomodInstallerWindow::createContainerLayout() {
   const auto layout = new QVBoxLayout(this);
 
-  // add top row here.
   const auto topRow = createTopRow();
-  layout->addWidget(topRow);
-
-  // middle area takes up the bulk of space. maybe 5x the size of the top row
   const auto centerRow = createCenterRow();
-  layout->addWidget(centerRow, 1); // stretch 1 here so the others are static size
-
-  // bottom row
   const auto bottomRow = createBottomRow();
+
+  layout->addWidget(topRow);
+  layout->addWidget(centerRow, 1); // stretch 1 here so the others are static size
   layout->addWidget(bottomRow);
 
   // NOTE: Disable after debug done
@@ -198,9 +194,7 @@ QWidget *FomodInstallerWindow::createTopRow() {
 
   auto *mainHLayout = new QHBoxLayout(topRow);
 
-  /*
-   * Holds the name (label), author, version, and website
-   */
+  // Holds the name (label), author, version, and website
   auto *metadataLayout = new QHBoxLayout();
 
   // left side metadata. just the titles of the metadata

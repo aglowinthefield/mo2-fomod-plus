@@ -32,35 +32,34 @@ namespace UiConstants {
 
 class UIHelper {
 public:
+  /*
+  --------------------------------------------------------------------------------
+                             Widgets & Events
+  --------------------------------------------------------------------------------
+  */
+  static QPushButton *createButton(const QString &text, QWidget *parent);
 
-/*
---------------------------------------------------------------------------------
-                           Widgets & Events
---------------------------------------------------------------------------------
-*/
-static QPushButton *createButton(const QString &text, QWidget *parent);
+  static QLabel *createLabel(const QString &text, QWidget *parent);
 
-static QLabel *createLabel(const QString &text, QWidget *parent);
+  static QLabel *createHyperlink(const QString &url, QWidget *parent);
 
-static QLabel *createHyperlink(const QString &url, QWidget *parent);
+  /*
+  --------------------------------------------------------------------------------
+                                 Helpers
+  --------------------------------------------------------------------------------
+  */
+  static QString getFullImagePath(const QString &fomodPath, const QString &imagePath);
 
-/*
---------------------------------------------------------------------------------
-                               Helpers
---------------------------------------------------------------------------------
-*/
-static QString getFullImagePath(const QString &fomodPath, const QString &imagePath);
+  static void setGlobalAlignment(QBoxLayout *layout, Qt::Alignment alignment);
 
-static void setGlobalAlignment(QBoxLayout *layout, Qt::Alignment alignment);
+  static void reduceLabelPadding(const QLayout *layout);
 
-static void reduceLabelPadding(const QLayout *layout);
-
-/*
---------------------------------------------------------------------------------
-                               Development
---------------------------------------------------------------------------------
-*/
-static void setDebugBorders(QWidget *widget);
+  /*
+  --------------------------------------------------------------------------------
+                                 Development
+  --------------------------------------------------------------------------------
+  */
+  static void setDebugBorders(QWidget *widget);
 };
 
 #endif //UIHELPER_H

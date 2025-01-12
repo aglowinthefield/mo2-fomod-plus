@@ -67,6 +67,12 @@ IPluginInstaller::EInstallResult InstallerFomodPlus::install(GuessedValue<QStrin
     // modname was updated in window
     const std::shared_ptr<IFileTree> installTree = window->getFileInstaller()->install();
     tree = installTree;
+
+    if (const auto entry = tree->find("fomod.json", FileTreeEntry::FILE); entry != nullptr) {
+      const auto fomodJsonFilePath = manager()->createFile(entry);
+      window->getFileInstaller()->writeFomodJsonToFile(fomodJsonFilePath.toStdString());
+    }
+
     return RESULT_SUCCESS;
   }
   if (window->isManualInstall()) {
@@ -105,8 +111,6 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration>> 
   appendImageFiles(toExtract, tree);
   const auto paths = manager()->extractFiles(toExtract);
 
-  // parse xml
-  // Paths are in the order {infoXml, moduleConfigXml, ...images}
   auto infoFile = std::make_unique<FomodInfoFile>();
   try {
     infoFile->deserialize(paths.at(0).toStdString());
@@ -165,14 +169,11 @@ std::shared_ptr<const IFileTree> InstallerFomodPlus::findFomodDirectory(const st
 }
 
 QDialog::DialogCode InstallerFomodPlus::showInstallerWindow(const std::shared_ptr<FomodInstallerWindow>& window) {
-  log::debug("InstallerFomodPlus::showInstallerWindow - entering function");
   QEventLoop loop;
   connect(window.get(), SIGNAL(accepted()), &loop, SLOT(quit()));
   connect(window.get(), SIGNAL(rejected()), &loop, SLOT(quit()));
-  log::debug("InstallerFomodPlus::showInstallerWindow - starting event loop");
   window->show();
   loop.exec();
-  log::debug("InstallerFomodPlus::showInstallerWindow - event loop finished");
   return static_cast<QDialog::DialogCode>(window->result());
 }
 

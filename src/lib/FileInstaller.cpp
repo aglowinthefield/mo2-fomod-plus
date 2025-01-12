@@ -1,5 +1,8 @@
 ﻿#include "FileInstaller.h"
 
+#include <fstream>
+#include <QDir>
+
 #include "ui/FomodViewModel.h"
 
 using namespace MOBase;
@@ -31,11 +34,49 @@ std::shared_ptr<IFileTree> FileInstaller::install() const {
       std::cerr << "Could not find source: " << file.source << std::endl;
       continue;
     }
-
     const auto targetPath = QString::fromStdString(file.destination);
     installTree->copy(sourceNode, targetPath, IFileTree::InsertPolicy::MERGE);
   }
+
+  // This file will be written by the InstallationManager later.
+  const auto jsonFilePath = "fomod.json";
+  installTree->addFile(QString::fromStdString(jsonFilePath), true);
+
   return installTree;
+}
+
+void FileInstaller::writeFomodJsonToFile(const std::string &filePath) const {
+  const nlohmann::json fomodJson = generateFomodJsonFile();
+  std::ofstream jsonFile(filePath);
+  jsonFile << fomodJson.dump(4);
+  jsonFile.close();
+}
+
+nlohmann::json FileInstaller::generateFomodJsonFile() const {
+  nlohmann::json fomodJson;
+
+  fomodJson["steps"] = nlohmann::json::array();
+  for (const auto stepViewModel : mSteps) {
+    auto stepJson = nlohmann::json::object();
+    stepJson["name"] = stepViewModel->installStep->name;
+    stepJson["groups"] = nlohmann::json::array();
+
+    for (const auto groupViewModel : stepViewModel->getGroups()) {
+      auto groupJson = nlohmann::json::object();
+      groupJson["name"] = groupViewModel->getName();
+      auto pluginArray = nlohmann::json::array();
+
+      for (const auto pluginViewModel : groupViewModel->getPlugins()) {
+        if (pluginViewModel->isSelected()) {
+          pluginArray.emplace_back(pluginViewModel->getPlugin()->name);
+        }
+      }
+      groupJson["plugins"] = pluginArray;
+      stepJson["groups"].emplace_back(groupJson);
+    }
+    fomodJson["steps"].emplace_back(stepJson);
+  }
+  return fomodJson;
 }
 
 std::string FileInstaller::getQualifiedFilePath(const std::string &treePath) const {
