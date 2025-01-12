@@ -55,11 +55,11 @@ FileDependencyTypeEnum ConditionTester::getFileDependencyStateForPlugin(const st
 
   FileDependencyTypeEnum state;
 
-  if (pluginState & MOBase::IPluginList::STATE_MISSING) {
+  if (pluginState == MOBase::IPluginList::STATE_MISSING) {
     state = FileDependencyTypeEnum::Missing;
-  } else if (pluginState & MOBase::IPluginList::STATE_INACTIVE) {
+  } else if (pluginState == MOBase::IPluginList::STATE_INACTIVE) {
     state = FileDependencyTypeEnum::Inactive;
-  } else if (pluginState & MOBase::IPluginList::STATE_ACTIVE) {
+  } else if (pluginState == MOBase::IPluginList::STATE_ACTIVE) {
     state = FileDependencyTypeEnum::Active;
   } else {
     state = FileDependencyTypeEnum::UNKNOWN_STATE;

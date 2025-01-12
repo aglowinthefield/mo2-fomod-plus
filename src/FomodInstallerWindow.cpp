@@ -379,6 +379,10 @@ QRadioButton *FomodInstallerWindow::createPluginRadioButton(const std::shared_pt
                                                             const std::shared_ptr<GroupViewModel> &group,
                                                             QWidget *parent) {
   auto *radioButton = new QRadioButton(QString::fromStdString(plugin->getName()), parent);
+  auto* hoverFilter = new HoverEventFilter(plugin, this);
+  radioButton->installEventFilter(hoverFilter);
+  connect(hoverFilter, &HoverEventFilter::hovered, this, &FomodInstallerWindow::onPluginHovered);
+
   radioButton->setEnabled(plugin->isEnabled());
   radioButton->setChecked(plugin->isSelected());
   // Bind to model function

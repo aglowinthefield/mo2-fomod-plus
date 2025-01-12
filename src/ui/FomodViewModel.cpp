@@ -95,16 +95,19 @@ void FomodViewModel::processPluginConditions() {
       for (auto pluginViewModel : groupViewModel->getPlugins()) {
         const auto typeDescriptor = mConditionTester.getPluginTypeDescriptorState(pluginViewModel->getPlugin(), mFlags);
         if (typeDescriptor == PluginTypeEnum::NotUsable) {
+          std::cout << "Plugin is not usable: [" << pluginViewModel->getName() << "]" << std::endl;
           pluginViewModel->setEnabled(false);
           togglePlugin(groupViewModel, pluginViewModel, false);
         }
         if (typeDescriptor == PluginTypeEnum::Recommended) {
           pluginViewModel->setEnabled(true);
           togglePlugin(groupViewModel, pluginViewModel, true);
+          std::cout << "Plugin is recommended: [" << pluginViewModel->getName() << "]" << std::endl;
         }
         if (typeDescriptor == PluginTypeEnum::Required) {
           pluginViewModel->setEnabled(false);
           togglePlugin(groupViewModel, pluginViewModel, true);
+          std::cout << "Plugin is required: [" << pluginViewModel->getName() << "]" << std::endl;
         }
       }
     }

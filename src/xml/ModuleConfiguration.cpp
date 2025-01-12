@@ -24,6 +24,7 @@ bool PluginType::deserialize(pugi::xml_node &node) {
   else if (typeStr == TYPE_RECOMMENDED)     name = PluginTypeEnum::Recommended;
   else if (typeStr == TYPE_NOT_USABLE)      name = PluginTypeEnum::NotUsable;
   else if (typeStr == TYPE_COULD_BE_USABLE) name = PluginTypeEnum::CouldBeUsable;
+  else name = PluginTypeEnum::Optional;  // if there isn't any type. it can't be enforced as anything.
   return true;
 }
 
