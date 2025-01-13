@@ -11,7 +11,6 @@
 
 #include "FomodInstallerWindow.h"
 #include "integration/FomodDataContent.h"
-#include "integration/FomodDataContentWrapper.h"
 #include "ui/FomodViewModel.h"
 #include "lib/stringutil.h"
 
@@ -22,16 +21,16 @@ bool InstallerFomodPlus::init(IOrganizer *organizer) {
 }
 
 void InstallerFomodPlus::setupUiInjection() const {
-  // mOrganizer->onUserInterfaceInitialized([this](QMainWindow*) {
-  //
-  // });
   if (!mOrganizer) {
     std::cerr << "Organizer is null" << std::endl;
     return;
   }
-  auto fomodContent = std::make_shared<FomodDataContent>();
-  auto wrapper = std::make_shared<FomodDataContentWrapper>(fomodContent);
-  mOrganizer->gameFeatures()->registerFeature(wrapper, 0, true);
+  mOrganizer->onUserInterfaceInitialized([this](QMainWindow*) {
+    MOBase::IGameFeatures *gameFeatures = mOrganizer->gameFeatures();
+    const auto fomodContent = std::make_shared<FomodDataContent>(gameFeatures);
+    const auto managedGamePlugin = const_cast<IPluginGame*>(mOrganizer->managedGame());
+    mOrganizer->gameFeatures()->registerFeature(managedGamePlugin, fomodContent, 9999, true);
+  });
 
 }
 
