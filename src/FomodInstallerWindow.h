@@ -6,7 +6,7 @@
 #include <qcheckbox.h>
 #include <qcombobox.h>
 
-#include "InstallerFomodPlus.h"
+#include "FomodPlus.h"
 #include "xml/ModuleConfiguration.h"
 
 #include <QDialog>
@@ -25,7 +25,7 @@ namespace Ui {
   class FomodInstallerWindow;
 }
 
-class InstallerFomodPlus;
+class FomodPlus;
 /**
  * @class FomodInstallerWindow
  * @brief This class represents a window for the FOMOD installer.
@@ -41,7 +41,7 @@ class InstallerFomodPlus;
 class FomodInstallerWindow final : public QDialog {
   Q_OBJECT
 public:
-  FomodInstallerWindow(InstallerFomodPlus *installer,
+  FomodInstallerWindow(FomodPlus *installer,
                        GuessedValue<QString> &modName,
                        const std::shared_ptr<IFileTree> &tree,
                        QString fomodPath,
@@ -49,7 +49,7 @@ public:
                        QWidget *parent = nullptr);
 
 
-  // So InstallerFomodPlus can check if the user wants to manually install
+  // So FomodPlus can check if the user wants to manually install
   [[nodiscard]] bool isManualInstall() const {
     return mIsManualInstall;
   }
@@ -71,7 +71,7 @@ private slots:
 
 
 private:
-  InstallerFomodPlus *mInstaller;
+  FomodPlus *mInstaller;
   QString mFomodPath;
   GuessedValue<QString>& mModName;
   std::shared_ptr<IFileTree> mTree;

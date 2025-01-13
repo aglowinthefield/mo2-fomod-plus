@@ -29,7 +29,7 @@
  * @param parent
  */
 FomodInstallerWindow::FomodInstallerWindow(
-  InstallerFomodPlus *installer,
+  FomodPlus *installer,
   GuessedValue<QString> &modName,
   const std::shared_ptr<IFileTree> &tree,
   QString fomodPath,

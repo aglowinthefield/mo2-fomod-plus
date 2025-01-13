@@ -18,7 +18,7 @@ class FomodInstallerWindow;
 using namespace MOBase;
 using namespace std;
 
-class InstallerFomodPlus final : public IPluginInstallerSimple
+class FomodPlus final : public IPluginInstallerSimple
 {
   Q_OBJECT
   Q_INTERFACES(MOBase::IPlugin MOBase::IPluginInstaller MOBase::IPluginInstallerSimple)
@@ -35,7 +35,7 @@ public:
   [[nodiscard]] QString author() const override         { return StringConstants::Plugin::AUTHOR; }
   [[nodiscard]] QString description() const override    { return StringConstants::Plugin::DESCRIPTION; }
   [[nodiscard]] VersionInfo version() const override    { return {1, 0, 0, VersionInfo::RELEASE_FINAL}; }
-  [[nodiscard]] unsigned int priority() const override  { return 1200000; /* Above installer_fomod's highest priority. */ }
+  [[nodiscard]] unsigned int priority() const override  { return 120; /* Above installer_fomod's highest priority. */ }
   [[nodiscard]] bool isManualInstaller() const override { return false; }
 
   [[nodiscard]] bool isArchiveSupported(std::shared_ptr<const IFileTree> tree) const override;
@@ -67,8 +67,6 @@ private:
   static void appendImageFiles(vector<shared_ptr<const FileTreeEntry>>& entries, const shared_ptr<const IFileTree> &tree);
 
   void setupUiInjection() const;
-
-  void injectGameFeature() const;
 };
 
 #endif //INSTALLERFOMODPLUS_H
