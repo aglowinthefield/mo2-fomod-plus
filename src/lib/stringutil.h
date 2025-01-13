@@ -5,9 +5,9 @@
 
 namespace StringConstants {
     namespace Plugin {
-        constexpr auto NAME = "FomodPlus";
+        constexpr auto NAME = "FOMOD Plus";
         constexpr auto AUTHOR = "clearing";
-        constexpr auto DESCRIPTION = "FomodPlus is a plugin for Mod Organizer 2 that extends the functionality of the FOMOD Installer.";
+        constexpr auto DESCRIPTION = "Extends the capabilities of the FOMOD installer for advanced users.";
     }
 
     namespace FomodFiles {
