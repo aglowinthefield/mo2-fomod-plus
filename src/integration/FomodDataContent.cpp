@@ -17,9 +17,9 @@ void printVector(const std::vector<T>& vec) {
 
 
 std::vector<MOBase::ModDataContent::Content> FomodDataContent::getAllContents() const {
-  auto contents = GamebryoModDataContent::getAllContents();
+  std::vector<Content> contents;
   Content fomodContent = {
-    FomodDataContentConstants::FOMOD_CONTENT_ID, "FOMOD", ""
+    FomodDataContentConstants::FOMOD_CONTENT_ID, "FOMOD", "", true
   };
   contents.emplace_back(fomodContent);
   printVector(contents);
@@ -27,11 +27,10 @@ std::vector<MOBase::ModDataContent::Content> FomodDataContent::getAllContents() 
 }
 
 std::vector<int> FomodDataContent::getContentsFor(const std::shared_ptr<const MOBase::IFileTree> fileTree) const {
-  std::vector<int> contents = GamebryoModDataContent::getContentsFor(fileTree);
+  std::vector<int> contents;
 
   if (fileTree->find("fomod.json")) {
     contents.push_back(FomodDataContentConstants::FOMOD_CONTENT_ID);
   }
-  printVector(contents);
   return contents;
 }

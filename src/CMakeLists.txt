@@ -20,5 +20,5 @@ if (MSVC)
     )
 endif ()
 
-mo2_configure_plugin(fomod_plus WARNINGS OFF PRIVATE_DEPENDS gamebryo)
+mo2_configure_plugin(fomod_plus WARNINGS OFF)
 mo2_install_target(fomod_plus)

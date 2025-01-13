@@ -1,18 +1,19 @@
 ﻿#include "InstallerFomodPlus.h"
 
-#include <iinstallationmanager.h>
-#include <log.h>
-#include <iplugingame.h>
 #include <igamefeatures.h>
+#include <iinstallationmanager.h>
+#include <iplugingame.h>
+#include <log.h>
 #include <QEventLoop>
+#include <QTreeWidget>
 #include <xml/FomodInfoFile.h>
 #include <xml/ModuleConfiguration.h>
 #include <xml/XmlParseException.h>
 
 #include "FomodInstallerWindow.h"
 #include "integration/FomodDataContent.h"
-#include "ui/FomodViewModel.h"
 #include "lib/stringutil.h"
+#include "ui/FomodViewModel.h"
 
 bool InstallerFomodPlus::init(IOrganizer *organizer) {
   mOrganizer = organizer;
@@ -25,13 +26,13 @@ void InstallerFomodPlus::setupUiInjection() const {
     std::cerr << "Organizer is null" << std::endl;
     return;
   }
-  mOrganizer->onUserInterfaceInitialized([this](QMainWindow*) {
-    MOBase::IGameFeatures *gameFeatures = mOrganizer->gameFeatures();
-    const auto fomodContent = std::make_shared<FomodDataContent>(gameFeatures);
-    const auto managedGamePlugin = const_cast<IPluginGame*>(mOrganizer->managedGame());
-    mOrganizer->gameFeatures()->registerFeature(managedGamePlugin, fomodContent, 9999, true);
-  });
+  this->injectGameFeature();
+}
 
+void InstallerFomodPlus::injectGameFeature() const {
+  const auto fomodContent = std::make_shared<FomodDataContent>();
+  // const auto managedGamePlugin = const_cast<IPluginGame *>(mOrganizer->managedGame());
+  mOrganizer->gameFeatures()->registerFeature(fomodContent, 0, false);
 }
 
 bool InstallerFomodPlus::isArchiveSupported(std::shared_ptr<const IFileTree> tree) const {
@@ -55,8 +56,8 @@ QList<PluginSetting> InstallerFomodPlus::settings() const {
  * @return
  */
 IPluginInstaller::EInstallResult InstallerFomodPlus::install(GuessedValue<QString> &modName,
-  std::shared_ptr<IFileTree> &tree, QString &version, int &nexusID) {
-
+                                                             std::shared_ptr<IFileTree> &tree, QString &version,
+                                                             int &nexusID) {
   log::debug("InstallerFomodPlus::install - modName: {}, version: {}, nexusID: {}",
              modName->toStdString(),
              version.toStdString(),
@@ -104,7 +105,7 @@ IPluginInstaller::EInstallResult InstallerFomodPlus::install(GuessedValue<QStrin
  * @param tree
  * @return
  */
-std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration>> InstallerFomodPlus::parseFomodFiles(
+std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> > InstallerFomodPlus::parseFomodFiles(
   const std::shared_ptr<IFileTree> &tree) {
   const auto fomodDir = findFomodDirectory(tree);
   if (fomodDir == nullptr) {
@@ -118,11 +119,11 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration>> 
   const auto infoXML = fomodDir->find(
     StringConstants::FomodFiles::INFO_XML,
     FileTreeEntry::FILE
-    );
+  );
   const auto moduleConfig = fomodDir->find(
     StringConstants::FomodFiles::MODULE_CONFIG,
     FileTreeEntry::FILE
-    );
+  );
 
   // Extract files first.
   vector toExtract = {infoXML, moduleConfig};
@@ -143,18 +144,15 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration>> 
   } catch (XmlParseException &e) {
     log::error("InstallerFomodPlus::install - error parsing moduleConfig.xml: {}", e.what());
     return {nullptr, nullptr};
-
   }
   return {std::move(infoFile), std::move(moduleConfiguration)};
-
 }
 
 // Taken from https://github.com/ModOrganizer2/modorganizer-installer_fomod/blob/master/src/installerfomod.cpp#L123
-void InstallerFomodPlus::appendImageFiles(vector<shared_ptr<const FileTreeEntry>> &entries,
-  const shared_ptr<const IFileTree> &tree) {
-
+void InstallerFomodPlus::appendImageFiles(vector<shared_ptr<const FileTreeEntry> > &entries,
+                                          const shared_ptr<const IFileTree> &tree) {
   static std::set<QString, FileNameComparator> imageSuffixes{"png", "jpg", "jpeg", "gif", "bmp"};
-  for (auto entry : *tree) {
+  for (auto entry: *tree) {
     if (entry->isDir()) {
       appendImageFiles(entries, entry->astree());
     } else if (imageSuffixes.contains(entry->suffix())) {
@@ -187,7 +185,7 @@ std::shared_ptr<const IFileTree> InstallerFomodPlus::findFomodDirectory(const st
   return nullptr;
 }
 
-QDialog::DialogCode InstallerFomodPlus::showInstallerWindow(const std::shared_ptr<FomodInstallerWindow>& window) {
+QDialog::DialogCode InstallerFomodPlus::showInstallerWindow(const std::shared_ptr<FomodInstallerWindow> &window) {
   QEventLoop loop;
   connect(window.get(), SIGNAL(accepted()), &loop, SLOT(quit()));
   connect(window.get(), SIGNAL(rejected()), &loop, SLOT(quit()));
@@ -195,4 +193,3 @@ QDialog::DialogCode InstallerFomodPlus::showInstallerWindow(const std::shared_pt
   loop.exec();
   return static_cast<QDialog::DialogCode>(window->result());
 }
-
