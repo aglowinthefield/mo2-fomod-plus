@@ -2,18 +2,37 @@
 
 #include <iinstallationmanager.h>
 #include <log.h>
+#include <iplugingame.h>
+#include <igamefeatures.h>
 #include <QEventLoop>
 #include <xml/FomodInfoFile.h>
 #include <xml/ModuleConfiguration.h>
 #include <xml/XmlParseException.h>
 
 #include "FomodInstallerWindow.h"
+#include "integration/FomodDataContent.h"
+#include "integration/FomodDataContentWrapper.h"
 #include "ui/FomodViewModel.h"
 #include "lib/stringutil.h"
 
 bool InstallerFomodPlus::init(IOrganizer *organizer) {
-  m_Organizer = organizer;
+  mOrganizer = organizer;
+  setupUiInjection();
   return true;
+}
+
+void InstallerFomodPlus::setupUiInjection() const {
+  // mOrganizer->onUserInterfaceInitialized([this](QMainWindow*) {
+  //
+  // });
+  if (!mOrganizer) {
+    std::cerr << "Organizer is null" << std::endl;
+    return;
+  }
+  auto fomodContent = std::make_shared<FomodDataContent>();
+  auto wrapper = std::make_shared<FomodDataContentWrapper>(fomodContent);
+  mOrganizer->gameFeatures()->registerFeature(wrapper, 0, true);
+
 }
 
 bool InstallerFomodPlus::isArchiveSupported(std::shared_ptr<const IFileTree> tree) const {
@@ -54,7 +73,7 @@ IPluginInstaller::EInstallResult InstallerFomodPlus::install(GuessedValue<QStrin
   }
 
   // create ui & pass xml classes to ui
-  auto fomodViewModel = FomodViewModel::create(m_Organizer, std::move(moduleConfigFile), std::move(infoFile));
+  auto fomodViewModel = FomodViewModel::create(mOrganizer, std::move(moduleConfigFile), std::move(infoFile));
   const auto window = std::make_shared<FomodInstallerWindow>(
     this,
     modName,
@@ -144,6 +163,7 @@ void InstallerFomodPlus::appendImageFiles(vector<shared_ptr<const FileTreeEntry>
     }
   }
 }
+
 
 void InstallerFomodPlus::onInstallationStart(QString const &archive, const bool reinstallation,
                                              IModInterface *currentMod) {

@@ -46,7 +46,7 @@ public:
 
 private:
 
-  IOrganizer* m_Organizer = nullptr;
+  IOrganizer* mOrganizer = nullptr;
   QString mFomodPath{};
 
   /**
@@ -65,6 +65,8 @@ private:
     const shared_ptr<IFileTree> &tree);
 
   static void appendImageFiles(vector<shared_ptr<const FileTreeEntry>>& entries, const shared_ptr<const IFileTree> &tree);
+
+  void setupUiInjection() const;
 
 };
 
