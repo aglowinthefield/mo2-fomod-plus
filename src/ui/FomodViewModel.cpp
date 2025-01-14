@@ -39,6 +39,9 @@ std::shared_ptr<FomodViewModel> FomodViewModel::create(MOBase::IOrganizer *organ
                                                        std::unique_ptr<FomodInfoFile> infoFile) {
   auto viewModel = std::make_shared<FomodViewModel>(organizer, std::move(fomodFile), std::move(infoFile));
   viewModel->createStepViewModels();
+  viewModel->updateVisibleSteps();
+  viewModel->setupGroups();
+  viewModel->processPluginConditions();
   viewModel->mActiveStep = viewModel->mSteps.at(0);
   viewModel->mActivePlugin = viewModel->getFirstPluginForActiveStep();
   std::cout << "Active Plugin: " << viewModel->mActivePlugin->getName() << std::endl;
@@ -51,61 +54,68 @@ std::shared_ptr<FomodViewModel> FomodViewModel::create(MOBase::IOrganizer *organ
 --------------------------------------------------------------------------------
 */
 
-void FomodViewModel::constructInitialStates() {
-  // For each group, "select" the correct plugin based on the spec.
+bool isRadioButtonGroup(GroupTypeEnum groupType) {
+  return groupType == SelectExactlyOne || groupType == SelectAtMostOne;
+}
+
+bool FomodViewModel::pluginHasNoConditions(const std::shared_ptr<PluginViewModel>& plugin) {
+  return plugin->plugin->typeDescriptor.dependencyType.patterns.patterns.empty();
+}
+
+bool FomodViewModel::groupHasPluginWithNoConditions(const std::shared_ptr<GroupViewModel>& group) {
+  return std::ranges::any_of(group->getPlugins(), pluginHasNoConditions);
+}
+
+const std::shared_ptr<PluginViewModel> & FomodViewModel::getFirstPluginForActiveStep() const {
+  return mActiveStep->getGroups().at(0)->getPlugins().at(0);
+}
+
+void FomodViewModel::setupGroups() const {
   for (const auto& step : mSteps) {
     for (const auto& group : step->getGroups()) {
-      switch (group->getType()) {
-        case SelectExactlyOne:
-          // Mark the first option that doesn't fail its condition as active
-          for (const auto& plugin : group->getPlugins()) {
-            if (mConditionTester.getPluginTypeDescriptorState(plugin->getPlugin(), mFlags) != PluginTypeEnum::NotUsable) {
-              togglePlugin(group, plugin, true);
-              break;
-            }
-          }
-          break;
-        case SelectAtLeastOne:
-          if (group->getPlugins().size() == 1) {
-            group->getPlugins()[0]->setEnabled(false);
-            togglePlugin(group, group->getPlugins()[0], true);
-            break;
-          }
-          break;
-        case SelectAll:
-          // set every plugin in this group to be checked and disabled
-            for (const auto& plugin : group->getPlugins()) {
-              togglePlugin(group, plugin, true);
-              plugin->setEnabled(false);
-            }
-          break;
-        // SelectAny, SelectAtMostOne, and don't need anything to be done
-        default: ;
+
+      if (group->getType() == SelectAtMostOne) {
+        createNonePluginForGroup(group);
       }
+
     }
   }
 }
 
-void FomodViewModel::processPluginConditions() {
-  for (const auto stepViewModel : mSteps) {
-    for (const auto groupViewModel : stepViewModel->getGroups()) {
-      for (auto pluginViewModel : groupViewModel->getPlugins()) {
-        const auto typeDescriptor = mConditionTester.getPluginTypeDescriptorState(pluginViewModel->getPlugin(), mFlags);
-        if (typeDescriptor == PluginTypeEnum::NotUsable) {
-          std::cout << "Plugin is not usable: [" << pluginViewModel->getName() << "]" << std::endl;
-          pluginViewModel->setEnabled(false);
-          togglePlugin(groupViewModel, pluginViewModel, false);
-        }
-        if (typeDescriptor == PluginTypeEnum::Recommended) {
-          pluginViewModel->setEnabled(true);
-          togglePlugin(groupViewModel, pluginViewModel, true);
-          std::cout << "Plugin is recommended: [" << pluginViewModel->getName() << "]" << std::endl;
-        }
-        if (typeDescriptor == PluginTypeEnum::Required) {
-          pluginViewModel->setEnabled(false);
-          togglePlugin(groupViewModel, pluginViewModel, true);
-          std::cout << "Plugin is required: [" << pluginViewModel->getName() << "]" << std::endl;
-        }
+void FomodViewModel::createNonePluginForGroup(const std::shared_ptr<GroupViewModel>& group) const {
+  const auto nonePlugin = std::make_shared<Plugin>();
+  nonePlugin->name = "None";
+  // If we're making this, it should be selected. Maybe. Maybe we just evaluate conditions first.
+  const auto nonePluginViewModel = std::make_shared<PluginViewModel>(nonePlugin, false, true);
+  group->plugins.emplace_back(nonePluginViewModel);
+  togglePlugin(group, nonePluginViewModel, true);
+}
+
+void FomodViewModel::processPlugin(const std::shared_ptr<GroupViewModel> &groupViewModel,
+                                   const std::shared_ptr<PluginViewModel> &pluginViewModel) const {
+  const auto typeDescriptor = mConditionTester.getPluginTypeDescriptorState(pluginViewModel->plugin, mFlags);
+  if (typeDescriptor == PluginTypeEnum::NotUsable) {
+    std::cout << "Plugin is not usable: [" << pluginViewModel->getName() << "]" << std::endl;
+    pluginViewModel->setEnabled(false);
+    togglePlugin(groupViewModel, pluginViewModel, false);
+  }
+  if (typeDescriptor == PluginTypeEnum::Recommended) {
+    pluginViewModel->setEnabled(true);
+    togglePlugin(groupViewModel, pluginViewModel, true);
+    std::cout << "Plugin is recommended: [" << pluginViewModel->getName() << "]" << std::endl;
+  }
+  if (typeDescriptor == PluginTypeEnum::Required) {
+    pluginViewModel->setEnabled(false);
+    togglePlugin(groupViewModel, pluginViewModel, true);
+    std::cout << "Plugin is required: [" << pluginViewModel->getName() << "]" << std::endl;
+  }
+}
+
+void FomodViewModel::processPluginConditions() const {
+  for (const auto& stepViewModel : mSteps) {
+    for (const auto& groupViewModel : stepViewModel->getGroups()) {
+      for (const auto& pluginViewModel : groupViewModel->getPlugins()) {
+        processPlugin(groupViewModel, pluginViewModel);
       }
     }
   }
@@ -125,7 +135,7 @@ void FomodViewModel::createStepViewModels() {
         auto pluginViewModel = std::make_shared<PluginViewModel>(std::make_shared<Plugin>(plugin), false, true);
         pluginViewModels.emplace_back(pluginViewModel); // Assuming default values for selected and enabled
       }
-      auto groupViewModel = std::make_shared<GroupViewModel>(std::make_shared<Group>(group), std::move(pluginViewModels));
+      auto groupViewModel = std::make_shared<GroupViewModel>(std::make_shared<Group>(group), pluginViewModels);
       groupViewModels.emplace_back(groupViewModel);
     }
     auto stepViewModel = std::make_shared<StepViewModel>(std::make_shared<InstallStep>(installStep), std::move(groupViewModels));
@@ -133,15 +143,13 @@ void FomodViewModel::createStepViewModels() {
   }
   // TODO Sort the view models here, maybe
   mSteps = std::move(stepViewModels);
-  updateVisibleSteps();
-  constructInitialStates();
-  processPluginConditions();
 }
 
 // TODO: Handle groups later
-void FomodViewModel::togglePlugin(const std::shared_ptr<GroupViewModel>&, const std::shared_ptr<PluginViewModel> &plugin, const bool selected) {
+void FomodViewModel::togglePlugin(const std::shared_ptr<GroupViewModel> &,
+                                  const std::shared_ptr<PluginViewModel> &plugin, const bool selected) const {
   plugin->setSelected(selected);
-  for (const auto& flag : plugin->getPlugin()->conditionFlags.flags) {
+  for (const auto& flag : plugin->plugin->conditionFlags.flags) {
     mFlags.setFlag(flag.name, selected ? flag.value : "");
   }
   mActivePlugin = plugin;
@@ -159,7 +167,7 @@ bool FomodViewModel::isStepVisible(const int stepIndex) const {
   return mConditionTester.isStepVisible(mFlags, step.get());
 }
 
-void FomodViewModel::updateVisibleSteps() {
+void FomodViewModel::updateVisibleSteps() const {
   mVisibleStepIndices.clear();
   for (int i = 0; i < mSteps.size(); ++i) {
     if (isStepVisible(i)) {

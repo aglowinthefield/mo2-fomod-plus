@@ -73,7 +73,7 @@ enum class PluginTypeEnum {
 
 class PluginType final : public XmlDeserializable {
 public:
-  PluginTypeEnum name;
+  PluginTypeEnum name = PluginTypeEnum::Optional; // sane default
 
   bool deserialize(pugi::xml_node &node) override;
 };
@@ -81,7 +81,7 @@ public:
 class FileDependency final : public XmlDeserializable {
 public:
   std::string file;
-  FileDependencyTypeEnum state;
+  FileDependencyTypeEnum state = FileDependencyTypeEnum::UNKNOWN_STATE;
 
   bool deserialize(pugi::xml_node &node) override;
 };
@@ -98,7 +98,7 @@ class CompositeDependency final : public XmlDeserializable {
 public:
   std::vector<FileDependency> fileDependencies;
   std::vector<FlagDependency> flagDependencies;
-  OperatorTypeEnum operatorType;
+  OperatorTypeEnum operatorType = OperatorTypeEnum::OR; // safest default.
 
   bool deserialize(pugi::xml_node &node) override;
 };

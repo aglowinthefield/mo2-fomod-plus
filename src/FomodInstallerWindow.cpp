@@ -329,7 +329,7 @@ QWidget *FomodInstallerWindow::createStepWidget(const std::shared_ptr<StepViewMo
   const auto scrollAreaContent = new QWidget(scrollArea);
   auto *scrollAreaLayout = new QVBoxLayout(scrollAreaContent);
 
-  for (const auto& group: installStep->getGroups()) {
+  for (const auto &group: installStep->getGroups()) {
     const auto groupSection = renderGroup(group);
     scrollAreaLayout->addWidget(groupSection);
   }
@@ -347,19 +347,14 @@ QWidget *FomodInstallerWindow::renderGroup(const std::shared_ptr<GroupViewModel>
   const auto groupBoxLayout = new QVBoxLayout(groupBox);
 
   switch (group->getType()) {
+    case SelectAtLeastOne:
     case SelectAny:
-      renderSelectAny(groupBox, groupBoxLayout, group);
-      break;
     case SelectAll:
+      renderCheckboxGroup(groupBox, groupBoxLayout, group);
       break;
     case SelectExactlyOne:
-      renderSelectExactlyOne(groupBox, groupBoxLayout, group);
-      break;
     case SelectAtMostOne:
-      renderSelectAtMostOne(groupBox, groupBoxLayout, group);
-      break;
-    case SelectAtLeastOne:
-      renderSelectAtLeastOne(groupBox, groupBoxLayout, group);
+      renderRadioGroup(groupBox, groupBoxLayout, group);
       break;
     default: ;
   }
@@ -373,7 +368,7 @@ QRadioButton *FomodInstallerWindow::createPluginRadioButton(const std::shared_pt
                                                             const std::shared_ptr<GroupViewModel> &group,
                                                             QWidget *parent) {
   auto *radioButton = new QRadioButton(QString::fromStdString(plugin->getName()), parent);
-  auto* hoverFilter = new HoverEventFilter(plugin, this);
+  auto *hoverFilter = new HoverEventFilter(plugin, this);
   radioButton->installEventFilter(hoverFilter);
   connect(hoverFilter, &HoverEventFilter::hovered, this, &FomodInstallerWindow::onPluginHovered);
 
@@ -392,7 +387,7 @@ QCheckBox *FomodInstallerWindow::createPluginCheckBox(const std::shared_ptr<Plug
   auto *checkBox = new QCheckBox(QString::fromStdString(plugin->getName()), parent);
 
   // Make the hover stuff work
-  auto* hoverFilter = new HoverEventFilter(plugin, this);
+  auto *hoverFilter = new HoverEventFilter(plugin, this);
   checkBox->installEventFilter(hoverFilter);
   connect(hoverFilter, &HoverEventFilter::hovered, this, &FomodInstallerWindow::onPluginHovered);
 
@@ -404,8 +399,8 @@ QCheckBox *FomodInstallerWindow::createPluginCheckBox(const std::shared_ptr<Plug
   return checkBox;
 }
 
-void FomodInstallerWindow::renderSelectAtLeastOne(QWidget *parent, QLayout *parentLayout,
-                                                  const std::shared_ptr<GroupViewModel> &group) {
+void FomodInstallerWindow::renderCheckboxGroup(QWidget *parent, QLayout *parentLayout,
+                                               const std::shared_ptr<GroupViewModel> &group) {
   // Same thing but with an extra 'None' option at the end)
   // auto* buttonGroup = new QButtonGroup(parent);
   for (const auto &plugin: group->getPlugins()) {
@@ -414,35 +409,17 @@ void FomodInstallerWindow::renderSelectAtLeastOne(QWidget *parent, QLayout *pare
   }
 }
 
-QButtonGroup *FomodInstallerWindow::renderSelectExactlyOne(QWidget *parent, QLayout *parentLayout,
-                                                           const std::shared_ptr<GroupViewModel> &group) {
+QButtonGroup *FomodInstallerWindow::renderRadioGroup(QWidget *parent, QLayout *parentLayout,
+                                                     const std::shared_ptr<GroupViewModel> &group) {
   auto *buttonGroup = new QButtonGroup(parent);
   buttonGroup->setExclusive(true); // Ensure only one button can be selected
 
-  for (const auto plugin: group->getPlugins()) {
+  for (const auto &plugin: group->getPlugins()) {
     auto *radioButton = createPluginRadioButton(plugin, group, parent);
     buttonGroup->addButton(radioButton);
     parentLayout->addWidget(radioButton);
   }
   return buttonGroup;
-}
-
-void FomodInstallerWindow::renderSelectAtMostOne(QWidget *parent, QLayout *parentLayout,
-                                                 const std::shared_ptr<GroupViewModel> &group) {
-  // Same thing but with an extra 'None' option at the end
-  // TODO: Move this to the ViewModel. We want to control the None plugin here.
-  auto *buttonGroup = renderSelectExactlyOne(parent, parentLayout, group);
-  auto *noneButton = new QRadioButton("None", parent);
-  buttonGroup->addButton(noneButton);
-  parentLayout->addWidget(noneButton);
-}
-
-void FomodInstallerWindow::renderSelectAny(QWidget *parent, QLayout *parentLayout,
-                                           const std::shared_ptr<GroupViewModel> &group) {
-  for (const auto &plugin: group->getPlugins()) {
-    auto *checkbox = createPluginCheckBox(plugin, group, parent);
-    parentLayout->addWidget(checkbox);
-  }
 }
 
 

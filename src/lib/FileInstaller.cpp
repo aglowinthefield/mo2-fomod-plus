@@ -1,7 +1,6 @@
 ﻿#include "FileInstaller.h"
 
 #include <fstream>
-#include <QDir>
 
 #include "ui/FomodViewModel.h"
 
@@ -56,19 +55,19 @@ nlohmann::json FileInstaller::generateFomodJsonFile() const {
   nlohmann::json fomodJson;
 
   fomodJson["steps"] = nlohmann::json::array();
-  for (const auto stepViewModel : mSteps) {
+  for (const auto& stepViewModel : mSteps) {
     auto stepJson = nlohmann::json::object();
     stepJson["name"] = stepViewModel->installStep->name;
     stepJson["groups"] = nlohmann::json::array();
 
-    for (const auto groupViewModel : stepViewModel->getGroups()) {
+    for (const auto& groupViewModel : stepViewModel->getGroups()) {
       auto groupJson = nlohmann::json::object();
       groupJson["name"] = groupViewModel->getName();
       auto pluginArray = nlohmann::json::array();
 
-      for (const auto pluginViewModel : groupViewModel->getPlugins()) {
+      for (const auto& pluginViewModel : groupViewModel->getPlugins()) {
         if (pluginViewModel->isSelected()) {
-          pluginArray.emplace_back(pluginViewModel->getPlugin()->name);
+          pluginArray.emplace_back(pluginViewModel->getName());
         }
       }
       groupJson["plugins"] = pluginArray;

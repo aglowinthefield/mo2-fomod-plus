@@ -21,10 +21,6 @@
 
 using namespace MOBase;
 
-namespace Ui {
-  class FomodInstallerWindow;
-}
-
 class FomodPlus;
 /**
  * @class FomodInstallerWindow
@@ -114,13 +110,10 @@ private:
   QCheckBox *createPluginCheckBox(const std::shared_ptr<PluginViewModel> &plugin,
                                   const std::shared_ptr<GroupViewModel> &group, QWidget *parent);
 
-  void renderSelectAtLeastOne(QWidget *parent, QLayout *parentLayout,
+  void renderCheckboxGroup(QWidget *parent, QLayout *parentLayout,
                               const std::shared_ptr<GroupViewModel> &group);
 
-  QButtonGroup *renderSelectExactlyOne(QWidget *parent, QLayout *parentLayout, const std::shared_ptr<GroupViewModel> &group);
-
-  void renderSelectAtMostOne(QWidget *parent, QLayout *parentLayout, const std::shared_ptr<GroupViewModel> &group);
-  void renderSelectAny(QWidget *parent, QLayout *parentLayout, const std::shared_ptr<GroupViewModel> &group);
+  QButtonGroup *renderRadioGroup(QWidget *parent, QLayout *parentLayout, const std::shared_ptr<GroupViewModel> &group);
 };
 
 

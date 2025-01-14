@@ -27,14 +27,14 @@ namespace StringConstants {
 
 // trim from start (in place)
 inline void ltrim(std::string &s) {
-  s.erase(s.begin(), std::ranges::find_if(s, [](unsigned char ch) {
+  s.erase(s.begin(), std::ranges::find_if(s, [](const unsigned char ch) {
       return !std::isspace(ch);
   }));
 }
 
 // trim from end (in place)
 inline void rtrim(std::string &s) {
-  s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+  s.erase(std::find_if(s.rbegin(), s.rend(), [](const unsigned char ch) {
       return !std::isspace(ch);
   }).base(), s.end());
 }

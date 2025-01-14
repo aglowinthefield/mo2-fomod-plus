@@ -9,8 +9,8 @@ namespace FomodDataContentConstants {
 
 class FomodDataContent final : public MOBase::ModDataContent {
 public:
-  std::vector<Content> getAllContents() const override;
-  std::vector<int> getContentsFor(std::shared_ptr<const MOBase::IFileTree> fileTree) const override;
+  [[nodiscard]] std::vector<Content> getAllContents() const override;
+  [[nodiscard]] std::vector<int> getContentsFor(std::shared_ptr<const MOBase::IFileTree> fileTree) const override;
 };
 
 
