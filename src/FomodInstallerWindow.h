@@ -110,8 +110,10 @@ private:
   QCheckBox *createPluginCheckBox(const std::shared_ptr<PluginViewModel> &plugin,
                                   const std::shared_ptr<GroupViewModel> &group, QWidget *parent);
 
+  void renderSelectExactlyOne(QWidget *parent, QLayout *parentLayout, const std::shared_ptr<GroupViewModel> &group);
+
   void renderCheckboxGroup(QWidget *parent, QLayout *parentLayout,
-                              const std::shared_ptr<GroupViewModel> &group);
+                           const std::shared_ptr<GroupViewModel> &group);
 
   QButtonGroup *renderRadioGroup(QWidget *parent, QLayout *parentLayout, const std::shared_ptr<GroupViewModel> &group);
 };

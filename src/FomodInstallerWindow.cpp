@@ -362,7 +362,6 @@ QWidget *FomodInstallerWindow::renderGroup(const std::shared_ptr<GroupViewModel>
   return groupBox;
 }
 
-
 QRadioButton *FomodInstallerWindow::createPluginRadioButton(const std::shared_ptr<PluginViewModel> &plugin,
                                                             const std::shared_ptr<GroupViewModel> &group,
                                                             QWidget *parent) {
@@ -396,6 +395,18 @@ QCheckBox *FomodInstallerWindow::createPluginCheckBox(const std::shared_ptr<Plug
     onPluginToggled(state == Qt::Checked, group, plugin);
   });
   return checkBox;
+}
+
+void FomodInstallerWindow::renderSelectExactlyOne(QWidget *parent, QLayout *parentLayout,
+                                               const std::shared_ptr<GroupViewModel> &group) {
+
+  // This is for parity with the legacy installer. Both styles are functionally equivalent
+  // for a group size of 1, but they chose checkbox.
+  if (group->getPlugins().size() == 1) {
+    renderCheckboxGroup(parent, parentLayout, group);
+  } else {
+    renderRadioGroup(parent, parentLayout, group);
+  }
 }
 
 void FomodInstallerWindow::renderCheckboxGroup(QWidget *parent, QLayout *parentLayout,

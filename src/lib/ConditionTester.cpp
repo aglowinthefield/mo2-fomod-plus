@@ -92,10 +92,18 @@ PluginTypeEnum ConditionTester::getPluginTypeDescriptorState(const std::shared_p
 
   // We will return the 'winning' type or the default. If multiple conditions are met,
   // ...well, I'm not sure.
-  for (const auto& pattern : plugin->typeDescriptor.dependencyType.patterns.patterns) {
+  for (const auto& dependencyType = plugin->typeDescriptor.dependencyType; const auto& pattern : dependencyType.patterns.patterns) {
     if (testCompositeDependency(flags, pattern.dependencies)) {
-      return pattern.type.name;
+      return pattern.type;
     }
   }
-  return plugin->typeDescriptor.dependencyType.defaultType.name;
+
+  // Sometimes authors do this.
+  if (plugin->typeDescriptor.type != PluginTypeEnum::Optional) {
+    return plugin->typeDescriptor.type;
+  }
+  if (plugin->typeDescriptor.dependencyType.defaultType.has_value()) {
+    return plugin->typeDescriptor.dependencyType.defaultType.value();
+  }
+  return PluginTypeEnum::Optional;
 }

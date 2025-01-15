@@ -73,11 +73,9 @@ const std::shared_ptr<PluginViewModel> & FomodViewModel::getFirstPluginForActive
 void FomodViewModel::setupGroups() const {
   for (const auto& step : mSteps) {
     for (const auto& group : step->getGroups()) {
-
       if (group->getType() == SelectAtMostOne) {
         createNonePluginForGroup(group);
       }
-
     }
   }
 }
@@ -115,9 +113,6 @@ void FomodViewModel::enforceGroupConstraints(const std::shared_ptr<GroupViewMode
   if (groupViewModel->group->type != SelectExactlyOne) {
     return; // Nothing to do for other groups constraint-wise...yet. TODO: Figure out if that's true.
   }
-  if (std::ranges::any_of(groupViewModel->plugins, [](const auto& plugin) { return plugin->isSelected(); })) {
-    return;
-  }
 
   // Select the first plugin that isn't NotUsable
   for (const auto& plugin: groupViewModel->plugins) {
@@ -126,7 +121,11 @@ void FomodViewModel::enforceGroupConstraints(const std::shared_ptr<GroupViewMode
       break;
     }
   }
-  std::cerr << "SelectExactlyOne had no selectable members! Please debug this." << std::endl;
+
+  // My debugging function was wrong here at first. We really shouldn't see this logged now.
+  if (std::ranges::all_of(groupViewModel->plugins, [](const auto& plugin) { return !plugin->isSelected(); })) {
+    std::cerr << "SelectExactlyOne had no selectable members! Please debug this." << std::endl;
+  }
 }
 
 void FomodViewModel::processPluginConditions() const {

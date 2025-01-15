@@ -5,6 +5,7 @@
 #include <vector>
 #include <pugixml.hpp>
 #include <iostream>
+#include <optional>
 
 class XmlDeserializable {
 public:
@@ -71,6 +72,7 @@ enum class PluginTypeEnum {
   CouldBeUsable
 };
 
+// TODO Dont use this, just use the enum directly .
 class PluginType final : public XmlDeserializable {
 public:
   PluginTypeEnum name = PluginTypeEnum::Optional; // sane default
@@ -113,7 +115,7 @@ public:
 class DependencyPattern final : public XmlDeserializable {
 public:
   CompositeDependency dependencies;
-  PluginType type;
+  PluginTypeEnum type;
 
   bool deserialize(pugi::xml_node &node) override;
 };
@@ -128,16 +130,16 @@ public:
 
 class DependencyPluginType final : public XmlDeserializable {
 public:
-  PluginType defaultType;
+  std::optional<PluginTypeEnum> defaultType;
   DependencyPatternList patterns;
 
   bool deserialize(pugi::xml_node &node) override;
 };
 
-class PluginTypeDescriptor final : public XmlDeserializable {
+class TypeDescriptor final : public XmlDeserializable {
 public:
   DependencyPluginType dependencyType;
-  // PluginType type;
+  PluginTypeEnum type;
 
   bool deserialize(pugi::xml_node &node) override;
 };
@@ -202,7 +204,7 @@ class Plugin final : public XmlDeserializable {
 public:
   std::string description;
   Image image;
-  PluginTypeDescriptor typeDescriptor;
+  TypeDescriptor typeDescriptor;
   std::string name;
   ConditionFlagList conditionFlags;
   FileList files;

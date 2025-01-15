@@ -17,15 +17,13 @@ static GroupTypeEnum groupTypeFromString(const std::string &groupType) {
   return SelectAny; // is this a sane default? probably
 }
 
-bool PluginType::deserialize(pugi::xml_node &node) {
-  const std::string typeStr = node.attribute("name").as_string();
-  if (typeStr == TYPE_REQUIRED)             name = PluginTypeEnum::Required;
-  else if (typeStr == TYPE_OPTIONAL)        name = PluginTypeEnum::Optional;
-  else if (typeStr == TYPE_RECOMMENDED)     name = PluginTypeEnum::Recommended;
-  else if (typeStr == TYPE_NOT_USABLE)      name = PluginTypeEnum::NotUsable;
-  else if (typeStr == TYPE_COULD_BE_USABLE) name = PluginTypeEnum::CouldBeUsable;
-  else name = PluginTypeEnum::Optional;  // if there isn't any type. it can't be enforced as anything.
-  return true;
+PluginTypeEnum pluginTypeFromString(const std::string &typeStr) {
+  if (typeStr == TYPE_REQUIRED)             return PluginTypeEnum::Required;
+  if (typeStr == TYPE_OPTIONAL)        return PluginTypeEnum::Optional;
+  if (typeStr == TYPE_RECOMMENDED)     return PluginTypeEnum::Recommended;
+  if (typeStr == TYPE_NOT_USABLE)      return PluginTypeEnum::NotUsable;
+  if (typeStr == TYPE_COULD_BE_USABLE) return PluginTypeEnum::CouldBeUsable;
+  return PluginTypeEnum::Optional;
 }
 
 template <typename T>
@@ -87,9 +85,10 @@ bool CompositeDependency::deserialize(pugi::xml_node &node) {
 bool DependencyPattern::deserialize(pugi::xml_node &node) {
   if (!node) return false;
   pugi::xml_node dependenciesNode = node.child("dependencies");
-  pugi::xml_node typeNode = node.child("type");
   dependencies.deserialize(dependenciesNode);
-  type.deserialize(typeNode);
+
+  const pugi::xml_node typeNode = node.child("type");
+  type = pluginTypeFromString(typeNode.attribute("name").as_string());
   return true;
 }
 
@@ -98,16 +97,18 @@ bool DependencyPatternList::deserialize(pugi::xml_node &node) {
 }
 
 bool DependencyPluginType::deserialize(pugi::xml_node &node) {
-  pugi::xml_node defaultTypeNode = node.child("defaultType");
   pugi::xml_node patternsNode = node.child("patterns");
-  defaultType.deserialize(defaultTypeNode);
+  const pugi::xml_node defaultTypeNode = node.child("defaultType");
+  defaultType = pluginTypeFromString(defaultTypeNode.attribute("name").as_string());
   patterns.deserialize(patternsNode);
   return true;
 }
 
-bool PluginTypeDescriptor::deserialize(pugi::xml_node &node) {
+bool TypeDescriptor::deserialize(pugi::xml_node &node) {
   pugi::xml_node dependencyTypeNode = node.child("dependencyType");
   dependencyType.deserialize(dependencyTypeNode);
+  const pugi::xml_node typeNode = node.child("type");
+  type = pluginTypeFromString(typeNode.attribute("name").as_string());
   return true;
 }
 
