@@ -1,12 +1,20 @@
 ﻿#include "ConditionTester.h"
+
+#include <iplugingame.h>
 #include <ipluginlist.h>
+
+template <typename... Vectors>
+bool areAllVectorsEmpty(const Vectors&... vectors) {
+  return (vectors.empty() && ...);
+}
 
 bool ConditionTester::testCompositeDependency(const FlagMap& flags, const CompositeDependency& compositeDependency) const {
   const auto fileDependencies = compositeDependency.fileDependencies;
   const auto flagDependencies = compositeDependency.flagDependencies;
+  const auto gameDependencies = compositeDependency.gameDependencies;
   const auto globalOperatorType = compositeDependency.operatorType;
 
-  if (fileDependencies.empty() && flagDependencies.empty()) {
+  if (areAllVectorsEmpty(fileDependencies, flagDependencies, gameDependencies)) {
     return true;
   }
   // For the globalOperatorType
@@ -18,6 +26,9 @@ bool ConditionTester::testCompositeDependency(const FlagMap& flags, const Compos
   }
   for (const auto& flagDependency : flagDependencies) {
     results.emplace_back(testFlagDependency(flags, flagDependency));
+  }
+  for (const auto& gameDependency : gameDependencies) {
+    results.emplace_back(testGameDependency(gameDependency));
   }
 
   if (globalOperatorType == OperatorTypeEnum::AND) {
@@ -44,6 +55,11 @@ bool ConditionTester::testFileDependency(const FileDependency& fileDependency) c
   const std::string& pluginName = fileDependency.file;
   const auto pluginState = getFileDependencyStateForPlugin(pluginName);
   return pluginState == fileDependency.state;
+}
+
+bool ConditionTester::testGameDependency(const GameDependency& gameDependency) const {
+  const auto gameVersion = mOrganizer->managedGame()->gameVersion().toStdString();
+  return gameVersion == gameDependency.version;
 }
 
 FileDependencyTypeEnum ConditionTester::getFileDependencyStateForPlugin(const std::string &pluginName) const {

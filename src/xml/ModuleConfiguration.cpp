@@ -66,9 +66,16 @@ bool FlagDependency::deserialize(pugi::xml_node &node) {
   return true;
 }
 
+bool GameDependency::deserialize(pugi::xml_node &node) {
+  version = node.attribute("version").as_string();
+  trim(version);
+  return true;
+}
+
 bool CompositeDependency::deserialize(pugi::xml_node &node) {
   deserializeList(node, "fileDependency", fileDependencies);
   deserializeList(node, "flagDependency", flagDependencies);
+  deserializeList(node, "gameDependency", gameDependencies);
 
   const std::string operatorStr = node.attribute("operator").as_string();
   if (operatorStr == "And") operatorType = OperatorTypeEnum::AND;
@@ -100,10 +107,7 @@ bool DependencyPluginType::deserialize(pugi::xml_node &node) {
 
 bool PluginTypeDescriptor::deserialize(pugi::xml_node &node) {
   pugi::xml_node dependencyTypeNode = node.child("dependencyType");
-  pugi::xml_node typeNode = node.child("type");
-
   dependencyType.deserialize(dependencyTypeNode);
-  type.deserialize(typeNode);
   return true;
 }
 

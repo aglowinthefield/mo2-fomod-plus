@@ -31,6 +31,7 @@ add_executable(runTests
         test_moduleconf_lux.cpp
         test_stringutil.cpp
         test_moduleconf_citytrees.cpp
+        test_moduleconf_bos.cpp
 )
 
 

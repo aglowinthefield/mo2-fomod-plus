@@ -10,10 +10,6 @@
           "type": "STRING",
           "value": "RelWithDebInfo"
         },
-        "CMAKE_CXX_FLAGS": {
-          "type": "STRING",
-          "value": "/EHsc /Wall"
-        },
         "DEPENDENCIES_DIR": {
           "type": "PATH",
           "value": "${sourceDir}/../.."

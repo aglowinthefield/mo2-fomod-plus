@@ -94,10 +94,17 @@ public:
   bool deserialize(pugi::xml_node &node) override;
 };
 
+class GameDependency final : public XmlDeserializable {
+public:
+  std::string version;
+  bool deserialize(pugi::xml_node &node) override;
+};
+
 class CompositeDependency final : public XmlDeserializable {
 public:
   std::vector<FileDependency> fileDependencies;
   std::vector<FlagDependency> flagDependencies;
+  std::vector<GameDependency> gameDependencies;
   OperatorTypeEnum operatorType = OperatorTypeEnum::OR; // safest default.
 
   bool deserialize(pugi::xml_node &node) override;
@@ -130,7 +137,7 @@ public:
 class PluginTypeDescriptor final : public XmlDeserializable {
 public:
   DependencyPluginType dependencyType;
-  PluginType type;
+  // PluginType type;
 
   bool deserialize(pugi::xml_node &node) override;
 };

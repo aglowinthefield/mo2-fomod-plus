@@ -249,7 +249,6 @@ QComboBox *FomodInstallerWindow::createModNameComboBox() {
   mModNameInput = new QComboBox(this);
   mModNameInput->setEditable(true);
 
-  // To show the 'best' guess first, we reverse the variant order
   // TODO: Pick the proper guess based on quality instead and sort by quality?
   // std::vector variants(mModName.variants().begin(), mModName.variants().end());
   // ranges::reverse(variants);

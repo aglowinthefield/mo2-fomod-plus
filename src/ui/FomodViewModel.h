@@ -209,6 +209,8 @@ private:
   void processPlugin(const std::shared_ptr<GroupViewModel> &groupViewModel,
                      const std::shared_ptr<PluginViewModel> &pluginViewModel) const;
 
+  void enforceGroupConstraints(const std::shared_ptr<GroupViewModel> &groupViewModel) const;
+
 
   // Indices
   int mCurrentStepIndex{0};

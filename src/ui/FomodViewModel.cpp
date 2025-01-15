@@ -111,12 +111,31 @@ void FomodViewModel::processPlugin(const std::shared_ptr<GroupViewModel> &groupV
   }
 }
 
+void FomodViewModel::enforceGroupConstraints(const std::shared_ptr<GroupViewModel> &groupViewModel) const {
+  if (groupViewModel->group->type != SelectExactlyOne) {
+    return; // Nothing to do for other groups constraint-wise...yet. TODO: Figure out if that's true.
+  }
+  if (std::ranges::any_of(groupViewModel->plugins, [](const auto& plugin) { return plugin->isSelected(); })) {
+    return;
+  }
+
+  // Select the first plugin that isn't NotUsable
+  for (const auto& plugin: groupViewModel->plugins) {
+    if (mConditionTester.getPluginTypeDescriptorState(plugin->getPlugin(), mFlags) != PluginTypeEnum::NotUsable) {
+      togglePlugin(groupViewModel, plugin, true);
+      break;
+    }
+  }
+  std::cerr << "SelectExactlyOne had no selectable members! Please debug this." << std::endl;
+}
+
 void FomodViewModel::processPluginConditions() const {
   for (const auto& stepViewModel : mSteps) {
     for (const auto& groupViewModel : stepViewModel->getGroups()) {
       for (const auto& pluginViewModel : groupViewModel->getPlugins()) {
         processPlugin(groupViewModel, pluginViewModel);
       }
+      enforceGroupConstraints(groupViewModel);
     }
   }
 

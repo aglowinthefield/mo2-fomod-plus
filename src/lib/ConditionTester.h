@@ -18,6 +18,8 @@ public:
   static bool testFlagDependency(FlagMap flags, const FlagDependency &flagDependency);
   [[nodiscard]] bool testFileDependency(const FileDependency &fileDependency) const;
 
+  bool testGameDependency(const GameDependency &gameDependency) const;
+
 private:
   MOBase::IOrganizer* mOrganizer;
 
