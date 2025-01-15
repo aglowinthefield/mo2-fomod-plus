@@ -429,5 +429,8 @@ void FomodInstallerWindow::updateDisplayForActivePlugin() const {
   mDescriptionBox->setText(QString::fromStdString(plugin->getDescription()));
   const auto image = mViewModel->getDisplayImage();
   const auto imagePath = UIHelper::getFullImagePath(mFomodPath, QString::fromStdString(image));
+  if (image.empty()) {
+    return;
+  }
   mImageLabel->setScalableResource(imagePath);
 }
