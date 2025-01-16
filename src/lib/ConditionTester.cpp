@@ -3,20 +3,16 @@
 #include <iplugingame.h>
 #include <ipluginlist.h>
 
-template <typename... Vectors>
-bool areAllVectorsEmpty(const Vectors&... vectors) {
-  return (vectors.empty() && ...);
-}
-
 bool ConditionTester::testCompositeDependency(const FlagMap& flags, const CompositeDependency& compositeDependency) const {
+  if (compositeDependency.totalDependencies == 0) {
+    return true;
+  }
+
   const auto fileDependencies = compositeDependency.fileDependencies;
   const auto flagDependencies = compositeDependency.flagDependencies;
   const auto gameDependencies = compositeDependency.gameDependencies;
   const auto globalOperatorType = compositeDependency.operatorType;
 
-  if (areAllVectorsEmpty(fileDependencies, flagDependencies, gameDependencies)) {
-    return true;
-  }
   // For the globalOperatorType
   // Evaluate all conditions and store the results in a vector<bool>, then return based on operator.
   // These aren't expensive to calculate so rather than do some fancy logic to short-circuit, just calculate all of 'em.

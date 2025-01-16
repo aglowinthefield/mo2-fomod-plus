@@ -196,8 +196,11 @@ private:
   mutable std::shared_ptr<StepViewModel> mActiveStep = nullptr;
   mutable std::vector<int> mVisibleStepIndices;
   std::shared_ptr<FileInstaller> mFileInstaller = nullptr;
+  bool mInitialized{false};
 
   void createStepViewModels();
+
+  void setFlagForPluginState(const std::shared_ptr<PluginViewModel> &plugin, bool selected) const;
 
   void setupGroups() const;
 

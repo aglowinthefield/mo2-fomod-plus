@@ -65,9 +65,9 @@ public:
 };
 
 enum class PluginTypeEnum {
+  Recommended,
   Required,
   Optional,
-  Recommended,
   NotUsable,
   CouldBeUsable
 };

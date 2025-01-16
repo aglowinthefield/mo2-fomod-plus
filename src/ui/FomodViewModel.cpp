@@ -39,9 +39,10 @@ std::shared_ptr<FomodViewModel> FomodViewModel::create(MOBase::IOrganizer *organ
                                                        std::unique_ptr<FomodInfoFile> infoFile) {
   auto viewModel = std::make_shared<FomodViewModel>(organizer, std::move(fomodFile), std::move(infoFile));
   viewModel->createStepViewModels();
-  viewModel->updateVisibleSteps();
   viewModel->setupGroups();
   viewModel->processPluginConditions();
+  viewModel->updateVisibleSteps();
+  viewModel->mInitialized = true;
   viewModel->mActiveStep = viewModel->mSteps.at(0);
   viewModel->mActivePlugin = viewModel->getFirstPluginForActiveStep();
   std::cout << "Active Plugin: " << viewModel->mActivePlugin->getName() << std::endl;
@@ -83,6 +84,7 @@ void FomodViewModel::setupGroups() const {
 void FomodViewModel::createNonePluginForGroup(const std::shared_ptr<GroupViewModel>& group) const {
   const auto nonePlugin = std::make_shared<Plugin>();
   nonePlugin->name = "None";
+  nonePlugin->typeDescriptor.type = PluginTypeEnum::Recommended;
   // If we're making this, it should be selected. Maybe. Maybe we just evaluate conditions first.
   const auto nonePluginViewModel = std::make_shared<PluginViewModel>(nonePlugin, false, true);
   group->plugins.emplace_back(nonePluginViewModel);
@@ -162,23 +164,38 @@ void FomodViewModel::createStepViewModels() {
   mSteps = std::move(stepViewModels);
 }
 
-// TODO: Handle groups later
-void FomodViewModel::togglePlugin(const std::shared_ptr<GroupViewModel> &,
-                                  const std::shared_ptr<PluginViewModel> &plugin, const bool selected) const {
-  plugin->setSelected(selected);
+void FomodViewModel::setFlagForPluginState(const std::shared_ptr<PluginViewModel> &plugin, const bool selected) const {
   for (const auto& flag : plugin->plugin->conditionFlags.flags) {
     mFlags.setFlag(flag.name, selected ? flag.value : "");
   }
-  mActivePlugin = plugin;
-  updateVisibleSteps();
+}
+
+// TODO: Handle groups later
+void FomodViewModel::togglePlugin(const std::shared_ptr<GroupViewModel> &group,
+                                  const std::shared_ptr<PluginViewModel> &plugin, const bool selected) const {
+  plugin->setSelected(selected);
+  setFlagForPluginState(plugin, selected);
+
+  // for radio groups, we need to toggle the other plugins to be off, maybe?
+  if (group->getType() == SelectExactlyOne || group->getType() == SelectAtMostOne) {
+    for (const auto& otherPlugin : group->getPlugins()) {
+      if (otherPlugin != plugin) {
+        otherPlugin->setSelected(false);
+        setFlagForPluginState(otherPlugin, false);
+      }
+    }
+  }
+
+  if (mInitialized) {
+    mActivePlugin = plugin;
+    updateVisibleSteps();
+  }
 }
 
 void FomodViewModel::updateVisibleSteps() const {
   mVisibleStepIndices.clear();
   for (int i = 0; i < mSteps.size(); ++i) {
-    if (mSteps[i]->installStep->visible.totalDependencies == 0) {
-      mVisibleStepIndices.push_back(i);
-    } else if (mConditionTester.isStepVisible(mFlags, mSteps[i]->installStep)) {
+    if (mConditionTester.isStepVisible(mFlags, mSteps[i]->installStep)) {
       mVisibleStepIndices.push_back(i);
     }
   }

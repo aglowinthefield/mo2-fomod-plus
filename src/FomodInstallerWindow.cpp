@@ -1,20 +1,20 @@
 ﻿#include "FomodInstallerWindow.h"
-#include "ui/UIHelper.h"
-#include "xml/ModuleConfiguration.h"
 #include <log.h>
 #include "ui/ScaleLabel.h"
+#include "ui/UIHelper.h"
+#include "xml/ModuleConfiguration.h"
 
-#include <QVBoxLayout>
+#include <QButtonGroup>
+#include <QCheckBox>
 #include <QComboBox>
 #include <QCompleter>
-#include <QSizePolicy>
 #include <QGroupBox>
-#include <QTextEdit>
 #include <QLabel>
-#include <QButtonGroup>
 #include <QRadioButton>
-#include <QCheckBox>
 #include <QScrollArea>
+#include <QSizePolicy>
+#include <QTextEdit>
+#include <QVBoxLayout>
 #include <utility>
 
 #include "ui/FomodViewModel.h"
@@ -352,6 +352,8 @@ QWidget *FomodInstallerWindow::renderGroup(const std::shared_ptr<GroupViewModel>
       renderCheckboxGroup(groupBox, groupBoxLayout, group);
       break;
     case SelectExactlyOne:
+      renderSelectExactlyOne(groupBox, groupBoxLayout, group);
+      break;
     case SelectAtMostOne:
       renderRadioGroup(groupBox, groupBoxLayout, group);
       break;
