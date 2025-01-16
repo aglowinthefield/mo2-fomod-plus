@@ -57,9 +57,9 @@ TEST_F(ModuleConfigurationTest_Xavbio, SecondPluginImagePath) {
 }
 
 TEST_F(ModuleConfigurationTest_Xavbio, SecondStepVisibleFlag) {
-    EXPECT_EQ(moduleConfig.installSteps.installSteps[1].visible.dependencies.operatorType, OperatorTypeEnum::AND);
-    EXPECT_EQ(moduleConfig.installSteps.installSteps[1].visible.dependencies.flagDependencies[0].flag, "1");
-    EXPECT_EQ(moduleConfig.installSteps.installSteps[1].visible.dependencies.flagDependencies[0].value, "On");
+    EXPECT_EQ(moduleConfig.installSteps.installSteps[1].visible.operatorType, OperatorTypeEnum::AND);
+    EXPECT_EQ(moduleConfig.installSteps.installSteps[1].visible.flagDependencies[0].flag, "1");
+    EXPECT_EQ(moduleConfig.installSteps.installSteps[1].visible.flagDependencies[0].value, "On");
 }
 
 TEST_F(ModuleConfigurationTest_Xavbio, ConditionFlag) {

@@ -35,10 +35,10 @@ TEST_F(ModuleConfPrecision, PatternDependencies) {
       .plugins[0];
 
     const auto typeDescriptor = tkDodge.typeDescriptor;
-    EXPECT_EQ(typeDescriptor.dependencyType.defaultType.name, PluginTypeEnum::NotUsable);
+    EXPECT_EQ(typeDescriptor.dependencyType.defaultType, PluginTypeEnum::NotUsable);
 
     const auto pattern = typeDescriptor.dependencyType.patterns.patterns[0];
-    EXPECT_EQ(pattern.type.name, PluginTypeEnum::Recommended);
+    EXPECT_EQ(pattern.type, PluginTypeEnum::Recommended);
 
     // TODO: This doesn't QUITE add up to how the xml is formatted. fine for now.
     EXPECT_EQ(pattern.dependencies.operatorType, OperatorTypeEnum::OR);

@@ -71,13 +71,27 @@ bool GameDependency::deserialize(pugi::xml_node &node) {
 }
 
 bool CompositeDependency::deserialize(pugi::xml_node &node) {
-  deserializeList(node, "fileDependency", fileDependencies);
-  deserializeList(node, "flagDependency", flagDependencies);
-  deserializeList(node, "gameDependency", gameDependencies);
 
-  const std::string operatorStr = node.attribute("operator").as_string();
-  if (operatorStr == "And") operatorType = OperatorTypeEnum::AND;
-  else if (operatorStr == "Or") operatorType = OperatorTypeEnum::OR;
+  // this could EITHER have a dependencies child or the dependencies are here.
+  pugi::xml_node possibleNode = node;
+  if (node.child("dependencies")) {
+    possibleNode = node.child("dependencies");
+  }
+
+  deserializeList(possibleNode, "fileDependency", fileDependencies);
+  deserializeList(possibleNode, "flagDependency", flagDependencies);
+  deserializeList(possibleNode, "gameDependency", gameDependencies);
+
+  operatorType = OperatorTypeEnum::OR; // safest default.
+
+  if (const std::string operatorStr = possibleNode.attribute("operator").as_string(); operatorStr == "And") {
+    operatorType = OperatorTypeEnum::AND;
+  }
+
+  totalDependencies = static_cast<int>(fileDependencies.size()
+                                  + flagDependencies.size()
+                                  + gameDependencies.size()
+  );
 
   return true;
 }

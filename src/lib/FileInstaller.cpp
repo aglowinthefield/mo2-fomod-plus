@@ -109,7 +109,7 @@ std::vector<File> FileInstaller::collectFilesToInstall() const {
 
   // Selected files from visible steps
   for (const auto& stepViewModel : mSteps) {
-    if (!mConditionTester.isStepVisible(mFlagMap, stepViewModel->installStep.get())) {
+    if (!mConditionTester.isStepVisible(mFlagMap, stepViewModel->installStep)) {
       continue;
     }
     for (const auto& groupViewModel : stepViewModel->getGroups()) {

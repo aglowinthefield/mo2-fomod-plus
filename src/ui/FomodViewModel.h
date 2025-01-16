@@ -148,8 +148,6 @@ public:
   [[nodiscard]] int getCurrentStepIndex() const { return mCurrentStepIndex; }
   [[deprecated]] void setCurrentStepIndex(const int index) { mCurrentStepIndex = index; }
 
-  [[nodiscard]] bool isStepVisible(int stepIndex) const;
-
   void updateVisibleSteps() const;
 
   void preinstall(const std::shared_ptr<MOBase::IFileTree> &tree, const QString &fomodPath);
@@ -157,9 +155,9 @@ public:
   std::shared_ptr<FileInstaller> getFileInstaller() { return mFileInstaller; }
 
   // Flags
-  void setFlag(const std::string &flag, const std::string &value);
+  void setFlag(const std::string &flag, const std::string &value) const;
 
-  std::string getFlag(const std::string &flag);
+  std::string getFlag(const std::string &flag) const;
 
   std::string getDisplayImage() const;
 
@@ -188,6 +186,7 @@ private:
   std::unique_ptr<FomodInfoFile> mInfoFile;
   mutable FlagMap mFlags;
   ConditionTester mConditionTester;
+
 
   // Internal only
   // TODO: This is a LOT of shared_ptr nonsense. It works for now but I need to understand it better to fix it.

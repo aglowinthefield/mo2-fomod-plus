@@ -108,6 +108,7 @@ public:
   std::vector<FlagDependency> flagDependencies;
   std::vector<GameDependency> gameDependencies;
   OperatorTypeEnum operatorType = OperatorTypeEnum::OR; // safest default.
+  int totalDependencies = 0;
 
   bool deserialize(pugi::xml_node &node) override;
 };
@@ -239,7 +240,7 @@ public:
 
 class InstallStep final : public XmlDeserializable {
 public:
-  DependencyPattern visible;
+  CompositeDependency visible;
   GroupList optionalFileGroups;
   std::string name;
 

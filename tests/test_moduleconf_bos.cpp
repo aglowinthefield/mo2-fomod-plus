@@ -21,7 +21,7 @@ TEST_F(MCBos, VersionDependency) {
   const auto firstGroup = moduleConfig.installSteps.installSteps.front().optionalFileGroups.groups.front();
   const auto firstPlugin = firstGroup.plugins.plugins.front();
 
-  EXPECT_EQ(firstPlugin.typeDescriptor.dependencyType.defaultType.name, PluginTypeEnum::Optional);
+  EXPECT_EQ(firstPlugin.typeDescriptor.dependencyType.defaultType, PluginTypeEnum::Optional);
 
   const auto dependencies = firstPlugin.typeDescriptor.dependencyType.patterns.patterns;
   EXPECT_EQ(dependencies.size(), 3);

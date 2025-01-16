@@ -34,3 +34,11 @@ TEST_F(MCCityTrees, ConditionalFileInstalls) {
   EXPECT_EQ(firstConditional.files.files[0].destination, "CT_10_Dawnstar_A1.esp");
   EXPECT_EQ(firstConditional.files.files[0].priority, 0);
 }
+
+TEST_F(MCCityTrees, VisibleDependencies) {
+  const auto visibilityStep = moduleConfig.installSteps.installSteps.at(5);
+  const auto visibility = visibilityStep.visible.flagDependencies;
+  EXPECT_EQ(visibility.size(), 1);
+  EXPECT_EQ(visibility.front().flag, "addon1menu");
+  EXPECT_EQ(visibility.front().value, "1");
+}

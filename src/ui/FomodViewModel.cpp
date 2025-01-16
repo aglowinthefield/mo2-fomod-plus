@@ -137,7 +137,6 @@ void FomodViewModel::processPluginConditions() const {
       enforceGroupConstraints(groupViewModel);
     }
   }
-
 }
 
 void FomodViewModel::createStepViewModels() {
@@ -174,21 +173,12 @@ void FomodViewModel::togglePlugin(const std::shared_ptr<GroupViewModel> &,
   updateVisibleSteps();
 }
 
-
-/*
---------------------------------------------------------------------------------
-                               Step Visibility
---------------------------------------------------------------------------------
-*/
-bool FomodViewModel::isStepVisible(const int stepIndex) const {
-  const auto step = mSteps[stepIndex]->installStep;
-  return mConditionTester.isStepVisible(mFlags, step.get());
-}
-
 void FomodViewModel::updateVisibleSteps() const {
   mVisibleStepIndices.clear();
   for (int i = 0; i < mSteps.size(); ++i) {
-    if (isStepVisible(i)) {
+    if (mSteps[i]->installStep->visible.totalDependencies == 0) {
+      mVisibleStepIndices.push_back(i);
+    } else if (mConditionTester.isStepVisible(mFlags, mSteps[i]->installStep)) {
       mVisibleStepIndices.push_back(i);
     }
   }
@@ -230,11 +220,11 @@ void FomodViewModel::stepForward() {
                                Flags
 --------------------------------------------------------------------------------
 */
-void FomodViewModel::setFlag(const std::string &flag, const std::string &value) {
+void FomodViewModel::setFlag(const std::string &flag, const std::string &value) const {
   mFlags.setFlag(flag, value);
 }
 
-std::string FomodViewModel::getFlag(const std::string &flag) {
+std::string FomodViewModel::getFlag(const std::string &flag) const {
   return mFlags.getFlag(flag);
 }
 

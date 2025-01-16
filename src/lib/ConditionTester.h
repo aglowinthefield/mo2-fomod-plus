@@ -13,7 +13,7 @@ public:
 
   bool testCompositeDependency(const FlagMap &flags, const CompositeDependency &compositeDependency) const;
 
-  bool isStepVisible(const FlagMap &flags, const InstallStep *step) const;
+  bool isStepVisible(const FlagMap &flags, const std::shared_ptr<InstallStep> &step) const;
 
   static bool testFlagDependency(FlagMap flags, const FlagDependency &flagDependency);
   [[nodiscard]] bool testFileDependency(const FileDependency &fileDependency) const;
