@@ -55,7 +55,7 @@ std::shared_ptr<FomodViewModel> FomodViewModel::create(MOBase::IOrganizer *organ
 --------------------------------------------------------------------------------
 */
 
-bool isRadioButtonGroup(GroupTypeEnum groupType) {
+bool isRadioButtonGroup(const GroupTypeEnum groupType) {
   return groupType == SelectExactlyOne || groupType == SelectAtMostOne;
 }
 
@@ -177,7 +177,7 @@ void FomodViewModel::togglePlugin(const std::shared_ptr<GroupViewModel> &group,
   setFlagForPluginState(plugin, selected);
 
   // for radio groups, we need to toggle the other plugins to be off, maybe?
-  if (group->getType() == SelectExactlyOne || group->getType() == SelectAtMostOne) {
+  if (isRadioButtonGroup(group->getType())) {
     for (const auto& otherPlugin : group->getPlugins()) {
       if (otherPlugin != plugin) {
         otherPlugin->setSelected(false);

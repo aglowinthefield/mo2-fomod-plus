@@ -1,6 +1,7 @@
 ﻿#include "FileInstaller.h"
 
 #include <fstream>
+#include <utility>
 
 #include "ui/FomodViewModel.h"
 
@@ -8,11 +9,11 @@ using namespace MOBase;
 
 FileInstaller::FileInstaller(
   IOrganizer *organizer,
-  const QString &fomodPath,
+  QString fomodPath,
   const std::shared_ptr<IFileTree> &fileTree,
   std::unique_ptr<ModuleConfiguration> fomodFile,
   const FlagMap &flagMap,
-  const std::vector<std::shared_ptr<StepViewModel> > &steps) : mOrganizer(organizer), mFomodPath(fomodPath),
+  const std::vector<std::shared_ptr<StepViewModel> > &steps) : mOrganizer(organizer), mFomodPath(std::move(fomodPath)),
                                                                mFileTree(fileTree),
                                                                mFomodFile(std::move(fomodFile)),
                                                                mFlagMap(flagMap),
@@ -44,14 +45,19 @@ std::shared_ptr<IFileTree> FileInstaller::install() const {
   return installTree;
 }
 
+void FileInstaller::addFomodToMeta() {
+  const auto json = generateFomodJson();
+
+}
+
 void FileInstaller::writeFomodJsonToFile(const std::string &filePath) const {
-  const nlohmann::json fomodJson = generateFomodJsonFile();
+  const nlohmann::json fomodJson = generateFomodJson();
   std::ofstream jsonFile(filePath);
   jsonFile << fomodJson.dump(4);
   jsonFile.close();
 }
 
-nlohmann::json FileInstaller::generateFomodJsonFile() const {
+nlohmann::json FileInstaller::generateFomodJson() const {
   nlohmann::json fomodJson;
 
   fomodJson["steps"] = nlohmann::json::array();

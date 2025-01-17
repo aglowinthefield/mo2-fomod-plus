@@ -413,7 +413,7 @@ void FomodInstallerWindow::renderSelectExactlyOne(QWidget *parent, QLayout *pare
 
 void FomodInstallerWindow::renderCheckboxGroup(QWidget *parent, QLayout *parentLayout,
                                                const std::shared_ptr<GroupViewModel> &group) {
-  // Same thing but with an extra 'None' option at the end)
+  // Same thing but with an extra 'None' option at the end
   // auto* buttonGroup = new QButtonGroup(parent);
   for (const auto &plugin: group->getPlugins()) {
     auto *checkbox = createPluginCheckBox(plugin, group, parent);

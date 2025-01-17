@@ -28,13 +28,15 @@ class FileInstaller {
 public:
   FileInstaller(
     MOBase::IOrganizer* organizer,
-    const QString &fomodPath,
+    QString fomodPath,
     const std::shared_ptr<MOBase::IFileTree> &fileTree,
     std::unique_ptr<ModuleConfiguration> fomodFile,
     const FlagMap& flagMap,
     const std::vector<std::shared_ptr<StepViewModel>> &steps);
 
   std::shared_ptr<MOBase::IFileTree> install() const;
+
+  void addFomodToMeta();
 
   void writeFomodJsonToFile(const std::string &filePath) const;
 
@@ -63,7 +65,7 @@ public:
    *
    * @return nhlohmann::json
    */
-  nlohmann::json generateFomodJsonFile() const;
+  nlohmann::json generateFomodJson() const;
   std::string getQualifiedFilePath(const std::string &treePath) const;
 
 private:

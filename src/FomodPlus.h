@@ -7,6 +7,7 @@
 #include <iplugininstaller.h>
 #include <iplugininstallersimple.h>
 
+#include <nlohmann/json.hpp>
 #include "FomodInstallerWindow.h"
 #include "xml/FomodInfoFile.h"
 #include "xml/ModuleConfiguration.h"
@@ -48,6 +49,7 @@ private:
 
   IOrganizer* mOrganizer = nullptr;
   QString mFomodPath{};
+  std::shared_ptr<nlohmann::json> mFomodJson{nullptr};
 
   /**
  * @brief Retrieve the tree entry corresponding to the fomod directory.

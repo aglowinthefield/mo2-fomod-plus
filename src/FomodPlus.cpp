@@ -26,7 +26,7 @@ void FomodPlus::setupUiInjection() const {
     std::cerr << "Organizer is null" << std::endl;
     return;
   }
-  const auto fomodContent = std::make_shared<FomodDataContent>();
+  const auto fomodContent = std::make_shared<FomodDataContent>(mOrganizer);
   // const auto managedGamePlugin = const_cast<IPluginGame *>(mOrganizer->managedGame());
   mOrganizer->gameFeatures()->registerFeature(fomodContent, 0, false);
 }
@@ -82,11 +82,12 @@ IPluginInstaller::EInstallResult FomodPlus::install(GuessedValue<QString> &modNa
     // modname was updated in window
     const std::shared_ptr<IFileTree> installTree = window->getFileInstaller()->install();
     tree = installTree;
+    mFomodJson = std::make_shared<nlohmann::json>(window->getFileInstaller()->generateFomodJson());
 
-    if (const auto entry = tree->find("fomod.json", FileTreeEntry::FILE); entry != nullptr) {
-      const auto fomodJsonFilePath = manager()->createFile(entry);
-      window->getFileInstaller()->writeFomodJsonToFile(fomodJsonFilePath.toStdString());
-    }
+    // if (const auto entry = tree->find("fomod.json", FileTreeEntry::FILE); entry != nullptr) {
+      // const auto fomodJsonFilePath = manager()->createFile(entry);
+      // window->getFileInstaller()->writeFomodJsonToFile(fomodJsonFilePath.toStdString());
+    // }
 
     return RESULT_SUCCESS;
   }
@@ -165,6 +166,11 @@ void FomodPlus::onInstallationStart(QString const &archive, const bool reinstall
 
 void FomodPlus::onInstallationEnd(const EInstallResult result, IModInterface *newMod) {
   IPluginInstallerSimple::onInstallationEnd(result, newMod);
+
+  // Update the meta.ini file with the fomod information
+  if (mFomodJson != nullptr) {
+    newMod->setPluginSetting(this->name(), "fomod", mFomodJson->dump().c_str());
+  }
 }
 
 // Borrowed from https://github.com/ModOrganizer2/modorganizer-installer_fomod/blob/master/src/installerfomod.cpp
