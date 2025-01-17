@@ -82,10 +82,10 @@ bool CompositeDependency::deserialize(pugi::xml_node &node) {
   deserializeList(possibleNode, "flagDependency", flagDependencies);
   deserializeList(possibleNode, "gameDependency", gameDependencies);
 
-  operatorType = OperatorTypeEnum::OR; // safest default.
+  operatorType = OperatorTypeEnum::AND; // safest default.
 
-  if (const std::string operatorStr = possibleNode.attribute("operator").as_string(); operatorStr == "And") {
-    operatorType = OperatorTypeEnum::AND;
+  if (const std::string operatorStr = possibleNode.attribute("operator").as_string(); operatorStr == "Or") {
+    operatorType = OperatorTypeEnum::OR;
   }
 
   totalDependencies = static_cast<int>(fileDependencies.size()

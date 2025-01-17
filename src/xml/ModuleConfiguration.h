@@ -107,7 +107,7 @@ public:
   std::vector<FileDependency> fileDependencies;
   std::vector<FlagDependency> flagDependencies;
   std::vector<GameDependency> gameDependencies;
-  OperatorTypeEnum operatorType = OperatorTypeEnum::OR; // safest default.
+  OperatorTypeEnum operatorType = OperatorTypeEnum::AND; // safest default.
   int totalDependencies = 0;
 
   bool deserialize(pugi::xml_node &node) override;
