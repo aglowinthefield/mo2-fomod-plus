@@ -13,3 +13,6 @@ To debug:
 1. Make sure you are debugging the `fomod_plus` target.
 2. Set your target executable to the MO2 executable inside `<mobDir>/install/bin`.
 
+---
+#### Attribution
+<a href="https://www.flaticon.com/free-icons/witch" title="witch icons">Witch icons created by Umeicon - Flaticon</a>

@@ -54,6 +54,7 @@ QList<PluginSetting> FomodPlus::settings() const {
 IPluginInstaller::EInstallResult FomodPlus::install(GuessedValue<QString> &modName,
                                                              std::shared_ptr<IFileTree> &tree, QString &version,
                                                              int &nexusID) {
+
   log::debug("FomodPlus::install - modName: {}, version: {}, nexusID: {}",
              modName->toStdString(),
              version.toStdString(),
@@ -64,30 +65,18 @@ IPluginInstaller::EInstallResult FomodPlus::install(GuessedValue<QString> &modNa
   auto [infoFile, moduleConfigFile] = parseFomodFiles(tree);
 
   if (infoFile == nullptr || moduleConfigFile == nullptr) {
-    // Do we want to fail if no info.xml? probably for now. something to consider here.
     return RESULT_FAILED;
   }
 
   // create ui & pass xml classes to ui
   auto fomodViewModel = FomodViewModel::create(mOrganizer, std::move(moduleConfigFile), std::move(infoFile));
-  const auto window = std::make_shared<FomodInstallerWindow>(
-    this,
-    modName,
-    tree,
-    mFomodPath,
-    fomodViewModel
-  );
+  const auto window = std::make_shared<FomodInstallerWindow>(this, modName, tree, mFomodPath, fomodViewModel);
 
   if (const QDialog::DialogCode result = showInstallerWindow(window); result == QDialog::Accepted) {
     // modname was updated in window
     const std::shared_ptr<IFileTree> installTree = window->getFileInstaller()->install();
     tree = installTree;
     mFomodJson = std::make_shared<nlohmann::json>(window->getFileInstaller()->generateFomodJson());
-
-    // if (const auto entry = tree->find("fomod.json", FileTreeEntry::FILE); entry != nullptr) {
-      // const auto fomodJsonFilePath = manager()->createFile(entry);
-      // window->getFileInstaller()->writeFomodJsonToFile(fomodJsonFilePath.toStdString());
-    // }
 
     return RESULT_SUCCESS;
   }
@@ -168,7 +157,7 @@ void FomodPlus::onInstallationEnd(const EInstallResult result, IModInterface *ne
   IPluginInstallerSimple::onInstallationEnd(result, newMod);
 
   // Update the meta.ini file with the fomod information
-  if (mFomodJson != nullptr) {
+  if (mFomodJson != nullptr && result == RESULT_SUCCESS && newMod != nullptr) {
     newMod->setPluginSetting(this->name(), "fomod", mFomodJson->dump().c_str());
   }
 }

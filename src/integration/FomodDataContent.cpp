@@ -12,7 +12,7 @@ std::ostream& operator<<(std::ostream& os, const MOBase::ModDataContent::Content
 std::vector<MOBase::ModDataContent::Content> FomodDataContent::getAllContents() const {
   std::vector<Content> contents;
   Content fomodContent = {
-    FomodDataContentConstants::FOMOD_CONTENT_ID, "FOMOD", "", true
+    FomodDataContentConstants::FOMOD_CONTENT_ID, "FOMOD", ":/fomod/hat", false
   };
   contents.emplace_back(fomodContent);
   return contents;
