@@ -26,7 +26,7 @@ add_executable(runTests
         moduleconf/test_moduleconf_xavbio.cpp
         moduleconf/test_moduleconf_precision.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../installer/xml/FomodInfoFile.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/../installer/lib/stringutil.h
+        ../share/stringutil.h
         ../installer/xml/ModuleConfiguration.cpp
         moduleconf/test_moduleconf_lux.cpp
         test_stringutil.cpp

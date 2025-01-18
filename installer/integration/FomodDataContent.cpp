@@ -2,7 +2,7 @@
 #include <ifiletree.h>
 #include <iostream>
 
-#include "lib/stringutil.h"
+#include "stringutil.h"
 
 std::ostream& operator<<(std::ostream& os, const MOBase::ModDataContent::Content& content) {
   os << content.id() << " " << content.name().toStdString() << " " << content.icon().toStdString();

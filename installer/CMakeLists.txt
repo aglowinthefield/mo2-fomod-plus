@@ -4,7 +4,12 @@ add_library(fomod_plus_installer SHARED)
 set_property(TARGET fomod_plus_installer PROPERTY CXX_STANDARD 20)
 
 set(CMAKE_GENERATOR_PLATFORM x64)
-target_include_directories(fomod_plus_installer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(
+        fomod_plus_installer
+        PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/../share
+)
 
 FetchContent_Declare(pugixml GIT_REPOSITORY https://github.com/zeux/pugixml GIT_TAG v1.14)
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)

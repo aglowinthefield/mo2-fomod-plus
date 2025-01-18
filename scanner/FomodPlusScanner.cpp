@@ -2,78 +2,147 @@
 
 #include <QDialog>
 #include <QPushButton>
+#include <QProgressBar>
 #include <QVBoxLayout>
+#include <QMessageBox>
 #include <archive.h>
+#include <string>
 
+#include <QLabel>
 #include <iostream>
+
+#include "stringutil.h"
 
 bool FomodPlusScanner::init(IOrganizer* organizer) {
   mOrganizer = organizer;
+
+  mDialog = new QDialog();
+  mDialog->setWindowTitle("FOMOD Scanner");
+
+  const auto layout = new QVBoxLayout(mDialog);
+
+  std::string   wizard      = "";
+  const QString description = "Greetings, traveler.\n"
+      "This tool will scan your load order for mods installed via FOMOD.\n"
+      "It might take a minute to complete once you hit 'Scan', so please be patient!\n\n"
+      "Safe travels, and may your load order be free of conflicts.";
+
+  const auto descriptionLabel = new QLabel(description, mDialog);
+  descriptionLabel->setWordWrap(true); // Enable word wrap for large text
+  descriptionLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  descriptionLabel->setAlignment(Qt::AlignLeft | Qt::AlignTop); // Align text to the top-left corner
+
+  mProgressBar = new QProgressBar(mDialog);
+  mProgressBar->setRange(0, mOrganizer->modList()->allMods().size());
+  mProgressBar->setVisible(false);
+  layout->addWidget(mProgressBar);
+
+  const auto scanButton = new QPushButton("Scan", mDialog);
+  const auto cancelButton = new QPushButton("Cancel", mDialog);
+
+  layout->addWidget(scanButton);
+  layout->addWidget(cancelButton);
+
+  connect(cancelButton, &QPushButton::clicked, mDialog, &QDialog::reject);
+  connect(scanButton, &QPushButton::clicked, [this] {
+    mProgressBar->setVisible(true);
+    const int added = this->scanLoadOrder();
+    this->mDialog->accept();
+    QMessageBox::information(mDialog, "Scan Complete", "The load order scan is complete. Added filter info to " + QString::number(added) + " mods.");
+
+  });
+  mDialog->setLayout(layout);
+  mDialog->setMinimumSize(400, 300);
+  mDialog->adjustSize();
+  descriptionLabel->adjustSize();
   return true;
 }
 
 void FomodPlusScanner::display() const {
-  QDialog dialog;
-  dialog.setWindowTitle("FOMOD Scanner");
-
-  QVBoxLayout layout(&dialog);
-
-  QPushButton scanButton("Scan", &dialog);
-  QPushButton cancelButton("Cancel", &dialog);
-
-  layout.addWidget(&scanButton);
-  layout.addWidget(&cancelButton);
-
-  connect(&cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
-  connect(&scanButton, &QPushButton::clicked, [this, &dialog] {
-    this->scanLoadOrder();
-    dialog.accept();
-  });
-
-  dialog.exec();
+  mDialog->exec();
 }
 
-void FomodPlusScanner::scanLoadOrder() const {
-  const auto pluginName = "FOMOD Plus"; // TODO: can this be read from shared constants?
-
+int FomodPlusScanner::scanLoadOrder() const {
+  int progress = 0;
+  int added = 0;
   for (auto modName : mOrganizer->modList()->allMods()) {
-    const auto mod = mOrganizer->modList()->getMod(modName);
+    const auto pluginName = "FOMOD Plus";
+    const auto mod        = mOrganizer->modList()->getMod(modName);
     if (auto setting = mod->pluginSetting(pluginName, "fomod", 0); setting == 0) {
-      continue; // We've already set metadata for this FOMOD.
+      const int result = openInstallationArchive(mod);
+      if (result == 0) {
+        added++;
+      }
     }
-
-    // check archives
-    int result = openInstallationArchive(mod);
-    std::cout << "Result is " << result << std::endl;
-
-
+    mProgressBar->setValue(++progress);
   }
+  return added;
+}
+
+bool hasFomodFiles(const std::vector<FileData*>& files) {
+
+  bool hasModuleXml = false;
+  bool hasInfoXml = false;
+
+  for (const auto* file : files) {
+    if (endsWithCaseInsensitive(file->getArchiveFilePath(), StringConstants::FomodFiles::W_MODULE_CONFIG.data())) {
+      hasModuleXml = true;
+    }
+    if (endsWithCaseInsensitive(file->getArchiveFilePath(), StringConstants::FomodFiles::W_INFO_XML.data())) {
+      hasInfoXml = true;
+    }
+  }
+  return hasModuleXml && hasInfoXml;
+}
+
+std::ostream& operator<<(std::ostream& os, const Archive::Error& error) {
+  switch (error) {
+    case Archive::Error::ERROR_NONE:
+      os << "No error";
+    break;
+    case Archive::Error::ERROR_ARCHIVE_NOT_FOUND:
+      os << "File not found";
+    break;
+    case Archive::Error::ERROR_FAILED_TO_OPEN_ARCHIVE:
+      os << "Failed to open file";
+    break;
+    case Archive::Error::ERROR_INVALID_ARCHIVE_FORMAT:
+      os << "Invalid archive format";
+    break;
+    default:
+      os << "Unknown error??";
+  }
+  return os;
 }
 
 int FomodPlusScanner::openInstallationArchive(const IModInterface* mod) const {
   const auto downloadsDir = mOrganizer->downloadsPath();
   const auto installationFilePath = mod->installationFile();
+
+  if (installationFilePath.isEmpty()) {
+    return -1;
+  }
+
   const auto qualifiedInstallerPath = downloadsDir + "/" + installationFilePath;
 
   const auto archive = CreateArchive();
 
   if (!archive->isValid()) {
-    std::wcerr << "Failed to load the archive module: " << std::endl;
+    std::cerr << "[" << mod->name().toStdString() << "] Failed to load the archive module: " << archive->getLastError() << std::endl;
     return -1;
   }
 
   // Open the archive:
   if (!archive->open(qualifiedInstallerPath.toStdWString(), nullptr)) {
-    std::wcerr << "Failed to open the archive: " << std::endl;
+    std::cerr << "[" << mod->name().toStdString() << "] Failed to open the archive [" << qualifiedInstallerPath.toStdString() <<  "]: " << archive->getLastError() << std::endl;
     return -1;
   }
 
-  // Get the list of files:
-
   // Mark all files for extraction to their path in the archive:
-  for (auto const& files = archive->getFileList(); const auto *fileData: files) {
-    std::wcout << fileData->getArchiveFilePath() << std::endl;
+  if (hasFomodFiles(archive->getFileList())) {
+    std::cout << "Found FOMOD files in " << qualifiedInstallerPath.toStdString() << std::endl;
   }
+
   return 0;
 }
 

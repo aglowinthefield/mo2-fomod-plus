@@ -1,7 +1,7 @@
 ﻿#ifndef INSTALLERFOMODPLUS_H
 #define INSTALLERFOMODPLUS_H
 
-#include "lib/stringutil.h"
+#include "stringutil.h"
 
 #include <iplugin.h>
 #include <iplugininstaller.h>

@@ -11,8 +11,8 @@
 #include <xml/XmlParseException.h>
 
 #include "FomodInstallerWindow.h"
+#include "stringutil.h"
 #include "integration/FomodDataContent.h"
-#include "lib/stringutil.h"
 #include "ui/FomodViewModel.h"
 
 bool FomodPlusInstaller::init(IOrganizer *organizer) {

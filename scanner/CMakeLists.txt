@@ -7,7 +7,12 @@ set(project_type plugin)
 set_property(TARGET fomod_plus_scanner PROPERTY CXX_STANDARD 20)
 
 set(CMAKE_GENERATOR_PLATFORM x64)
-target_include_directories(fomod_plus_scanner PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(
+        fomod_plus_scanner
+        PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/../share
+)
 
 if (MSVC)
     target_compile_options(

@@ -2,7 +2,7 @@
 
 #include <format>
 
-#include "../lib/stringutil.h"
+#include "stringutil.h"
 #include "XmlParseException.h"
 #include "XmlHelper.h"
 

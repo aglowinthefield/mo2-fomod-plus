@@ -4,6 +4,9 @@
 #include <iplugin.h>
 #include <iplugintool.h>
 
+#include <QDialog>
+#include <QProgressBar>
+
 using namespace MOBase;
 
 class FomodPlusScanner final : public IPluginTool {
@@ -14,6 +17,12 @@ class FomodPlusScanner final : public IPluginTool {
   #endif
 
 public:
+  ~FomodPlusScanner() override {
+    delete mDialog;
+    mDialog = nullptr;
+    mProgressBar = nullptr;
+  }
+
   bool init(IOrganizer* organizer) override;
 
   [[nodiscard]] QString     name() const override { return "FOMOD Scanner"; }
@@ -31,17 +40,15 @@ public:
 
   void display() const override;
 
-  void scanLoadOrder() const;
-
-  void scanLoadOrder();
-
-  int openInstallationArchive(const IModInterface* mod);
+  int scanLoadOrder() const;
 
   int openInstallationArchive(const IModInterface* mod) const;
 
   static bool setFomodInfoForMod(IModInterface* mod);
 
 private:
+  QDialog* mDialog{nullptr};
+  QProgressBar* mProgressBar{nullptr};
   IOrganizer* mOrganizer{nullptr};
 };
 
