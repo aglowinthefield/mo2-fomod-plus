@@ -24,7 +24,7 @@ std::vector<int> FomodDataContent::getContentsFor(const std::shared_ptr<const MO
   const auto modName = fileTree->name();
   const auto mod = mOrganizer->modList()->getMod(modName);
 
-  if (const auto fomodMeta = mod->pluginSetting(StringConstants::Plugin::NAME, "fomod", 0); fomodMeta != 0) {
+  if (const auto fomodMeta = mod->pluginSetting(QString::fromStdString(StringConstants::Plugin::NAME.data()), "fomod", 0); fomodMeta != 0) {
     contents.push_back(FomodDataContentConstants::FOMOD_CONTENT_ID);
   }
   return contents;

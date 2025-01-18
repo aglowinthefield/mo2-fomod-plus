@@ -32,12 +32,12 @@ public:
   bool init(IOrganizer *organizer) override;
 
   // constant values
-  [[nodiscard]] QString name() const override           { return StringConstants::Plugin::NAME; }
-  [[nodiscard]] QString author() const override         { return StringConstants::Plugin::AUTHOR; }
-  [[nodiscard]] QString description() const override    { return StringConstants::Plugin::DESCRIPTION; }
-  [[nodiscard]] VersionInfo version() const override    { return {1, 0, 0, VersionInfo::RELEASE_FINAL}; }
+  [[nodiscard]] QString      name() const override           { return StringConstants::Plugin::NAME.data(); }
+  [[nodiscard]] QString      author() const override         { return StringConstants::Plugin::AUTHOR.data(); }
+  [[nodiscard]] QString      description() const override    { return StringConstants::Plugin::DESCRIPTION.data(); }
+  [[nodiscard]] VersionInfo  version() const override    { return {1, 0, 0, VersionInfo::RELEASE_FINAL}; }
   [[nodiscard]] unsigned int priority() const override  { return 120; /* Above installer_fomod's highest priority. */ }
-  [[nodiscard]] bool isManualInstaller() const override { return false; }
+  [[nodiscard]] bool         isManualInstaller() const override { return false; }
 
   [[nodiscard]] bool isArchiveSupported(std::shared_ptr<const IFileTree> tree) const override;
   [[nodiscard]] QList<PluginSetting> settings() const override;

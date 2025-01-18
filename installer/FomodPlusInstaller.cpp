@@ -34,7 +34,7 @@ void FomodPlusInstaller::setupUiInjection() const {
 bool FomodPlusInstaller::isArchiveSupported(std::shared_ptr<const IFileTree> tree) const {
   tree = findFomodDirectory(tree);
   if (tree != nullptr) {
-    return tree->exists(StringConstants::FomodFiles::MODULE_CONFIG, FileTreeEntry::FILE);
+    return tree->exists(StringConstants::FomodFiles::MODULE_CONFIG.data(), FileTreeEntry::FILE);
   }
   return false;
 }
@@ -103,11 +103,11 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> >
   mFomodPath = fomodDir->parent()->path();
 
   const auto infoXML = fomodDir->find(
-    StringConstants::FomodFiles::INFO_XML,
+    StringConstants::FomodFiles::INFO_XML.data(),
     FileTreeEntry::FILE
   );
   const auto moduleConfig = fomodDir->find(
-    StringConstants::FomodFiles::MODULE_CONFIG,
+    StringConstants::FomodFiles::MODULE_CONFIG.data(),
     FileTreeEntry::FILE
   );
 
@@ -164,7 +164,7 @@ void FomodPlusInstaller::onInstallationEnd(const EInstallResult result, IModInte
 
 // Borrowed from https://github.com/ModOrganizer2/modorganizer-installer_fomod/blob/master/src/installerfomod.cpp
 std::shared_ptr<const IFileTree> FomodPlusInstaller::findFomodDirectory(const std::shared_ptr<const IFileTree> &tree) {
-  const auto entry = tree->find(StringConstants::FomodFiles::FOMOD_DIR, FileTreeEntry::DIRECTORY);
+  const auto entry = tree->find(StringConstants::FomodFiles::FOMOD_DIR.data(), FileTreeEntry::DIRECTORY);
 
   if (entry != nullptr) {
     return entry->astree();
