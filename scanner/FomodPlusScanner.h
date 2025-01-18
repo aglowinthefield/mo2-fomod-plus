@@ -31,6 +31,16 @@ public:
 
   void display() const override;
 
+  void scanLoadOrder() const;
+
+  void scanLoadOrder();
+
+  int openInstallationArchive(const IModInterface* mod);
+
+  int openInstallationArchive(const IModInterface* mod) const;
+
+  static bool setFomodInfoForMod(IModInterface* mod);
+
 private:
   IOrganizer* mOrganizer{nullptr};
 };

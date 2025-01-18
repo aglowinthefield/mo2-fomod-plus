@@ -1,12 +1,13 @@
 ﻿cmake_minimum_required(VERSION 3.30)
+project(fomod_plus_scanner)
+
 add_library(fomod_plus_scanner SHARED)
+include(FetchContent)
+set(project_type plugin)
 set_property(TARGET fomod_plus_scanner PROPERTY CXX_STANDARD 20)
 
 set(CMAKE_GENERATOR_PLATFORM x64)
 target_include_directories(fomod_plus_scanner PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-
-set(project_type plugin)
-project(fomod_plus_scanner)
 
 if (MSVC)
     target_compile_options(
@@ -19,6 +20,5 @@ if (MSVC)
             /wd4458 # declaration of 'identifier' hides class member
     )
 endif ()
-
-mo2_configure_plugin(fomod_plus_scanner WARNINGS OFF)
+mo2_configure_plugin(fomod_plus_scanner WARNINGS OFF PRIVATE_DEPENDS archive)
 mo2_install_target(fomod_plus_scanner)
