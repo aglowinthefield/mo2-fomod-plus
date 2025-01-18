@@ -59,14 +59,6 @@ bool isRadioButtonGroup(const GroupTypeEnum groupType) {
   return groupType == SelectExactlyOne || groupType == SelectAtMostOne;
 }
 
-bool FomodViewModel::pluginHasNoConditions(const std::shared_ptr<PluginViewModel>& plugin) {
-  return plugin->plugin->typeDescriptor.dependencyType.patterns.patterns.empty();
-}
-
-bool FomodViewModel::groupHasPluginWithNoConditions(const std::shared_ptr<GroupViewModel>& group) {
-  return std::ranges::any_of(group->getPlugins(), pluginHasNoConditions);
-}
-
 const std::shared_ptr<PluginViewModel> & FomodViewModel::getFirstPluginForActiveStep() const {
   return mActiveStep->getGroups().at(0)->getPlugins().at(0);
 }
@@ -81,6 +73,7 @@ void FomodViewModel::setupGroups() const {
   }
 }
 
+// TODO: Only do this if there is no other plugin that can be selected.
 void FomodViewModel::createNonePluginForGroup(const std::shared_ptr<GroupViewModel>& group) const {
   const auto nonePlugin = std::make_shared<Plugin>();
   nonePlugin->name = "None";

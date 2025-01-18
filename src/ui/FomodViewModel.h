@@ -137,10 +137,6 @@ public:
     std::unique_ptr<ModuleConfiguration> fomodFile,
     std::unique_ptr<FomodInfoFile> infoFile);
 
-  static bool pluginHasNoConditions(const std::shared_ptr<PluginViewModel> &plugin);
-
-  static bool groupHasPluginWithNoConditions(const std::shared_ptr<GroupViewModel> &group);
-
   [[nodiscard]] const std::shared_ptr<PluginViewModel>& getFirstPluginForActiveStep() const;
 
   // Steps

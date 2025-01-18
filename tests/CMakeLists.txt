@@ -23,15 +23,15 @@ enable_testing()
 
 add_executable(runTests
         ${CMAKE_CURRENT_SOURCE_DIR}/../tests/test_fomod_info_file.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/../tests/test_moduleconf_xavbio.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/../tests/test_moduleconf_precision.cpp
+        moduleconf/test_moduleconf_xavbio.cpp
+        moduleconf/test_moduleconf_precision.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../src/xml/FomodInfoFile.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../src/lib/stringutil.h
         ../src/xml/ModuleConfiguration.cpp
-        test_moduleconf_lux.cpp
+        moduleconf/test_moduleconf_lux.cpp
         test_stringutil.cpp
-        test_moduleconf_citytrees.cpp
-        test_moduleconf_bos.cpp
+        moduleconf/test_moduleconf_citytrees.cpp
+        moduleconf/test_moduleconf_bos.cpp
 )
 
 
