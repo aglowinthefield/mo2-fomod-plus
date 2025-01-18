@@ -66,7 +66,7 @@ const std::shared_ptr<PluginViewModel> & FomodViewModel::getFirstPluginForActive
 void FomodViewModel::setupGroups() const {
   for (const auto& step : mSteps) {
     for (const auto& group : step->getGroups()) {
-      if (group->getType() == SelectAtMostOne) {
+      if (group->getType() == SelectAtMostOne && group->getPlugins().size() > 1) {
         createNonePluginForGroup(group);
       }
     }
@@ -163,7 +163,6 @@ void FomodViewModel::setFlagForPluginState(const std::shared_ptr<PluginViewModel
   }
 }
 
-// TODO: Handle groups later
 void FomodViewModel::togglePlugin(const std::shared_ptr<GroupViewModel> &group,
                                   const std::shared_ptr<PluginViewModel> &plugin, const bool selected) const {
   plugin->setSelected(selected);

@@ -352,10 +352,9 @@ QWidget *FomodInstallerWindow::renderGroup(const std::shared_ptr<GroupViewModel>
       renderCheckboxGroup(groupBox, groupBoxLayout, group);
       break;
     case SelectExactlyOne:
-      renderSelectExactlyOne(groupBox, groupBoxLayout, group);
-      break;
     case SelectAtMostOne:
-      renderRadioGroup(groupBox, groupBoxLayout, group);
+      renderSelectExactlyOne(groupBox, groupBoxLayout, group);
+      // renderRadioGroup(groupBox, groupBoxLayout, group);
       break;
     default: ;
   }
