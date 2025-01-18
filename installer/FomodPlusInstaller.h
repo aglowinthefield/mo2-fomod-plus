@@ -19,7 +19,7 @@ class FomodInstallerWindow;
 using namespace MOBase;
 using namespace std;
 
-class FomodPlus final : public IPluginInstallerSimple
+class FomodPlusInstaller final : public IPluginInstallerSimple
 {
   Q_OBJECT
   Q_INTERFACES(MOBase::IPlugin MOBase::IPluginInstaller MOBase::IPluginInstallerSimple)

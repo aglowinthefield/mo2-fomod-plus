@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.30)
 set(CMAKE_CXX_STANDARD 20)
-include(FetchContent)
 
 set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/install")
 #set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_CURRENT_LIST_DIR}/../../../install/bin/plugins)
@@ -18,19 +17,8 @@ else()
 endif()
 
 project(fomod_plus)
-set(project_type plugin)
 set(enable_warnings OFF)
 
-FetchContent_Declare(
-        pugixml
-        GIT_REPOSITORY https://github.com/zeux/pugixml
-        # Maybe we want master/main. Unsure.
-        GIT_TAG v1.14
-)
-
-FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
-FetchContent_MakeAvailable(pugixml json)
-
-add_subdirectory(src)
+add_subdirectory(installer)
+add_subdirectory(scanner)
 add_subdirectory(tests)
-target_link_libraries(fomod_plus PRIVATE pugixml nlohmann_json::nlohmann_json)

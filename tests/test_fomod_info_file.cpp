@@ -1,6 +1,6 @@
 ﻿#include <gtest/gtest.h>
 #include <filesystem>
-#include "../src/xml/FomodInfoFile.h"
+#include "../installer/xml/FomodInfoFile.h"
 
 TEST(FomodInfoFileTest, DeserializeValidFile) {
     FomodInfoFile fomodInfo;

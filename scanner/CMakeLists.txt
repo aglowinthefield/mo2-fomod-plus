@@ -1,16 +1,16 @@
 ﻿cmake_minimum_required(VERSION 3.30)
-add_library(fomod_plus SHARED)
-set_property(TARGET fomod_plus PROPERTY CXX_STANDARD 20)
+add_library(fomod_plus_scanner SHARED)
+set_property(TARGET fomod_plus_scanner PROPERTY CXX_STANDARD 20)
 
 set(CMAKE_GENERATOR_PLATFORM x64)
-target_include_directories(
-        fomod_plus
-        PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-)
+target_include_directories(fomod_plus_scanner PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+set(project_type plugin)
+project(fomod_plus_scanner)
 
 if (MSVC)
     target_compile_options(
-            fomod_plus
+            fomod_plus_scanner
             PRIVATE
             /bigobj # increase number of sections in .obj file
             /W4     # level 4 warnings
@@ -20,5 +20,5 @@ if (MSVC)
     )
 endif ()
 
-mo2_configure_plugin(fomod_plus WARNINGS OFF)
-mo2_install_target(fomod_plus)
+mo2_configure_plugin(fomod_plus_scanner WARNINGS OFF)
+mo2_install_target(fomod_plus_scanner)

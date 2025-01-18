@@ -26,8 +26,8 @@ private:
 
 
 namespace UiConstants {
-  constexpr int WINDOW_MIN_WIDTH = 1000;
-  constexpr int WINDOW_MIN_HEIGHT = 700;
+  constexpr int WINDOW_MIN_WIDTH = 900;
+  constexpr int WINDOW_MIN_HEIGHT = 600;
 }
 
 class UIHelper {

@@ -1,4 +1,4 @@
-﻿#include "FomodPlus.h"
+﻿#include "FomodPlusInstaller.h"
 
 #include <igamefeatures.h>
 #include <iinstallationmanager.h>
@@ -15,13 +15,13 @@
 #include "lib/stringutil.h"
 #include "ui/FomodViewModel.h"
 
-bool FomodPlus::init(IOrganizer *organizer) {
+bool FomodPlusInstaller::init(IOrganizer *organizer) {
   mOrganizer = organizer;
   setupUiInjection();
   return true;
 }
 
-void FomodPlus::setupUiInjection() const {
+void FomodPlusInstaller::setupUiInjection() const {
   if (!mOrganizer) {
     std::cerr << "Organizer is null" << std::endl;
     return;
@@ -31,7 +31,7 @@ void FomodPlus::setupUiInjection() const {
   mOrganizer->gameFeatures()->registerFeature(fomodContent, 0, false);
 }
 
-bool FomodPlus::isArchiveSupported(std::shared_ptr<const IFileTree> tree) const {
+bool FomodPlusInstaller::isArchiveSupported(std::shared_ptr<const IFileTree> tree) const {
   tree = findFomodDirectory(tree);
   if (tree != nullptr) {
     return tree->exists(StringConstants::FomodFiles::MODULE_CONFIG, FileTreeEntry::FILE);
@@ -39,7 +39,7 @@ bool FomodPlus::isArchiveSupported(std::shared_ptr<const IFileTree> tree) const 
   return false;
 }
 
-QList<PluginSetting> FomodPlus::settings() const {
+QList<PluginSetting> FomodPlusInstaller::settings() const {
   return {};
 }
 
@@ -51,16 +51,16 @@ QList<PluginSetting> FomodPlus::settings() const {
  * @param nexusID
  * @return
  */
-IPluginInstaller::EInstallResult FomodPlus::install(GuessedValue<QString> &modName,
+IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QString> &modName,
                                                              std::shared_ptr<IFileTree> &tree, QString &version,
                                                              int &nexusID) {
 
-  log::debug("FomodPlus::install - modName: {}, version: {}, nexusID: {}",
+  log::debug("FomodPlusInstaller::install - modName: {}, version: {}, nexusID: {}",
              modName->toStdString(),
              version.toStdString(),
              nexusID
   );
-  log::debug("FomodPlus::install - tree size: {}", tree->size());
+  log::debug("FomodPlusInstaller::install - tree size: {}", tree->size());
 
   auto [infoFile, moduleConfigFile] = parseFomodFiles(tree);
 
@@ -91,11 +91,11 @@ IPluginInstaller::EInstallResult FomodPlus::install(GuessedValue<QString> &modNa
  * @param tree
  * @return
  */
-std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> > FomodPlus::parseFomodFiles(
+std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> > FomodPlusInstaller::parseFomodFiles(
   const std::shared_ptr<IFileTree> &tree) {
   const auto fomodDir = findFomodDirectory(tree);
   if (fomodDir == nullptr) {
-    log::error("FomodPlus::install - fomod directory not found");
+    log::error("FomodPlusInstaller::install - fomod directory not found");
     return {nullptr, nullptr};
   }
 
@@ -120,7 +120,7 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> >
   try {
     infoFile->deserialize(paths.at(0).toStdString());
   } catch (XmlParseException &e) {
-    log::error("FomodPlus::install - error parsing info.xml: {}", e.what());
+    log::error("FomodPlusInstaller::install - error parsing info.xml: {}", e.what());
     return {nullptr, nullptr};
   }
 
@@ -128,14 +128,14 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> >
   try {
     moduleConfiguration->deserialize(paths.at(1).toStdString());
   } catch (XmlParseException &e) {
-    log::error("FomodPlus::install - error parsing moduleConfig.xml: {}", e.what());
+    log::error("FomodPlusInstaller::install - error parsing moduleConfig.xml: {}", e.what());
     return {nullptr, nullptr};
   }
   return {std::move(infoFile), std::move(moduleConfiguration)};
 }
 
 // Taken from https://github.com/ModOrganizer2/modorganizer-installer_fomod/blob/master/src/installerfomod.cpp#L123
-void FomodPlus::appendImageFiles(vector<shared_ptr<const FileTreeEntry> > &entries,
+void FomodPlusInstaller::appendImageFiles(vector<shared_ptr<const FileTreeEntry> > &entries,
                                           const shared_ptr<const IFileTree> &tree) {
   static std::set<QString, FileNameComparator> imageSuffixes{"png", "jpg", "jpeg", "gif", "bmp"};
   for (auto entry: *tree) {
@@ -148,12 +148,12 @@ void FomodPlus::appendImageFiles(vector<shared_ptr<const FileTreeEntry> > &entri
 }
 
 
-void FomodPlus::onInstallationStart(QString const &archive, const bool reinstallation,
+void FomodPlusInstaller::onInstallationStart(QString const &archive, const bool reinstallation,
                                              IModInterface *currentMod) {
   IPluginInstallerSimple::onInstallationStart(archive, reinstallation, currentMod);
 }
 
-void FomodPlus::onInstallationEnd(const EInstallResult result, IModInterface *newMod) {
+void FomodPlusInstaller::onInstallationEnd(const EInstallResult result, IModInterface *newMod) {
   IPluginInstallerSimple::onInstallationEnd(result, newMod);
 
   // Update the meta.ini file with the fomod information
@@ -163,7 +163,7 @@ void FomodPlus::onInstallationEnd(const EInstallResult result, IModInterface *ne
 }
 
 // Borrowed from https://github.com/ModOrganizer2/modorganizer-installer_fomod/blob/master/src/installerfomod.cpp
-std::shared_ptr<const IFileTree> FomodPlus::findFomodDirectory(const std::shared_ptr<const IFileTree> &tree) {
+std::shared_ptr<const IFileTree> FomodPlusInstaller::findFomodDirectory(const std::shared_ptr<const IFileTree> &tree) {
   const auto entry = tree->find(StringConstants::FomodFiles::FOMOD_DIR, FileTreeEntry::DIRECTORY);
 
   if (entry != nullptr) {
@@ -176,7 +176,7 @@ std::shared_ptr<const IFileTree> FomodPlus::findFomodDirectory(const std::shared
   return nullptr;
 }
 
-QDialog::DialogCode FomodPlus::showInstallerWindow(const std::shared_ptr<FomodInstallerWindow> &window) {
+QDialog::DialogCode FomodPlusInstaller::showInstallerWindow(const std::shared_ptr<FomodInstallerWindow> &window) {
   QEventLoop loop;
   connect(window.get(), SIGNAL(accepted()), &loop, SLOT(quit()));
   connect(window.get(), SIGNAL(rejected()), &loop, SLOT(quit()));
