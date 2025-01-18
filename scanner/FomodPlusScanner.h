@@ -12,18 +12,20 @@ using namespace MOBase;
 class FomodPlusScanner final : public IPluginTool {
   Q_OBJECT
   Q_INTERFACES(MOBase::IPlugin MOBase::IPluginTool)
-  #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-    Q_PLUGIN_METADATA(IID "io.clearing.FomodPlusScanner" FILE "fomodplusscanner.json")
-  #endif
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  Q_PLUGIN_METADATA(IID "io.clearing.FomodPlusScanner" FILE "fomodplusscanner.json")
+#endif
 
 public:
   ~FomodPlusScanner() override {
     delete mDialog;
-    mDialog = nullptr;
+    mDialog      = nullptr;
     mProgressBar = nullptr;
   }
 
   bool init(IOrganizer* organizer) override;
+
+  void cleanup() const;
 
   [[nodiscard]] QString     name() const override { return "FOMOD Scanner"; }
   [[nodiscard]] QString     author() const override { return "clearing"; }
@@ -47,9 +49,9 @@ public:
   static bool setFomodInfoForMod(IModInterface* mod);
 
 private:
-  QDialog* mDialog{nullptr};
+  QDialog*      mDialog{nullptr};
   QProgressBar* mProgressBar{nullptr};
-  IOrganizer* mOrganizer{nullptr};
+  IOrganizer*   mOrganizer{nullptr};
 };
 
 #endif  // FOMODPLUSSCANNER_H

@@ -35,13 +35,13 @@ bool FomodPlusScanner::init(IOrganizer* organizer) {
   mProgressBar = new QProgressBar(mDialog);
   mProgressBar->setRange(0, mOrganizer->modList()->allMods().size());
   mProgressBar->setVisible(false);
-  layout->addWidget(mProgressBar);
 
   const auto scanButton = new QPushButton("Scan", mDialog);
   const auto cancelButton = new QPushButton("Cancel", mDialog);
 
-  layout->addWidget(scanButton);
-  layout->addWidget(cancelButton);
+  layout->addWidget(mProgressBar, 1);
+  layout->addWidget(scanButton, 1);
+  layout->addWidget(cancelButton, 1);
 
   connect(cancelButton, &QPushButton::clicked, mDialog, &QDialog::reject);
   connect(scanButton, &QPushButton::clicked, [this] {
@@ -51,11 +51,17 @@ bool FomodPlusScanner::init(IOrganizer* organizer) {
     QMessageBox::information(mDialog, "Scan Complete", "The load order scan is complete. Added filter info to " + QString::number(added) + " mods.");
 
   });
+  connect(mDialog, &QDialog::finished, this, &FomodPlusScanner::cleanup);
   mDialog->setLayout(layout);
   mDialog->setMinimumSize(400, 300);
   mDialog->adjustSize();
   descriptionLabel->adjustSize();
   return true;
+}
+
+void FomodPlusScanner::cleanup() const {
+  mProgressBar->reset();
+  mProgressBar->setVisible(false);
 }
 
 void FomodPlusScanner::display() const {
@@ -69,8 +75,8 @@ int FomodPlusScanner::scanLoadOrder() const {
     const auto pluginName = "FOMOD Plus";
     const auto mod        = mOrganizer->modList()->getMod(modName);
     if (auto setting = mod->pluginSetting(pluginName, "fomod", 0); setting == 0) {
-      const int result = openInstallationArchive(mod);
-      if (result == 0) {
+      if (const int result = openInstallationArchive(mod); result == 0) {
+        setFomodInfoForMod(mod);
         added++;
       }
     }
@@ -141,9 +147,10 @@ int FomodPlusScanner::openInstallationArchive(const IModInterface* mod) const {
   // Mark all files for extraction to their path in the archive:
   if (hasFomodFiles(archive->getFileList())) {
     std::cout << "Found FOMOD files in " << qualifiedInstallerPath.toStdString() << std::endl;
+    return 0;
   }
 
-  return 0;
+  return -1;
 }
 
 bool FomodPlusScanner::setFomodInfoForMod(IModInterface* mod) {
