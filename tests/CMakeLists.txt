@@ -34,6 +34,8 @@ add_executable(runTests
         moduleconf/test_moduleconf_bos.cpp
 )
 
+target_include_directories(runTests PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../share)
+
 
 target_link_libraries(runTests gtest gtest_main pugixml)# Qt6::Core Qt6::Gui)
 add_test(NAME runTests COMMAND runTests)

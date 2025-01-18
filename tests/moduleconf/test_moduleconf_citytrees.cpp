@@ -1,5 +1,5 @@
 ﻿#include <gtest/gtest.h>
-#include "../src/xml/ModuleConfiguration.h"
+#include "../../installer/xml/ModuleConfiguration.h"
 #include <filesystem>
 
 class MCCityTrees : public testing::Test {

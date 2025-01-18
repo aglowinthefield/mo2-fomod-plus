@@ -1,7 +1,7 @@
 ﻿#include <gtest/gtest.h>
 #include <pugixml.hpp>
 #include <filesystem>
-#include "../src/xml/ModuleConfiguration.h"
+#include "../../installer/xml/ModuleConfiguration.h"
 
 class ModuleConfigurationTest_Lux : public testing::Test {
 protected:

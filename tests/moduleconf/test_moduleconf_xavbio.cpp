@@ -1,5 +1,5 @@
 ﻿#include <gtest/gtest.h>
-#include "../src/xml/ModuleConfiguration.h"
+#include "../../installer/xml/ModuleConfiguration.h"
 #include <filesystem>
 
 class ModuleConfigurationTest_Xavbio : public ::testing::Test {

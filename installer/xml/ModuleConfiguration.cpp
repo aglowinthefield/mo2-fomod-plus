@@ -2,9 +2,9 @@
 
 #include <format>
 
-#include "stringutil.h"
-#include "XmlParseException.h"
 #include "XmlHelper.h"
+#include "XmlParseException.h"
+#include "stringutil.h"
 
 using namespace StringConstants::FomodFiles;
 

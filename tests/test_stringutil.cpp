@@ -1,5 +1,5 @@
 ﻿#include <gtest/gtest.h>
-#include "../installer/lib/stringutil.h"
+#include "../share/stringutil.h"
 
 TEST(StringUtil, Trim_Copy) {
   std::string str = "  extra spaces  ";
