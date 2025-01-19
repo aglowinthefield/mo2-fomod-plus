@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/fomod">
         <file alias="hat">resources/fomod_icon.png</file>
+        <file alias="wizard">resources/wizard.gif</file>
     </qresource>
 </RCC>

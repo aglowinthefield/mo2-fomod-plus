@@ -25,6 +25,10 @@ public:
 
   bool init(IOrganizer* organizer) override;
 
+  void onScanClicked() const;
+
+  void onDeleteClicked() const;
+
   void cleanup() const;
 
   [[nodiscard]] QString     name() const override { return "FOMOD Scanner"; }
@@ -42,11 +46,13 @@ public:
 
   void display() const override;
 
-  int scanLoadOrder() const;
+  int scanLoadOrder(const std::function<bool(IModInterface*)>& callback) const;
 
   int openInstallationArchive(const IModInterface* mod) const;
 
   static bool setFomodInfoForMod(IModInterface* mod);
+
+  static bool removeFomodInfoFromMod(IModInterface* mod);
 
 private:
   QDialog*      mDialog{nullptr};
