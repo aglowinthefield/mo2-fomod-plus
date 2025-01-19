@@ -4,6 +4,7 @@ add_library(fomod_plus_installer SHARED)
 set_property(TARGET fomod_plus_installer PROPERTY CXX_STANDARD 20)
 
 set(CMAKE_GENERATOR_PLATFORM x64)
+
 target_include_directories(
         fomod_plus_installer
         PUBLIC

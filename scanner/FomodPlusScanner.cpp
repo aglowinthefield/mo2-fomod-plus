@@ -39,6 +39,7 @@ bool FomodPlusScanner::init(IOrganizer* organizer) {
   const auto scanButton = new QPushButton("Scan", mDialog);
   const auto cancelButton = new QPushButton("Cancel", mDialog);
 
+  layout->addWidget(descriptionLabel, 1);
   layout->addWidget(mProgressBar, 1);
   layout->addWidget(scanButton, 1);
   layout->addWidget(cancelButton, 1);
@@ -52,6 +53,7 @@ bool FomodPlusScanner::init(IOrganizer* organizer) {
 
   });
   connect(mDialog, &QDialog::finished, this, &FomodPlusScanner::cleanup);
+
   mDialog->setLayout(layout);
   mDialog->setMinimumSize(400, 300);
   mDialog->adjustSize();

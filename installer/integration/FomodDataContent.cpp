@@ -1,5 +1,7 @@
 ﻿#include "FomodDataContent.h"
+
 #include <ifiletree.h>
+
 #include <iostream>
 
 #include "stringutil.h"
