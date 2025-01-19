@@ -1,15 +1,16 @@
 ﻿<!-- Created with FOMOD Creation Tool 1.7.0.37 [http://www.nexusmods.com/fallout4/mods/6821] -->
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://qconsulting.ca/fo3/ModConfig5.0.xsd">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://qconsulting.ca/fo3/ModConfig5.0.xsd">
     <moduleName>Precision</moduleName>
     <requiredInstallFiles>
-        <folder source="Interface" destination="Interface" />
-        <folder source="MCM" destination="MCM" />
-        <folder source="Meshes" destination="Meshes" />
-        <folder source="Scripts" destination="Scripts" />
-        <folder source="SKSE" destination="SKSE" />
-        <folder source="Textures" destination="Textures" />
-        <folder source="Nemesis_Engine\mod\colis" destination="Nemesis_Engine\mod\colis" />
-        <file source="Precision.esp" destination="Precision.esp" />
+        <folder source="Interface" destination="Interface"/>
+        <folder source="MCM" destination="MCM"/>
+        <folder source="Meshes" destination="Meshes"/>
+        <folder source="Scripts" destination="Scripts"/>
+        <folder source="SKSE" destination="SKSE"/>
+        <folder source="Textures" destination="Textures"/>
+        <folder source="Nemesis_Engine\mod\colis" destination="Nemesis_Engine\mod\colis"/>
+        <file source="Precision.esp" destination="Precision.esp"/>
     </requiredInstallFiles>
     <installSteps order="Explicit">
         <installStep name="Compatibility">
@@ -17,9 +18,12 @@
                 <group name="Compatibility" type="SelectExactlyOne">
                     <plugins order="Explicit">
                         <plugin name="TK Dodge or Ultimate Combat">
-                            <description>Select if you use the original TK Dodge or Ultimate Combat without TK Dodge RE.</description>
+                            <description>Select if you use the original TK Dodge or Ultimate Combat without TK Dodge
+                                RE.
+                            </description>
                             <files>
-                                <folder source="Compatibility\TK Dodge Ultimate Combat" destination="Nemesis_Engine" priority="0" />
+                                <folder source="Compatibility\TK Dodge Ultimate Combat" destination="Nemesis_Engine"
+                                        priority="0"/>
                             </files>
                             <typeDescriptor>
                                 <dependencyType>
@@ -39,9 +43,11 @@
                             </typeDescriptor>
                         </plugin>
                         <plugin name="TK Dodge RE">
-                            <description>Select if you use TK Dodge RE, regardless of whether you also use Ultimate Combat.</description>
+                            <description>Select if you use TK Dodge RE, regardless of whether you also use Ultimate
+                                Combat.
+                            </description>
                             <files>
-                                <folder source="Compatibility\TK Dodge RE" destination="Nemesis_Engine" priority="1" />
+                                <folder source="Compatibility\TK Dodge RE" destination="Nemesis_Engine" priority="1"/>
                             </files>
                             <typeDescriptor>
                                 <dependencyType>
@@ -58,7 +64,8 @@
                             </typeDescriptor>
                         </plugin>
                         <plugin name="None">
-                            <description>Select if you don't use TK Dodge (RE or original) or Ultimate Combat.</description>
+                            <description>Select if you don't use TK Dodge (RE or original) or Ultimate Combat.
+                            </description>
                             <typeDescriptor>
                                 <type name="Recommended"/>
                             </typeDescriptor>

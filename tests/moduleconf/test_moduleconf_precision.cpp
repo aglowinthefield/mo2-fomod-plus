@@ -6,33 +6,37 @@ class ModuleConfPrecision : public ::testing::Test {
 protected:
     ModuleConfiguration moduleConfig;
 
-    void SetUp() override {
+    void SetUp() override
+    {
         const std::string filePath = (std::filesystem::path(__FILE__).parent_path() / "test_moduleconf_precision.xml").string();
         moduleConfig.deserialize(filePath);
     }
 };
 
-TEST_F(ModuleConfPrecision, ModuleName) {
+TEST_F(ModuleConfPrecision, ModuleName)
+{
     EXPECT_EQ(moduleConfig.moduleName, "Precision");
 }
 
-TEST_F(ModuleConfPrecision, RequiredInstallFiles) {
+TEST_F(ModuleConfPrecision, RequiredInstallFiles)
+{
     const auto requiredInstallFiles = moduleConfig.requiredInstallFiles.files;
     EXPECT_EQ(requiredInstallFiles.size(), 8);
-    EXPECT_EQ(requiredInstallFiles[0].source,      "Interface");
+    EXPECT_EQ(requiredInstallFiles[0].source, "Interface");
     EXPECT_EQ(requiredInstallFiles[0].destination, "Interface");
-    EXPECT_EQ(requiredInstallFiles[7].source,      "Precision.esp");
+    EXPECT_EQ(requiredInstallFiles[7].source, "Precision.esp");
     EXPECT_EQ(requiredInstallFiles[7].destination, "Precision.esp");
 }
 
-TEST_F(ModuleConfPrecision, PatternDependencies) {
+TEST_F(ModuleConfPrecision, PatternDependencies)
+{
     const auto tkDodge = moduleConfig
-      .installSteps
-      .installSteps[0]
-      .optionalFileGroups
-      .groups[0]
-      .plugins
-      .plugins[0];
+        .installSteps
+        .installSteps[0]
+        .optionalFileGroups
+        .groups[0]
+        .plugins
+        .plugins[0];
 
     const auto typeDescriptor = tkDodge.typeDescriptor;
     EXPECT_EQ(typeDescriptor.dependencyType.defaultType, PluginTypeEnum::NotUsable);

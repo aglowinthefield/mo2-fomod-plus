@@ -4,10 +4,11 @@
 
 #include "../installer/xml/FomodInfoFile.h"
 
-TEST(FomodInfoFileTest, DeserializeValidFile) {
+TEST(FomodInfoFileTest, DeserializeValidFile)
+{
     FomodInfoFile fomodInfo;
     std::string filePath = (std::filesystem::path(__FILE__).parent_path() / "test_fomod.xml").string();
-    bool result = fomodInfo.deserialize(filePath);
+    bool result          = fomodInfo.deserialize(filePath);
     EXPECT_TRUE(result);
     EXPECT_EQ(fomodInfo.getName(), "Ancient Nord Armors and Weapons Retexture SE");
     EXPECT_EQ(fomodInfo.getAuthor(), "xavbio");
@@ -18,7 +19,8 @@ TEST(FomodInfoFileTest, DeserializeValidFile) {
     EXPECT_EQ(fomodInfo.getGroups()[0], "models and Textures");
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv)
+{
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
