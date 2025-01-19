@@ -7,26 +7,26 @@
 
 
 class ScaleLabel final : public QLabel {
-  Q_OBJECT
+    Q_OBJECT
 
 public:
-  explicit ScaleLabel(QWidget *parent = nullptr);
+    explicit ScaleLabel(QWidget* parent = nullptr);
 
-  void setScalableResource(const QString &path);
+    void setScalableResource(const QString& path);
 
-  void setStatic(bool isStatic);
+    void setStatic(bool isStatic);
 
 protected:
-  void resizeEvent(QResizeEvent *event) override;
+    void resizeEvent(QResizeEvent* event) override;
 
 private:
-  void setScalableMovie(const QString &path);
+    void setScalableMovie(const QString& path);
 
-  void setScalableImage(const QString &path);
+    void setScalableImage(const QString& path);
 
-  QImage mUnscaledImage;
-  QSize mOriginalMovieSize;
-  bool misStatic = false;
+    QImage mUnscaledImage;
+    QSize mOriginalMovieSize;
+    bool misStatic = false;
 };
 
 

@@ -35,89 +35,112 @@ class FomodPlusInstaller;
  * to process and run the FOMOD installer in a structured manner.
  */
 class FomodInstallerWindow final : public QDialog {
-  Q_OBJECT
+    Q_OBJECT
+
 public:
-  FomodInstallerWindow(FomodPlusInstaller *installer,
-                       GuessedValue<QString> &modName,
-                       const std::shared_ptr<IFileTree> &tree,
-                       QString fomodPath,
-                       const std::shared_ptr<FomodViewModel> &viewModel,
-                       QWidget *parent = nullptr);
+    FomodInstallerWindow(FomodPlusInstaller* installer,
+        GuessedValue<QString>& modName,
+        const std::shared_ptr<IFileTree>& tree,
+        QString fomodPath,
+        const std::shared_ptr<FomodViewModel>& viewModel,
+        QWidget* parent = nullptr);
 
 
-  // So FomodPlusInstaller can check if the user wants to manually install
-  [[nodiscard]] bool isManualInstall() const {
-    return mIsManualInstall;
-  }
-  [[nodiscard]] std::shared_ptr<FileInstaller> getFileInstaller() const { return mViewModel->getFileInstaller(); }
+    // So FomodPlusInstaller can check if the user wants to manually install
+    [[nodiscard]] bool isManualInstall() const
+    {
+        return mIsManualInstall;
+    }
+
+    [[nodiscard]] std::shared_ptr<FileInstaller> getFileInstaller() const { return mViewModel->getFileInstaller(); }
 
 private slots:
-  void onNextClicked();
-  void onPluginToggled(bool selected, const std::shared_ptr<GroupViewModel> &group, const std::shared_ptr<PluginViewModel> &plugin) const;
-  void onPluginHovered(const std::shared_ptr<PluginViewModel> &plugin) const;
-  void updateModName(const QString& name) const {
-    mModName.update(name, GUESS_USER);
-  }
+    void onNextClicked();
+
+    void onPluginToggled(bool selected, const std::shared_ptr<GroupViewModel>& group, const std::shared_ptr<PluginViewModel>& plugin) const;
+
+    void onPluginHovered(const std::shared_ptr<PluginViewModel>& plugin) const;
+
+    void updateModName(const QString& name) const
+    {
+        mModName.update(name, GUESS_USER);
+    }
 
 
-  void onBackClicked() const;
-  void onCancelClicked() { this->reject(); }
-  void onManualClicked() { mIsManualInstall = true; this->reject(); }
-  void onInstallClicked();
+    void onBackClicked() const;
 
+    void onCancelClicked() { this->reject(); }
+
+    void onManualClicked()
+    {
+        mIsManualInstall = true;
+        this->reject();
+    }
+
+    void onInstallClicked();
 
 private:
-  FomodPlusInstaller *mInstaller;
-  QString mFomodPath;
-  GuessedValue<QString>& mModName;
-  std::shared_ptr<IFileTree> mTree;
-  std::shared_ptr<FomodViewModel> mViewModel;
+    FomodPlusInstaller* mInstaller;
+    QString mFomodPath;
+    GuessedValue<QString>& mModName;
+    std::shared_ptr<IFileTree> mTree;
+    std::shared_ptr<FomodViewModel> mViewModel;
 
-  // Meta
-  bool mIsManualInstall{};
+    // Meta
+    bool mIsManualInstall{};
 
-  // Buttons
-  QPushButton* mNextInstallButton{};
-  QPushButton* mBackButton{};
-  QPushButton* mCancelButton{};
-  QPushButton* mManualButton{};
-  void updateButtons() const;
+    // Buttons
+    QPushButton* mNextInstallButton{};
+    QPushButton* mBackButton{};
+    QPushButton* mCancelButton{};
+    QPushButton* mManualButton{};
 
-  // Widgets
-  QStackedWidget* mInstallStepStack{};
-  QWidget* mLeftPane{};
-  QTextEdit* mDescriptionBox{};
-  QComboBox* mModNameInput{};
-  ScaleLabel* mImageLabel{};
+    void updateButtons() const;
 
-  // Fn
-  void setupUi();
-  void updateInstallStepStack();
-  void updateDisplayForActivePlugin() const;
+    // Widgets
+    QStackedWidget* mInstallStepStack{};
+    QWidget* mLeftPane{};
+    QTextEdit* mDescriptionBox{};
+    QComboBox* mModNameInput{};
+    ScaleLabel* mImageLabel{};
 
-  [[nodiscard]] QBoxLayout* createContainerLayout();
-  [[nodiscard]] QWidget*    createCenterRow();
-  [[nodiscard]] QWidget*    createTopRow();
-  [[nodiscard]] QComboBox*  createModNameComboBox();
-  [[nodiscard]] QWidget*    createBottomRow();
-  [[nodiscard]] QWidget*    createLeftPane();
-  [[nodiscard]] QWidget*    createRightPane();
-  [[nodiscard]] QWidget*    createStepWidget(const std::shared_ptr<StepViewModel> &installStep);
-  [[nodiscard]] QWidget*    renderGroup(const std::shared_ptr<GroupViewModel> &group);
+    // Fn
+    void setupUi();
 
-  QRadioButton *createPluginRadioButton(const std::shared_ptr<PluginViewModel> &plugin, const std::shared_ptr<GroupViewModel> &group, QWidget *parent);
+    void updateInstallStepStack();
 
-  QCheckBox *createPluginCheckBox(const std::shared_ptr<PluginViewModel> &plugin,
-                                  const std::shared_ptr<GroupViewModel> &group, QWidget *parent);
+    void updateDisplayForActivePlugin() const;
 
-  void renderSelectExactlyOne(QWidget *parent, QLayout *parentLayout, const std::shared_ptr<GroupViewModel> &group);
+    [[nodiscard]] QBoxLayout* createContainerLayout();
 
-  void renderCheckboxGroup(QWidget *parent, QLayout *parentLayout,
-                           const std::shared_ptr<GroupViewModel> &group);
+    [[nodiscard]] QWidget* createCenterRow();
 
-  QButtonGroup *renderRadioGroup(QWidget *parent, QLayout *parentLayout, const std::shared_ptr<GroupViewModel> &group);
+    [[nodiscard]] QWidget* createTopRow();
+
+    [[nodiscard]] QComboBox* createModNameComboBox();
+
+    [[nodiscard]] QWidget* createBottomRow();
+
+    [[nodiscard]] QWidget* createLeftPane();
+
+    [[nodiscard]] QWidget* createRightPane();
+
+    [[nodiscard]] QWidget* createStepWidget(const std::shared_ptr<StepViewModel>& installStep);
+
+    [[nodiscard]] QWidget* renderGroup(const std::shared_ptr<GroupViewModel>& group);
+
+    QRadioButton* createPluginRadioButton(const std::shared_ptr<PluginViewModel>& plugin, const std::shared_ptr<GroupViewModel>& group, QWidget* parent);
+
+    QCheckBox* createPluginCheckBox(const std::shared_ptr<PluginViewModel>& plugin,
+        const std::shared_ptr<GroupViewModel>& group, QWidget* parent);
+
+    void renderSelectExactlyOne(QWidget* parent, QLayout* parentLayout, const std::shared_ptr<GroupViewModel>& group);
+
+    void renderCheckboxGroup(QWidget* parent, QLayout* parentLayout,
+        const std::shared_ptr<GroupViewModel>& group);
+
+    QButtonGroup* renderRadioGroup(QWidget* parent, QLayout* parentLayout, const std::shared_ptr<GroupViewModel>& group);
 };
-
 
 
 #endif //FOMODINSTALLERWINDOW_H

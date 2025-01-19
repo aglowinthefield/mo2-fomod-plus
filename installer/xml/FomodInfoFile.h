@@ -7,6 +7,7 @@
 class FomodInfoFile {
 public:
     bool deserialize(const std::string& filePath);
+
     [[nodiscard]] const std::string& getName() const { return name; }
     [[nodiscard]] const std::string& getAuthor() const { return author; }
     [[nodiscard]] const std::string& getVersion() const { return version; }

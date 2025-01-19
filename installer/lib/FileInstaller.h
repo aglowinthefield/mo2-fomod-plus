@@ -26,60 +26,58 @@ class StepViewModel;
 
 class FileInstaller {
 public:
-  FileInstaller(
-    MOBase::IOrganizer* organizer,
-    QString fomodPath,
-    const std::shared_ptr<MOBase::IFileTree> &fileTree,
-    std::unique_ptr<ModuleConfiguration> fomodFile,
-    const FlagMap& flagMap,
-    const std::vector<std::shared_ptr<StepViewModel>> &steps);
+    FileInstaller(
+        MOBase::IOrganizer* organizer,
+        QString fomodPath,
+        const std::shared_ptr<MOBase::IFileTree>& fileTree,
+        std::unique_ptr<ModuleConfiguration> fomodFile,
+        const FlagMap& flagMap,
+        const std::vector<std::shared_ptr<StepViewModel> >& steps);
 
-  std::shared_ptr<MOBase::IFileTree> install() const;
+    std::shared_ptr<MOBase::IFileTree> install() const;
 
-  void addFomodToMeta();
+    void writeFomodJsonToFile(const std::string& filePath) const;
 
-  void writeFomodJsonToFile(const std::string &filePath) const;
+    /**
+     * @brief Create a 'fomod.json' file to add to the base of the installTree. Functionally similar to MO2's meta.ini.
+     *
+     * Until there's more utility in the JSON structure itself, it will simply be of this format:
+     * @code
+     * {
+     *  "steps": [
+     *    {
+     *      "name": "Step 1",
+     *      "groups": [
+     *        {
+     *          "name": "Group 1",
+     *          "plugins: [
+     *            "Plugin1.esp",
+     *            "Plugin2.esp"
+     *          ]
+     *        }
+     *      ]
+     *    }
+     *  ]
+     * }
+     * @endcode
+     *
+     * @return nhlohmann::json
+     */
+    nlohmann::json generateFomodJson() const;
 
-  /**
-   * @brief Create a 'fomod.json' file to add to the base of the installTree. Functionally similar to MO2's meta.ini.
-   *
-   * Until there's more utility in the JSON structure itself, it will simply be of this format:
-   * @code
-   * {
-   *  "steps": [
-   *    {
-   *      "name": "Step 1",
-   *      "groups": [
-   *        {
-   *          "name": "Group 1",
-   *          "plugins: [
-   *            "Plugin1.esp",
-   *            "Plugin2.esp"
-   *          ]
-   *        }
-   *      ]
-   *    }
-   *  ]
-   * }
-   * @endcode
-   *
-   * @return nhlohmann::json
-   */
-  nlohmann::json generateFomodJson() const;
-  std::string getQualifiedFilePath(const std::string &treePath) const;
+    std::string getQualifiedFilePath(const std::string& treePath) const;
 
 private:
-  MOBase::IOrganizer* mOrganizer;
-  QString mFomodPath;
-  std::shared_ptr<MOBase::IFileTree> mFileTree;
-  std::unique_ptr<ModuleConfiguration> mFomodFile;
-  FlagMap mFlagMap;
-  ConditionTester mConditionTester;
-  std::vector<std::shared_ptr<StepViewModel>> mSteps; // TODO: Maybe this is nasty. Idk.
+    MOBase::IOrganizer* mOrganizer;
+    QString mFomodPath;
+    std::shared_ptr<MOBase::IFileTree> mFileTree;
+    std::unique_ptr<ModuleConfiguration> mFomodFile;
+    FlagMap mFlagMap;
+    ConditionTester mConditionTester;
+    std::vector<std::shared_ptr<StepViewModel> > mSteps; // TODO: Maybe this is nasty. Idk.
 
-  std::vector<File> collectFilesToInstall() const;
+    std::vector<File> collectFilesToInstall() const;
 };
-
 
 
 #endif //FILEINSTALLER_H

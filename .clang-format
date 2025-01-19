@@ -1,5 +1,3 @@
-﻿BasedOnStyle: Google
-AlignConsecutiveDeclarations: true
-AlignConsecutiveAssignments: true
-AlignTrailingComments: true
-ColumnLimit: 0
+﻿BasedOnStyle: WebKit
+AlignConsecutiveAssignments: Consecutive
+AccessModifierOffset: -2

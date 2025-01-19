@@ -9,57 +9,57 @@
 #include "FomodViewModel.h"
 
 class HoverEventFilter final : public QObject {
-  Q_OBJECT
+    Q_OBJECT
 
 public:
-  explicit HoverEventFilter(const std::shared_ptr<PluginViewModel> &plugin, QObject *parent = nullptr);
+    explicit HoverEventFilter(const std::shared_ptr<PluginViewModel>& plugin, QObject* parent = nullptr);
 
 signals:
-  void hovered(const std::shared_ptr<PluginViewModel> &plugin);
+    void hovered(const std::shared_ptr<PluginViewModel>& plugin);
 
 protected:
-  bool eventFilter(QObject *obj, QEvent *event) override;
+    bool eventFilter(QObject* obj, QEvent* event) override;
 
 private:
-  std::shared_ptr<PluginViewModel> mPlugin;
+    std::shared_ptr<PluginViewModel> mPlugin;
 };
 
 
 namespace UiConstants {
-  constexpr int WINDOW_MIN_WIDTH = 900;
-  constexpr int WINDOW_MIN_HEIGHT = 600;
+constexpr int WINDOW_MIN_WIDTH  = 900;
+constexpr int WINDOW_MIN_HEIGHT = 600;
 }
 
 class UIHelper {
 public:
-  /*
-  --------------------------------------------------------------------------------
-                             Widgets & Events
-  --------------------------------------------------------------------------------
-  */
-  static QPushButton *createButton(const QString &text, QWidget *parent);
+    /*
+    --------------------------------------------------------------------------------
+                               Widgets & Events
+    --------------------------------------------------------------------------------
+    */
+    static QPushButton* createButton(const QString& text, QWidget* parent);
 
-  static QLabel *createLabel(const QString &text, QWidget *parent);
+    static QLabel* createLabel(const QString& text, QWidget* parent);
 
-  static QLabel *createHyperlink(const QString &url, QWidget *parent);
+    static QLabel* createHyperlink(const QString& url, QWidget* parent);
 
-  /*
-  --------------------------------------------------------------------------------
-                                 Helpers
-  --------------------------------------------------------------------------------
-  */
-  static QString getFullImagePath(const QString &fomodPath, const QString &imagePath);
+    /*
+    --------------------------------------------------------------------------------
+                                   Helpers
+    --------------------------------------------------------------------------------
+    */
+    static QString getFullImagePath(const QString& fomodPath, const QString& imagePath);
 
-  static void setGlobalAlignment(QBoxLayout *layout, Qt::Alignment alignment);
+    static void setGlobalAlignment(QBoxLayout* layout, Qt::Alignment alignment);
 
-  static void reduceLabelPadding(const QLayout *layout);
+    static void reduceLabelPadding(const QLayout* layout);
 
-  /*
-  --------------------------------------------------------------------------------
-                                 Development
-  --------------------------------------------------------------------------------
-  */
-  static void setDebugBorders(QWidget *widget);
+    /*
+    --------------------------------------------------------------------------------
+                                   Development
+    --------------------------------------------------------------------------------
+    */
+    static void setDebugBorders(QWidget* widget);
 };
 
 #endif //UIHELPER_H

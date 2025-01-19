@@ -9,29 +9,30 @@
 
 class ConditionTester {
 public:
-  explicit ConditionTester(MOBase::IOrganizer* organizer) : mOrganizer(organizer) {}
+    explicit ConditionTester(MOBase::IOrganizer* organizer) : mOrganizer(organizer) {}
 
-  bool testCompositeDependency(const FlagMap &flags, const CompositeDependency &compositeDependency) const;
+    bool testCompositeDependency(const FlagMap& flags, const CompositeDependency& compositeDependency) const;
 
-  bool isStepVisible(const FlagMap &flags, const std::shared_ptr<InstallStep> &step) const;
+    bool isStepVisible(const FlagMap& flags, const std::shared_ptr<InstallStep>& step) const;
 
-  static bool testFlagDependency(FlagMap flags, const FlagDependency &flagDependency);
-  [[nodiscard]] bool testFileDependency(const FileDependency &fileDependency) const;
+    static bool testFlagDependency(FlagMap flags, const FlagDependency& flagDependency);
 
-  bool testGameDependency(const GameDependency &gameDependency) const;
+    [[nodiscard]] bool testFileDependency(const FileDependency& fileDependency) const;
+
+    bool testGameDependency(const GameDependency& gameDependency) const;
 
 private:
-  MOBase::IOrganizer* mOrganizer;
+    MOBase::IOrganizer* mOrganizer;
 
-  friend class FomodViewModel;
+    friend class FomodViewModel;
 
-  [[nodiscard]] FileDependencyTypeEnum getFileDependencyStateForPlugin(const std::string& pluginName) const;
+    [[nodiscard]] FileDependencyTypeEnum getFileDependencyStateForPlugin(const std::string& pluginName) const;
 
-  PluginTypeEnum getPluginTypeDescriptorState(const std::shared_ptr<Plugin> &plugin, const FlagMap &flags) const;
-  mutable std::unordered_map<std::string, FileDependencyTypeEnum> pluginStateCache;
+    PluginTypeEnum getPluginTypeDescriptorState(const std::shared_ptr<Plugin>& plugin, const FlagMap& flags) const;
+
+    mutable std::unordered_map<std::string, FileDependencyTypeEnum> pluginStateCache;
 
 };
-
 
 
 #endif //CONDITIONTESTER_H

@@ -5,19 +5,21 @@
 #include <moddatacontent.h>
 
 namespace FomodDataContentConstants {
-  constexpr int FOMOD_CONTENT_ID = 400400; // TODO: Confirm if this is how we should be setting this value. See Gamebryo's enum
+constexpr int FOMOD_CONTENT_ID = 400400;
 }
 
 class FomodDataContent final : public MOBase::ModDataContent {
 public:
-  explicit FomodDataContent(MOBase::IOrganizer *organizer) : mOrganizer(organizer) {}
-  [[nodiscard]] std::vector<Content> getAllContents() const override;
-  [[nodiscard]] std::vector<int> getContentsFor(std::shared_ptr<const MOBase::IFileTree> fileTree) const override;
+    explicit
+    FomodDataContent(MOBase::IOrganizer* organizer) : mOrganizer(organizer) {}
+
+    [[nodiscard]] std::vector<Content> getAllContents() const override;
+
+    [[nodiscard]] std::vector<int> getContentsFor(std::shared_ptr<const MOBase::IFileTree> fileTree) const override;
 
 private:
-  MOBase::IOrganizer* mOrganizer;
+    MOBase::IOrganizer* mOrganizer;
 };
-
 
 
 #endif //FOMODDATACONTENT_H
