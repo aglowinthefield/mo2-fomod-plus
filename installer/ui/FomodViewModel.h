@@ -8,7 +8,7 @@
 #include "lib/FileInstaller.h"
 #include "xml/FomodInfoFile.h"
 
-template<typename T>
+template <typename T>
 using shared_ptr_list = std::vector<std::shared_ptr<T> >;
 
 /*
@@ -18,24 +18,24 @@ using shared_ptr_list = std::vector<std::shared_ptr<T> >;
 */
 class PluginViewModel {
 public:
-  PluginViewModel(const std::shared_ptr<Plugin> &plugin_, const bool selected, bool)
+  PluginViewModel(const std::shared_ptr<Plugin>& plugin_, const bool selected, bool)
     : plugin(plugin_), selected(selected), enabled(true) {
   }
 
-  void setSelected(const bool selected) { this->selected = selected; }
-  void setEnabled(const bool enabled) { this->enabled = enabled; }
+  void                      setSelected(const bool selected) { this->selected = selected; }
+  void                      setEnabled(const bool enabled) { this->enabled = enabled; }
   [[nodiscard]] std::string getName() const { return plugin->name; }
   [[nodiscard]] std::string getDescription() const { return plugin->description; }
   [[nodiscard]] std::string getImagePath() const { return plugin->image.path; }
-  [[nodiscard]] bool isSelected() const { return selected; }
-  [[nodiscard]] bool isEnabled() const { return enabled; }
+  [[nodiscard]] bool        isSelected() const { return selected; }
+  [[nodiscard]] bool        isEnabled() const { return enabled; }
 
   friend class FomodViewModel;
   friend class FileInstaller;
 
 protected:
   [[nodiscard]] std::shared_ptr<Plugin> getPlugin() const { return plugin; }
-  std::shared_ptr<Plugin> plugin;
+  std::shared_ptr<Plugin>               plugin;
 
 private:
   bool selected;
@@ -49,12 +49,12 @@ private:
 */
 class GroupViewModel {
 public:
-  GroupViewModel(const std::shared_ptr<Group> &group_, const shared_ptr_list<PluginViewModel> &plugins)
+  GroupViewModel(const std::shared_ptr<Group>& group_, const shared_ptr_list<PluginViewModel>& plugins)
     : plugins(plugins), group(group_) {
   }
 
-  [[nodiscard]] std::string getName() const { return group->name; }
-  [[nodiscard]] GroupTypeEnum getType() const { return group->type; }
+  [[nodiscard]] std::string                      getName() const { return group->name; }
+  [[nodiscard]] GroupTypeEnum                    getType() const { return group->type; }
   [[nodiscard]] shared_ptr_list<PluginViewModel> getPlugins() const { return plugins; }
 
   friend class FomodViewModel;
@@ -62,7 +62,7 @@ public:
 
 protected:
   shared_ptr_list<PluginViewModel> plugins;
-  std::shared_ptr<Group> group;
+  std::shared_ptr<Group>           group;
 };
 
 /*
@@ -76,7 +76,7 @@ public:
     : installStep(installStep_), groups(groups) {
   }
 
-  [[nodiscard]] std::string getName() const { return installStep->name; }
+  [[nodiscard]] std::string                            getName() const { return installStep->name; }
   [[nodiscard]] const shared_ptr_list<GroupViewModel>& getGroups() const { return groups; }
 
   friend class FomodViewModel;
@@ -95,12 +95,12 @@ protected:
 */
 class InfoViewModel {
 public:
-  explicit InfoViewModel(const std::shared_ptr<FomodInfoFile> &infoFile) {
+  explicit InfoViewModel(const std::unique_ptr<FomodInfoFile>& infoFile) {
     if (infoFile) {
       // Copy the necessary members from FomodInfoFile to InfoViewModel
-      mName = infoFile->getName();
+      mName    = infoFile->getName();
       mVersion = infoFile->getVersion();
-      mAuthor = infoFile->getAuthor();
+      mAuthor  = infoFile->getAuthor();
       mWebsite = infoFile->getWebsite();
     }
   }
@@ -128,32 +128,32 @@ enum class NEXT_OP { NEXT, INSTALL };
 class FomodViewModel {
 public:
   FomodViewModel(
-    MOBase::IOrganizer *organizer,
-    std::unique_ptr<ModuleConfiguration> fomodFile,
-    std::unique_ptr<FomodInfoFile> infoFile);
+      MOBase::IOrganizer*                  organizer,
+      std::unique_ptr<ModuleConfiguration> fomodFile,
+      std::unique_ptr<FomodInfoFile>       infoFile);
 
   static std::shared_ptr<FomodViewModel> create(
-    MOBase::IOrganizer *organizer,
-    std::unique_ptr<ModuleConfiguration> fomodFile,
-    std::unique_ptr<FomodInfoFile> infoFile);
+      MOBase::IOrganizer*                  organizer,
+      std::unique_ptr<ModuleConfiguration> fomodFile,
+      std::unique_ptr<FomodInfoFile>       infoFile);
 
   [[nodiscard]] const std::shared_ptr<PluginViewModel>& getFirstPluginForActiveStep() const;
 
   // Steps
   [[nodiscard]] shared_ptr_list<StepViewModel> getSteps() const { return mSteps; }
-  [[nodiscard]] int getCurrentStepIndex() const { return mCurrentStepIndex; }
-  [[deprecated]] void setCurrentStepIndex(const int index) { mCurrentStepIndex = index; }
+  [[nodiscard]] int                            getCurrentStepIndex() const { return mCurrentStepIndex; }
+  [[deprecated]] void                          setCurrentStepIndex(const int index) { mCurrentStepIndex = index; }
 
   void updateVisibleSteps() const;
 
-  void preinstall(const std::shared_ptr<MOBase::IFileTree> &tree, const QString &fomodPath);
+  void preinstall(const std::shared_ptr<MOBase::IFileTree>& tree, const QString& fomodPath);
 
   std::shared_ptr<FileInstaller> getFileInstaller() { return mFileInstaller; }
 
   // Flags
-  void setFlag(const std::string &flag, const std::string &value) const;
+  void setFlag(const std::string& flag, const std::string& value) const;
 
-  std::string getFlag(const std::string &flag) const;
+  std::string getFlag(const std::string& flag) const;
 
   std::string getDisplayImage() const;
 
@@ -161,7 +161,7 @@ public:
   [[nodiscard]] std::shared_ptr<PluginViewModel> getActivePlugin() const { return mActivePlugin; }
 
   // Info
-  [[nodiscard]] InfoViewModel getInfoViewModel() const { return mInfoViewModel; }
+  [[nodiscard]] std::shared_ptr<InfoViewModel> getInfoViewModel() const { return mInfoViewModel; }
 
   // Interactions
   void stepBack();
@@ -170,44 +170,39 @@ public:
 
   bool isLastVisibleStep() const;
 
-  void togglePlugin(const std::shared_ptr<GroupViewModel> &, const std::shared_ptr<PluginViewModel> &plugin,
-                    bool selected) const;
+  void togglePlugin(const std::shared_ptr<GroupViewModel>&, const std::shared_ptr<PluginViewModel>& plugin,
+                    bool                                                                            selected) const;
 
-  void setActivePlugin(const std::shared_ptr<PluginViewModel> &plugin) const { mActivePlugin = plugin; }
+  void setActivePlugin(const std::shared_ptr<PluginViewModel>& plugin) const { mActivePlugin = plugin; }
 
 private:
-  // Constructor members
-  MOBase::IOrganizer *mOrganizer = nullptr;
-  std::unique_ptr<ModuleConfiguration> mFomodFile;
-  std::unique_ptr<FomodInfoFile> mInfoFile;
-  mutable FlagMap mFlags;
-  ConditionTester mConditionTester;
-
-
-  // Internal only
-  // TODO: This is a LOT of shared_ptr nonsense. It works for now but I need to understand it better to fix it.
-  InfoViewModel mInfoViewModel;
+  MOBase::IOrganizer*                          mOrganizer = nullptr;
+  std::unique_ptr<ModuleConfiguration>         mFomodFile;
+  std::unique_ptr<FomodInfoFile>               mInfoFile;
+  mutable FlagMap                              mFlags;
+  ConditionTester                              mConditionTester;
+  std::shared_ptr<InfoViewModel>               mInfoViewModel;
   std::vector<std::shared_ptr<StepViewModel> > mSteps;
-  mutable std::shared_ptr<PluginViewModel> mActivePlugin = nullptr; // TODO: This will update on hover and click
-  mutable std::shared_ptr<StepViewModel> mActiveStep = nullptr;
-  mutable std::vector<int> mVisibleStepIndices;
-  std::shared_ptr<FileInstaller> mFileInstaller = nullptr;
-  bool mInitialized{false};
+  mutable std::shared_ptr<PluginViewModel>     mActivePlugin{nullptr};
+  mutable std::shared_ptr<StepViewModel>       mActiveStep{nullptr};
+  mutable std::vector<int>                     mVisibleStepIndices;
+  std::shared_ptr<FileInstaller>               mFileInstaller{nullptr};
+  bool                                         mInitialized{false};
 
   void createStepViewModels();
 
-  void setFlagForPluginState(const std::shared_ptr<PluginViewModel> &plugin, bool selected) const;
+  void setFlagForPluginState(const std::shared_ptr<PluginViewModel>& plugin, bool selected) const;
 
   void setupGroups() const;
 
   void processPluginConditions() const;
 
-  void createNonePluginForGroup(const std::shared_ptr<GroupViewModel> &group) const;
+  void createNonePluginForGroup(const std::shared_ptr<GroupViewModel>& group) const;
 
-  void processPlugin(const std::shared_ptr<GroupViewModel> &groupViewModel,
-                     const std::shared_ptr<PluginViewModel> &pluginViewModel) const;
+  void processPlugin(const std::shared_ptr<GroupViewModel>&  groupViewModel,
+                     const std::shared_ptr<PluginViewModel>& pluginViewModel) const;
 
-  void enforceGroupConstraints(const std::shared_ptr<GroupViewModel> &groupViewModel) const;
+  void enforceGroupConstraints(const std::shared_ptr<GroupViewModel>& groupViewModel) const;
 
 
   // Indices

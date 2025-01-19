@@ -24,7 +24,7 @@ FomodViewModel::FomodViewModel(MOBase::IOrganizer *organizer,
                                std::unique_ptr<FomodInfoFile> infoFile)
   : mOrganizer(organizer), mFomodFile(std::move(fomodFile)), mInfoFile(std::move(infoFile)),
     mConditionTester(organizer),
-    mInfoViewModel(std::move(infoFile)) {
+    mInfoViewModel(std::make_shared<InfoViewModel>(mInfoFile)) {
 }
 
 /**
