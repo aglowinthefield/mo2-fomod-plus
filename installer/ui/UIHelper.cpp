@@ -33,7 +33,7 @@ QLabel* UIHelper::createHyperlink(const QString& url, QWidget* parent = nullptr)
         return createLabel(url, parent);
     }
     const auto label        = new QLabel(url, parent);
-    const QString hyperlink = QString("<a href=\"%1\">%1</a>").arg(url);
+    const QString hyperlink = QString("<a href=\"%1\">%2</a>").arg(url, "Link");
     label->setText(hyperlink);
     label->setOpenExternalLinks(true);
     label->setTextFormat(Qt::RichText);
