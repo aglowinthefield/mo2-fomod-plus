@@ -76,7 +76,7 @@ void ScaleLabel::setScalableImage(const QString& path)
         qWarning(">%s< is a null image", qUtf8Printable(path));
     } else {
         mUnscaledImage = image;
-        setPixmap(QPixmap::fromImage(image).scaled(size(), Qt::KeepAspectRatio));
+        setPixmap(QPixmap::fromImage(image).scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
     }
 }
 
@@ -96,6 +96,6 @@ void ScaleLabel::resizeEvent(QResizeEvent* event)
     }
     if (const auto p = pixmap(); !p.isNull()) {
         setPixmap(
-            QPixmap::fromImage(mUnscaledImage).scaled(event->size(), Qt::KeepAspectRatio));
+            QPixmap::fromImage(mUnscaledImage).scaled(event->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
     }
 }

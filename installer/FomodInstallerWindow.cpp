@@ -15,6 +15,7 @@
 #include <QSizePolicy>
 #include <QTextEdit>
 #include <QVBoxLayout>
+#include <QSplitter>
 #include <utility>
 
 #include "ui/FomodViewModel.h"
@@ -178,24 +179,12 @@ QBoxLayout* FomodInstallerWindow::createContainerLayout()
 
 QWidget* FomodInstallerWindow::createCenterRow()
 {
-    const auto centerRow   = new QWidget(this);
-    auto* centerMainLayout = new QHBoxLayout(centerRow);
-
-    // add the left pane
-    const auto leftPaneLayout = new QVBoxLayout(centerRow);
-    const auto leftPane       = createLeftPane();
-    leftPaneLayout->addWidget(leftPane, 1);
-
-    // add the right pane (to be the anchor for renderStep)
-    const auto rightPaneLayout = new QVBoxLayout(centerRow);
-    const auto rightPane       = createRightPane();
-    rightPaneLayout->addWidget(rightPane, 1);
-
-    // add panes to layout
-    centerMainLayout->addLayout(leftPaneLayout, 1);
-    centerMainLayout->addLayout(rightPaneLayout, 1);
-
-    centerRow->setLayout(centerMainLayout);
+    const auto centerRow = new QSplitter(Qt::Horizontal, this);
+    const auto leftPane  = createLeftPane();
+    const auto rightPane = createRightPane();
+    centerRow->addWidget(leftPane);
+    centerRow->addWidget(rightPane);
+    centerRow->setSizes({ width() / 2, width() / 2 });
     return centerRow;
 }
 
