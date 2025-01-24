@@ -1,4 +1,7 @@
 ﻿#include "FomodInstallerWindow.h"
+
+#include "ui/FomodImageViewer.h"
+
 #include <log.h>
 #include "ui/ScaleLabel.h"
 #include "ui/UIHelper.h"
@@ -305,6 +308,12 @@ QWidget* FomodInstallerWindow::createLeftPane()
     // Initialize with defaults (the first plugin's image)
     mImageLabel = new ScaleLabel(leftPane);
     mImageLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    connect(mImageLabel, &ScaleLabel::clicked, this, [this] {
+        const auto viewer = new FomodImageViewer(this, mFomodPath, mViewModel->getActiveStep(), mViewModel->getActivePlugin());
+        viewer->showMaximized();
+        viewer->exec();
+    });
     layout->addWidget(mImageLabel);
 
     updateDisplayForActivePlugin();

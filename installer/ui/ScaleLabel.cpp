@@ -10,8 +10,6 @@ static bool isResourceMovie(const QString& path)
     });
 }
 
-ScaleLabel::ScaleLabel(QWidget* parent) : QLabel(parent) {}
-
 void ScaleLabel::setScalableResource(const QString& path)
 {
     if (const auto m = movie()) {
@@ -97,5 +95,23 @@ void ScaleLabel::resizeEvent(QResizeEvent* event)
     if (const auto p = pixmap(); !p.isNull()) {
         setPixmap(
             QPixmap::fromImage(mUnscaledImage).scaled(event->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    }
+}
+
+void ScaleLabel::showEvent(QShowEvent* event)
+{
+    QLabel::showEvent(event);
+
+    if (const auto m = movie()) {
+        m->stop();
+        m->setScaledSize(mOriginalMovieSize.scaled(size(), Qt::KeepAspectRatio));
+        m->start();
+
+        if (misStatic) {
+            m->stop();
+        }
+    }
+    if (const auto p = pixmap(); !p.isNull()) {
+        setPixmap(QPixmap::fromImage(mUnscaledImage).scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
     }
 }

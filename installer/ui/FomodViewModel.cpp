@@ -158,7 +158,8 @@ void FomodViewModel::createStepViewModels()
             auto groupViewModel = std::make_shared<GroupViewModel>(std::make_shared<Group>(group), pluginViewModels);
             groupViewModels.emplace_back(groupViewModel);
         }
-        auto stepViewModel = std::make_shared<StepViewModel>(std::make_shared<InstallStep>(installStep), std::move(groupViewModels));
+        auto stepViewModel = std::make_shared<StepViewModel>(std::make_shared<InstallStep>(installStep),
+            std::move(groupViewModels));
         stepViewModels.emplace_back(stepViewModel);
     }
     // TODO Sort the view models here, maybe
@@ -206,7 +207,8 @@ void FomodViewModel::updateVisibleSteps() const
 
 void FomodViewModel::preinstall(const std::shared_ptr<MOBase::IFileTree>& tree, const QString& fomodPath)
 {
-    mFileInstaller = std::make_shared<FileInstaller>(mOrganizer, fomodPath, tree, std::move(mFomodFile), mFlags, mSteps);
+    mFileInstaller = std::make_shared<
+        FileInstaller>(mOrganizer, fomodPath, tree, std::move(mFomodFile), mFlags, mSteps);
 }
 
 bool FomodViewModel::isLastVisibleStep() const

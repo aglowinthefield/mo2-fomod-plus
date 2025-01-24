@@ -8,6 +8,7 @@
 
 #include "FomodPlusInstaller.h"
 #include "xml/ModuleConfiguration.h"
+#include "ui/ClickableWidget.h"
 
 #include <QDialog>
 #include <qradiobutton.h>
@@ -99,7 +100,6 @@ private:
 
     // Widgets
     QStackedWidget* mInstallStepStack{};
-    QWidget* mLeftPane{};
     QTextEdit* mDescriptionBox{};
     QComboBox* mModNameInput{};
     ScaleLabel* mImageLabel{};

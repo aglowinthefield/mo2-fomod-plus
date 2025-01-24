@@ -139,6 +139,7 @@ public:
 
     // Steps
     [[nodiscard]] shared_ptr_list<StepViewModel> getSteps() const { return mSteps; }
+    [[nodiscard]] const std::shared_ptr<StepViewModel>& getActiveStep() const { return mActiveStep; }
     [[nodiscard]] int getCurrentStepIndex() const { return mCurrentStepIndex; }
     [[deprecated]] void setCurrentStepIndex(const int index) { mCurrentStepIndex = index; }
 

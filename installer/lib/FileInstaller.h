@@ -22,19 +22,21 @@
 // - Copy all conditionalInstall files
 // - Copy all selected files from steps that were visible to the user at the point of install
 
+using namespace MOBase;
+
 class StepViewModel;
 
 class FileInstaller {
 public:
     FileInstaller(
-        MOBase::IOrganizer* organizer,
+        IOrganizer* organizer,
         QString fomodPath,
-        const std::shared_ptr<MOBase::IFileTree>& fileTree,
+        const std::shared_ptr<IFileTree>& fileTree,
         std::unique_ptr<ModuleConfiguration> fomodFile,
         const FlagMap& flagMap,
         const std::vector<std::shared_ptr<StepViewModel> >& steps);
 
-    std::shared_ptr<MOBase::IFileTree> install() const;
+    std::shared_ptr<IFileTree> install() const;
 
     void writeFomodJsonToFile(const std::string& filePath) const;
 
@@ -68,9 +70,9 @@ public:
     std::string getQualifiedFilePath(const std::string& treePath) const;
 
 private:
-    MOBase::IOrganizer* mOrganizer;
+    IOrganizer* mOrganizer;
     QString mFomodPath;
-    std::shared_ptr<MOBase::IFileTree> mFileTree;
+    std::shared_ptr<IFileTree> mFileTree;
     std::unique_ptr<ModuleConfiguration> mFomodFile;
     FlagMap mFlagMap;
     ConditionTester mConditionTester;
