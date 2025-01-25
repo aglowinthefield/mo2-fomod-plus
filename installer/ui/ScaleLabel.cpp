@@ -1,5 +1,6 @@
 ﻿#include "scalelabel.h"
 #include <QResizeEvent>
+#include <iostream>
 
 // Taken from https://github.com/ModOrganizer2/modorganizer-installer_fomod/blob/master/src/scalelabel.h
 static bool isResourceMovie(const QString& path)
@@ -100,6 +101,8 @@ void ScaleLabel::resizeEvent(QResizeEvent* event)
 
 void ScaleLabel::showEvent(QShowEvent* event)
 {
+    std::cout << "showEvent called" << std::endl;
+
     QLabel::showEvent(event);
 
     if (const auto m = movie()) {

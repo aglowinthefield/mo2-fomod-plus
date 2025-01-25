@@ -4,9 +4,10 @@
 #include "FomodViewModel.h"
 
 #include <QDialog>
+#include <QKeyEvent>
 #include <QLabel>
+#include <QScrollArea>
 #include <QStackedWidget>
-#include <qscrollarea.h>
 
 using LabelImagePair = std::pair<QString, QString>;
 
@@ -57,11 +58,9 @@ private:
 
     QPushButton* createForwardButton(QWidget* parent) const;
 
-    QWidget* createMainImageLabel(QWidget* parent);
-
     QWidget* createTopBar(QWidget* parent);
 
-    QWidget* createCloseButton(QWidget* parent);
+    QPushButton* createCloseButton(QWidget* parent);
 
     void updateCounterText() const;
 
@@ -70,6 +69,8 @@ private:
     void goForward();
 
     void select(int index);
+
+    void keyPressEvent(QKeyEvent* event) override;
 
     std::vector<LabelImagePair> mLabelsAndImages;
     std::vector<QWidget*> mImagePanes{};

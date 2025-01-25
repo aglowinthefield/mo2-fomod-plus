@@ -311,8 +311,8 @@ QWidget* FomodInstallerWindow::createLeftPane()
 
     connect(mImageLabel, &ScaleLabel::clicked, this, [this] {
         const auto viewer = new FomodImageViewer(this, mFomodPath, mViewModel->getActiveStep(), mViewModel->getActivePlugin());
-        // viewer->showMaximized();
-        viewer->show();
+        viewer->showMaximized();
+        // viewer->show();
     });
     layout->addWidget(mImageLabel);
 
