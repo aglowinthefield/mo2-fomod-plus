@@ -74,6 +74,9 @@ void FomodImageViewer::collectImages()
     mLabelsAndImages.clear();
     for (const auto& groupViewModel : mActiveStep->getGroups()) {
         for (const auto& pluginViewModel : groupViewModel->getPlugins()) {
+            if (pluginViewModel->getImagePath().empty()) {
+                continue;
+            }
             QString imagePath = UIHelper::getFullImagePath(mFomodPath,
                 QString::fromStdString(pluginViewModel->getImagePath()));
             mLabelsAndImages.emplace_back(QString::fromStdString(pluginViewModel->getName()), imagePath);
@@ -146,9 +149,12 @@ QScrollArea* FomodImageViewer::createPreviewImages(QWidget* parent)
     }
 
     widget->setLayout(layout);
-    previewImages->setFixedHeight(PREVIEW_IMAGE_HEIGHT);
-    // previewImages->setWidgetResizable(true);
+    previewImages->setFixedHeight(PREVIEW_IMAGE_HEIGHT + 10);
+    previewImages->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    previewImages->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
     previewImages->setWidget(widget);
+    previewImages->setStyleSheet("QScrollArea { border: none; }");
 
     return previewImages;
 }
@@ -156,7 +162,9 @@ QScrollArea* FomodImageViewer::createPreviewImages(QWidget* parent)
 QPushButton* FomodImageViewer::createBackButton(QWidget* parent) const
 {
     const auto backButton = new QPushButton(parent);
-    backButton->setText("<");
+    const QIcon icon(":/fomod/back");
+    backButton->setIcon(icon);
+    // backButton->setText("<");
     connect(backButton, &QPushButton::clicked, this, &FomodImageViewer::goBack);
     return backButton;
 }
@@ -164,7 +172,9 @@ QPushButton* FomodImageViewer::createBackButton(QWidget* parent) const
 QPushButton* FomodImageViewer::createForwardButton(QWidget* parent) const
 {
     const auto forwardButton = new QPushButton(parent);
-    forwardButton->setText(">");
+    const QIcon icon(":/fomod/forward");
+    forwardButton->setIcon(icon);
+    // forwardButton->setText(">");
     connect(forwardButton, &QPushButton::clicked, this, &FomodImageViewer::goForward);
     return forwardButton;
 }
@@ -188,7 +198,9 @@ QWidget* FomodImageViewer::createTopBar(QWidget* parent)
 QPushButton* FomodImageViewer::createCloseButton(QWidget* parent)
 {
     const auto closeButton = new QPushButton(parent);
-    closeButton->setText("X");
+    const QIcon icon(":/fomod/close");
+    closeButton->setIcon(icon);
+    // closeButton->setText("X");
     connect(closeButton, &QPushButton::clicked, this, &FomodImageViewer::close);
     return closeButton;
 }
@@ -247,4 +259,10 @@ void FomodImageViewer::keyPressEvent(QKeyEvent* event)
     default:
         QDialog::keyPressEvent(event);
     }
+}
+
+void FomodImageViewer::showEvent(QShowEvent* event)
+{
+    QDialog::showEvent(event);
+    setFocus();
 }

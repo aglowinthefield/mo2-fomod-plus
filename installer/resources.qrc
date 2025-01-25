@@ -2,4 +2,13 @@
     <qresource prefix="/fomod">
         <file alias="hat">resources/fomod_icon.png</file>
     </qresource>
+    <qresource prefix="/fomod">
+        <file alias="previous">resources/left-chevron.png</file>
+    </qresource>
+    <qresource prefix="/fomod">
+        <file alias="next">resources/right-chevron.png</file>
+    </qresource>
+    <qresource prefix="/fomod">
+        <file alias="close">resources/delete.png</file>
+    </qresource>
 </RCC>

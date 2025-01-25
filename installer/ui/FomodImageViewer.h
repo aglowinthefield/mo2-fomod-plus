@@ -72,6 +72,8 @@ private:
 
     void keyPressEvent(QKeyEvent* event) override;
 
+    void showEvent(QShowEvent* event) override;
+
     std::vector<LabelImagePair> mLabelsAndImages;
     std::vector<QWidget*> mImagePanes{};
     int mCurrentIndex{ 0 };
