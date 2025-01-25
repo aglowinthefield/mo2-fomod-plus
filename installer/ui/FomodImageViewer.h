@@ -4,7 +4,9 @@
 #include "FomodViewModel.h"
 
 #include <QDialog>
+#include <QLabel>
 #include <QStackedWidget>
+#include <qscrollarea.h>
 
 using LabelImagePair = std::pair<QString, QString>;
 
@@ -45,29 +47,32 @@ private:
 
     QWidget* createCenterRow(QWidget* parent);
 
-    QStackedWidget* createStackWidget(QWidget *parent);
+    QStackedWidget* createStackWidget(QWidget* parent);
 
     QWidget* createSinglePhotoPane(QWidget* parent, const QString& imagePath);
 
-    QWidget* createPreviewImages(QWidget *parent) const;
+    QScrollArea* createPreviewImages(QWidget* parent);
 
-    QWidget* createBackButton(QWidget *parent);
+    QPushButton* createBackButton(QWidget* parent) const;
 
-    QWidget* createForwardButton(QWidget *parent);
+    QPushButton* createForwardButton(QWidget* parent) const;
 
-    QWidget* createMainImageLabel(QWidget *parent);
+    QWidget* createMainImageLabel(QWidget* parent);
 
-    QWidget* createTopBar(QWidget *parent);
+    QWidget* createTopBar(QWidget* parent);
 
     QWidget* createCloseButton(QWidget* parent);
 
-    QWidget* createCounter(QWidget *parent) const;
+    void updateCounterText() const;
 
     void goBack();
 
     void goForward();
 
+    void select(int index);
+
     std::vector<LabelImagePair> mLabelsAndImages;
+    std::vector<QWidget*> mImagePanes{};
     int mCurrentIndex{ 0 };
 
     QString mFomodPath;
@@ -77,12 +82,12 @@ private:
     QWidget* mCenterRow{ nullptr };
     QWidget* mTopBar{ nullptr };
     QWidget* mCloseButton{ nullptr };
-    QWidget* mBackButton{ nullptr };
-    QWidget* mForwardButton{ nullptr };
-    QWidget* mCounter{ nullptr };
+    QPushButton* mBackButton{ nullptr };
+    QPushButton* mForwardButton{ nullptr };
+    QLabel* mCounter{ nullptr };
     QStackedWidget* mMainDisplayImage{ nullptr };
-    QWidget* mLabel{ nullptr };
-    QWidget* mPreviewImages{ nullptr };
+    QLabel* mLabel{ nullptr };
+    QScrollArea* mPreviewImages{ nullptr };
 };
 
 
