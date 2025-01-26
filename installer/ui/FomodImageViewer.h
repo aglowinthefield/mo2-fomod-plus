@@ -50,7 +50,7 @@ private:
 
     QStackedWidget* createStackWidget(QWidget* parent);
 
-    QWidget* createSinglePhotoPane(QWidget* parent, const QString& imagePath);
+    QWidget* createSinglePhotoPane(QWidget *parent, LabelImagePair pair);
 
     QScrollArea* createPreviewImages(QWidget* parent);
 

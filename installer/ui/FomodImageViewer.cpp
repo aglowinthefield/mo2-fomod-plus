@@ -106,22 +106,30 @@ QWidget* FomodImageViewer::createCenterRow(QWidget* parent)
 QStackedWidget* FomodImageViewer::createStackWidget(QWidget* parent)
 {
     const auto stackWidget = new QStackedWidget(parent);
-    for (const auto& val : mLabelsAndImages | std::views::values) {
-        const auto photoPane = createSinglePhotoPane(stackWidget, val);
+    for (const auto& pair : mLabelsAndImages) {
+        const auto photoPane = createSinglePhotoPane(stackWidget, pair);
         stackWidget->addWidget(photoPane);
     }
     return stackWidget;
 }
 
 // ReSharper disable once CppMemberFunctionMayBeStatic
-QWidget* FomodImageViewer::createSinglePhotoPane(QWidget* parent, const QString& imagePath)
+QWidget* FomodImageViewer::createSinglePhotoPane(QWidget* parent, const LabelImagePair pair)
 {
     const auto singlePhotoPane = new QWidget(parent);
     const auto layout          = new QVBoxLayout(singlePhotoPane);
 
+    const auto [labelText, imagePath] = pair;
+
     const auto imageLabel = new ScaleLabel(singlePhotoPane);
     imageLabel->setScalableResource(imagePath);
-    layout->addWidget(imageLabel);
+    layout->addWidget(imageLabel, 1);
+
+    const auto textLabel = new QLabel(singlePhotoPane);
+    textLabel->setText(labelText);
+    textLabel->setAlignment(Qt::AlignCenter);
+    textLabel->setStyleSheet("color: white; font-size: 20px;");
+    layout->addWidget(textLabel);
 
     return singlePhotoPane;
 }
@@ -162,9 +170,9 @@ QScrollArea* FomodImageViewer::createPreviewImages(QWidget* parent)
 QPushButton* FomodImageViewer::createBackButton(QWidget* parent) const
 {
     const auto backButton = new QPushButton(parent);
-    const QIcon icon(":/fomod/back");
-    backButton->setIcon(icon);
-    // backButton->setText("<");
+    // const QIcon icon(":/fomod/back");
+    // backButton->setIcon(icon);
+    backButton->setText("<");
     connect(backButton, &QPushButton::clicked, this, &FomodImageViewer::goBack);
     return backButton;
 }
@@ -172,9 +180,9 @@ QPushButton* FomodImageViewer::createBackButton(QWidget* parent) const
 QPushButton* FomodImageViewer::createForwardButton(QWidget* parent) const
 {
     const auto forwardButton = new QPushButton(parent);
-    const QIcon icon(":/fomod/forward");
-    forwardButton->setIcon(icon);
-    // forwardButton->setText(">");
+    // const QIcon icon(":/fomod/forward");
+    // forwardButton->setIcon(icon);
+    forwardButton->setText(">");
     connect(forwardButton, &QPushButton::clicked, this, &FomodImageViewer::goForward);
     return forwardButton;
 }
@@ -198,9 +206,9 @@ QWidget* FomodImageViewer::createTopBar(QWidget* parent)
 QPushButton* FomodImageViewer::createCloseButton(QWidget* parent)
 {
     const auto closeButton = new QPushButton(parent);
-    const QIcon icon(":/fomod/close");
-    closeButton->setIcon(icon);
-    // closeButton->setText("X");
+    // const QIcon icon(":/fomod/close");
+    // closeButton->setIcon(icon);
+    closeButton->setText("X");
     connect(closeButton, &QPushButton::clicked, this, &FomodImageViewer::close);
     return closeButton;
 }
