@@ -14,7 +14,7 @@ A total rewrite of the FOMOD installer. Supports all features of the original FO
 ![scanner](doc/scanner.png)
 
 - A nice wizard hat in the content column
-![hat](doc/content.png)
+![hat](doc/filter.png)
 
 ## Using
 1. Unzip the latest release into your MO2 plugins directory.
