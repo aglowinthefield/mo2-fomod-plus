@@ -40,6 +40,8 @@ You'll want to follow all setup instructions for `mob` before proceeding.
 2. Clone this repository inside the generated `<rootDir>/build/modorganizer-super` directory.
 3. Open in your IDE of choice. I prefer CLion and it should be fairly painless.
 
+*Note: I don't have a good setup for building to DLLs within the repo at the moment.*
+
 ## Debugging
 To debug:
 1. Make sure you are debugging the `fomod_plus` target.

@@ -218,9 +218,11 @@ bool Plugin::deserialize(pugi::xml_node& node)
     pugi::xml_node filesNode          = node.child("files");
 
     description = node.child("description").text().as_string();
+    description = trim(description); // Find a better way to do this eventually.
     image.deserialize(imageNode);
     typeDescriptor.deserialize(typeDescriptorNode);
     name = node.attribute("name").as_string();
+    name = trim(name);
     conditionFlags.deserialize(conditionFlagsNode);
     files.deserialize(filesNode);
     return true;
