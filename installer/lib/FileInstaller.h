@@ -33,7 +33,7 @@ public:
         QString fomodPath,
         const std::shared_ptr<IFileTree>& fileTree,
         std::unique_ptr<ModuleConfiguration> fomodFile,
-        const FlagMap& flagMap,
+        const std::shared_ptr<FlagMap>& flagMap,
         const std::vector<std::shared_ptr<StepViewModel> >& steps);
 
     std::shared_ptr<IFileTree> install() const;
@@ -74,7 +74,7 @@ private:
     QString mFomodPath;
     std::shared_ptr<IFileTree> mFileTree;
     std::unique_ptr<ModuleConfiguration> mFomodFile;
-    FlagMap mFlagMap;
+    std::shared_ptr<FlagMap> mFlagMap;
     ConditionTester mConditionTester;
     std::vector<std::shared_ptr<StepViewModel> > mSteps; // TODO: Maybe this is nasty. Idk.
 

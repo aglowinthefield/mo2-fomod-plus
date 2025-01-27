@@ -11,11 +11,11 @@ class ConditionTester {
 public:
     explicit ConditionTester(MOBase::IOrganizer* organizer) : mOrganizer(organizer) {}
 
-    bool testCompositeDependency(const FlagMap& flags, const CompositeDependency& compositeDependency) const;
+    bool testCompositeDependency(const std::shared_ptr<FlagMap> &flags, const CompositeDependency &compositeDependency) const;
 
-    bool isStepVisible(const FlagMap& flags, const std::shared_ptr<InstallStep>& step) const;
+    bool isStepVisible(const std::shared_ptr<FlagMap> &flags, const std::shared_ptr<InstallStep> &step) const;
 
-    static bool testFlagDependency(FlagMap flags, const FlagDependency& flagDependency);
+    static bool testFlagDependency(const std::shared_ptr<FlagMap> &flags, const FlagDependency &flagDependency);
 
     [[nodiscard]] bool testFileDependency(const FileDependency& fileDependency) const;
 
@@ -28,7 +28,7 @@ private:
 
     [[nodiscard]] FileDependencyTypeEnum getFileDependencyStateForPlugin(const std::string& pluginName) const;
 
-    PluginTypeEnum getPluginTypeDescriptorState(const std::shared_ptr<Plugin>& plugin, const FlagMap& flags) const;
+    PluginTypeEnum getPluginTypeDescriptorState(const std::shared_ptr<Plugin> &plugin, const std::shared_ptr<FlagMap> &flags) const;
 
     mutable std::unordered_map<std::string, FileDependencyTypeEnum> pluginStateCache;
 

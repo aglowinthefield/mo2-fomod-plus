@@ -24,7 +24,10 @@ FomodViewModel::FomodViewModel(MOBase::IOrganizer* organizer,
     std::unique_ptr<FomodInfoFile> infoFile)
     : mOrganizer(organizer), mFomodFile(std::move(fomodFile)), mInfoFile(std::move(infoFile)),
       mConditionTester(organizer),
-      mInfoViewModel(std::make_shared<InfoViewModel>(mInfoFile)) {}
+      mInfoViewModel(std::make_shared<InfoViewModel>(mInfoFile))
+{
+    mFlags = std::make_shared<FlagMap>();
+}
 
 /**
  *
@@ -38,6 +41,9 @@ std::shared_ptr<FomodViewModel> FomodViewModel::create(MOBase::IOrganizer* organ
     std::unique_ptr<FomodInfoFile> infoFile)
 {
     auto viewModel = std::make_shared<FomodViewModel>(organizer, std::move(fomodFile), std::move(infoFile));
+    if (viewModel->mFlags == nullptr) {
+        viewModel->mFlags = std::make_shared<FlagMap>();
+    }
     viewModel->createStepViewModels();
     viewModel->setupGroups();
     viewModel->processPluginConditions();
@@ -92,11 +98,6 @@ void FomodViewModel::processPlugin(const std::shared_ptr<GroupViewModel>& groupV
     const std::shared_ptr<PluginViewModel>& pluginViewModel) const
 {
     const auto typeDescriptor = mConditionTester.getPluginTypeDescriptorState(pluginViewModel->plugin, mFlags);
-    if (typeDescriptor == PluginTypeEnum::NotUsable) {
-        std::cout << "Plugin is not usable: [" << pluginViewModel->getName() << "]" << std::endl;
-        pluginViewModel->setEnabled(false);
-        togglePlugin(groupViewModel, pluginViewModel, false);
-    }
     if (typeDescriptor == PluginTypeEnum::Recommended) {
         pluginViewModel->setEnabled(true);
         togglePlugin(groupViewModel, pluginViewModel, true);
@@ -107,12 +108,21 @@ void FomodViewModel::processPlugin(const std::shared_ptr<GroupViewModel>& groupV
         togglePlugin(groupViewModel, pluginViewModel, true);
         std::cout << "Plugin is required: [" << pluginViewModel->getName() << "]" << std::endl;
     }
+    if (typeDescriptor == PluginTypeEnum::NotUsable) {
+        std::cout << "Plugin is not usable: [" << pluginViewModel->getName() << "]" << std::endl;
+        pluginViewModel->setEnabled(false);
+        togglePlugin(groupViewModel, pluginViewModel, false);
+    }
 }
 
 void FomodViewModel::enforceGroupConstraints(const std::shared_ptr<GroupViewModel>& groupViewModel) const
 {
     if (groupViewModel->group->type != SelectExactlyOne) {
         return; // Nothing to do for other groups constraint-wise...yet. TODO: Figure out if that's true.
+    }
+
+    if (std::ranges::any_of(groupViewModel->plugins, [](const auto& plugin) { return plugin->isSelected(); })) {
+        return; // We're good if at least one is selected.
     }
 
     // Select the first plugin that isn't NotUsable
@@ -169,13 +179,16 @@ void FomodViewModel::createStepViewModels()
 void FomodViewModel::setFlagForPluginState(const std::shared_ptr<PluginViewModel>& plugin, const bool selected) const
 {
     for (const auto& flag : plugin->plugin->conditionFlags.flags) {
-        mFlags.setFlag(flag.name, selected ? flag.value : "");
+        mFlags->setFlag(flag.name, selected ? flag.value : "");
     }
 }
 
 void FomodViewModel::togglePlugin(const std::shared_ptr<GroupViewModel>& group,
     const std::shared_ptr<PluginViewModel>& plugin, const bool selected) const
 {
+    if (plugin->getImagePath() == "img/new.jpg") {
+        std::cout << "Debugging here" << std::endl;
+    }
     plugin->setSelected(selected);
     setFlagForPluginState(plugin, selected);
 
@@ -239,21 +252,6 @@ void FomodViewModel::stepForward()
         mActiveStep       = mSteps[mCurrentStepIndex];
         mActivePlugin     = getFirstPluginForActiveStep();
     }
-}
-
-/*
---------------------------------------------------------------------------------
-                               Flags
---------------------------------------------------------------------------------
-*/
-void FomodViewModel::setFlag(const std::string& flag, const std::string& value) const
-{
-    mFlags.setFlag(flag, value);
-}
-
-std::string FomodViewModel::getFlag(const std::string& flag) const
-{
-    return mFlags.getFlag(flag);
 }
 
 /*

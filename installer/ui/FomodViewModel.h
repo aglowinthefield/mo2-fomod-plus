@@ -149,11 +149,6 @@ public:
 
     std::shared_ptr<FileInstaller> getFileInstaller() { return mFileInstaller; }
 
-    // Flags
-    void setFlag(const std::string& flag, const std::string& value) const;
-
-    std::string getFlag(const std::string& flag) const;
-
     std::string getDisplayImage() const;
 
     // Plugins
@@ -178,7 +173,7 @@ private:
     MOBase::IOrganizer* mOrganizer = nullptr;
     std::unique_ptr<ModuleConfiguration> mFomodFile;
     std::unique_ptr<FomodInfoFile> mInfoFile;
-    mutable FlagMap mFlags;
+    std::shared_ptr<FlagMap> mFlags {nullptr};
     ConditionTester mConditionTester;
     std::shared_ptr<InfoViewModel> mInfoViewModel;
     std::vector<std::shared_ptr<StepViewModel> > mSteps;

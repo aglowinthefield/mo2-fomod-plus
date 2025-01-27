@@ -233,7 +233,7 @@ QWidget* FomodInstallerWindow::createTopRow()
     UIHelper::setGlobalAlignment(valuesColumn, Qt::AlignTop);
 
     metadataLayout->addLayout(labelsColumn);
-    metadataLayout->addLayout(valuesColumn);
+    metadataLayout->addLayout(valuesColumn, 1); // To push the right column close to the edge of the left.
 
     mainHLayout->addLayout(metadataLayout);
 

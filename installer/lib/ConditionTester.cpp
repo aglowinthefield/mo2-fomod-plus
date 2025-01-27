@@ -3,7 +3,8 @@
 #include <iplugingame.h>
 #include <ipluginlist.h>
 
-bool ConditionTester::testCompositeDependency(const FlagMap& flags, const CompositeDependency& compositeDependency) const
+bool ConditionTester::testCompositeDependency(const std::shared_ptr<FlagMap>& flags,
+    const CompositeDependency& compositeDependency) const
 {
     if (compositeDependency.totalDependencies == 0) {
         return true;
@@ -40,14 +41,15 @@ bool ConditionTester::testCompositeDependency(const FlagMap& flags, const Compos
 
 
 [[deprecated("Use testCompositeDependency() directly instead")]]
-bool ConditionTester::isStepVisible(const FlagMap& flags, const std::shared_ptr<InstallStep>& step) const
+bool ConditionTester::isStepVisible(const std::shared_ptr<FlagMap>& flags,
+    const std::shared_ptr<InstallStep>& step) const
 {
     return testCompositeDependency(flags, step->visible);
 }
 
-bool ConditionTester::testFlagDependency(FlagMap flags, const FlagDependency& flagDependency)
+bool ConditionTester::testFlagDependency(const std::shared_ptr<FlagMap>& flags, const FlagDependency& flagDependency)
 {
-    return flags.getFlag(flagDependency.flag) == flagDependency.value;
+    return flags->getFlag(flagDependency.flag) == flagDependency.value;
 }
 
 bool ConditionTester::testFileDependency(const FileDependency& fileDependency) const
@@ -69,7 +71,8 @@ FileDependencyTypeEnum ConditionTester::getFileDependencyStateForPlugin(const st
         return it->second;
     }
 
-    const QFlags<MOBase::IPluginList::PluginState> pluginState = mOrganizer->pluginList()->state(QString::fromStdString(pluginName));
+    const QFlags<MOBase::IPluginList::PluginState> pluginState = mOrganizer->pluginList()->state(
+        QString::fromStdString(pluginName));
 
     FileDependencyTypeEnum state;
 
@@ -87,7 +90,8 @@ FileDependencyTypeEnum ConditionTester::getFileDependencyStateForPlugin(const st
     return state;
 }
 
-PluginTypeEnum ConditionTester::getPluginTypeDescriptorState(const std::shared_ptr<Plugin>& plugin, const FlagMap& flags) const
+PluginTypeEnum ConditionTester::getPluginTypeDescriptorState(const std::shared_ptr<Plugin>& plugin,
+    const std::shared_ptr<FlagMap>& flags) const
 {
     // NOTE: A plugin's ConditionFlags aren't the same thing as a step visibility one.
     // A plugin's ConditionFlags are toggled based on the selection state of the plugin
@@ -95,7 +99,8 @@ PluginTypeEnum ConditionTester::getPluginTypeDescriptorState(const std::shared_p
 
     // We will return the 'winning' type or the default. If multiple conditions are met,
     // ...well, I'm not sure.
-    for (const auto& dependencyType = plugin->typeDescriptor.dependencyType; const auto& pattern : dependencyType.patterns.patterns) {
+    for (const auto& dependencyType = plugin->typeDescriptor.dependencyType; const auto& pattern : dependencyType.
+         patterns.patterns) {
         if (testCompositeDependency(flags, pattern.dependencies)) {
             return pattern.type;
         }

@@ -12,7 +12,7 @@ FileInstaller::FileInstaller(
     QString fomodPath,
     const std::shared_ptr<IFileTree>& fileTree,
     std::unique_ptr<ModuleConfiguration> fomodFile,
-    const FlagMap& flagMap,
+    const std::shared_ptr<FlagMap>& flagMap,
     const std::vector<std::shared_ptr<StepViewModel> >& steps) : mOrganizer(organizer), mFomodPath(std::move(fomodPath)),
                                                                  mFileTree(fileTree),
                                                                  mFomodFile(std::move(fomodFile)),
