@@ -46,6 +46,7 @@ std::shared_ptr<FomodViewModel> FomodViewModel::create(MOBase::IOrganizer* organ
     }
     viewModel->createStepViewModels();
     viewModel->setupGroups();
+    viewModel->enforceGroupConstraints();
     viewModel->processPluginConditions();
     viewModel->updateVisibleSteps();
     viewModel->mInitialized  = true;
@@ -115,27 +116,31 @@ void FomodViewModel::processPlugin(const std::shared_ptr<GroupViewModel>& groupV
     }
 }
 
-void FomodViewModel::enforceGroupConstraints(const std::shared_ptr<GroupViewModel>& groupViewModel) const
+void FomodViewModel::enforceGroupConstraints() const
 {
-    if (groupViewModel->group->type != SelectExactlyOne) {
-        return; // Nothing to do for other groups constraint-wise...yet. TODO: Figure out if that's true.
-    }
+    for (const auto& stepViewModel : getSteps()) {
+        for (const auto& groupViewModel : stepViewModel->getGroups()) {
+            if (!isRadioButtonGroup(groupViewModel->getType())) {
+                return; // Nothing to do for other groups constraint-wise...yet. TODO: Figure out if that's true.
+            }
 
-    if (std::ranges::any_of(groupViewModel->plugins, [](const auto& plugin) { return plugin->isSelected(); })) {
-        return; // We're good if at least one is selected.
-    }
+            if (std::ranges::any_of(groupViewModel->plugins, [](const auto& plugin) { return plugin->isSelected(); })) {
+                return; // We're good if at least one is selected.
+            }
 
-    // Select the first plugin that isn't NotUsable
-    for (const auto& plugin : groupViewModel->plugins) {
-        if (mConditionTester.getPluginTypeDescriptorState(plugin->getPlugin(), mFlags) != PluginTypeEnum::NotUsable) {
-            togglePlugin(groupViewModel, plugin, true);
-            break;
+            // Select the first plugin that isn't NotUsable
+            for (const auto& plugin : groupViewModel->plugins) {
+                if (mConditionTester.getPluginTypeDescriptorState(plugin->getPlugin(), mFlags) != PluginTypeEnum::NotUsable) {
+                    togglePlugin(groupViewModel, plugin, true);
+                    break;
+                }
+            }
+
+            // My debugging function was wrong here at first. We really shouldn't see this logged now.
+            if (std::ranges::all_of(groupViewModel->plugins, [](const auto& plugin) { return !plugin->isSelected(); })) {
+                std::cerr << "SelectExactlyOne had no selectable members! Please debug this." << std::endl;
+            }
         }
-    }
-
-    // My debugging function was wrong here at first. We really shouldn't see this logged now.
-    if (std::ranges::all_of(groupViewModel->plugins, [](const auto& plugin) { return !plugin->isSelected(); })) {
-        std::cerr << "SelectExactlyOne had no selectable members! Please debug this." << std::endl;
     }
 }
 
@@ -143,10 +148,12 @@ void FomodViewModel::processPluginConditions() const
 {
     for (const auto& stepViewModel : mSteps) {
         for (const auto& groupViewModel : stepViewModel->getGroups()) {
+            if (isRadioButtonGroup(groupViewModel->getType())) {
+                continue;
+            }
             for (const auto& pluginViewModel : groupViewModel->getPlugins()) {
                 processPlugin(groupViewModel, pluginViewModel);
             }
-            enforceGroupConstraints(groupViewModel);
         }
     }
 }
@@ -179,6 +186,10 @@ void FomodViewModel::createStepViewModels()
 void FomodViewModel::setFlagForPluginState(const std::shared_ptr<PluginViewModel>& plugin, const bool selected) const
 {
     for (const auto& flag : plugin->plugin->conditionFlags.flags) {
+        if (flag.name == "EmbersXD" && !selected) {
+            std::cerr << "Disabling EmbersXD Flag" << std::endl;
+
+        }
         mFlags->setFlag(flag.name, selected ? flag.value : "");
     }
 }
@@ -189,20 +200,21 @@ void FomodViewModel::togglePlugin(const std::shared_ptr<GroupViewModel>& group,
     if (plugin->getImagePath() == "img/new.jpg") {
         std::cout << "Debugging here" << std::endl;
     }
+
     plugin->setSelected(selected);
     setFlagForPluginState(plugin, selected);
 
-    // for radio groups, we need to toggle the other plugins to be off, maybe?
-    if (isRadioButtonGroup(group->getType())) {
-        for (const auto& otherPlugin : group->getPlugins()) {
-            if (otherPlugin != plugin) {
-                otherPlugin->setSelected(false);
-                setFlagForPluginState(otherPlugin, false);
+    if (mInitialized) {
+        // for radio groups, we need to toggle the other plugins to be off first.
+        if (isRadioButtonGroup(group->getType())) {
+            for (const auto& otherPlugin : group->getPlugins()) {
+                if (otherPlugin != plugin && otherPlugin->isSelected()) {
+                    std::cout << "Disabling " << otherPlugin->getName() << " because we're enabling " << plugin->getName() << std::endl;
+                    otherPlugin->setSelected(false);
+                    setFlagForPluginState(otherPlugin, false);
+                }
             }
         }
-    }
-
-    if (mInitialized) {
         mActivePlugin = plugin;
         updateVisibleSteps();
     }

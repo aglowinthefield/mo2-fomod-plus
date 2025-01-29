@@ -116,6 +116,7 @@ void FomodInstallerWindow::updateButtons() const
 
 void FomodInstallerWindow::setupUi()
 {
+    setWindowFlags(Qt::Window);  // Allows OS-controlled resizing, including snapping
     setMinimumSize(UiConstants::WINDOW_MIN_WIDTH, UiConstants::WINDOW_MIN_HEIGHT);
     setWindowTitle(mModName);
     setWindowModality(Qt::NonModal); // To allow scrolling modlist without closing the window

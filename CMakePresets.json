@@ -56,7 +56,7 @@
         },
         "LIBBSARCH_ROOT": {
           "type": "PATH",
-          "value": "${sourceDir}/../../libbsarch-0.0.9-release-x64"
+          "value": "${sourceDir}/../../libbsarch-0.0.12-release-x64"
         },
         "BOOST_DI_ROOT": {
           "type": "PATH",
