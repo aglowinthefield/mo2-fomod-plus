@@ -233,6 +233,18 @@ bool PluginList::deserialize(pugi::xml_node& node)
 {
     deserializeList(node, "plugin", plugins);
     order = XmlHelper::getOrderType(node.attribute("order").as_string());
+
+    // Sort the plugins based on the specified order
+    std::ranges::sort(plugins, [this](const Plugin& a, const Plugin& b) {
+        if (order == OrderTypeEnum::Ascending) {
+            return a.name < b.name;
+        }
+        if (order == OrderTypeEnum::Descending) {
+            return a.name > b.name;
+        }
+        return false; // Default case, no sorting
+    });
+
     return true;
 }
 
@@ -249,6 +261,17 @@ bool GroupList::deserialize(pugi::xml_node& node)
 {
     deserializeList(node, "group", groups);
     order = XmlHelper::getOrderType(node.attribute("order").as_string());
+
+    // Sort the groups based on the specified order
+    std::ranges::sort(groups, [this](const Group& a, const Group& b) {
+        if (order == OrderTypeEnum::Ascending) {
+            return a.name < b.name;
+        }
+        if (order == OrderTypeEnum::Descending) {
+            return a.name > b.name;
+        }
+        return false; // Default case, no sorting
+    });
     return true;
 }
 

@@ -173,6 +173,7 @@ void FomodViewModel::createStepViewModels()
             }
             auto groupViewModel = std::make_shared<GroupViewModel>(std::make_shared<Group>(group), pluginViewModels);
             groupViewModels.emplace_back(groupViewModel);
+
         }
         auto stepViewModel = std::make_shared<StepViewModel>(std::make_shared<InstallStep>(installStep),
             std::move(groupViewModels));
@@ -181,6 +182,7 @@ void FomodViewModel::createStepViewModels()
     // TODO Sort the view models here, maybe
     mSteps = std::move(stepViewModels);
 }
+
 
 void FomodViewModel::setFlagForPluginState(const std::shared_ptr<PluginViewModel>& plugin, const bool selected) const
 {
