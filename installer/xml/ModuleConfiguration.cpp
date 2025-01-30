@@ -90,14 +90,19 @@ bool CompositeDependency::deserialize(pugi::xml_node& node)
 {
 
     // this could EITHER have a dependencies child or the dependencies are here.
+    // turns out they could have both.
     pugi::xml_node possibleNode = node;
-    if (node.child("dependencies")) {
+
+    // If the dependencies are all right inside, just use the root node as the dependency base.
+    // This looks hacky but accommodates both _nested_ dependencies for plugins, and extremely simple ones for step visibility.
+    if (node.child("dependencies") && !node.child("fileDependency") && !node.child("flagDependency") &&!node.child("gameDependency")) {
         possibleNode = node.child("dependencies");
     }
 
     deserializeList(possibleNode, "fileDependency", fileDependencies);
     deserializeList(possibleNode, "flagDependency", flagDependencies);
     deserializeList(possibleNode, "gameDependency", gameDependencies);
+    deserializeList(possibleNode, "dependencies", nestedDependencies);
 
     operatorType = OperatorTypeEnum::AND; // safest default.
 
@@ -105,11 +110,7 @@ bool CompositeDependency::deserialize(pugi::xml_node& node)
         operatorType = OperatorTypeEnum::OR;
     }
 
-    totalDependencies = static_cast<int>(fileDependencies.size()
-        + flagDependencies.size()
-        + gameDependencies.size()
-    );
-
+    totalDependencies = static_cast<int>(fileDependencies.size() + flagDependencies.size() + gameDependencies.size());
     return true;
 }
 

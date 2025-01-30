@@ -89,8 +89,7 @@ void FomodViewModel::createNonePluginForGroup(const std::shared_ptr<GroupViewMod
     const auto nonePlugin           = std::make_shared<Plugin>();
     nonePlugin->name                = "None";
     nonePlugin->typeDescriptor.type = PluginTypeEnum::Recommended;
-    // If we're making this, it should be selected. Maybe. Maybe we just evaluate conditions first.
-    const auto nonePluginViewModel = std::make_shared<PluginViewModel>(nonePlugin, false, true);
+    const auto nonePluginViewModel  = std::make_shared<PluginViewModel>(nonePlugin, false, true);
     group->plugins.emplace_back(nonePluginViewModel);
     togglePlugin(group, nonePluginViewModel, true);
 }
@@ -102,15 +101,12 @@ void FomodViewModel::processPlugin(const std::shared_ptr<GroupViewModel>& groupV
     if (typeDescriptor == PluginTypeEnum::Recommended) {
         pluginViewModel->setEnabled(true);
         togglePlugin(groupViewModel, pluginViewModel, true);
-        std::cout << "Plugin is recommended: [" << pluginViewModel->getName() << "]" << std::endl;
     }
     if (typeDescriptor == PluginTypeEnum::Required) {
         pluginViewModel->setEnabled(false);
         togglePlugin(groupViewModel, pluginViewModel, true);
-        std::cout << "Plugin is required: [" << pluginViewModel->getName() << "]" << std::endl;
     }
     if (typeDescriptor == PluginTypeEnum::NotUsable) {
-        std::cout << "Plugin is not usable: [" << pluginViewModel->getName() << "]" << std::endl;
         pluginViewModel->setEnabled(false);
         togglePlugin(groupViewModel, pluginViewModel, false);
     }
@@ -130,14 +126,17 @@ void FomodViewModel::enforceGroupConstraints() const
 
             // Select the first plugin that isn't NotUsable
             for (const auto& plugin : groupViewModel->plugins) {
-                if (mConditionTester.getPluginTypeDescriptorState(plugin->getPlugin(), mFlags) != PluginTypeEnum::NotUsable) {
+                if (mConditionTester.getPluginTypeDescriptorState(plugin->getPlugin(), mFlags) !=
+                    PluginTypeEnum::NotUsable) {
                     togglePlugin(groupViewModel, plugin, true);
                     break;
                 }
             }
 
             // My debugging function was wrong here at first. We really shouldn't see this logged now.
-            if (std::ranges::all_of(groupViewModel->plugins, [](const auto& plugin) { return !plugin->isSelected(); })) {
+            if (std::ranges::all_of(groupViewModel->plugins, [](const auto& plugin) {
+                return !plugin->isSelected();
+            })) {
                 std::cerr << "SelectExactlyOne had no selectable members! Please debug this." << std::endl;
             }
         }
@@ -209,7 +208,8 @@ void FomodViewModel::togglePlugin(const std::shared_ptr<GroupViewModel>& group,
         if (isRadioButtonGroup(group->getType())) {
             for (const auto& otherPlugin : group->getPlugins()) {
                 if (otherPlugin != plugin && otherPlugin->isSelected()) {
-                    std::cout << "Disabling " << otherPlugin->getName() << " because we're enabling " << plugin->getName() << std::endl;
+                    std::cout << "Disabling " << otherPlugin->getName() << " because we're enabling " << plugin->
+                        getName() << std::endl;
                     otherPlugin->setSelected(false);
                     setFlagForPluginState(otherPlugin, false);
                 }

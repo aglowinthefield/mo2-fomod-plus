@@ -32,6 +32,7 @@ add_executable(runTests
         test_stringutil.cpp
         moduleconf/test_moduleconf_citytrees.cpp
         moduleconf/test_moduleconf_bos.cpp
+        moduleconf/test_moduleconf_embers.cpp
 )
 
 target_include_directories(runTests PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../share)

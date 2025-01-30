@@ -110,6 +110,7 @@ public:
     std::vector<FileDependency> fileDependencies;
     std::vector<FlagDependency> flagDependencies;
     std::vector<GameDependency> gameDependencies;
+    std::vector<CompositeDependency> nestedDependencies;
     OperatorTypeEnum operatorType = OperatorTypeEnum::AND; // safest default.
     int totalDependencies         = 0;
 

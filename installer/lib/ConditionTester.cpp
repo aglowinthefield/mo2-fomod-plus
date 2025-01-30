@@ -13,6 +13,7 @@ bool ConditionTester::testCompositeDependency(const std::shared_ptr<FlagMap>& fl
     const auto fileDependencies   = compositeDependency.fileDependencies;
     const auto flagDependencies   = compositeDependency.flagDependencies;
     const auto gameDependencies   = compositeDependency.gameDependencies;
+    const auto nestedDependencies = compositeDependency.nestedDependencies;
     const auto globalOperatorType = compositeDependency.operatorType;
 
     // For the globalOperatorType
@@ -27,6 +28,9 @@ bool ConditionTester::testCompositeDependency(const std::shared_ptr<FlagMap>& fl
     }
     for (const auto& gameDependency : gameDependencies) {
         results.emplace_back(testGameDependency(gameDependency));
+    }
+    for (const auto& nestedDependency : nestedDependencies) {
+        results.emplace_back(testCompositeDependency(flags, nestedDependency));
     }
 
     if (globalOperatorType == OperatorTypeEnum::AND) {

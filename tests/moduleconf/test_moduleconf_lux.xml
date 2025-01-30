@@ -9,9 +9,7 @@
                 <group name="4thUnknown" type="SelectAny">
                     <plugins order="Explicit">
                         <plugin name="Fort Windpoint">
-                            <description>Compatibility patch for Fort Windpoint (Credits to AgentW) (ESPFE) Fixed
-                                version by Xtudo is required.
-                            </description>
+                            <description>Compatibility patch for Fort Windpoint (Credits to AgentW) (ESPFE) Fixed version by Xtudo is required.</description>
                             <files>
                                 <file source="00 Data\Lux - Fort Windpoint.esp" destination="Lux - Fort Windpoint.esp"
                                       priority="0"/>
