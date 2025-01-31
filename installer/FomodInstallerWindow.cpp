@@ -68,12 +68,33 @@ void FomodInstallerWindow::onNextClicked()
     }
 }
 
+void FomodInstallerWindow::updateCheckboxStates() const
+{
+    for (const auto& step : mViewModel->getSteps()) {
+        for (const auto& group : step->getGroups()) {
+            for (const auto& plugin : group->getPlugins()) {
+                // Find the corresponding checkbox and update its state
+                for (auto* checkbox : findChildren<QCheckBox*>()) {
+                    if (checkbox->text().toStdString() == plugin->getName()) {
+                        checkbox->blockSignals(true);
+                        checkbox->setChecked(plugin->isSelected());
+                        checkbox->setEnabled(plugin->isEnabled());
+                        checkbox->blockSignals(false);
+                    }
+                }
+            }
+        }
+    }
+}
+
 void FomodInstallerWindow::onPluginToggled(const bool selected, const std::shared_ptr<GroupViewModel>& group,
     const std::shared_ptr<PluginViewModel>& plugin) const
 {
-    std::cout << "Selected? " << selected << std::endl;
+    std::cout << "onPluginToggled called with " << plugin->getName() << " in " << group->getName() << ": " << selected
+        << std::endl;
     mViewModel->togglePlugin(group, plugin, selected);
     updateButtons();
+    updateCheckboxStates();
 }
 
 void FomodInstallerWindow::onPluginHovered(const std::shared_ptr<PluginViewModel>& plugin) const
@@ -116,7 +137,7 @@ void FomodInstallerWindow::updateButtons() const
 
 void FomodInstallerWindow::setupUi()
 {
-    setWindowFlags(Qt::Window);  // Allows OS-controlled resizing, including snapping
+    setWindowFlags(Qt::Window); // Allows OS-controlled resizing, including snapping
     setMinimumSize(UiConstants::WINDOW_MIN_WIDTH, UiConstants::WINDOW_MIN_HEIGHT);
     setWindowTitle(mModName);
     setWindowModality(Qt::NonModal); // To allow scrolling modlist without closing the window
@@ -311,7 +332,8 @@ QWidget* FomodInstallerWindow::createLeftPane()
     mImageLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     connect(mImageLabel, &ScaleLabel::clicked, this, [this] {
-        const auto viewer = new FomodImageViewer(this, mFomodPath, mViewModel->getActiveStep(), mViewModel->getActivePlugin());
+        const auto viewer = new FomodImageViewer(this, mFomodPath, mViewModel->getActiveStep(),
+            mViewModel->getActivePlugin());
         viewer->showMaximized();
         // viewer->show();
     });
@@ -388,10 +410,13 @@ QRadioButton* FomodInstallerWindow::createPluginRadioButton(const std::shared_pt
     radioButton->installEventFilter(hoverFilter);
     connect(hoverFilter, &HoverEventFilter::hovered, this, &FomodInstallerWindow::onPluginHovered);
 
+    radioButton->blockSignals(true);
     radioButton->setEnabled(plugin->isEnabled());
     radioButton->setChecked(plugin->isSelected());
+    radioButton->blockSignals(false);
     // Bind to model function
     connect(radioButton, &QRadioButton::toggled, this, [this, group, plugin](const bool checked) {
+        std::cout << "Received toggled signal for radio button" << std::endl;
         onPluginToggled(checked, group, plugin);
     });
 
@@ -408,9 +433,12 @@ QCheckBox* FomodInstallerWindow::createPluginCheckBox(const std::shared_ptr<Plug
     checkBox->installEventFilter(hoverFilter);
     connect(hoverFilter, &HoverEventFilter::hovered, this, &FomodInstallerWindow::onPluginHovered);
 
+    checkBox->blockSignals(true);
     checkBox->setEnabled(plugin->isEnabled());
     checkBox->setChecked(plugin->isSelected());
+    checkBox->blockSignals(false);
     connect(checkBox, &QCheckBox::stateChanged, this, [this, group, plugin](const int state) {
+        std::cout << "Received toggled signal for checkbox" << std::endl;
         onPluginToggled(state == Qt::Checked, group, plugin);
     });
     return checkBox;

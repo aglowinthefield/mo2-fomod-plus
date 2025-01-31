@@ -58,6 +58,8 @@ public:
 private slots:
     void onNextClicked();
 
+    void updateCheckboxStates() const;
+
     void onPluginToggled(bool selected, const std::shared_ptr<GroupViewModel>& group, const std::shared_ptr<PluginViewModel>& plugin) const;
 
     void onPluginHovered(const std::shared_ptr<PluginViewModel>& plugin) const;

@@ -74,7 +74,29 @@ enum class PluginTypeEnum {
     CouldBeUsable
 };
 
-// TODO Dont use this, just use the enum directly .
+inline std::ostream& operator<<(std::ostream& os, const PluginTypeEnum& type)
+{
+    switch (type) {
+    case PluginTypeEnum::Recommended:
+        os << "Recommended";
+        break;
+    case PluginTypeEnum::Required:
+        os << "Required";
+        break;
+    case PluginTypeEnum::Optional:
+        os << "Optional";
+        break;
+    case PluginTypeEnum::NotUsable:
+        os <<"NotUsable";
+        break;
+    case PluginTypeEnum::CouldBeUsable:
+        os << "CouldBeUsable";
+        break;
+    default: ;
+    }
+    return os;
+}
+
 class PluginType final : public XmlDeserializable {
 public:
     PluginTypeEnum name = PluginTypeEnum::Optional; // sane default

@@ -103,8 +103,9 @@ PluginTypeEnum ConditionTester::getPluginTypeDescriptorState(const std::shared_p
 
     // We will return the 'winning' type or the default. If multiple conditions are met,
     // ...well, I'm not sure.
-    for (const auto& dependencyType = plugin->typeDescriptor.dependencyType; const auto& pattern : dependencyType.
-         patterns.patterns) {
+    // ReSharper disable once CppTooWideScopeInitStatement
+    const auto& dependencyType = plugin->typeDescriptor.dependencyType;
+    for ( const auto& pattern : dependencyType. patterns.patterns) {
         if (testCompositeDependency(flags, pattern.dependencies)) {
             return pattern.type;
         }

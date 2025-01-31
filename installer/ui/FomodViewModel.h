@@ -135,6 +135,15 @@ public:
         std::unique_ptr<ModuleConfiguration> fomodFile,
         std::unique_ptr<FomodInfoFile> infoFile);
 
+    void forEachGroup(
+        const std::function<void(const std::shared_ptr<GroupViewModel>&)> &callback)
+    const;
+
+    void forEachPlugin(
+        const std::function<void(const std::shared_ptr<GroupViewModel>&, const std::shared_ptr<PluginViewModel>&)>&
+        callback)
+    const;
+
     [[nodiscard]] const std::shared_ptr<PluginViewModel>& getFirstPluginForActiveStep() const;
 
     // Steps
@@ -189,14 +198,18 @@ private:
 
     void setupGroups() const;
 
-    void processPluginConditions() const;
-
     void createNonePluginForGroup(const std::shared_ptr<GroupViewModel>& group) const;
 
     void processPlugin(const std::shared_ptr<GroupViewModel>& groupViewModel,
         const std::shared_ptr<PluginViewModel>& pluginViewModel) const;
 
+    void enforceRadioGroupConstraints(const std::shared_ptr<GroupViewModel>& groupViewModel) const;
+
+    void enforceSelectAllConstraint(const std::shared_ptr<GroupViewModel>& groupViewModel) const;
+
     void enforceGroupConstraints() const;
+
+    void processPluginConditions() const;
 
 
     // Indices
