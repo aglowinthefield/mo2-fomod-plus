@@ -80,8 +80,8 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
     if (const QDialog::DialogCode result = showInstallerWindow(window); result == QDialog::Accepted) {
         // modname was updated in window
         const std::shared_ptr<IFileTree> installTree = window->getFileInstaller()->install();
-        tree                                         = installTree;
-        mFomodJson                                   = std::make_shared<nlohmann::json>(window->getFileInstaller()->generateFomodJson());
+        tree = installTree;
+        mFomodJson = std::make_shared<nlohmann::json>(window->getFileInstaller()->generateFomodJson());
 
         return RESULT_SUCCESS;
     }
@@ -118,25 +118,36 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> >
         );
 
     // Extract files first.
-    vector toExtract = { infoXML, moduleConfig };
+    vector<std::shared_ptr<const FileTreeEntry> > toExtract = {};
+    if (moduleConfig) {
+        toExtract.push_back(moduleConfig);
+    } else {
+        log::error("FomodPlusInstaller::install - error parsing moduleConfig.xml: Not Present");
+        return { nullptr, nullptr };
+    }
+    if (infoXML) {
+        toExtract.push_back(infoXML);
+    }
     appendImageFiles(toExtract, tree);
     const auto paths = manager()->extractFiles(toExtract);
 
-    auto infoFile = std::make_unique<FomodInfoFile>();
-    try {
-        infoFile->deserialize(paths.at(0).toStdString());
-    } catch (XmlParseException& e) {
-        log::error("FomodPlusInstaller::install - error parsing info.xml: {}", e.what());
-        return { nullptr, nullptr };
-    }
-
     auto moduleConfiguration = std::make_unique<ModuleConfiguration>();
     try {
-        moduleConfiguration->deserialize(paths.at(1).toStdString());
+        moduleConfiguration->deserialize(paths.at(0).toStdString());
     } catch (XmlParseException& e) {
         log::error("FomodPlusInstaller::install - error parsing moduleConfig.xml: {}", e.what());
         return { nullptr, nullptr };
     }
+
+    auto infoFile = std::make_unique<FomodInfoFile>();
+    if (infoXML) {
+        try {
+            infoFile->deserialize(paths.at(1).toStdString());
+        } catch (XmlParseException& e) {
+            log::error("FomodPlusInstaller::install - error parsing info.xml: {}", e.what());
+        }
+    }
+
     return { std::move(infoFile), std::move(moduleConfiguration) };
 }
 
