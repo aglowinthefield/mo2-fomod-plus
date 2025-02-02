@@ -2,10 +2,10 @@
 
 #include "ui/FomodImageViewer.h"
 
-#include <log.h>
 #include "ui/ScaleLabel.h"
 #include "ui/UIHelper.h"
 #include "xml/ModuleConfiguration.h"
+#include <log.h>
 
 #include <QButtonGroup>
 #include <QCheckBox>
@@ -15,10 +15,11 @@
 #include <QLabel>
 #include <QRadioButton>
 #include <QScrollArea>
+#include <QSettings>
 #include <QSizePolicy>
+#include <QSplitter>
 #include <QTextEdit>
 #include <QVBoxLayout>
-#include <QSplitter>
 #include <utility>
 
 #include "ui/FomodViewModel.h"
@@ -47,6 +48,9 @@ FomodInstallerWindow::FomodInstallerWindow(
 {
     setupUi();
 
+    const QString cwd = QDir::currentPath();
+    std::cout << "Running DLL from " << cwd.toStdString() << std::endl;
+
     mInstallStepStack = new QStackedWidget(this);
     updateInstallStepStack();
 
@@ -54,6 +58,27 @@ FomodInstallerWindow::FomodInstallerWindow(
     setLayout(containerLayout);
 
     updateButtons();
+    restoreGeometryAndState();
+}
+
+void FomodInstallerWindow::closeEvent(QCloseEvent* event)
+{
+    saveGeometryAndState();
+    QDialog::closeEvent(event);
+}
+
+void FomodInstallerWindow::saveGeometryAndState() const
+{
+    const auto cwd = QDir::currentPath();
+    QSettings settings(cwd + "/fomod-plus-settings.ini", QSettings::IniFormat);
+    settings.setValue("windowGeometry", saveGeometry());
+}
+
+void FomodInstallerWindow::restoreGeometryAndState()
+{
+    const auto cwd = QDir::currentPath();
+    const QSettings settings(cwd + "/fomod-plus-settings.ini", QSettings::IniFormat);
+    restoreGeometry(settings.value("windowGeometry").toByteArray());
 }
 
 void FomodInstallerWindow::onNextClicked()
@@ -113,6 +138,8 @@ void FomodInstallerWindow::onBackClicked() const
 
 void FomodInstallerWindow::onInstallClicked()
 {
+    saveGeometryAndState();
+
     mModName.update(mModNameInput->currentText(), GUESS_USER);
     mViewModel->preinstall(mTree, mFomodPath);
     // now the installer is available in the outer scope

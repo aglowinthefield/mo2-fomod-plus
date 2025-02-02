@@ -46,6 +46,12 @@ public:
         const std::shared_ptr<FomodViewModel>& viewModel,
         QWidget* parent = nullptr);
 
+    void closeEvent(QCloseEvent* event) override;
+
+    void saveGeometryAndState() const;
+
+    void restoreGeometryAndState();
+
 
     // So FomodPlusInstaller can check if the user wants to manually install
     [[nodiscard]] bool isManualInstall() const
