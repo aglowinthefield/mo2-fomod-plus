@@ -5,6 +5,7 @@
 A total rewrite of the FOMOD installer. Supports all features of the original FOMOD installer, and adds a few new ones.
 
 **Features**
+- FOMOD window keeps the size you choose between installs.
 - Filter by mods installed via FOMOD.
 
 ![filter](doc/filter.png)
