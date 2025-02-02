@@ -86,6 +86,22 @@ void FomodViewModel::forEachPlugin(
     }
 }
 
+void FomodViewModel::forEachFuturePlugin(
+    const std::function<void(const std::shared_ptr<GroupViewModel>&, const std::shared_ptr<PluginViewModel>&)>&
+    callback) const
+{
+    for (int i = 0; i < mSteps.size(); ++i) {
+        if (i <= mCurrentStepIndex) {
+            continue;
+        }
+        for (const auto& groupViewModel : mSteps[i]->getGroups()) {
+            for (const auto& pluginViewModel : groupViewModel->getPlugins()) {
+                callback(groupViewModel, pluginViewModel);
+            }
+        }
+    }
+}
+
 bool isRadioButtonGroup(const GroupTypeEnum groupType)
 {
     return groupType == SelectExactlyOne || groupType == SelectAtMostOne;
@@ -125,16 +141,15 @@ void FomodViewModel::processPlugin(const std::shared_ptr<GroupViewModel>& groupV
     const auto typeDescriptor = mConditionTester.getPluginTypeDescriptorState(pluginViewModel->plugin, mFlags);
     std::cout << "Processing plugin " << pluginViewModel->getName() << " with type " << typeDescriptor << std::endl;
 
-    const bool isOnlyPlugin = groupViewModel->getPlugins().size() == 1 && groupViewModel->getType() == SelectExactlyOne;
+    const bool isOnlyPlugin = groupViewModel->getPlugins().size() == 1
+        && (groupViewModel->getType() == SelectExactlyOne || groupViewModel->getType() == SelectAtLeastOne);
 
     switch (typeDescriptor) {
     case PluginTypeEnum::Recommended:
         if (!pluginViewModel->isEnabled()) {
             pluginViewModel->setEnabled(true);
         }
-        if (!mInitialized) {
-            togglePlugin(groupViewModel, pluginViewModel, true);
-        }
+        togglePlugin(groupViewModel, pluginViewModel, true);
         break;
     case PluginTypeEnum::Required:
         if (pluginViewModel->isEnabled()) {
@@ -220,19 +235,42 @@ void FomodViewModel::enforceSelectAllConstraint(const std::shared_ptr<GroupViewM
 
 }
 
+void FomodViewModel::enforceSelectAtLeastOneConstraint(const std::shared_ptr<GroupViewModel>& groupViewModel) const
+{
+    if (groupViewModel->getType() != SelectAtLeastOne) {
+        return;
+    }
+
+    if (groupViewModel->getPlugins().size() == 1) {
+        const auto& plugin = groupViewModel->getPlugins().at(0);
+        if (mConditionTester.getPluginTypeDescriptorState(plugin->getPlugin(), mFlags) != PluginTypeEnum::NotUsable) {
+            togglePlugin(groupViewModel, plugin, true);
+            plugin->setEnabled(false);
+        }
+    }
+}
+
 void FomodViewModel::enforceGroupConstraints() const
 {
     forEachGroup([this](const auto& groupViewModel) {
         enforceRadioGroupConstraints(groupViewModel);
         enforceSelectAllConstraint(groupViewModel);
+        enforceSelectAtLeastOneConstraint(groupViewModel);
     });
 }
 
 void FomodViewModel::processPluginConditions() const
 {
-    forEachPlugin([this](const auto& groupViewModel, const auto& pluginViewModel) {
-        processPlugin(groupViewModel, pluginViewModel);
-    });
+    // We only want to update plugins that haven't been seen yet. Otherwise we could undo manual selections by the user.
+    if (mInitialized) {
+        forEachFuturePlugin([this](const auto& groupViewModel, const auto& pluginViewModel) {
+            processPlugin(groupViewModel, pluginViewModel);
+        });
+    } else {
+        forEachPlugin([this](const auto& groupViewModel, const auto& pluginViewModel) {
+            processPlugin(groupViewModel, pluginViewModel);
+        });
+    }
 }
 
 void FomodViewModel::createStepViewModels()
@@ -278,6 +316,9 @@ void FomodViewModel::setFlagForPluginState(const std::shared_ptr<PluginViewModel
 void FomodViewModel::togglePlugin(const std::shared_ptr<GroupViewModel>&,
     const std::shared_ptr<PluginViewModel>& plugin, const bool selected) const
 {
+    if (plugin->isSelected() == selected) {
+        return;
+    }
     plugin->setSelected(selected);
     setFlagForPluginState(plugin, selected);
 

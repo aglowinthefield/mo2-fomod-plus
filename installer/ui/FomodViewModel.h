@@ -144,6 +144,11 @@ public:
         callback)
     const;
 
+    void forEachFuturePlugin(
+        const std::function<void(const std::shared_ptr<GroupViewModel>&, const std::shared_ptr<PluginViewModel>&)>&
+        callback)
+    const;
+
     [[nodiscard]] const std::shared_ptr<PluginViewModel>& getFirstPluginForActiveStep() const;
 
     // Steps
@@ -206,6 +211,8 @@ private:
     void enforceRadioGroupConstraints(const std::shared_ptr<GroupViewModel>& groupViewModel) const;
 
     void enforceSelectAllConstraint(const std::shared_ptr<GroupViewModel>& groupViewModel) const;
+
+    void enforceSelectAtLeastOneConstraint(const std::shared_ptr<GroupViewModel>& groupViewModel) const;
 
     void enforceGroupConstraints() const;
 

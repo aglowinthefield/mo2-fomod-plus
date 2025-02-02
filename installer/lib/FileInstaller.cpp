@@ -28,6 +28,8 @@ std::shared_ptr<IFileTree> FileInstaller::install() const
     const std::shared_ptr<IFileTree> installTree = mFileTree->createOrphanTree();
 
     for (const auto& file : filesToInstall) {
+
+        // TODO If it's a folder, copy the contents of the folder, not the folder itself.
         const auto sourcePath = getQualifiedFilePath(file.source);
         const auto sourceNode = mFileTree->find(QString::fromStdString(sourcePath));
         if (sourceNode == nullptr) {
@@ -35,7 +37,15 @@ std::shared_ptr<IFileTree> FileInstaller::install() const
             continue;
         }
         const auto targetPath = QString::fromStdString(file.destination);
-        installTree->copy(sourceNode, targetPath, IFileTree::InsertPolicy::MERGE);
+        if (sourceNode->isDir()) {
+            const auto& tree = sourceNode->astree();
+            for (auto it = tree->begin(); it != tree->end(); ++it) {
+                installTree->copy(*it, targetPath, IFileTree::InsertPolicy::MERGE);
+            }
+
+        } else {
+            installTree->copy(sourceNode, targetPath, IFileTree::InsertPolicy::MERGE);
+        }
     }
 
     // This file will be written by the InstallationManager later.
