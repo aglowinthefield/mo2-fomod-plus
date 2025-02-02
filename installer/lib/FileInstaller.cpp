@@ -29,7 +29,6 @@ std::shared_ptr<IFileTree> FileInstaller::install() const
 
     for (const auto& file : filesToInstall) {
 
-        // TODO If it's a folder, copy the contents of the folder, not the folder itself.
         const auto sourcePath = getQualifiedFilePath(file.source);
         const auto sourceNode = mFileTree->find(QString::fromStdString(sourcePath));
         if (sourceNode == nullptr) {
@@ -37,12 +36,13 @@ std::shared_ptr<IFileTree> FileInstaller::install() const
             continue;
         }
         const auto targetPath = QString::fromStdString(file.destination);
+
+        // If it's a folder, copy the contents of the folder, not the folder itself.
         if (sourceNode->isDir()) {
             const auto& tree = sourceNode->astree();
             for (auto it = tree->begin(); it != tree->end(); ++it) {
                 installTree->copy(*it, targetPath, IFileTree::InsertPolicy::MERGE);
             }
-
         } else {
             installTree->copy(sourceNode, targetPath, IFileTree::InsertPolicy::MERGE);
         }
@@ -136,6 +136,12 @@ std::vector<File> FileInstaller::collectFilesToInstall() const
             }
         }
     }
+
+    // Sort by priority. I don't think we need to do anything about skipping lower priority mods, but i'm not sure.
+
+    std::ranges::sort(filesToInstall, [](const auto& a, const auto& b) {
+        return a.priority < b.priority;
+    });
 
     return filesToInstall;
 }
