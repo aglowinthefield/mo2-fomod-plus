@@ -9,6 +9,8 @@ A total rewrite of the FOMOD installer. Supports all features of the original FO
 - Filter by mods installed via FOMOD. [Pic](doc/filter.png)
 - A Scanner plugin to retroactively mark mods as FOMOD-installed where possible. [Pic](doc/scanner-menu.png)
 - A nice wizard hat in the content column. [Pic](doc/content.png)
+- Optimized image viewer
+- Window sizes and splitter positions persist between mod installs.
 
 ## Using
 1. Unzip the latest release into your MO2 plugins directory.
@@ -19,7 +21,6 @@ A total rewrite of the FOMOD installer. Supports all features of the original FO
 Since this is a WIP and barely in alpha stages, expect some bugs as things progress. 
 Some of my plans, roughly ordered, include:
 
-- [ ] Better UI for image viewing, to match existing.
 - [ ] Searchable installation notes (manual input and automatic)
 - [ ] Selecting previously selected manual options where possible.
 - [ ] Introduce new optional features to the FOMOD XML schema to allow more fun~.
