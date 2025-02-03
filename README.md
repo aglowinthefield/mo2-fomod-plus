@@ -6,17 +6,9 @@ A total rewrite of the FOMOD installer. Supports all features of the original FO
 
 **Features**
 - FOMOD window keeps the size you choose between installs.
-- Filter by mods installed via FOMOD.
-
-![filter](doc/filter.png)
-
-- A Scanner plugin to retroactively mark mods as FOMOD-installed where possible.
-
-![scanner-menu](doc/scanner-menu.png)
-<img src="doc/scanner.png" height="250" width="auto">
-
-- A nice wizard hat in the content column
-![hat](doc/content.png)
+- Filter by mods installed via FOMOD. [Pic](doc/filter.png)
+- A Scanner plugin to retroactively mark mods as FOMOD-installed where possible. [Pic](doc/scanner-menu.png)
+- A nice wizard hat in the content column. [Pic](doc/content.png)
 
 ## Using
 1. Unzip the latest release into your MO2 plugins directory.
