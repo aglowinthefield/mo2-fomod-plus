@@ -47,7 +47,8 @@ public:
 
     [[nodiscard]] QList<PluginSetting> settings() const override;
 
-    EInstallResult install(GuessedValue<QString>& modName, std::shared_ptr<IFileTree>& tree, QString& version, int& nexusID) override;
+    EInstallResult install(GuessedValue<QString>& modName, std::shared_ptr<IFileTree>& tree, QString& version,
+        int& nexusID) override;
 
     void onInstallationStart(QString const& archive, bool reinstallation, IModInterface* currentMod) override;
 
@@ -57,6 +58,7 @@ private:
     IOrganizer* mOrganizer = nullptr;
     QString mFomodPath{};
     std::shared_ptr<nlohmann::json> mFomodJson{ nullptr };
+    bool mInstallerUsed{ false };
 
     /**
    * @brief Retrieve the tree entry corresponding to the fomod directory.
@@ -73,7 +75,8 @@ private:
     [[nodiscard]] std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> > parseFomodFiles(
         const shared_ptr<IFileTree>& tree);
 
-    static void appendImageFiles(vector<shared_ptr<const FileTreeEntry> >& entries, const shared_ptr<const IFileTree>& tree);
+    static void appendImageFiles(vector<shared_ptr<const FileTreeEntry> >& entries,
+        const shared_ptr<const IFileTree>& tree);
 
     void setupUiInjection() const;
 };

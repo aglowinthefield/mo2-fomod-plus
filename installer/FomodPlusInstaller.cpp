@@ -79,6 +79,7 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
 
     if (const QDialog::DialogCode result = showInstallerWindow(window); result == QDialog::Accepted) {
         // modname was updated in window
+        mInstallerUsed = true;
         const std::shared_ptr<IFileTree> installTree = window->getFileInstaller()->install();
         tree = installTree;
         mFomodJson = std::make_shared<nlohmann::json>(window->getFileInstaller()->generateFomodJson());
@@ -177,7 +178,7 @@ void FomodPlusInstaller::onInstallationEnd(const EInstallResult result, IModInte
     IPluginInstallerSimple::onInstallationEnd(result, newMod);
 
     // Update the meta.ini file with the fomod information
-    if (mFomodJson != nullptr && result == RESULT_SUCCESS && newMod != nullptr) {
+    if (mFomodJson != nullptr && result == RESULT_SUCCESS && newMod != nullptr && mInstallerUsed) {
         newMod->setPluginSetting(this->name(), "fomod", mFomodJson->dump().c_str());
     }
 }
