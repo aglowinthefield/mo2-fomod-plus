@@ -35,9 +35,21 @@ You'll want to follow all setup instructions for `mob` before proceeding.
 
 *Note: I don't have a good setup for building to DLLs within the repo at the moment.*
 
+The project is divided into two targets, `fomod_plus_installer` and `fomod_plus_scanner`. Hopefully the 
+distinction is self-explanatory.
+
+<details>
+  <summary>Technical Reasons</summary>
+
+  MO2 plugin architecture doesn't support providing multiple C++ plugins in one target. Even if it could,
+  `FomodPlusScanner` implements `IPluginTool` which conflicts in inheritence with `IPluginInstaller`. 
+
+  Sorry for the headache!
+</details>
+
 ## Debugging
 To debug:
-1. Make sure you are debugging the `fomod_plus` target.
+1. Make sure you are debugging the `fomod_plus_installer` target (unless you're debugging the scanner).
 2. Set your target executable to the MO2 executable inside `<mobDir>/install/bin`.
 
 *NOTE* Inside `CMakeLists.txt` you'll see a pair of lines like this:
