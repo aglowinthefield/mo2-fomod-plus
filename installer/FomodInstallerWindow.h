@@ -44,6 +44,7 @@ public:
         const std::shared_ptr<IFileTree>& tree,
         QString fomodPath,
         const std::shared_ptr<FomodViewModel>& viewModel,
+        const nlohmann::json& fomodJson,
         QWidget* parent = nullptr);
 
     void closeEvent(QCloseEvent* event) override;
@@ -97,6 +98,7 @@ private:
 
     // Meta
     bool mIsManualInstall{};
+    nlohmann::json mFomodJson;
 
     // Buttons
     QPushButton* mNextInstallButton{};
@@ -118,6 +120,8 @@ private:
     void updateInstallStepStack();
 
     void updateDisplayForActivePlugin() const;
+
+    void stylePreviouslySelectedOptions() const;
 
     [[nodiscard]] QBoxLayout* createContainerLayout();
 

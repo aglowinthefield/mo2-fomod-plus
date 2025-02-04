@@ -47,6 +47,32 @@ QList<PluginSetting> FomodPlusInstaller::settings() const
     return {};
 }
 
+nlohmann::json FomodPlusInstaller::getExistingFomodJson(const GuessedValue<QString>& modName) const
+{
+    auto existingMod = mOrganizer->modList()->getMod(modName);
+    if (existingMod == nullptr) {
+        for (auto variant : modName.variants()) {
+            existingMod = mOrganizer->modList()->getMod(variant);
+            if (existingMod != nullptr) {
+                break;
+            }
+        }
+    }
+    if (existingMod == nullptr) {
+        return {};
+    }
+    const auto fomodJson = existingMod->pluginSetting(name(), "fomod", 0);
+    if (fomodJson == 0) {
+        return {};
+    }
+    try {
+        return nlohmann::json::parse(fomodJson.toString().toStdString());
+    } catch ([[maybe_unused]] Exception e) {
+        log::error("Could not parse existing JSON, even though it appears to exist. Returning empty JSON.");
+        return {};
+    }
+}
+
 /**
  *
  * @param modName
@@ -75,7 +101,8 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
 
     // create ui & pass xml classes to ui
     auto fomodViewModel = FomodViewModel::create(mOrganizer, std::move(moduleConfigFile), std::move(infoFile));
-    const auto window   = std::make_shared<FomodInstallerWindow>(this, modName, tree, mFomodPath, fomodViewModel);
+    auto json           = getExistingFomodJson(modName);
+    const auto window   = std::make_shared<FomodInstallerWindow>(this, modName, tree, mFomodPath, fomodViewModel, json);
 
     if (const QDialog::DialogCode result = showInstallerWindow(window); result == QDialog::Accepted) {
         // modname was updated in window
