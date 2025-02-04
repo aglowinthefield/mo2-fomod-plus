@@ -137,6 +137,9 @@ private:
 
     [[nodiscard]] QWidget* renderGroup(const std::shared_ptr<GroupViewModel>& group);
 
+    static QString createObjectName(const std::shared_ptr<PluginViewModel>& plugin,
+        const std::shared_ptr<GroupViewModel>& group);
+
     QRadioButton* createPluginRadioButton(const std::shared_ptr<PluginViewModel>& plugin, const std::shared_ptr<GroupViewModel>& group, QWidget* parent);
 
     QCheckBox* createPluginCheckBox(const std::shared_ptr<PluginViewModel>& plugin,
