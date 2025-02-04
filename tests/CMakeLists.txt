@@ -33,6 +33,7 @@ add_executable(runTests
         moduleconf/test_moduleconf_citytrees.cpp
         moduleconf/test_moduleconf_bos.cpp
         moduleconf/test_moduleconf_embers.cpp
+        ../installer/lib/Logger.h
 )
 
 target_include_directories(runTests PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../share)

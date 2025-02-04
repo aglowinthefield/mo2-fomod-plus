@@ -201,8 +201,6 @@ private:
 
     void setFlagForPluginState(const std::shared_ptr<PluginViewModel>& plugin, bool selected) const;
 
-    void setupGroups() const;
-
     void createNonePluginForGroup(const std::shared_ptr<GroupViewModel>& group) const;
 
     void processPlugin(const std::shared_ptr<GroupViewModel>& groupViewModel,

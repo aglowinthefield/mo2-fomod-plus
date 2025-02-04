@@ -1,5 +1,6 @@
 ﻿#include "FomodViewModel.h"
 #include "xml/ModuleConfiguration.h"
+#include "lib/Logger.h"
 
 /*
 --------------------------------------------------------------------------------
@@ -45,7 +46,6 @@ std::shared_ptr<FomodViewModel> FomodViewModel::create(MOBase::IOrganizer* organ
         viewModel->mFlags = std::make_shared<FlagMap>();
     }
     viewModel->createStepViewModels();
-    viewModel->setupGroups();
     viewModel->enforceGroupConstraints();
     viewModel->processPluginConditions();
     viewModel->updateVisibleSteps();
@@ -117,6 +117,9 @@ void FomodViewModel::createStepViewModels()
                 pluginViewModels.emplace_back(pluginViewModel); // Assuming default values for selected and enabled
             }
             auto groupViewModel = std::make_shared<GroupViewModel>(std::make_shared<Group>(group), pluginViewModels);
+            if (groupViewModel->getType() == SelectAtMostOne && groupViewModel->getPlugins().size() > 1) {
+                createNonePluginForGroup(groupViewModel);
+            }
             groupViewModels.emplace_back(groupViewModel);
 
         }
@@ -137,23 +140,13 @@ bool isRadioButtonGroup(const GroupTypeEnum groupType)
     return groupType == SelectExactlyOne || groupType == SelectAtMostOne;
 }
 
-void FomodViewModel::setupGroups() const
-{
-    forEachGroup([this](const auto& group) {
-        if (group->getType() == SelectAtMostOne && group->getPlugins().size() > 1) {
-            createNonePluginForGroup(group);
-        }
-    });
-}
-
 void FomodViewModel::createNonePluginForGroup(const std::shared_ptr<GroupViewModel>& group) const
 {
     const auto nonePlugin           = std::make_shared<Plugin>();
     nonePlugin->name                = "None";
     nonePlugin->typeDescriptor.type = PluginTypeEnum::Optional;
-    const auto nonePluginViewModel  = std::make_shared<PluginViewModel>(nonePlugin, false, true);
+    const auto nonePluginViewModel  = std::make_shared<PluginViewModel>(nonePlugin, true, true);
     group->plugins.emplace_back(nonePluginViewModel);
-    togglePlugin(group, nonePluginViewModel, true);
 }
 
 void FomodViewModel::enforceRadioGroupConstraints(const std::shared_ptr<GroupViewModel>& groupViewModel) const
@@ -246,7 +239,7 @@ void FomodViewModel::processPlugin(const std::shared_ptr<GroupViewModel>& groupV
         return;
     }
     const auto typeDescriptor = mConditionTester.getPluginTypeDescriptorState(pluginViewModel->plugin, mFlags);
-    std::cout << "Processing plugin " << pluginViewModel->getName() << " with type " << typeDescriptor << std::endl;
+    // std::cout << "Processing plugin " << pluginViewModel->getName() << " with type " << typeDescriptor << std::endl;
 
     const bool isOnlyPlugin = groupViewModel->getPlugins().size() == 1
         && (groupViewModel->getType() == SelectExactlyOne || groupViewModel->getType() == SelectAtLeastOne);
