@@ -101,10 +101,8 @@ void FomodInstallerWindow::updateCheckboxStates() const
                 // Find the corresponding checkbox and update its state
                 for (auto* checkbox : findChildren<QCheckBox*>()) {
                     if (checkbox->text().toStdString() == plugin->getName()) {
-                        checkbox->blockSignals(true);
                         checkbox->setChecked(plugin->isSelected());
                         checkbox->setEnabled(plugin->isEnabled());
-                        checkbox->blockSignals(false);
                     }
                 }
             }
@@ -118,8 +116,10 @@ void FomodInstallerWindow::onPluginToggled(const bool selected, const std::share
     std::cout << "onPluginToggled called with " << plugin->getName() << " in " << group->getName() << ": " << selected
         << std::endl;
     mViewModel->togglePlugin(group, plugin, selected);
-    updateButtons();
     updateCheckboxStates();
+    if (mNextInstallButton != nullptr) {
+        updateButtons();
+    }
 }
 
 void FomodInstallerWindow::onPluginHovered(const std::shared_ptr<PluginViewModel>& plugin) const
@@ -362,7 +362,6 @@ QWidget* FomodInstallerWindow::createLeftPane()
         const auto viewer = new FomodImageViewer(this, mFomodPath, mViewModel->getActiveStep(),
             mViewModel->getActivePlugin());
         viewer->showMaximized();
-        // viewer->show();
     });
     layout->addWidget(mImageLabel);
 
@@ -419,7 +418,6 @@ QWidget* FomodInstallerWindow::renderGroup(const std::shared_ptr<GroupViewModel>
     case SelectExactlyOne:
     case SelectAtMostOne:
         renderSelectExactlyOne(groupBox, groupBoxLayout, group);
-    // renderRadioGroup(groupBox, groupBoxLayout, group);
         break;
     default: ;
     }
@@ -437,13 +435,11 @@ QRadioButton* FomodInstallerWindow::createPluginRadioButton(const std::shared_pt
     radioButton->installEventFilter(hoverFilter);
     connect(hoverFilter, &HoverEventFilter::hovered, this, &FomodInstallerWindow::onPluginHovered);
 
-    radioButton->blockSignals(true);
     radioButton->setEnabled(plugin->isEnabled());
     radioButton->setChecked(plugin->isSelected());
-    radioButton->blockSignals(false);
     // Bind to model function
     connect(radioButton, &QRadioButton::toggled, this, [this, group, plugin](const bool checked) {
-        std::cout << "Received toggled signal for radio button" << std::endl;
+        std::cout << "Received toggled signal for radio button: " << checked << std::endl;
         onPluginToggled(checked, group, plugin);
     });
 
@@ -460,13 +456,11 @@ QCheckBox* FomodInstallerWindow::createPluginCheckBox(const std::shared_ptr<Plug
     checkBox->installEventFilter(hoverFilter);
     connect(hoverFilter, &HoverEventFilter::hovered, this, &FomodInstallerWindow::onPluginHovered);
 
-    checkBox->blockSignals(true);
     checkBox->setEnabled(plugin->isEnabled());
     checkBox->setChecked(plugin->isSelected());
-    checkBox->blockSignals(false);
-    connect(checkBox, &QCheckBox::stateChanged, this, [this, group, plugin](const int state) {
-        std::cout << "Received toggled signal for checkbox" << std::endl;
-        onPluginToggled(state == Qt::Checked, group, plugin);
+    connect(checkBox, &QCheckBox::toggled, this, [this, group, plugin](const bool checked) {
+        std::cout << "Received toggled signal for checkbox: " << checked << std::endl;
+        onPluginToggled(checked, group, plugin);
     });
     return checkBox;
 }
@@ -486,8 +480,6 @@ void FomodInstallerWindow::renderSelectExactlyOne(QWidget* parent, QLayout* pare
 void FomodInstallerWindow::renderCheckboxGroup(QWidget* parent, QLayout* parentLayout,
     const std::shared_ptr<GroupViewModel>& group)
 {
-    // Same thing but with an extra 'None' option at the end
-    // auto* buttonGroup = new QButtonGroup(parent);
     for (const auto& plugin : group->getPlugins()) {
         auto* checkbox = createPluginCheckBox(plugin, group, parent);
         parentLayout->addWidget(checkbox);
