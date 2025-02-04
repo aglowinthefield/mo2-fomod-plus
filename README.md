@@ -5,6 +5,7 @@
 A total rewrite of the FOMOD installer. Supports all features of the original FOMOD installer, and adds a few new ones.
 
 **Features**
+- Show previously selected options. Should work even if a different mod name is chosen in the top bar.
 - Filter by mods installed via FOMOD. [Pic](doc/filter.png)
 - A Scanner plugin to retroactively mark mods as FOMOD-installed where possible. [Pic](doc/scanner-menu.png)
 - A nice wizard hat in the content column. [Pic](doc/content.png)
@@ -20,7 +21,6 @@ A total rewrite of the FOMOD installer. Supports all features of the original FO
 Since this is a WIP and barely in alpha stages, expect some bugs as things progress. 
 Some of my plans, roughly ordered, include:
 
-- [ ] Show previously selected options
 - [ ] Selecting previously selected manual options where possible.
 - [ ] Searchable installation notes (manual input and automatic)
 - [ ] Introduce new optional features to the FOMOD XML schema to allow more fun~.
