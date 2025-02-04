@@ -31,6 +31,7 @@
  * @param tree
  * @param fomodPath
  * @param viewModel
+ * @param fomodJson
  * @param parent
  */
 FomodInstallerWindow::FomodInstallerWindow(
@@ -39,20 +40,25 @@ FomodInstallerWindow::FomodInstallerWindow(
     const std::shared_ptr<IFileTree>& tree,
     QString fomodPath,
     const std::shared_ptr<FomodViewModel>& viewModel,
+    const nlohmann::json& fomodJson,
     QWidget* parent): QDialog(parent),
                       mInstaller(installer),
                       mFomodPath(std::move(fomodPath)),
                       mModName(modName),
                       mTree(tree),
-                      mViewModel(viewModel)
+                      mViewModel(viewModel),
+                      mFomodJson(fomodJson)
 {
     setupUi();
 
     const QString cwd = QDir::currentPath();
     std::cout << "Running DLL from " << cwd.toStdString() << std::endl;
+    std::cout << "Existing JSON provided: " << mFomodJson.dump(4) << std::endl;
 
     mInstallStepStack = new QStackedWidget(this);
     updateInstallStepStack();
+    stylePreviouslySelectedOptions();
+
 
     const auto containerLayout = createContainerLayout();
     setLayout(containerLayout);
@@ -99,7 +105,7 @@ void FomodInstallerWindow::updateCheckboxStates() const
         for (const auto& group : step->getGroups()) {
             for (const auto& plugin : group->getPlugins()) {
 
-                const auto name = QString::fromStdString(group->getName() + " - " + plugin->getName());
+                const auto name = createObjectName(plugin, group);
                 // Find the corresponding checkbox and update its state
                 for (auto* checkbox : findChildren<QCheckBox*>()) {
                     if (checkbox->objectName() == name) {
@@ -437,7 +443,7 @@ QWidget* FomodInstallerWindow::renderGroup(const std::shared_ptr<GroupViewModel>
 QString FomodInstallerWindow::createObjectName(const std::shared_ptr<PluginViewModel>& plugin,
     const std::shared_ptr<GroupViewModel>& group)
 {
-    return QString::fromStdString(group->getName() + " - " + plugin->getName());
+    return QString::fromStdString(group->getName() + "-" + plugin->getName());
 }
 
 QRadioButton* FomodInstallerWindow::createPluginRadioButton(const std::shared_ptr<PluginViewModel>& plugin,
@@ -528,4 +534,52 @@ void FomodInstallerWindow::updateDisplayForActivePlugin() const
         return;
     }
     mImageLabel->setScalableResource(imagePath);
+}
+
+void FomodInstallerWindow::stylePreviouslySelectedOptions() const
+{
+    if (mFomodJson.empty()) {
+        return;
+    }
+
+    const auto jsonSteps = mFomodJson["steps"];
+    // for each step in JSON, create a <group>-<plugin> string out of the { groups: [ { plugins... } ] } array
+    vector<std::string> selectedPlugins;
+
+    // TODO: Can groups have the same name within a step, or across steps? How do we account for that?
+    for (auto step : jsonSteps) {
+        for (const auto jsonGroups = step["groups"]; auto group : jsonGroups) {
+            for (const auto jsonPlugins = group["plugins"]; auto plugin : jsonPlugins) {
+                selectedPlugins.push_back(group["name"].get<std::string>() + "-" + plugin.get<std::string>());
+            }
+        }
+    }
+
+    for (auto basicString : selectedPlugins) {
+        std::cout << "Plugin to highlight: " << basicString << std::endl;
+    }
+
+    const auto checkboxes = findChildren<QCheckBox*>();
+    const auto radioButtons = findChildren<QRadioButton*>();
+    const auto stylesheet = "QCheckBox { background-color: rgba(91, 127, 152, 0.4); } "
+                            "QRadioButton { background-color: rgba(91, 127, 152, 0.4); }";
+
+    for (auto* checkbox : checkboxes) {
+        for (auto selectedPlugin : selectedPlugins) {
+            std::cout << "Checking " << checkbox->objectName().toStdString() << " against " << selectedPlugin << std::endl;
+            if (checkbox->objectName().toStdString() == selectedPlugin) {
+                checkbox->setStyleSheet(stylesheet);
+                checkbox->setToolTip("You previously selected this plugin when installing this mod.");
+            }
+        }
+    }
+    for (auto* radio : radioButtons) {
+        for (auto selectedPlugin : selectedPlugins) {
+            std::cout << "Checking " << radio->objectName().toStdString() << " against " << selectedPlugin << std::endl;
+            if (radio->objectName().toStdString() == selectedPlugin) {
+                radio->setStyleSheet(stylesheet);
+                radio->setToolTip("You previously selected this plugin when installing this mod.");
+            }
+        }
+    }
 }

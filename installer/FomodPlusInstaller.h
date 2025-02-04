@@ -47,6 +47,8 @@ public:
 
     [[nodiscard]] QList<PluginSetting> settings() const override;
 
+    nlohmann::json getExistingFomodJson(const GuessedValue<QString>& modName) const;
+
     EInstallResult install(GuessedValue<QString>& modName, std::shared_ptr<IFileTree>& tree, QString& version,
         int& nexusID) override;
 
