@@ -76,6 +76,7 @@ private slots:
         mModName.update(name, GUESS_USER);
     }
 
+    void onSelectPreviousClicked() { this->selectPreviouslySelectedOptions(); }
 
     void onBackClicked() const;
 
@@ -105,6 +106,7 @@ private:
     QPushButton* mBackButton{};
     QPushButton* mCancelButton{};
     QPushButton* mManualButton{};
+    QPushButton* mSelectPreviousButton{};
 
     void updateButtons() const;
 
@@ -121,7 +123,11 @@ private:
 
     void updateDisplayForActivePlugin() const;
 
-    void stylePreviouslySelectedOptions() const;
+    void applyFnFromJson(const std::function<void(QAbstractButton*)> &fn);
+
+    void stylePreviouslySelectedOptions();
+
+    void selectPreviouslySelectedOptions();
 
     [[nodiscard]] QBoxLayout* createContainerLayout();
 

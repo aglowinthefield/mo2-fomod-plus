@@ -44,6 +44,7 @@ bool FomodPlusInstaller::isArchiveSupported(std::shared_ptr<const IFileTree> tre
 
 QList<PluginSetting> FomodPlusInstaller::settings() const
 {
+
     return {};
 }
 

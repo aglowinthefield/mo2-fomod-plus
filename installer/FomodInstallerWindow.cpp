@@ -59,7 +59,6 @@ FomodInstallerWindow::FomodInstallerWindow(
     updateInstallStepStack();
     stylePreviouslySelectedOptions();
 
-
     const auto containerLayout = createContainerLayout();
     setLayout(containerLayout);
 
@@ -334,8 +333,10 @@ QWidget* FomodInstallerWindow::createBottomRow()
     auto* layout         = new QHBoxLayout(bottomRow);
 
     // Manual on far left
-    mManualButton = UIHelper::createButton("Manual", bottomRow);
+    mManualButton         = UIHelper::createButton("Manual", bottomRow);
+    mSelectPreviousButton = UIHelper::createButton("Select Previously Installed", bottomRow);
     layout->addWidget(mManualButton);
+    layout->addWidget(mSelectPreviousButton);
 
     // Space to push remaining buttons right
     layout->addStretch();
@@ -348,6 +349,7 @@ QWidget* FomodInstallerWindow::createBottomRow()
     connect(mNextInstallButton, SIGNAL(clicked()), this, SLOT(onNextClicked()));
     connect(mBackButton, SIGNAL(clicked()), this, SLOT(onBackClicked()));
     connect(mCancelButton, SIGNAL(clicked()), this, SLOT(reject()));
+    connect(mSelectPreviousButton, SIGNAL(clicked()), this, SLOT(onSelectPreviousClicked()));
 
     layout->addWidget(mBackButton);
     layout->addWidget(mNextInstallButton);
@@ -536,7 +538,7 @@ void FomodInstallerWindow::updateDisplayForActivePlugin() const
     mImageLabel->setScalableResource(imagePath);
 }
 
-void FomodInstallerWindow::stylePreviouslySelectedOptions() const
+void FomodInstallerWindow::applyFnFromJson(const std::function<void(QAbstractButton*)>& fn)
 {
     if (mFomodJson.empty()) {
         return;
@@ -555,31 +557,47 @@ void FomodInstallerWindow::stylePreviouslySelectedOptions() const
         }
     }
 
-    for (auto basicString : selectedPlugins) {
-        std::cout << "Plugin to highlight: " << basicString << std::endl;
-    }
-
-    const auto checkboxes = findChildren<QCheckBox*>();
+    const auto checkboxes   = findChildren<QCheckBox*>();
     const auto radioButtons = findChildren<QRadioButton*>();
-    const auto stylesheet = "QCheckBox { background-color: rgba(91, 127, 152, 0.4); } "
-                            "QRadioButton { background-color: rgba(91, 127, 152, 0.4); }";
 
     for (auto* checkbox : checkboxes) {
         for (auto selectedPlugin : selectedPlugins) {
-            std::cout << "Checking " << checkbox->objectName().toStdString() << " against " << selectedPlugin << std::endl;
+            std::cout << "Checking " << checkbox->objectName().toStdString() << " against " << selectedPlugin <<
+                std::endl;
             if (checkbox->objectName().toStdString() == selectedPlugin) {
-                checkbox->setStyleSheet(stylesheet);
-                checkbox->setToolTip("You previously selected this plugin when installing this mod.");
+                fn(checkbox);
             }
         }
     }
     for (auto* radio : radioButtons) {
         for (auto selectedPlugin : selectedPlugins) {
-            std::cout << "Checking " << radio->objectName().toStdString() << " against " << selectedPlugin << std::endl;
+            std::cout << "Checking " << radio->objectName().toStdString() << " against " << selectedPlugin <<
+                std::endl;
             if (radio->objectName().toStdString() == selectedPlugin) {
-                radio->setStyleSheet(stylesheet);
-                radio->setToolTip("You previously selected this plugin when installing this mod.");
+                fn(radio);
             }
         }
     }
+}
+
+void FomodInstallerWindow::stylePreviouslySelectedOptions()
+{
+    const auto stylesheet = "QCheckBox { background-color: rgba(91, 127, 152, 0.4); } "
+        "QRadioButton { background-color: rgba(91, 127, 152, 0.4); }";
+
+    const auto tooltip = "You previously selected this plugin when installing this mod.";
+
+    applyFnFromJson([stylesheet, tooltip](QAbstractButton* button) {
+        button->setStyleSheet(stylesheet);
+        button->setToolTip(tooltip);
+    });
+}
+
+void FomodInstallerWindow::selectPreviouslySelectedOptions()
+{
+    applyFnFromJson([](QAbstractButton* button) {
+        if (button->isEnabled()) {
+            button->setChecked(true);
+        }
+    });
 }
