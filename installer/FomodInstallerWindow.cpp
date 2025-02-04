@@ -453,7 +453,7 @@ QRadioButton* FomodInstallerWindow::createPluginRadioButton(const std::shared_pt
     radioButton->setEnabled(plugin->isEnabled());
     radioButton->setChecked(plugin->isSelected());
     // Bind to model function
-    connect(radioButton, &QRadioButton::clicked, this, [this, group, plugin](const bool checked) {
+    connect(radioButton, &QRadioButton::toggled, this, [this, group, plugin](const bool checked) {
         std::cout << "Received toggled signal for radio button: " << checked << std::endl;
         onPluginToggled(checked, group, plugin);
     });
@@ -474,7 +474,7 @@ QCheckBox* FomodInstallerWindow::createPluginCheckBox(const std::shared_ptr<Plug
 
     checkBox->setEnabled(plugin->isEnabled());
     checkBox->setChecked(plugin->isSelected());
-    connect(checkBox, &QCheckBox::clicked, this, [this, group, plugin](const bool checked) {
+    connect(checkBox, &QCheckBox::toggled, this, [this, group, plugin](const bool checked) {
         std::cout << "Received toggled signal for checkbox: " << checked << std::endl;
         onPluginToggled(checked, group, plugin);
     });
