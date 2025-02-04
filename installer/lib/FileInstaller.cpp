@@ -41,7 +41,10 @@ std::shared_ptr<IFileTree> FileInstaller::install() const
         if (sourceNode->isDir()) {
             const auto& tree = sourceNode->astree();
             for (auto it = tree->begin(); it != tree->end(); ++it) {
-                installTree->copy(*it, targetPath, IFileTree::InsertPolicy::MERGE);
+                // this could be a directory too. ugh
+                const auto entry = *it;
+                const auto path = targetPath + "/" + entry->name();
+                installTree->copy(entry, path, IFileTree::InsertPolicy::MERGE);
             }
         } else {
             installTree->copy(sourceNode, targetPath, IFileTree::InsertPolicy::MERGE);
