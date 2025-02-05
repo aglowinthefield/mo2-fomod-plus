@@ -100,22 +100,33 @@ void FomodInstallerWindow::onNextClicked()
 
 void FomodInstallerWindow::updateCheckboxStates() const
 {
+    const auto checkboxes = findChildren<QCheckBox*>();
+    const auto radioButtons = findChildren<QRadioButton*>();
+
     for (const auto& step : mViewModel->getSteps()) {
         for (const auto& group : step->getGroups()) {
             for (const auto& plugin : group->getPlugins()) {
 
                 const auto name = createObjectName(plugin, group);
                 // Find the corresponding checkbox and update its state
-                for (auto* checkbox : findChildren<QCheckBox*>()) {
+                for (auto* checkbox : checkboxes) {
                     if (checkbox->objectName() == name) {
-                        checkbox->setChecked(plugin->isSelected());
-                        checkbox->setEnabled(plugin->isEnabled());
+                        if (checkbox->isChecked() != plugin->isSelected()) {
+                            checkbox->setChecked(plugin->isSelected());
+                        }
+                        if (checkbox->isEnabled() != plugin->isEnabled()) {
+                            checkbox->setEnabled(plugin->isEnabled());
+                        }
                     }
                 }
-                for (auto* radio : findChildren<QRadioButton*>()) {
+                for (auto* radio : radioButtons) {
                     if (radio->objectName() == name) {
-                        radio->setChecked(plugin->isSelected());
-                        radio->setEnabled(plugin->isEnabled());
+                        if (radio->isChecked() != plugin->isSelected()) {
+                            radio->setChecked(plugin->isSelected());
+                        }
+                        if (radio->isEnabled() != plugin->isEnabled()) {
+                            radio->setEnabled(plugin->isEnabled());
+                        }
                     }
                 }
             }

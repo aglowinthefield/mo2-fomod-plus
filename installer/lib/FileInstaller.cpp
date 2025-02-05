@@ -58,14 +58,6 @@ std::shared_ptr<IFileTree> FileInstaller::install() const
     return installTree;
 }
 
-void FileInstaller::writeFomodJsonToFile(const std::string& filePath) const
-{
-    const nlohmann::json fomodJson = generateFomodJson();
-    std::ofstream jsonFile(filePath);
-    jsonFile << fomodJson.dump(4);
-    jsonFile.close();
-}
-
 nlohmann::json FileInstaller::generateFomodJson() const
 {
     nlohmann::json fomodJson;
@@ -98,6 +90,35 @@ std::string FileInstaller::getQualifiedFilePath(const std::string& treePath) con
 {
     // We need to prepend the fomod path to whatever source we reference. Guess we're passing that path around.
     return mFomodPath.toStdString() + "/" + treePath;
+}
+
+QString FileInstaller::createInstallationNotes() const
+{
+    QString notes = "";
+
+    notes += "### BEGIN FOMOD NOTES ###\n";
+
+    std::vector<std::string> selectedOptions;
+    std::vector<std::string> allOptions;
+
+    for (const auto stepViewModel : mSteps) {
+        for (const auto groupViewModel : stepViewModel->getGroups()) {
+            for (const auto pluginViewModel : groupViewModel->plugins) {
+                if (pluginViewModel->getName() != "None") {
+                    allOptions.emplace_back(pluginViewModel->getName());
+                    if (pluginViewModel->isSelected()) {
+                        selectedOptions.push_back(pluginViewModel->getName());
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    notes += "### END FOMOD NOTES ###\n";
+
+    return notes;
 }
 
 // Generic vector appender

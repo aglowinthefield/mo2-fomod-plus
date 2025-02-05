@@ -111,7 +111,6 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
         const std::shared_ptr<IFileTree> installTree = window->getFileInstaller()->install();
         tree = installTree;
         mFomodJson = std::make_shared<nlohmann::json>(window->getFileInstaller()->generateFomodJson());
-
         return RESULT_SUCCESS;
     }
     if (window->isManualInstall()) {

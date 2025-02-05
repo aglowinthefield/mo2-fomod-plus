@@ -38,8 +38,6 @@ public:
 
     std::shared_ptr<IFileTree> install() const;
 
-    void writeFomodJsonToFile(const std::string& filePath) const;
-
     /**
      * @brief Create a 'fomod.json' file to add to the base of the installTree. Functionally similar to MO2's meta.ini.
      *
@@ -68,6 +66,8 @@ public:
     nlohmann::json generateFomodJson() const;
 
     std::string getQualifiedFilePath(const std::string& treePath) const;
+
+    QString createInstallationNotes() const;
 
 private:
     IOrganizer* mOrganizer;
