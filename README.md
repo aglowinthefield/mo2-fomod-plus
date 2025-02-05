@@ -9,7 +9,7 @@ A total rewrite of the FOMOD installer. Supports all features of the original FO
 - Button to select previously installed options where feasible.
 - Filter by mods installed via FOMOD. [Pic](doc/filter.png)
 - A Scanner plugin to retroactively mark mods as FOMOD-installed where possible. [Pic](doc/scanner-menu.png)
-- A nice wizard hat in the content column. [Pic](doc/content.png)
+- A nice wizard hat in the content column to indicate the mod was installed via FOMOD. [Pic](doc/content.png)
 - Optimized image viewer
 - Window sizes and splitter positions persist between mod installs.
 
