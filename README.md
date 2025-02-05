@@ -26,6 +26,10 @@ Some of my plans, roughly ordered, include:
 - [ ] Searchable installation notes (manual input and automatic)
 - [ ] Introduce new optional features to the FOMOD XML schema to allow more fun~.
 
+## Troubleshooting
+
+## FAQ
+
 ## Developing
 
 Development of this plugin is done within the context of `mob`.
