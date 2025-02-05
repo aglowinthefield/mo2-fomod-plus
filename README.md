@@ -12,6 +12,7 @@ A total rewrite of the FOMOD installer. Supports all features of the original FO
 - A nice wizard hat in the content column to indicate the mod was installed via FOMOD. [Pic](doc/content.png)
 - Optimized image viewer
 - Window sizes and splitter positions persist between mod installs.
+- FOMOD installer window won't block the main MO2 window. No more quitting the installer to check if you installed A, B, or C.
 
 ## Using
 1. Unzip the latest release into your MO2 plugins directory.
