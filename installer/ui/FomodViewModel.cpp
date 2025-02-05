@@ -106,27 +106,48 @@ void FomodViewModel::createStepViewModels()
 {
     shared_ptr_list<StepViewModel> stepViewModels;
 
-    for (const auto& installStep : mFomodFile->installSteps.installSteps) {
-        std::vector<std::shared_ptr<GroupViewModel> > groupViewModels;
+    for (int stepIndex = 0; stepIndex < mFomodFile->installSteps.installSteps.size(); ++stepIndex) {
+        const auto& installStep = mFomodFile->installSteps.installSteps[stepIndex];
+        shared_ptr_list<GroupViewModel> groupViewModels;
 
-        for (const auto& group : installStep.optionalFileGroups.groups) {
-            std::vector<std::shared_ptr<PluginViewModel> > pluginViewModels;
+        for (int groupIndex = 0; groupIndex < installStep.optionalFileGroups.groups.size(); ++groupIndex) {
+            const auto& group = installStep.optionalFileGroups.groups[groupIndex];
+            shared_ptr_list<PluginViewModel> pluginViewModels;
 
-            for (const auto& plugin : group.plugins.plugins) {
-                auto pluginViewModel = std::make_shared<PluginViewModel>(std::make_shared<Plugin>(plugin), false, true);
+            for (int pluginIndex = 0; pluginIndex < group.plugins.plugins.size(); ++pluginIndex) {
+                const auto& plugin   = group.plugins.plugins[pluginIndex];
+                auto pluginViewModel = std::make_shared<PluginViewModel>(std::make_shared<Plugin>(plugin), false, true,
+                    pluginIndex);
                 pluginViewModels.emplace_back(pluginViewModel); // Assuming default values for selected and enabled
             }
-            auto groupViewModel = std::make_shared<GroupViewModel>(std::make_shared<Group>(group), pluginViewModels);
+            auto groupViewModel = std::make_shared<GroupViewModel>(std::make_shared<Group>(group), pluginViewModels,
+                groupIndex, stepIndex);
             if (groupViewModel->getType() == SelectAtMostOne && groupViewModel->getPlugins().size() > 1) {
                 createNonePluginForGroup(groupViewModel);
             }
             groupViewModels.emplace_back(groupViewModel);
-
         }
         auto stepViewModel = std::make_shared<StepViewModel>(std::make_shared<InstallStep>(installStep),
-            std::move(groupViewModels));
+            std::move(groupViewModels), stepIndex);
         stepViewModels.emplace_back(stepViewModel);
+
     }
+
+    //     for (const auto& group : installStep.optionalFileGroups.groups) {
+    //         std::vector<std::shared_ptr<PluginViewModel> > pluginViewModels;
+    //
+    //         for (const auto& plugin : group.plugins.plugins) {
+    //             auto pluginViewModel = std::make_shared<PluginViewModel>(std::make_shared<Plugin>(plugin), false, true);
+    //             pluginViewModels.emplace_back(pluginViewModel); // Assuming default values for selected and enabled
+    //         }
+    //         auto groupViewModel = std::make_shared<GroupViewModel>(std::make_shared<Group>(group), pluginViewModels);
+    //         if (groupViewModel->getType() == SelectAtMostOne && groupViewModel->getPlugins().size() > 1) {
+    //             createNonePluginForGroup(groupViewModel);
+    //         }
+    //         groupViewModels.emplace_back(groupViewModel);
+    //
+    //     }
+    // }
     mSteps = std::move(stepViewModels);
 }
 
@@ -146,7 +167,8 @@ void FomodViewModel::createNonePluginForGroup(const std::shared_ptr<GroupViewMod
     const auto nonePlugin           = std::make_shared<Plugin>();
     nonePlugin->name                = "None";
     nonePlugin->typeDescriptor.type = PluginTypeEnum::Optional;
-    const auto nonePluginViewModel  = std::make_shared<PluginViewModel>(nonePlugin, true, true);
+    const int newIndex              = static_cast<int>(group->getPlugins().size());
+    const auto nonePluginViewModel  = std::make_shared<PluginViewModel>(nonePlugin, true, true, newIndex);
     group->addPlugin(nonePluginViewModel);
 }
 

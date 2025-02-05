@@ -53,7 +53,6 @@ FomodInstallerWindow::FomodInstallerWindow(
 
     const QString cwd = QDir::currentPath();
     std::cout << "Running DLL from " << cwd.toStdString() << std::endl;
-    std::cout << "Existing JSON provided: " << mFomodJson.dump(4) << std::endl;
 
     mInstallStepStack = new QStackedWidget(this);
     updateInstallStepStack();
@@ -100,7 +99,7 @@ void FomodInstallerWindow::onNextClicked()
 
 void FomodInstallerWindow::updateCheckboxStates() const
 {
-    const auto checkboxes = findChildren<QCheckBox*>();
+    const auto checkboxes   = findChildren<QCheckBox*>();
     const auto radioButtons = findChildren<QRadioButton*>();
 
     for (const auto& step : mViewModel->getSteps()) {
@@ -456,7 +455,11 @@ QWidget* FomodInstallerWindow::renderGroup(const std::shared_ptr<GroupViewModel>
 QString FomodInstallerWindow::createObjectName(const std::shared_ptr<PluginViewModel>& plugin,
     const std::shared_ptr<GroupViewModel>& group)
 {
-    return QString::fromStdString(group->getName() + "-" + plugin->getName());
+    const std::string objectName = std::format("[{}:{}] {}-{}",
+        group->getStepIndex(), group->getOwnIndex(),
+        group->getName(), plugin->getName());
+
+    return QString::fromStdString(objectName);
 }
 
 QRadioButton* FomodInstallerWindow::createPluginRadioButton(const std::shared_ptr<PluginViewModel>& plugin,
@@ -555,15 +558,23 @@ void FomodInstallerWindow::applyFnFromJson(const std::function<void(QAbstractBut
         return;
     }
 
+    std::cout << "Existing JSON provided: " << mFomodJson.dump(4) << std::endl;
+
     const auto jsonSteps = mFomodJson["steps"];
     // for each step in JSON, create a <group>-<plugin> string out of the { groups: [ { plugins... } ] } array
     vector<std::string> selectedPlugins;
 
     // TODO: Can groups have the same name within a step, or across steps? How do we account for that?
-    for (auto step : jsonSteps) {
-        for (const auto jsonGroups = step["groups"]; auto group : jsonGroups) {
-            for (const auto jsonPlugins = group["plugins"]; auto plugin : jsonPlugins) {
-                selectedPlugins.push_back(group["name"].get<std::string>() + "-" + plugin.get<std::string>());
+    for (int stepIndex = 0; stepIndex < jsonSteps.size(); ++stepIndex) {
+        const auto& step = jsonSteps[stepIndex];
+        for (int groupIndex = 0; groupIndex < step["groups"].size(); ++groupIndex) {
+            const auto& group = step["groups"][groupIndex];
+            for (int pluginIndex = 0; pluginIndex < group["plugins"].size(); ++pluginIndex) {
+                const auto& plugin = group["plugins"][pluginIndex];
+
+                std::string name = std::format("[{}:{}] {}-{}",
+                    stepIndex, groupIndex, group["name"].get<std::string>(), plugin.get<std::string>());
+                selectedPlugins.push_back(name);
             }
         }
     }
