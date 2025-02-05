@@ -1,5 +1,7 @@
 ﻿#include "ConditionTester.h"
 
+#include "ui/FomodViewModel.h"
+
 #include <iplugingame.h>
 #include <ipluginlist.h>
 
@@ -43,13 +45,6 @@ bool ConditionTester::testCompositeDependency(const std::shared_ptr<FlagMap>& fl
     return true;
 }
 
-
-[[deprecated("Use testCompositeDependency() directly instead")]]
-bool ConditionTester::isStepVisible(const std::shared_ptr<FlagMap>& flags,
-    const std::shared_ptr<InstallStep>& step) const
-{
-    return testCompositeDependency(flags, step->visible);
-}
 
 bool ConditionTester::testFlagDependency(const std::shared_ptr<FlagMap>& flags, const FlagDependency& flagDependency)
 {

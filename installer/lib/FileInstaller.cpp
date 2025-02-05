@@ -65,7 +65,7 @@ nlohmann::json FileInstaller::generateFomodJson() const
     fomodJson["steps"] = nlohmann::json::array();
     for (const auto& stepViewModel : mSteps) {
         auto stepJson      = nlohmann::json::object();
-        stepJson["name"]   = stepViewModel->installStep->name;
+        stepJson["name"]   = stepViewModel->getName();
         stepJson["groups"] = nlohmann::json::array();
 
         for (const auto& groupViewModel : stepViewModel->getGroups()) {
@@ -103,7 +103,7 @@ QString FileInstaller::createInstallationNotes() const
 
     for (const auto stepViewModel : mSteps) {
         for (const auto groupViewModel : stepViewModel->getGroups()) {
-            for (const auto pluginViewModel : groupViewModel->plugins) {
+            for (const auto pluginViewModel : groupViewModel->getPlugins()) {
                 if (pluginViewModel->getName() != "None") {
                     allOptions.emplace_back(pluginViewModel->getName());
                     if (pluginViewModel->isSelected()) {
@@ -149,7 +149,7 @@ std::vector<File> FileInstaller::collectFilesToInstall() const
 
     // Selected files from visible steps
     for (const auto& stepViewModel : mSteps) {
-        if (!mConditionTester.isStepVisible(mFlagMap, stepViewModel->installStep)) {
+        if (!mConditionTester.testCompositeDependency(mFlagMap, stepViewModel->getVisibilityConditions())) {
             continue;
         }
         for (const auto& groupViewModel : stepViewModel->getGroups()) {

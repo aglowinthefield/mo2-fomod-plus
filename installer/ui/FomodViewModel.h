@@ -34,11 +34,11 @@ public:
 
 protected:
     [[nodiscard]] std::shared_ptr<Plugin> getPlugin() const { return plugin; }
-    std::shared_ptr<Plugin> plugin;
 
 private:
     bool selected;
     bool enabled;
+    std::shared_ptr<Plugin> plugin;
 };
 
 /*
@@ -51,14 +51,13 @@ public:
     GroupViewModel(const std::shared_ptr<Group>& group_, const shared_ptr_list<PluginViewModel>& plugins)
         : plugins(plugins), group(group_) {}
 
+    void addPlugin(const std::shared_ptr<PluginViewModel>& plugin) { plugins.emplace_back(plugin); }
+
     [[nodiscard]] std::string getName() const { return group->name; }
     [[nodiscard]] GroupTypeEnum getType() const { return group->type; }
     [[nodiscard]] shared_ptr_list<PluginViewModel> getPlugins() const { return plugins; }
 
-    friend class FomodViewModel;
-    friend class FileInstaller;
-
-protected:
+private:
     shared_ptr_list<PluginViewModel> plugins;
     std::shared_ptr<Group> group;
 };
@@ -73,15 +72,12 @@ public:
     StepViewModel(const std::shared_ptr<InstallStep>& installStep_, const shared_ptr_list<GroupViewModel>& groups)
         : installStep(installStep_), groups(groups) {}
 
+    [[nodiscard]] CompositeDependency& getVisibilityConditions() const { return installStep->visible; }
     [[nodiscard]] std::string getName() const { return installStep->name; }
     [[nodiscard]] const shared_ptr_list<GroupViewModel>& getGroups() const { return groups; }
 
-    friend class FomodViewModel;
-    friend class FileInstaller;
-
-protected:
+private:
     std::shared_ptr<InstallStep> installStep;
-    // bool isVisible = true;
     shared_ptr_list<GroupViewModel> groups;
 };
 
@@ -136,7 +132,7 @@ public:
         std::unique_ptr<FomodInfoFile> infoFile);
 
     void forEachGroup(
-        const std::function<void(const std::shared_ptr<GroupViewModel>&)> &callback)
+        const std::function<void(const std::shared_ptr<GroupViewModel>&)>& callback)
     const;
 
     void forEachPlugin(
@@ -187,7 +183,7 @@ private:
     MOBase::IOrganizer* mOrganizer = nullptr;
     std::unique_ptr<ModuleConfiguration> mFomodFile;
     std::unique_ptr<FomodInfoFile> mInfoFile;
-    std::shared_ptr<FlagMap> mFlags {nullptr};
+    std::shared_ptr<FlagMap> mFlags{ nullptr };
     ConditionTester mConditionTester;
     std::shared_ptr<InfoViewModel> mInfoViewModel;
     std::vector<std::shared_ptr<StepViewModel> > mSteps;

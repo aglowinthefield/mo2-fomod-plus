@@ -6,14 +6,13 @@
 #include "FlagMap.h"
 #include "../xml/ModuleConfiguration.h"
 
+class CompositeDependency;
 
 class ConditionTester {
 public:
     explicit ConditionTester(MOBase::IOrganizer* organizer) : mOrganizer(organizer) {}
 
     bool testCompositeDependency(const std::shared_ptr<FlagMap> &flags, const CompositeDependency &compositeDependency) const;
-
-    bool isStepVisible(const std::shared_ptr<FlagMap> &flags, const std::shared_ptr<InstallStep> &step) const;
 
     static bool testFlagDependency(const std::shared_ptr<FlagMap> &flags, const FlagDependency &flagDependency);
 

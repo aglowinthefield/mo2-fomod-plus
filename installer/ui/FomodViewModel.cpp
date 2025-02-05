@@ -140,13 +140,14 @@ bool isRadioButtonGroup(const GroupTypeEnum groupType)
     return groupType == SelectExactlyOne || groupType == SelectAtMostOne;
 }
 
+// ReSharper disable once CppMemberFunctionMayBeStatic
 void FomodViewModel::createNonePluginForGroup(const std::shared_ptr<GroupViewModel>& group) const
 {
     const auto nonePlugin           = std::make_shared<Plugin>();
     nonePlugin->name                = "None";
     nonePlugin->typeDescriptor.type = PluginTypeEnum::Optional;
     const auto nonePluginViewModel  = std::make_shared<PluginViewModel>(nonePlugin, true, true);
-    group->plugins.emplace_back(nonePluginViewModel);
+    group->addPlugin(nonePluginViewModel);
 }
 
 void FomodViewModel::enforceRadioGroupConstraints(const std::shared_ptr<GroupViewModel>& groupViewModel) const
@@ -157,19 +158,19 @@ void FomodViewModel::enforceRadioGroupConstraints(const std::shared_ptr<GroupVie
 
     std::cout << "Enforcing group constraints for group " << groupViewModel->getName() << std::endl;
 
-    if (groupViewModel->getType() == SelectExactlyOne && groupViewModel->plugins.size() == 1) {
+    if (groupViewModel->getType() == SelectExactlyOne && groupViewModel->getPlugins().size() == 1) {
         std::cout << "Disabling " << groupViewModel->getPlugins().at(0)->getName() << " because it's the only plugin."
             << std::endl;
         groupViewModel->getPlugins().at(0)->setEnabled(false);
     }
 
-    if (std::ranges::any_of(groupViewModel->plugins, [](const auto& plugin) { return plugin->isSelected(); })) {
+    if (std::ranges::any_of(groupViewModel->getPlugins(), [](const auto& plugin) { return plugin->isSelected(); })) {
         std::cout << "At least one plugin is selected. Nothing to enforce." << std::endl;
         return; // We're good if at least one is selected.
     }
 
     // First, try to select the first Recommended plugin
-    for (const auto& plugin : groupViewModel->plugins) {
+    for (const auto& plugin : groupViewModel->getPlugins()) {
         if (mConditionTester.getPluginTypeDescriptorState(plugin->getPlugin(), mFlags) == PluginTypeEnum::Recommended) {
             std::cout << "Selecting " << plugin->getName() << " because it's the first recommended plugin." <<
                 std::endl;
@@ -179,7 +180,7 @@ void FomodViewModel::enforceRadioGroupConstraints(const std::shared_ptr<GroupVie
     }
 
     // If no Recommended plugin is found, select the first one that isn't NotUsable
-    for (const auto& plugin : groupViewModel->plugins) {
+    for (const auto& plugin : groupViewModel->getPlugins()) {
         if (mConditionTester.getPluginTypeDescriptorState(plugin->getPlugin(), mFlags) != PluginTypeEnum::NotUsable) {
             std::cout << "Selecting " << plugin->getName() << " because it's the first usable plugin." << std::endl;
             togglePlugin(groupViewModel, plugin, true);
@@ -320,7 +321,7 @@ void FomodViewModel::updateVisibleSteps() const
 {
     mVisibleStepIndices.clear();
     for (int i = 0; i < mSteps.size(); ++i) {
-        if (mConditionTester.isStepVisible(mFlags, mSteps[i]->installStep)) {
+        if (mConditionTester.testCompositeDependency(mFlags, mSteps[i]->getVisibilityConditions())) {
             mVisibleStepIndices.push_back(i);
         }
     }
