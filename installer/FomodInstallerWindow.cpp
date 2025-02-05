@@ -307,11 +307,11 @@ QWidget* FomodInstallerWindow::createTopRow()
     metadataLayout->addLayout(labelsColumn);
     metadataLayout->addLayout(valuesColumn, 1); // To push the right column close to the edge of the left.
 
-    mainHLayout->addLayout(metadataLayout);
+    mainHLayout->addLayout(metadataLayout, 1);
 
     // Now make the search bar layout
     auto* modNameComboBox = createModNameComboBox();
-    mainHLayout->addWidget(modNameComboBox);
+    mainHLayout->addWidget(modNameComboBox, 4);
     UIHelper::setGlobalAlignment(mainHLayout, Qt::AlignTop);
 
     // Extra stuff
@@ -325,12 +325,12 @@ QComboBox* FomodInstallerWindow::createModNameComboBox()
     mModNameInput = new QComboBox(this);
     mModNameInput->setEditable(true);
 
-    // TODO: Pick the proper guess based on quality instead and sort by quality?
-    // std::vector variants(mModName.variants().begin(), mModName.variants().end());
-    // ranges::reverse(variants);
+    mModNameInput->addItem(mModName);
 
     for (const auto& variant : mModName.variants()) {
-        mModNameInput->addItem(variant);
+        if (variant.toStdString() != mModName->toStdString()) {
+            mModNameInput->addItem(variant);
+        }
     }
     mModNameInput->completer()->setCaseSensitivity(Qt::CaseSensitive);
     return mModNameInput;

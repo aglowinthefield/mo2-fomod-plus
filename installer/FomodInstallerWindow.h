@@ -71,11 +71,6 @@ private slots:
 
     void onPluginHovered(const std::shared_ptr<PluginViewModel>& plugin) const;
 
-    void updateModName(const QString& name) const
-    {
-        mModName.update(name, GUESS_USER);
-    }
-
     void onSelectPreviousClicked() { this->selectPreviouslySelectedOptions(); }
 
     void onBackClicked() const;
