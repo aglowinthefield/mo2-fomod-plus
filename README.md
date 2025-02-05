@@ -14,7 +14,7 @@ A total rewrite of the FOMOD installer. Supports all features of the original FO
 - Window sizes and splitter positions persist between mod installs.
 - FOMOD installer window won't block the main MO2 window. No more quitting the installer to check if you installed A, B, or C.
 
-## Using
+## How to Install
 1. Unzip the latest release into your MO2 plugins directory.
 2. If running for the first time, use the scanner to populate your mods.
 3. Install FOMODs as normal and enjoy the new features.
