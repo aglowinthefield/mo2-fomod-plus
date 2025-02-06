@@ -213,6 +213,7 @@ void FomodPlusInstaller::onInstallationEnd(const EInstallResult result, IModInte
     if (mFomodJson != nullptr && result == RESULT_SUCCESS && newMod != nullptr && mInstallerUsed) {
         newMod->setPluginSetting(this->name(), "fomod", mFomodJson->dump().c_str());
         writeNotes(newMod);
+        mOrganizer->refresh();
     }
 }
 

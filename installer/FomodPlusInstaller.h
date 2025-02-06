@@ -25,11 +25,8 @@ using namespace std;
 
 class FomodPlusInstaller final : public IPluginInstallerSimple {
     Q_OBJECT
-    Q_INTERFACES(MOBase::IPlugin MOBase::IPluginInstaller MOBase::IPluginInstallerSimple)
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    Q_INTERFACES(MOBase::IPlugin MOBase::IPluginInstaller)
     Q_PLUGIN_METADATA(IID "io.clearing.FomodPlus" FILE "fomodplus.json")
-#endif
 
 public:
     bool init(IOrganizer* organizer) override;

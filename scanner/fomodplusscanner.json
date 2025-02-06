@@ -1,1 +1,8 @@
-﻿{}
+﻿{
+  "author" : "clearing",
+  "date" : "2025/02/06",
+  "name" : "FOMOD Plus - Scanner",
+  "version" : "1.0.0",
+  "des" : "Scans load order for FOMOD installations",
+  "dependencies" : []
+}
