@@ -69,6 +69,8 @@ public:
 
     QString createInstallationNotes() const;
 
+    static std::vector<std::string> collectPositiveFileNamesFromDependencyPatterns(std::vector<DependencyPattern> patterns);
+
 private:
     IOrganizer* mOrganizer;
     QString mFomodPath;

@@ -101,8 +101,6 @@ void ScaleLabel::resizeEvent(QResizeEvent* event)
 
 void ScaleLabel::showEvent(QShowEvent* event)
 {
-    std::cout << "showEvent called" << std::endl;
-
     QLabel::showEvent(event);
 
     if (const auto m = movie()) {

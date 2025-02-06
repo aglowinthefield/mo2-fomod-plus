@@ -52,7 +52,6 @@ std::shared_ptr<FomodViewModel> FomodViewModel::create(MOBase::IOrganizer* organ
     viewModel->mInitialized  = true;
     viewModel->mActiveStep   = viewModel->mSteps.at(0);
     viewModel->mActivePlugin = viewModel->getFirstPluginForActiveStep();
-    std::cout << "Active Plugin: " << viewModel->mActivePlugin->getName() << std::endl;
     return viewModel;
 }
 
@@ -132,22 +131,6 @@ void FomodViewModel::createStepViewModels()
         stepViewModels.emplace_back(stepViewModel);
 
     }
-
-    //     for (const auto& group : installStep.optionalFileGroups.groups) {
-    //         std::vector<std::shared_ptr<PluginViewModel> > pluginViewModels;
-    //
-    //         for (const auto& plugin : group.plugins.plugins) {
-    //             auto pluginViewModel = std::make_shared<PluginViewModel>(std::make_shared<Plugin>(plugin), false, true);
-    //             pluginViewModels.emplace_back(pluginViewModel); // Assuming default values for selected and enabled
-    //         }
-    //         auto groupViewModel = std::make_shared<GroupViewModel>(std::make_shared<Group>(group), pluginViewModels);
-    //         if (groupViewModel->getType() == SelectAtMostOne && groupViewModel->getPlugins().size() > 1) {
-    //             createNonePluginForGroup(groupViewModel);
-    //         }
-    //         groupViewModels.emplace_back(groupViewModel);
-    //
-    //     }
-    // }
     mSteps = std::move(stepViewModels);
 }
 
@@ -156,11 +139,6 @@ void FomodViewModel::createStepViewModels()
                                Group Constraints
 --------------------------------------------------------------------------------
 */
-bool isRadioButtonGroup(const GroupTypeEnum groupType)
-{
-    return groupType == SelectExactlyOne || groupType == SelectAtMostOne;
-}
-
 // ReSharper disable once CppMemberFunctionMayBeStatic
 void FomodViewModel::createNonePluginForGroup(const std::shared_ptr<GroupViewModel>& group) const
 {

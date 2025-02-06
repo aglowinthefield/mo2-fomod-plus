@@ -9,6 +9,7 @@
 #include <QScrollArea>
 #include <QStackedWidget>
 
+class ScaleLabel;
 using LabelImagePair = std::pair<QString, QString>;
 
 
@@ -48,9 +49,7 @@ private:
 
     QWidget* createCenterRow(QWidget* parent);
 
-    QStackedWidget* createStackWidget(QWidget* parent);
-
-    QWidget* createSinglePhotoPane(QWidget *parent, LabelImagePair pair);
+    QWidget* createSinglePhotoPane(QWidget *parent);
 
     QScrollArea* createPreviewImages(QWidget* parent);
 
@@ -88,7 +87,8 @@ private:
     QPushButton* mBackButton{ nullptr };
     QPushButton* mForwardButton{ nullptr };
     QLabel* mCounter{ nullptr };
-    QStackedWidget* mMainDisplayImage{ nullptr };
+    QWidget* mMainImageWrapper{ nullptr };
+    ScaleLabel* mMainImage{ nullptr };
     QLabel* mLabel{ nullptr };
     QScrollArea* mPreviewImages{ nullptr };
 };

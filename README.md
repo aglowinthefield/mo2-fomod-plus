@@ -2,34 +2,42 @@
 ![wizard](./scanner/resources/wizard.gif)
 
 ## Overview
-A total rewrite of the FOMOD installer. Supports all features of the original FOMOD installer, and adds a few new ones.
+A total rewrite of the FOMOD installer.
+Supports all features of the original FOMOD installer, and adds a few new ones.
 
-**Features**
-- Show previously selected options. Should work even if a different mod name is chosen in the top bar.
-- Button to select previously installed options where feasible.
+### Features
+- Highlight previously selected options. 
+- Select previously installed options (where feasible).
 - Filter by mods installed via FOMOD. [Pic](doc/filter.png)
 - A Scanner plugin to retroactively mark mods as FOMOD-installed where possible. [Pic](doc/scanner-menu.png)
 - A nice wizard hat in the content column to indicate the mod was installed via FOMOD. [Pic](doc/content.png)
-- Optimized image viewer
 - Window sizes and splitter positions persist between mod installs.
 - FOMOD installer window won't block the main MO2 window. No more quitting the installer to check if you installed A, B, or C.
+- Optimized image viewer
 
-## How to Install
+### How to Install
 1. Unzip the latest release into your MO2 plugins directory.
 2. If running for the first time, use the scanner to populate your mods.
 3. Install FOMODs as normal and enjoy the new features.
 
-## Future Plans
+### Future Plans
 Since this is a WIP and barely in alpha stages, expect some bugs as things progress. 
 Some of my plans, roughly ordered, include:
 
 - [ ] Searchable installation notes (manual input and automatic)
 - [ ] Introduce new optional features to the FOMOD XML schema to allow more fun~.
 
-## Troubleshooting
+TODO: Icons for each heading
 
-## FAQ
+### Troubleshooting
 
+### FAQ
+
+
+
+_Tech stuff below_
+
+---
 ## Developing
 
 Development of this plugin is done within the context of `mob`.

@@ -358,7 +358,7 @@ QWidget* FomodInstallerWindow::createBottomRow()
     connect(mManualButton, SIGNAL(clicked()), this, SLOT(onManualClicked()));
     connect(mNextInstallButton, SIGNAL(clicked()), this, SLOT(onNextClicked()));
     connect(mBackButton, SIGNAL(clicked()), this, SLOT(onBackClicked()));
-    connect(mCancelButton, SIGNAL(clicked()), this, SLOT(reject()));
+    connect(mCancelButton, SIGNAL(clicked()), this, SLOT(onCancelClicked()));
     connect(mSelectPreviousButton, SIGNAL(clicked()), this, SLOT(onSelectPreviousClicked()));
 
     layout->addWidget(mBackButton);

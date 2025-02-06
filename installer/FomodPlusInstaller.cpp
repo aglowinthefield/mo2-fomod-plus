@@ -15,6 +15,9 @@
 #include "integration/FomodDataContent.h"
 #include "ui/FomodViewModel.h"
 
+#include <QMessageBox>
+#include <QSettings>
+
 bool FomodPlusInstaller::init(IOrganizer* organizer)
 {
     mOrganizer = organizer;
@@ -87,12 +90,12 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
     int& nexusID)
 {
 
-    log::debug("FomodPlusInstaller::install - modName: {}, version: {}, nexusID: {}",
+    log::info("FomodPlusInstaller::install - modName: {}, version: {}, nexusID: {}",
         modName->toStdString(),
         version.toStdString(),
         nexusID
         );
-    log::debug("FomodPlusInstaller::install - tree size: {}", tree->size());
+    log::info("FomodPlusInstaller::install - tree size: {}", tree->size());
 
     auto [infoFile, moduleConfigFile] = parseFomodFiles(tree);
 
@@ -105,12 +108,14 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
     auto json           = getExistingFomodJson(modName);
     const auto window   = std::make_shared<FomodInstallerWindow>(this, modName, tree, mFomodPath, fomodViewModel, json);
 
-    if (const QDialog::DialogCode result = showInstallerWindow(window); result == QDialog::Accepted) {
+    const QDialog::DialogCode result = showInstallerWindow(window);
+    if (result == QDialog::Accepted) {
         // modname was updated in window
         mInstallerUsed = true;
         const std::shared_ptr<IFileTree> installTree = window->getFileInstaller()->install();
         tree = installTree;
         mFomodJson = std::make_shared<nlohmann::json>(window->getFileInstaller()->generateFomodJson());
+        mNotes = window->getFileInstaller()->createInstallationNotes();
         return RESULT_SUCCESS;
     }
     if (window->isManualInstall()) {
@@ -207,7 +212,30 @@ void FomodPlusInstaller::onInstallationEnd(const EInstallResult result, IModInte
     // Update the meta.ini file with the fomod information
     if (mFomodJson != nullptr && result == RESULT_SUCCESS && newMod != nullptr && mInstallerUsed) {
         newMod->setPluginSetting(this->name(), "fomod", mFomodJson->dump().c_str());
+        writeNotes(newMod);
     }
+}
+
+void FomodPlusInstaller::writeNotes(IModInterface* newMod) const
+{
+    if (mNotes.isEmpty()) {
+        return;
+    }
+
+    const auto iniKey = "installationNotes";
+    newMod->setPluginSetting(this->name(), iniKey, mNotes);
+    std::cout << "Wrote notes to meta.ini. Needs handler for adding to actual meta.ini 'notes' field." << std::endl;
+
+    // const auto newModPath = mOrganizer->modList()->getMod(newMod->name())->absolutePath();
+    // std::cout << "New mod path: " << newModPath.toStdString() << std::endl;
+    // const auto metaPath = newModPath + "/meta.ini";
+    // QSettings meta(metaPath, QSettings::IniFormat);
+    // QString fullNotes        = "";
+    // const auto existingNotes = meta.value(iniKey).toString();
+    // fullNotes += existingNotes;
+    // fullNotes += mNotes;
+    // meta.setValue(iniKey, fullNotes);
+    // meta.sync();
 }
 
 // Borrowed from https://github.com/ModOrganizer2/modorganizer-installer_fomod/blob/master/src/installerfomod.cpp
@@ -233,4 +261,21 @@ QDialog::DialogCode FomodPlusInstaller::showInstallerWindow(const std::shared_pt
     window->show();
     loop.exec();
     return static_cast<QDialog::DialogCode>(window->result());
+}
+
+void showError(const Exception& e)
+{
+    const QString errorText = "Mod Name: \n" "Nexus ID: " "\n" "Exception: " + QString(e.what()) + "\n";
+
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("FOMOD Plus Error :(");
+    msgBox.setTextFormat(Qt::RichText);
+    msgBox.setText("Sorry this happened. Please copy the following error and report it to me on Nexus or GitHub.\n"
+        "<pre style='background-color: #f0f0f0; padding: 10px;'>"
+        + errorText +
+        "</pre>"
+        );
+    msgBox.setIcon(QMessageBox::Critical);
+    msgBox.exec();
+
 }

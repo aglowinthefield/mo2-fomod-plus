@@ -1,6 +1,10 @@
 ﻿#ifndef INSTALLERFOMODPLUS_H
 #define INSTALLERFOMODPLUS_H
 
+// TODO: Log everything to a custom file
+// TODO: Ensure crash dumps are generated
+// TODO
+
 #include "stringutil.h"
 
 #include <iplugin.h>
@@ -56,10 +60,13 @@ public:
 
     void onInstallationEnd(EInstallResult result, IModInterface* newMod) override;
 
+    void writeNotes(IModInterface *newMod) const;
+
 private:
     IOrganizer* mOrganizer = nullptr;
     QString mFomodPath{};
     std::shared_ptr<nlohmann::json> mFomodJson{ nullptr };
+    QString mNotes{};
     bool mInstallerUsed{ false };
 
     /**

@@ -13,7 +13,8 @@ FileInstaller::FileInstaller(
     const std::shared_ptr<IFileTree>& fileTree,
     std::unique_ptr<ModuleConfiguration> fomodFile,
     const std::shared_ptr<FlagMap>& flagMap,
-    const std::vector<std::shared_ptr<StepViewModel> >& steps) : mOrganizer(organizer), mFomodPath(std::move(fomodPath)),
+    const std::vector<std::shared_ptr<StepViewModel> >& steps) : mOrganizer(organizer),
+                                                                 mFomodPath(std::move(fomodPath)),
                                                                  mFileTree(fileTree),
                                                                  mFomodFile(std::move(fomodFile)),
                                                                  mFlagMap(flagMap),
@@ -43,7 +44,7 @@ std::shared_ptr<IFileTree> FileInstaller::install() const
             for (auto it = tree->begin(); it != tree->end(); ++it) {
                 // this could be a directory too. ugh
                 const auto entry = *it;
-                const auto path = targetPath + "/" + entry->name();
+                const auto path  = targetPath + "/" + entry->name();
                 installTree->copy(entry, path, IFileTree::InsertPolicy::MERGE);
             }
         } else {
@@ -96,29 +97,90 @@ QString FileInstaller::createInstallationNotes() const
 {
     QString notes = "";
 
-    notes += "### BEGIN FOMOD NOTES ###\n";
 
-    std::vector<std::string> selectedOptions;
-    std::vector<std::string> allOptions;
+    // std::vector<std::string> selectedOptions;
+    // std::vector<std::string> allOptions;
+
+    std::vector<std::string> hasPatchFor;
+    std::vector<std::string> installedPatchFor;
+    std::vector<std::string> notInstalledPatchFor;
 
     for (const auto stepViewModel : mSteps) {
         for (const auto groupViewModel : stepViewModel->getGroups()) {
             for (const auto pluginViewModel : groupViewModel->getPlugins()) {
-                if (pluginViewModel->getName() != "None") {
-                    allOptions.emplace_back(pluginViewModel->getName());
+
+                const auto patterns = pluginViewModel->getPlugin()->typeDescriptor.dependencyType.patterns.patterns;
+                const auto fileNames = collectPositiveFileNamesFromDependencyPatterns(patterns);
+
+                for (auto fileName : fileNames) {
+                    hasPatchFor.emplace_back("hasPatchFor:" + fileName);
                     if (pluginViewModel->isSelected()) {
-                        selectedOptions.push_back(pluginViewModel->getName());
+                        installedPatchFor.emplace_back("installedPatchFor:" + fileName);
+                    } else {
+                        notInstalledPatchFor.emplace_back("notInstalledPatchFor:" + fileName);
                     }
                 }
+                // if (pluginViewModel->getName() != "None") {
+                //     allOptions.emplace_back(pluginViewModel->getName());
+                //     if (pluginViewModel->isSelected()) {
+                //         selectedOptions.push_back(pluginViewModel->getName());
+                //     }
+                // }
             }
         }
     }
 
-
-
-    notes += "### END FOMOD NOTES ###\n";
-
+    notes += "BEGIN FOMOD NOTES\n";
+    for (auto patchFor : hasPatchFor) {
+        notes += patchFor + "\n";
+    }
+    notes += "\n";
+    for (auto patchFor : installedPatchFor) {
+        notes += patchFor + "\n";
+    }
+    notes += "\n";
+    for (auto patchFor : notInstalledPatchFor) {
+        notes += patchFor + "\n";
+    }
+    notes += "\nEND FOMOD NOTES\n";
     return notes;
+}
+
+std::vector<std::string> FileInstaller::collectPositiveFileNamesFromDependencyPatterns(std::vector<DependencyPattern> patterns)
+{
+    std::vector<std::string> usableFileDependencyPluginNames = {};
+
+    for (const auto pattern : patterns) {
+        if (pattern.type == PluginTypeEnum::NotUsable) {
+            continue;
+        }
+
+        if (pattern.dependencies.fileDependencies.size() == 0 && pattern.dependencies.nestedDependencies.size() == 0) {
+            continue;
+        }
+
+        const auto fileDependencies   = pattern.dependencies.fileDependencies;
+        const auto nestedDependencies = pattern.dependencies.nestedDependencies;
+
+        for (const auto fileDependency : fileDependencies) {
+            if (fileDependency.state != FileDependencyTypeEnum::Active) {
+                continue;
+            }
+            usableFileDependencyPluginNames.emplace_back(fileDependency.file);
+        }
+
+        for (const auto nestedDependency : nestedDependencies) {
+            for (const auto fileDependency : nestedDependency.fileDependencies) {
+                if (fileDependency.state != FileDependencyTypeEnum::Active) {
+                    continue;
+                }
+                usableFileDependencyPluginNames.emplace_back(fileDependency.file);
+            }
+        }
+        // Not handling twice-nested dependencies now. IDK if that's even feasible.
+    }
+
+    return usableFileDependencyPluginNames;
 }
 
 // Generic vector appender

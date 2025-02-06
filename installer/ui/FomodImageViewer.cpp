@@ -6,6 +6,7 @@
 #include <QLabel>
 #include <QScrollArea>
 #include <QStackedWidget>
+#include <QtConcurrent/QtConcurrent>
 
 constexpr int PREVIEW_IMAGE_WIDTH  = 160;
 constexpr int PREVIEW_IMAGE_HEIGHT = 90;
@@ -31,6 +32,9 @@ constexpr int PREVIEW_IMAGE_HEIGHT = 90;
 |      |      |      |                                     |
 +------+------+------+-------------------------------------+
 */
+constexpr auto BUTTON_STYLE =
+    "font-size: 16px; font-weight: bold; color: white; background-color: black; padding: 5px; border-radius: 1px solid black;";
+
 FomodImageViewer::FomodImageViewer(QWidget* parent,
     const QString& fomodPath,
     const std::shared_ptr<StepViewModel>& activeStep,
@@ -49,7 +53,7 @@ FomodImageViewer::FomodImageViewer(QWidget* parent,
     move(availableGeometry.x(), availableGeometry.y());
 
     collectImages();
-    mMainDisplayImage = createStackWidget(this);
+    mMainImageWrapper = createSinglePhotoPane(this);
     mTopBar           = createTopBar(this);
     mPreviewImages    = createPreviewImages(this);
     mCenterRow        = createCenterRow(this);
@@ -65,8 +69,6 @@ FomodImageViewer::FomodImageViewer(QWidget* parent,
     select(mCurrentIndex);
 
     setFocusPolicy(Qt::StrongFocus); // so we can receive key events
-
-    // showFullScreen();
 }
 
 void FomodImageViewer::collectImages()
@@ -96,40 +98,33 @@ QWidget* FomodImageViewer::createCenterRow(QWidget* parent)
     mBackButton    = createBackButton(centerRow);
     mForwardButton = createForwardButton(centerRow);
 
+    mBackButton->setFocusPolicy(Qt::NoFocus);
+    mForwardButton->setFocusPolicy(Qt::NoFocus);
+
     layout->addWidget(mBackButton);
-    layout->addWidget(mMainDisplayImage, 1);
+    layout->addWidget(mMainImageWrapper, 1);
     layout->addWidget(mForwardButton);
 
     return centerRow;
 }
 
-QStackedWidget* FomodImageViewer::createStackWidget(QWidget* parent)
-{
-    const auto stackWidget = new QStackedWidget(parent);
-    for (const auto& pair : mLabelsAndImages) {
-        const auto photoPane = createSinglePhotoPane(stackWidget, pair);
-        stackWidget->addWidget(photoPane);
-    }
-    return stackWidget;
-}
-
 // ReSharper disable once CppMemberFunctionMayBeStatic
-QWidget* FomodImageViewer::createSinglePhotoPane(QWidget* parent, const LabelImagePair pair)
+QWidget* FomodImageViewer::createSinglePhotoPane(QWidget* parent)
 {
     const auto singlePhotoPane = new QWidget(parent);
     const auto layout          = new QVBoxLayout(singlePhotoPane);
 
-    const auto [labelText, imagePath] = pair;
+    // const auto [labelText, imagePath] = pair;
 
-    const auto imageLabel = new ScaleLabel(singlePhotoPane);
-    imageLabel->setScalableResource(imagePath);
-    layout->addWidget(imageLabel, 1);
+    mMainImage = new ScaleLabel(singlePhotoPane);
+    mMainImage->setAlignment(Qt::AlignCenter);
+    layout->addWidget(mMainImage, 1);
 
-    const auto textLabel = new QLabel(singlePhotoPane);
-    textLabel->setText(labelText);
-    textLabel->setAlignment(Qt::AlignCenter);
-    textLabel->setStyleSheet("color: white; font-size: 20px;");
-    layout->addWidget(textLabel);
+    mLabel = new QLabel(singlePhotoPane);
+    // mLabel->setText(labelText);
+    mLabel->setAlignment(Qt::AlignCenter);
+    mLabel->setStyleSheet("color: white; font-size: 20px;");
+    layout->addWidget(mLabel);
 
     return singlePhotoPane;
 }
@@ -146,20 +141,30 @@ QScrollArea* FomodImageViewer::createPreviewImages(QWidget* parent)
 
     for (int i = 0; i < mLabelsAndImages.size(); i++) {
         const auto imageLabel = new ScaleLabel(previewImages);
-        imageLabel->setScalableResource(mLabelsAndImages[i].second);
         imageLabel->setAlignment(Qt::AlignCenter);
         imageLabel->setFixedSize(PREVIEW_IMAGE_WIDTH, PREVIEW_IMAGE_HEIGHT);
+        imageLabel->setFocusPolicy(Qt::NoFocus);
         connect(imageLabel, &ScaleLabel::clicked, this, [this, i] {
             select(i);
         });
         layout->addWidget(imageLabel);
         mImagePanes.emplace_back(imageLabel);
+
+        // imageLabel->setScalableResource(mLabelsAndImages[i].second);
+        const auto imagePath = mLabelsAndImages[i].second;
+
+        QThreadPool::globalInstance()->start([imageLabel, imagePath]() {
+            QMetaObject::invokeMethod(imageLabel, [imageLabel, imagePath]() {
+                imageLabel->setScalableResource(imagePath);
+            }, Qt::QueuedConnection);
+        });
     }
 
     widget->setLayout(layout);
     previewImages->setFixedHeight(PREVIEW_IMAGE_HEIGHT + 10);
     previewImages->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     previewImages->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    previewImages->setFocusPolicy(Qt::NoFocus);
 
     previewImages->setWidget(widget);
     previewImages->setStyleSheet("QScrollArea { border: none; }");
@@ -170,9 +175,8 @@ QScrollArea* FomodImageViewer::createPreviewImages(QWidget* parent)
 QPushButton* FomodImageViewer::createBackButton(QWidget* parent) const
 {
     const auto backButton = new QPushButton(parent);
-    // const QIcon icon(":/fomod/back");
-    // backButton->setIcon(icon);
     backButton->setText("<");
+    backButton->setStyleSheet(BUTTON_STYLE);
     connect(backButton, &QPushButton::clicked, this, &FomodImageViewer::goBack);
     return backButton;
 }
@@ -180,9 +184,9 @@ QPushButton* FomodImageViewer::createBackButton(QWidget* parent) const
 QPushButton* FomodImageViewer::createForwardButton(QWidget* parent) const
 {
     const auto forwardButton = new QPushButton(parent);
-    // const QIcon icon(":/fomod/forward");
-    // forwardButton->setIcon(icon);
     forwardButton->setText(">");
+    forwardButton->
+        setStyleSheet(BUTTON_STYLE);
     connect(forwardButton, &QPushButton::clicked, this, &FomodImageViewer::goForward);
     return forwardButton;
 }
@@ -194,6 +198,7 @@ QWidget* FomodImageViewer::createTopBar(QWidget* parent)
 
     // counter, spacer, close button
     mCounter = new QLabel(topBar);
+    mCounter->setStyleSheet(BUTTON_STYLE);
     layout->addWidget(mCounter);
 
     layout->addStretch();
@@ -209,6 +214,7 @@ QPushButton* FomodImageViewer::createCloseButton(QWidget* parent)
     // const QIcon icon(":/fomod/close");
     // closeButton->setIcon(icon);
     closeButton->setText("X");
+    closeButton->setStyleSheet("color: white; background-color: black; padding: 5px; border-radius: 1px solid black;");
     connect(closeButton, &QPushButton::clicked, this, &FomodImageViewer::close);
     return closeButton;
 }
@@ -252,7 +258,10 @@ void FomodImageViewer::select(const int index)
         }
     }
 
-    mMainDisplayImage->setCurrentIndex(mCurrentIndex);
+    const auto& imagePath = mLabelsAndImages[index].second;
+    const auto& labelText = mLabelsAndImages[index].first;
+    mLabel->setText(labelText);
+    mMainImage->setScalableResource(imagePath);
 }
 
 void FomodImageViewer::keyPressEvent(QKeyEvent* event)

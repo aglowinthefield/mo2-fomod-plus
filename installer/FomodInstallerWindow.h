@@ -75,11 +75,16 @@ private slots:
 
     void onBackClicked() const;
 
-    void onCancelClicked() { this->reject(); }
+    void onCancelClicked()
+    {
+        this->saveGeometryAndState();
+        this->reject();
+    }
 
     void onManualClicked()
     {
         mIsManualInstall = true;
+        this->saveGeometryAndState();
         this->reject();
     }
 
