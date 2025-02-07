@@ -156,24 +156,23 @@ void FomodViewModel::enforceRadioGroupConstraints(const std::shared_ptr<GroupVie
         return;
     }
 
-    std::cout << "Enforcing group constraints for group " << groupViewModel->getName() << std::endl;
+    log.logMessage(INFO, "Enforcing group constraints for group " + groupViewModel->getName());
 
     if (groupViewModel->getType() == SelectExactlyOne && groupViewModel->getPlugins().size() == 1) {
-        std::cout << "Disabling " << groupViewModel->getPlugins().at(0)->getName() << " because it's the only plugin."
-            << std::endl;
+        log.logMessage(INFO,
+            "Disabling " + groupViewModel->getPlugins().at(0)->getName() + " because it's the only plugin.");
         groupViewModel->getPlugins().at(0)->setEnabled(false);
     }
 
     if (std::ranges::any_of(groupViewModel->getPlugins(), [](const auto& plugin) { return plugin->isSelected(); })) {
-        std::cout << "At least one plugin is selected. Nothing to enforce." << std::endl;
+        log.logMessage(INFO, "At least one plugin is selected. Nothing to enforce.");
         return; // We're good if at least one is selected.
     }
 
     // First, try to select the first Recommended plugin
     for (const auto& plugin : groupViewModel->getPlugins()) {
         if (mConditionTester.getPluginTypeDescriptorState(plugin->getPlugin(), mFlags) == PluginTypeEnum::Recommended) {
-            std::cout << "Selecting " << plugin->getName() << " because it's the first recommended plugin." <<
-                std::endl;
+            log.logMessage(INFO, "Selecting " + plugin->getName() + " because it's the first recommended plugin.");
             togglePlugin(groupViewModel, plugin, true);
             return;
         }
@@ -182,7 +181,7 @@ void FomodViewModel::enforceRadioGroupConstraints(const std::shared_ptr<GroupVie
     // If no Recommended plugin is found, select the first one that isn't NotUsable
     for (const auto& plugin : groupViewModel->getPlugins()) {
         if (mConditionTester.getPluginTypeDescriptorState(plugin->getPlugin(), mFlags) != PluginTypeEnum::NotUsable) {
-            std::cout << "Selecting " << plugin->getName() << " because it's the first usable plugin." << std::endl;
+            log.logMessage(INFO, "Selecting " + plugin->getName() + " because it's the first usable plugin.");
             togglePlugin(groupViewModel, plugin, true);
             return;
         }
@@ -240,7 +239,6 @@ void FomodViewModel::processPlugin(const std::shared_ptr<GroupViewModel>& groupV
         return;
     }
     const auto typeDescriptor = mConditionTester.getPluginTypeDescriptorState(pluginViewModel->plugin, mFlags);
-    // std::cout << "Processing plugin " << pluginViewModel->getName() << " with type " << typeDescriptor << std::endl;
 
     const bool isOnlyPlugin = groupViewModel->getPlugins().size() == 1
         && (groupViewModel->getType() == SelectExactlyOne || groupViewModel->getType() == SelectAtLeastOne);

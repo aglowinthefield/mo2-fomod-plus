@@ -51,9 +51,6 @@ FomodInstallerWindow::FomodInstallerWindow(
 {
     setupUi();
 
-    const QString cwd = QDir::currentPath();
-    std::cout << "Running DLL from " << cwd.toStdString() << std::endl;
-
     mInstallStepStack = new QStackedWidget(this);
     updateInstallStepStack();
     stylePreviouslySelectedOptions();
@@ -111,28 +108,20 @@ void FomodInstallerWindow::updateCheckboxStates() const
                 for (auto* checkbox : checkboxes) {
                     if (checkbox->objectName() == name) {
                         if (checkbox->isChecked() != plugin->isSelected()) {
-                            checkbox->blockSignals(true);
                             checkbox->setChecked(plugin->isSelected());
-                            checkbox->blockSignals(false);
                         }
                         if (checkbox->isEnabled() != plugin->isEnabled()) {
-                            checkbox->blockSignals(true);
                             checkbox->setEnabled(plugin->isEnabled());
-                            checkbox->blockSignals(false);
                         }
                     }
                 }
                 for (auto* radio : radioButtons) {
                     if (radio->objectName() == name) {
                         if (radio->isChecked() != plugin->isSelected()) {
-                            radio->blockSignals(true);
                             radio->setChecked(plugin->isSelected());
-                            radio->blockSignals(false);
                         }
                         if (radio->isEnabled() != plugin->isEnabled()) {
-                            radio->blockSignals(true);
                             radio->setEnabled(plugin->isEnabled());
-                            radio->blockSignals(false);
                         }
                     }
                 }
@@ -144,8 +133,9 @@ void FomodInstallerWindow::updateCheckboxStates() const
 void FomodInstallerWindow::onPluginToggled(const bool selected, const std::shared_ptr<GroupViewModel>& group,
     const std::shared_ptr<PluginViewModel>& plugin) const
 {
-    std::cout << "onPluginToggled called with " << plugin->getName() << " in " << group->getName() << ": " << selected
-        << std::endl;
+    log.logMessage(INFO,
+        "onPluginToggled called with " + plugin->getName() + " in " + group->getName() + ": " +
+        std::to_string(selected));
     mViewModel->togglePlugin(group, plugin, selected);
     try {
         updateCheckboxStates();
@@ -487,8 +477,11 @@ QRadioButton* FomodInstallerWindow::createPluginRadioButton(const std::shared_pt
     radioButton->setEnabled(plugin->isEnabled());
     radioButton->setChecked(plugin->isSelected());
     // Bind to model function
-    connect(radioButton, &QRadioButton::toggled, this, [this, group, plugin](const bool checked) {
-        std::cout << "Received toggled signal for radio button: " << checked << std::endl;
+    connect(radioButton, &QRadioButton::toggled, this, [this, radioButton, group, plugin](const bool checked) {
+        if (radioButton->isChecked() == checked) {
+            return;
+        }
+        log.logMessage(INFO, "Received toggled signal for radio button: " + plugin->getName() + ": " + (checked ? "true" : "false"));
         onPluginToggled(checked, group, plugin);
     });
 
@@ -508,8 +501,11 @@ QCheckBox* FomodInstallerWindow::createPluginCheckBox(const std::shared_ptr<Plug
 
     checkBox->setEnabled(plugin->isEnabled());
     checkBox->setChecked(plugin->isSelected());
-    connect(checkBox, &QCheckBox::toggled, this, [this, group, plugin](const bool checked) {
-        std::cout << "Received toggled signal for checkbox: " << checked << std::endl;
+    connect(checkBox, &QCheckBox::toggled, this, [this, checkBox, group, plugin](const bool checked) {
+        if (checkBox->isChecked() == checked) {
+            return;
+        }
+        log.logMessage(INFO, "Received toggled signal for checkbox: " + plugin->getName() + ": " + (checked ? "true" : "false"));
         onPluginToggled(checked, group, plugin);
     });
     return checkBox;
@@ -570,7 +566,7 @@ void FomodInstallerWindow::applyFnFromJson(const std::function<void(QAbstractBut
         return;
     }
 
-    std::cout << "Existing JSON provided: " << mFomodJson.dump(4) << std::endl;
+    log.logMessage(INFO, "Existing JSON provided: " + mFomodJson.dump(4));
 
     const auto jsonSteps = mFomodJson["steps"];
     // for each step in JSON, create a <group>-<plugin> string out of the { groups: [ { plugins... } ] } array
@@ -596,8 +592,6 @@ void FomodInstallerWindow::applyFnFromJson(const std::function<void(QAbstractBut
 
     for (auto* checkbox : checkboxes) {
         for (auto selectedPlugin : selectedPlugins) {
-            std::cout << "Checking " << checkbox->objectName().toStdString() << " against " << selectedPlugin <<
-                std::endl;
             if (checkbox->objectName().toStdString() == selectedPlugin) {
                 fn(checkbox);
             }
@@ -605,8 +599,6 @@ void FomodInstallerWindow::applyFnFromJson(const std::function<void(QAbstractBut
     }
     for (auto* radio : radioButtons) {
         for (auto selectedPlugin : selectedPlugins) {
-            std::cout << "Checking " << radio->objectName().toStdString() << " against " << selectedPlugin <<
-                std::endl;
             if (radio->objectName().toStdString() == selectedPlugin) {
                 fn(radio);
             }
@@ -621,6 +613,7 @@ void FomodInstallerWindow::stylePreviouslySelectedOptions()
 
     const auto tooltip = "You previously selected this plugin when installing this mod.";
 
+    log.logMessage(INFO, "Styling previously selected choices");
     applyFnFromJson([stylesheet, tooltip](QAbstractButton* button) {
         button->setStyleSheet(stylesheet);
         button->setToolTip(tooltip);
@@ -629,6 +622,7 @@ void FomodInstallerWindow::stylePreviouslySelectedOptions()
 
 void FomodInstallerWindow::selectPreviouslySelectedOptions()
 {
+    log.logMessage(INFO, "Selecting previously selected choices");
     applyFnFromJson([](QAbstractButton* button) {
         if (button->isEnabled()) {
             button->setChecked(true);

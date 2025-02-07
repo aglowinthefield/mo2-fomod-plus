@@ -91,6 +91,7 @@ private slots:
     void onInstallClicked();
 
 private:
+    Logger& log = Logger::getInstance();
     FomodPlusInstaller* mInstaller;
     QString mFomodPath;
     GuessedValue<QString>& mModName;

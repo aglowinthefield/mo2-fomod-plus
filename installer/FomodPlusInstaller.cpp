@@ -21,6 +21,7 @@
 bool FomodPlusInstaller::init(IOrganizer* organizer)
 {
     mOrganizer = organizer;
+    log.setLogFilePath(QDir::currentPath().toStdString() + "/logs/fomodplus.log");
     setupUiInjection();
     return true;
 }
@@ -72,7 +73,7 @@ nlohmann::json FomodPlusInstaller::getExistingFomodJson(const GuessedValue<QStri
     try {
         return nlohmann::json::parse(fomodJson.toString().toStdString());
     } catch ([[maybe_unused]] Exception e) {
-        log::error("Could not parse existing JSON, even though it appears to exist. Returning empty JSON.");
+        log.logMessage(ERR, "Could not parse existing JSON, even though it appears to exist. Returning empty JSON.");
         return {};
     }
 }
@@ -90,12 +91,12 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
     int& nexusID)
 {
 
-    log::info("FomodPlusInstaller::install - modName: {}, version: {}, nexusID: {}",
+    log.logMessage(INFO, std::format("FomodPlusInstaller::install - modName: {}, version: {}, nexusID: {}",
         modName->toStdString(),
         version.toStdString(),
         nexusID
-        );
-    log::info("FomodPlusInstaller::install - tree size: {}", tree->size());
+        ));
+    log.logMessage(INFO, std::format("FomodPlusInstaller::install - tree size: {}", tree->size()));
 
     auto [infoFile, moduleConfigFile] = parseFomodFiles(tree);
 
@@ -134,7 +135,7 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> >
 {
     const auto fomodDir = findFomodDirectory(tree);
     if (fomodDir == nullptr) {
-        log::error("FomodPlusInstaller::install - fomod directory not found");
+        log.logMessage(ERR, "FomodPlusInstaller::install - fomod directory not found");
         return { nullptr, nullptr };
     }
 
@@ -155,7 +156,7 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> >
     if (moduleConfig) {
         toExtract.push_back(moduleConfig);
     } else {
-        log::error("FomodPlusInstaller::install - error parsing moduleConfig.xml: Not Present");
+        log.logMessage(ERR, "FomodPlusInstaller::install - error parsing moduleConfig.xml: Not Present");
         return { nullptr, nullptr };
     }
     if (infoXML) {
@@ -168,7 +169,7 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> >
     try {
         moduleConfiguration->deserialize(paths.at(0).toStdString());
     } catch (XmlParseException& e) {
-        log::error("FomodPlusInstaller::install - error parsing moduleConfig.xml: {}", e.what());
+        log.logMessage(ERR, std::format("FomodPlusInstaller::install - error parsing moduleConfig.xml: {}", e.what()));
         return { nullptr, nullptr };
     }
 
@@ -177,7 +178,7 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> >
         try {
             infoFile->deserialize(paths.at(1).toStdString());
         } catch (XmlParseException& e) {
-            log::error("FomodPlusInstaller::install - error parsing info.xml: {}", e.what());
+            log.logMessage(ERR, std::format("FomodPlusInstaller::install - error parsing info.xml: {}", e.what()));
         }
     }
 
@@ -202,7 +203,7 @@ void FomodPlusInstaller::appendImageFiles(vector<shared_ptr<const FileTreeEntry>
 void FomodPlusInstaller::onInstallationStart(QString const& archive, const bool reinstallation,
     IModInterface* currentMod)
 {
-    mNotes = "";
+    mNotes         = "";
     mInstallerUsed = false;
     if (mFomodJson != nullptr) {
         mFomodJson = nullptr;
@@ -230,7 +231,7 @@ void FomodPlusInstaller::writeNotes(IModInterface* newMod) const
 
     const auto iniKey = "installationNotes";
     newMod->setPluginSetting(this->name(), iniKey, mNotes);
-    std::cout << "Wrote notes to meta.ini. Needs handler for adding to actual meta.ini 'notes' field." << std::endl;
+    log.logMessage(INFO, "Wrote notes to meta.ini. Needs handler for adding to actual meta.ini 'notes' field.");
 
     // const auto newModPath = mOrganizer->modList()->getMod(newMod->name())->absolutePath();
     // std::cout << "New mod path: " << newModPath.toStdString() << std::endl;

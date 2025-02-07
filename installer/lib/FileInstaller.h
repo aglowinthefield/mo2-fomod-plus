@@ -5,6 +5,7 @@
 
 #include "ConditionTester.h"
 #include "FlagMap.h"
+#include "Logger.h"
 #include "xml/ModuleConfiguration.h"
 
 
@@ -71,8 +72,11 @@ public:
 
     static std::vector<std::string> collectPositiveFileNamesFromDependencyPatterns(std::vector<DependencyPattern> patterns);
 
+    void addFiles(std::vector<File>& main, std::vector<File> toAdd) const;
+
 private:
     IOrganizer* mOrganizer;
+    Logger& log = Logger::getInstance();
     QString mFomodPath;
     std::shared_ptr<IFileTree> mFileTree;
     std::unique_ptr<ModuleConfiguration> mFomodFile;

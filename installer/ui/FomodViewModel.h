@@ -190,6 +190,7 @@ public:
     void setActivePlugin(const std::shared_ptr<PluginViewModel>& plugin) const { mActivePlugin = plugin; }
 
 private:
+    Logger& log = Logger::getInstance();
     MOBase::IOrganizer* mOrganizer = nullptr;
     std::unique_ptr<ModuleConfiguration> mFomodFile;
     std::unique_ptr<FomodInfoFile> mInfoFile;

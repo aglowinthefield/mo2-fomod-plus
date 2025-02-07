@@ -13,6 +13,7 @@
 
 #include <nlohmann/json.hpp>
 #include "FomodInstallerWindow.h"
+#include "lib/Logger.h"
 #include "xml/FomodInfoFile.h"
 #include "xml/ModuleConfiguration.h"
 
@@ -60,6 +61,7 @@ public:
     void writeNotes(IModInterface *newMod) const;
 
 private:
+    Logger& log = Logger::getInstance();
     IOrganizer* mOrganizer = nullptr;
     QString mFomodPath{};
     std::shared_ptr<nlohmann::json> mFomodJson{ nullptr };

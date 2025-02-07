@@ -23,7 +23,7 @@ FileInstaller::FileInstaller(
 std::shared_ptr<IFileTree> FileInstaller::install() const
 {
     const auto filesToInstall = collectFilesToInstall();
-    std::cout << "Installing " << filesToInstall.size() << " files" << std::endl;
+    log.logMessage(INFO, "Installing " + std::to_string(filesToInstall.size()) + " files");
 
     // update the file tree with the new files
     const std::shared_ptr<IFileTree> installTree = mFileTree->createOrphanTree();
@@ -33,7 +33,7 @@ std::shared_ptr<IFileTree> FileInstaller::install() const
         const auto sourcePath = getQualifiedFilePath(file.source);
         const auto sourceNode = mFileTree->find(QString::fromStdString(sourcePath));
         if (sourceNode == nullptr) {
-            std::cerr << "Could not find source: " << file.source << std::endl;
+            log.logMessage(ERR, "Could not find source: " + file.source);
             continue;
         }
         const auto targetPath = QString::fromStdString(file.destination);
@@ -184,10 +184,10 @@ std::vector<std::string> FileInstaller::collectPositiveFileNamesFromDependencyPa
 }
 
 // Generic vector appender
-void addFiles(std::vector<File>& main, std::vector<File> toAdd)
+void FileInstaller::addFiles(std::vector<File>& main, std::vector<File> toAdd) const
 {
     for (const auto& add : toAdd) {
-        std::cout << "Adding file with source: " << add.source << std::endl;
+        log.logMessage(INFO, "Adding file with source: " + add.source);
     }
     main.insert(main.end(), toAdd.begin(), toAdd.end());
 }
