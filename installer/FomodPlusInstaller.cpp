@@ -202,6 +202,11 @@ void FomodPlusInstaller::appendImageFiles(vector<shared_ptr<const FileTreeEntry>
 void FomodPlusInstaller::onInstallationStart(QString const& archive, const bool reinstallation,
     IModInterface* currentMod)
 {
+    mNotes = "";
+    mInstallerUsed = false;
+    if (mFomodJson != nullptr) {
+        mFomodJson = nullptr;
+    }
     IPluginInstallerSimple::onInstallationStart(archive, reinstallation, currentMod);
 }
 
