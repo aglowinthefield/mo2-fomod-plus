@@ -13,6 +13,8 @@
 
 #include "stringutil.h"
 
+using ScanCallbackFn = std::function<bool(IModInterface*, ScanResult result)>;
+
 bool FomodPlusScanner::init(IOrganizer* organizer)
 {
     mOrganizer = organizer;
@@ -24,7 +26,7 @@ bool FomodPlusScanner::init(IOrganizer* organizer)
 
     const QString description = "Greetings, traveler.\n"
         "This tool will scan your load order for mods installed via FOMOD.\n"
-        "It might take a minute to complete once you hit 'Scan', so please be patient!\n\n"
+        "It will also fix up any erroneous FOMOD flags from previous versions of FOMOD Plus :) \n\n"
         "Safe travels, and may your load order be free of conflicts.";
 
     const auto descriptionLabel = new QLabel(description, mDialog);
@@ -43,21 +45,21 @@ bool FomodPlusScanner::init(IOrganizer* organizer)
 
     const auto scanButton   = new QPushButton("Scan", mDialog);
     const auto cancelButton = new QPushButton("Cancel", mDialog);
-    const auto deleteButton = new QPushButton("Clear all info", mDialog);
+    // const auto deleteButton = new QPushButton("Clear all info", mDialog);
 
     layout->addWidget(descriptionLabel, 1);
     layout->addWidget(gifLabel, 1);
     layout->addWidget(mProgressBar, 1);
     layout->addWidget(scanButton, 1);
     layout->addWidget(cancelButton, 1);
-    layout->addSpacerItem(new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding)); // Add spacer line
-    layout->addWidget(new QLabel("Debugging only", mDialog), 1);
-    layout->addWidget(deleteButton, 1);
+    // layout->addSpacerItem(new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding)); // Add spacer line
+    // layout->addWidget(new QLabel("Debugging only", mDialog), 1);
+    // layout->addWidget(deleteButton, 1);
 
     connect(cancelButton, &QPushButton::clicked, mDialog, &QDialog::reject);
     connect(scanButton, &QPushButton::clicked, this, &FomodPlusScanner::onScanClicked);
     connect(mDialog, &QDialog::finished, this, &FomodPlusScanner::cleanup);
-    connect(deleteButton, &QPushButton::clicked, this, &FomodPlusScanner::onDeleteClicked);
+    // connect(deleteButton, &QPushButton::clicked, this, &FomodPlusScanner::onDeleteClicked);
 
     mDialog->setLayout(layout);
     mDialog->setMinimumSize(400, 300);
@@ -71,7 +73,7 @@ void FomodPlusScanner::onScanClicked() const
     mProgressBar->setVisible(true);
     const int added = scanLoadOrder(setFomodInfoForMod);
     mDialog->accept();
-    QMessageBox::information(mDialog, "Scan Complete", "The load order scan is complete. Added filter info to " + QString::number(added) + " mods.");
+    QMessageBox::information(mDialog, "Scan Complete", "The load order scan is complete. Updated filter info for " + QString::number(added) + " mods.");
     mOrganizer->refresh();
 }
 
@@ -94,16 +96,15 @@ void FomodPlusScanner::display() const
     mDialog->exec();
 }
 
-int FomodPlusScanner::scanLoadOrder(const std::function<bool(IModInterface*)>& callback) const
+int FomodPlusScanner::scanLoadOrder(const ScanCallbackFn& callback) const
 {
     int progress = 0;
     int modified = 0;
     for (const auto& modName : mOrganizer->modList()->allMods()) {
         const auto mod = mOrganizer->modList()->getMod(modName);
-        if (const int result = openInstallationArchive(mod); result == 0) {
-            if (callback(mod)) {
-                modified++;
-            }
+        const ScanResult result = openInstallationArchive(mod);
+        if (callback(mod, result)) {
+            modified++;
         }
         mProgressBar->setValue(++progress);
     }
@@ -147,49 +148,55 @@ std::ostream& operator<<(std::ostream& os, const Archive::Error& error)
     return os;
 }
 
-int FomodPlusScanner::openInstallationArchive(const IModInterface* mod) const
+ScanResult FomodPlusScanner::openInstallationArchive(const IModInterface* mod) const
 {
     const auto downloadsDir         = mOrganizer->downloadsPath();
     const auto installationFilePath = mod->installationFile();
 
     if (installationFilePath.isEmpty()) {
-        return -1;
+        return NO_ARCHIVE;
     }
 
-    const auto qualifiedInstallerPath = downloadsDir + "/" + installationFilePath;
+    const auto qualifiedInstallerPath = QDir(installationFilePath).isAbsolute() ? installationFilePath : downloadsDir + "/" + installationFilePath;
 
     const auto archive = CreateArchive();
 
     if (!archive->isValid()) {
         std::cerr << "[" << mod->name().toStdString() << "] Failed to load the archive module: " << archive->getLastError() << std::endl;
-        return -1;
+        return NO_ARCHIVE;
     }
 
     // Open the archive:
     if (!archive->open(qualifiedInstallerPath.toStdWString(), nullptr)) {
         std::cerr << "[" << mod->name().toStdString() << "] Failed to open the archive [" << qualifiedInstallerPath.toStdString() << "]: " << archive->getLastError() << std::endl;
-        return -1;
+        return NO_ARCHIVE;
     }
 
     // Mark all files for extraction to their path in the archive:
     if (hasFomodFiles(archive->getFileList())) {
         std::cout << "Found FOMOD files in " << qualifiedInstallerPath.toStdString() << std::endl;
-        return 0;
+        return HAS_FOMOD;
+    } else {
+        return NO_FOMOD;
     }
 
-    return -1;
+    return NO_ARCHIVE;
 }
 
-bool FomodPlusScanner::setFomodInfoForMod(IModInterface* mod)
+bool FomodPlusScanner::setFomodInfoForMod(IModInterface* mod, ScanResult result)
 {
-    const auto pluginName = "FOMOD Plus"; // TODO: can this be read from shared constants?
-    if (const auto setting = mod->pluginSetting(pluginName, "fomod", 0); setting == 0) {
+    const auto pluginName = "FOMOD Plus";
+    const auto setting = mod->pluginSetting(pluginName, "fomod", 0);
+    if (setting == 0 && HAS_FOMOD == result) {
         return mod->setPluginSetting(pluginName, "fomod", "{}");
+    }
+    if (setting != 0 && NO_FOMOD == result) {
+        return mod->setPluginSetting(pluginName, "fomod", 0);
     }
     return false;
 }
 
-bool FomodPlusScanner::removeFomodInfoFromMod(IModInterface* mod)
+bool FomodPlusScanner::removeFomodInfoFromMod(IModInterface* mod, ScanResult)
 {
     const auto pluginName = QString::fromStdString("FOMOD Plus"); // TODO: can this be read from shared constants?
     // const auto settings = mod->clearPluginSettings(pluginName);

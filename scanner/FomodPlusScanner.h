@@ -9,6 +9,13 @@
 
 using namespace MOBase;
 
+enum ScanResult {
+    HAS_FOMOD,
+    NO_FOMOD,
+    NO_ARCHIVE
+};
+
+
 class FomodPlusScanner final : public IPluginTool {
     Q_OBJECT
     Q_INTERFACES(MOBase::IPlugin MOBase::IPluginTool)
@@ -47,13 +54,13 @@ public:
 
     void display() const override;
 
-    int scanLoadOrder(const std::function<bool(IModInterface*)>& callback) const;
+    int scanLoadOrder(const std::function<bool(IModInterface*, ScanResult result)> &callback) const;
 
-    int openInstallationArchive(const IModInterface* mod) const;
+    ScanResult openInstallationArchive(const IModInterface* mod) const;
 
-    static bool setFomodInfoForMod(IModInterface* mod);
+    static bool setFomodInfoForMod(IModInterface *mod, ScanResult result);
 
-    static bool removeFomodInfoFromMod(IModInterface* mod);
+    static bool removeFomodInfoFromMod(IModInterface *mod, ScanResult);
 
 private:
     QDialog* mDialog{ nullptr };
