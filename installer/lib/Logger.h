@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 
@@ -17,20 +18,58 @@ enum LogLevel {
     ERR = 3
 };
 
-// Function to print log messages with colors
-inline void logMessage(const LogLevel level, const std::string& message) {
-    switch (level) {
-    case DEBUG:
-        std::cout << BLUE << "[DEBUG] " << message << RESET << std::endl;
-        break;
-    case INFO:
-        std::cout << GREEN << "[INFO] " << message << RESET << std::endl;
-        break;
-    case WARN:
-        std::cout << YELLOW << "[WARN] " << message << RESET << std::endl;
-        break;
-    case ERR:
-        std::cout << RED << "[ERROR] " << message << RESET << std::endl;
-        break;
+
+class Logger {
+public:
+    static Logger& getInstance()
+    {
+        static Logger instance;
+        return instance;
     }
-}
+
+    void setLogFilePath(const std::string& filePath)
+    {
+        std::lock_guard lock(mMutex);
+        if (mLogFile.is_open()) {
+            mLogFile.close();
+        }
+        mLogFile.open(filePath, std::ios::out | std::ios::app);
+    }
+
+    void logMessage(const LogLevel level, const std::string& message)
+    {
+        std::lock_guard lock(mMutex);
+        std::ostream& out = mLogFile.is_open() ? mLogFile : std::cout;
+        switch (level) {
+        case DEBUG:
+            out << BLUE << "[DEBUG] " << message << RESET << std::endl;
+            break;
+        case INFO:
+            out << GREEN << "[INFO] " << message << RESET << std::endl;
+            break;
+        case WARN:
+            out << YELLOW << "[WARN] " << message << RESET << std::endl;
+            break;
+        case ERR:
+            out << RED << "[ERROR] " << message << RESET << std::endl;
+            break;
+        }
+    }
+
+    Logger& operator=(const Logger&) = delete;
+
+private:
+    Logger() = default;
+
+    ~Logger()
+    {
+        if (mLogFile.is_open()) {
+            mLogFile.close();
+        }
+    }
+
+    Logger(const Logger&) = delete;
+
+    std::ofstream mLogFile;
+    std::mutex mMutex;
+};

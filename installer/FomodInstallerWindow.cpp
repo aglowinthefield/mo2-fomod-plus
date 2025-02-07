@@ -111,20 +111,28 @@ void FomodInstallerWindow::updateCheckboxStates() const
                 for (auto* checkbox : checkboxes) {
                     if (checkbox->objectName() == name) {
                         if (checkbox->isChecked() != plugin->isSelected()) {
+                            checkbox->blockSignals(true);
                             checkbox->setChecked(plugin->isSelected());
+                            checkbox->blockSignals(false);
                         }
                         if (checkbox->isEnabled() != plugin->isEnabled()) {
+                            checkbox->blockSignals(true);
                             checkbox->setEnabled(plugin->isEnabled());
+                            checkbox->blockSignals(false);
                         }
                     }
                 }
                 for (auto* radio : radioButtons) {
                     if (radio->objectName() == name) {
                         if (radio->isChecked() != plugin->isSelected()) {
+                            radio->blockSignals(true);
                             radio->setChecked(plugin->isSelected());
+                            radio->blockSignals(false);
                         }
                         if (radio->isEnabled() != plugin->isEnabled()) {
+                            radio->blockSignals(true);
                             radio->setEnabled(plugin->isEnabled());
+                            radio->blockSignals(false);
                         }
                     }
                 }
@@ -139,7 +147,11 @@ void FomodInstallerWindow::onPluginToggled(const bool selected, const std::share
     std::cout << "onPluginToggled called with " << plugin->getName() << " in " << group->getName() << ": " << selected
         << std::endl;
     mViewModel->togglePlugin(group, plugin, selected);
-    updateCheckboxStates();
+    try {
+        updateCheckboxStates();
+    } catch (Exception e) {
+        std::cerr << "Failed to update checkbox states: " << e.what() << std::endl;
+    }
     if (mNextInstallButton != nullptr) {
         updateButtons();
     }
