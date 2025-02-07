@@ -362,11 +362,12 @@ void FomodViewModel::togglePlugin(const std::shared_ptr<GroupViewModel>& group,
         }
     }
 
+    const auto stepIndex = group->getStepIndex();
+
     log.logMessage(INFO, "[VIEWMODEL] Toggling " + plugin->getName() + " to " + (selected ? "true" : "false"));
     plugin->setSelected(selected);
     setFlagForPluginState(plugin, selected);
 
-    const auto stepIndex = group->getStepIndex();
 
     if (mInitialized) {
         mActivePlugin = plugin;
@@ -379,8 +380,9 @@ void FomodViewModel::updateVisibleSteps() const
 {
     mVisibleStepIndices.clear();
     for (int i = 0; i < mSteps.size(); ++i) {
-        if (mConditionTester.testCompositeDependency(mFlags, mSteps[i]->getVisibilityConditions())) {
-            // log.logMessage(DEBUG, "Step " + std::to_string(i) + " is visible.");
+
+        // This also depends on previous flags that may have set this particular flag.
+        if (mConditionTester.isStepVisible(mFlags, mSteps[i]->getVisibilityConditions(), i, mSteps)) {
             mVisibleStepIndices.push_back(i);
         } else {
             log.logMessage(DEBUG, "Step " + std::to_string(i) + " is NOT visible.");

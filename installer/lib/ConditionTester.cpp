@@ -5,6 +5,44 @@
 #include <iplugingame.h>
 #include <ipluginlist.h>
 
+bool ConditionTester::isStepVisible(const std::shared_ptr<FlagMap>& flags,
+    const CompositeDependency& compositeDependency,
+    const int stepIndex,
+    const std::vector<std::shared_ptr<StepViewModel>>& steps) const
+{
+    // first things first: is it visible?
+    if (!testCompositeDependency(flags, compositeDependency)) {
+        return false;
+    }
+
+    const auto flagDependencies = compositeDependency.flagDependencies;
+    if (flagDependencies.empty()) {
+        return true;
+    }
+
+    std::set<int> stepsThatSetThisFlag;
+
+    for (const auto& flagDependency : flagDependencies) {
+        // for this flag, find the plugins that set it
+        for (int i = stepIndex - 1; i >= 0; --i) {
+            for (const auto& group : steps[i]->getGroups()) {
+                for (const auto& plugin : group->getPlugins()) {
+                    if (std::ranges::any_of(plugin->getPlugin()->conditionFlags.flags,
+                        [&flagDependency](const ConditionFlag& flag) {
+                            return flag.name == flagDependency.flag && flag.value == flagDependency.value;
+                        })) {
+                            stepsThatSetThisFlag.insert(i);
+                        }
+                }
+            }
+        }
+    }
+    return std::ranges::any_of(stepsThatSetThisFlag, [this, &steps, &flags](const int stepIndex) {
+        return isStepVisible(flags, steps[stepIndex]->getVisibilityConditions(), stepIndex, steps);
+    });
+
+}
+
 bool ConditionTester::testCompositeDependency(const std::shared_ptr<FlagMap>& flags,
     const CompositeDependency& compositeDependency) const
 {
@@ -16,7 +54,6 @@ bool ConditionTester::testCompositeDependency(const std::shared_ptr<FlagMap>& fl
     // flags->forEach([this](const std::string& flag, const std::string& value) {
     //     log.logMessage(DEBUG, "Flag: " + flag + ", Value: " + value);
     // });
-
 
     const auto fileDependencies   = compositeDependency.fileDependencies;
     const auto flagDependencies   = compositeDependency.flagDependencies;
@@ -106,7 +143,7 @@ PluginTypeEnum ConditionTester::getPluginTypeDescriptorState(const std::shared_p
     // ...well, I'm not sure.
     // ReSharper disable once CppTooWideScopeInitStatement
     const auto& dependencyType = plugin->typeDescriptor.dependencyType;
-    for ( const auto& pattern : dependencyType. patterns.patterns) {
+    for (const auto& pattern : dependencyType.patterns.patterns) {
         if (testCompositeDependency(flags, pattern.dependencies)) {
             return pattern.type;
         }

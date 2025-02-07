@@ -7,11 +7,18 @@
 #include "Logger.h"
 #include "../xml/ModuleConfiguration.h"
 
+#include <complex.h>
+
 class CompositeDependency;
+class StepViewModel;
 
 class ConditionTester {
 public:
     explicit ConditionTester(MOBase::IOrganizer* organizer) : mOrganizer(organizer) {}
+
+    bool isStepVisible(const std::shared_ptr<FlagMap>& flags, const CompositeDependency& compositeDependency,
+        int stepIndex,
+        const std::vector<std::shared_ptr<StepViewModel>>& steps) const;
 
     bool testCompositeDependency(const std::shared_ptr<FlagMap>& flags,
         const CompositeDependency& compositeDependency) const;

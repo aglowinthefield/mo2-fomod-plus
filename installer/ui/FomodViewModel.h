@@ -32,6 +32,7 @@ public:
 
     friend class FomodViewModel;
     friend class FileInstaller;
+    friend class ConditionTester;
 
 protected:
     [[nodiscard]] std::shared_ptr<Plugin> getPlugin() const { return plugin; }
