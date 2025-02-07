@@ -151,9 +151,11 @@ public:
     const;
 
     void forEachFuturePlugin(
-        const std::function<void(const std::shared_ptr<GroupViewModel>&, const std::shared_ptr<PluginViewModel>&)>&
-        callback)
+        int fromStepIndex, const std::function<void(const std::shared_ptr<GroupViewModel>&, const std::shared_ptr<
+            PluginViewModel>&)> &callback)
     const;
+
+    void selectFromJson(nlohmann::json json) const;
 
     [[nodiscard]] const std::shared_ptr<PluginViewModel>& getFirstPluginForActiveStep() const;
 
@@ -221,7 +223,7 @@ private:
 
     void enforceGroupConstraints() const;
 
-    void processPluginConditions() const;
+    void processPluginConditions(int fromStepIndex) const;
 
 
     // Indices

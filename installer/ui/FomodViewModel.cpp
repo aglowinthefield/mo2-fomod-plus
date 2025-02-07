@@ -47,7 +47,7 @@ std::shared_ptr<FomodViewModel> FomodViewModel::create(MOBase::IOrganizer* organ
     }
     viewModel->createStepViewModels();
     viewModel->enforceGroupConstraints();
-    viewModel->processPluginConditions();
+    viewModel->processPluginConditions(0);
     viewModel->updateVisibleSteps();
     viewModel->mInitialized  = true;
     viewModel->mActiveStep   = viewModel->mSteps.at(0);
@@ -86,11 +86,12 @@ void FomodViewModel::forEachPlugin(
 }
 
 void FomodViewModel::forEachFuturePlugin(
+    const int fromStepIndex,
     const std::function<void(const std::shared_ptr<GroupViewModel>&, const std::shared_ptr<PluginViewModel>&)>&
     callback) const
 {
     for (int i = 0; i < mSteps.size(); ++i) {
-        if (i <= mCurrentStepIndex) {
+        if (i <= fromStepIndex) {
             continue;
         }
         for (const auto& groupViewModel : mSteps[i]->getGroups()) {
@@ -99,6 +100,40 @@ void FomodViewModel::forEachFuturePlugin(
             }
         }
     }
+}
+
+void FomodViewModel::selectFromJson(nlohmann::json json) const
+{
+
+    const auto jsonSteps = json["steps"];
+
+    for (int stepIndex = 0; stepIndex < jsonSteps.size(); ++stepIndex) {
+
+        const auto currentStep = mSteps[stepIndex];
+        const auto& step = jsonSteps[stepIndex];
+
+        for (int groupIndex = 0; groupIndex < step["groups"].size(); ++groupIndex) {
+
+            const auto& group        = step["groups"][groupIndex];
+            const auto currentGroup = currentStep->getGroups()[groupIndex];
+
+            for (const auto & jsonPlugin : group["plugins"]) {
+
+                const auto& allPlugins = currentGroup->getPlugins();
+
+                const auto& currentPlugin = std::ranges::find_if(allPlugins,
+                    [&jsonPlugin](const std::shared_ptr<PluginViewModel>& p) {
+                        return p->getName() == jsonPlugin.get<std::string>();
+                    });
+
+                if ((*currentPlugin)->isSelected()) {
+                    continue;
+                }
+                togglePlugin(currentGroup, *currentPlugin, true);
+            }
+        }
+    }
+
 }
 
 void FomodViewModel::createStepViewModels()
@@ -246,7 +281,9 @@ void FomodViewModel::processPlugin(const std::shared_ptr<GroupViewModel>& groupV
     switch (typeDescriptor) {
     case PluginTypeEnum::Recommended:
         pluginViewModel->setEnabled(true);
-        togglePlugin(groupViewModel, pluginViewModel, true);
+        if (!pluginViewModel->isSelected()) {
+            togglePlugin(groupViewModel, pluginViewModel, true);
+        }
         break;
     case PluginTypeEnum::Required:
         pluginViewModel->setEnabled(false);
@@ -272,11 +309,11 @@ void FomodViewModel::processPlugin(const std::shared_ptr<GroupViewModel>& groupV
     }
 }
 
-void FomodViewModel::processPluginConditions() const
+void FomodViewModel::processPluginConditions(const int fromStepIndex) const
 {
     // We only want to update plugins that haven't been seen yet. Otherwise we could undo manual selections by the user.
     if (mInitialized) {
-        forEachFuturePlugin([this](const auto& groupViewModel, const auto& pluginViewModel) {
+        forEachFuturePlugin(fromStepIndex, [this](const auto& groupViewModel, const auto& pluginViewModel) {
             processPlugin(groupViewModel, pluginViewModel);
         });
     } else {
@@ -289,7 +326,10 @@ void FomodViewModel::processPluginConditions() const
 void FomodViewModel::setFlagForPluginState(const std::shared_ptr<PluginViewModel>& plugin, const bool selected) const
 {
     for (const auto& flag : plugin->plugin->conditionFlags.flags) {
-        mFlags->setFlag(flag.name, selected ? flag.value : "");
+        const auto flagValue = selected ? flag.value : "";
+        log.logMessage(DEBUG, "Setting flag " + flag.name + " to " + flagValue);
+        mFlags->setFlag(flag.name, flagValue);
+        log.logMessage(DEBUG, "Flag " + flag.name + " set? " + mFlags->getFlag(flag.name));
     }
 }
 
@@ -299,18 +339,38 @@ void FomodViewModel::setFlagForPluginState(const std::shared_ptr<PluginViewModel
  *  togglePlugin(group, modB, false)
  *  togglePlugin(group, modA, true)
  */
-void FomodViewModel::togglePlugin(const std::shared_ptr<GroupViewModel>&,
+void FomodViewModel::togglePlugin(const std::shared_ptr<GroupViewModel>& group,
     const std::shared_ptr<PluginViewModel>& plugin, const bool selected) const
 {
     if (plugin->isSelected() == selected) {
+        log.logMessage(DEBUG, "Plugin " + plugin->getName() + " is already " + (selected ? "selected" : "deselected"));
         return;
     }
+
+    // Disable other radio options first.
+    bool isRadioLike = group->getType() == SelectExactlyOne || (group->getType() == SelectAtMostOne && group->
+        getPlugins().size() > 1);
+
+    if (selected && isRadioLike) {
+        for (const auto& pluginViewModel : group->getPlugins()) {
+            if (pluginViewModel != plugin) {
+                log.logMessage(DEBUG,
+                    "Deselecting " + pluginViewModel->getName() + " because " + plugin->getName() + " was selected.");
+                pluginViewModel->setSelected(false);
+                setFlagForPluginState(pluginViewModel, false);
+            }
+        }
+    }
+
+    log.logMessage(INFO, "[VIEWMODEL] Toggling " + plugin->getName() + " to " + (selected ? "true" : "false"));
     plugin->setSelected(selected);
     setFlagForPluginState(plugin, selected);
 
+    const auto stepIndex = group->getStepIndex();
+
     if (mInitialized) {
         mActivePlugin = plugin;
-        processPluginConditions();
+        processPluginConditions(stepIndex);
         updateVisibleSteps();
     }
 }
@@ -320,7 +380,13 @@ void FomodViewModel::updateVisibleSteps() const
     mVisibleStepIndices.clear();
     for (int i = 0; i < mSteps.size(); ++i) {
         if (mConditionTester.testCompositeDependency(mFlags, mSteps[i]->getVisibilityConditions())) {
+            // log.logMessage(DEBUG, "Step " + std::to_string(i) + " is visible.");
             mVisibleStepIndices.push_back(i);
+        } else {
+            log.logMessage(DEBUG, "Step " + std::to_string(i) + " is NOT visible.");
+            mFlags->forEach([this](const std::string& flag, const std::string& value) {
+                log.logMessage(DEBUG, "Flag: " + flag + ", Value: " + value);
+            });
         }
     }
 }

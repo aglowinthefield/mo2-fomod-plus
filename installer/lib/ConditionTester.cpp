@@ -8,9 +8,15 @@
 bool ConditionTester::testCompositeDependency(const std::shared_ptr<FlagMap>& flags,
     const CompositeDependency& compositeDependency) const
 {
-    if (compositeDependency.totalDependencies == 0) {
-        return true;
-    }
+    // if (compositeDependency.totalDependencies == 0) {
+    //     return true;
+    // }
+    //
+    // Log the flags
+    // flags->forEach([this](const std::string& flag, const std::string& value) {
+    //     log.logMessage(DEBUG, "Flag: " + flag + ", Value: " + value);
+    // });
+
 
     const auto fileDependencies   = compositeDependency.fileDependencies;
     const auto flagDependencies   = compositeDependency.flagDependencies;

@@ -106,23 +106,35 @@ void FomodInstallerWindow::updateCheckboxStates() const
                 const auto name = createObjectName(plugin, group);
                 // Find the corresponding checkbox and update its state
                 for (auto* checkbox : checkboxes) {
-                    if (checkbox->objectName() == name) {
-                        if (checkbox->isChecked() != plugin->isSelected()) {
-                            checkbox->setChecked(plugin->isSelected());
-                        }
-                        if (checkbox->isEnabled() != plugin->isEnabled()) {
-                            checkbox->setEnabled(plugin->isEnabled());
-                        }
+                    if (checkbox->objectName() != name) {
+                        continue;
+                    }
+                    if (checkbox->isChecked() != plugin->isSelected()) {
+                        log.logMessage(DEBUG,
+                            "Updating " + plugin->getName() + " to state: " + (plugin->isSelected() ? "TRUE" : "FALSE")
+                            +
+                            " because radio button selection state is " + (checkbox->isChecked() ? "TRUE" : "FALSE"));
+                        checkbox->setChecked(plugin->isSelected());
+                    }
+                    if (checkbox->isEnabled() != plugin->isEnabled()) {
+                        checkbox->setEnabled(plugin->isEnabled());
                     }
                 }
                 for (auto* radio : radioButtons) {
-                    if (radio->objectName() == name) {
-                        if (radio->isChecked() != plugin->isSelected()) {
-                            radio->setChecked(plugin->isSelected());
-                        }
-                        if (radio->isEnabled() != plugin->isEnabled()) {
-                            radio->setEnabled(plugin->isEnabled());
-                        }
+                    if (radio->objectName() != name) {
+                        continue;
+                    }
+                    if (radio->isEnabled() != plugin->isEnabled()) {
+                        radio->setEnabled(plugin->isEnabled());
+                    }
+                    if (radio->isChecked() != plugin->isSelected()) {
+                        log.logMessage(DEBUG,
+                            "Updating " + plugin->getName() + " to state: " + (plugin->isSelected() ? "TRUE" : "FALSE")
+                            +
+                            " because radio button selection state is " + (radio->isChecked() ? "TRUE" : "FALSE"));
+                        radio->blockSignals(true);
+                        radio->setChecked(plugin->isSelected());
+                        radio->blockSignals(false);
                     }
                 }
             }
@@ -137,11 +149,7 @@ void FomodInstallerWindow::onPluginToggled(const bool selected, const std::share
         "onPluginToggled called with " + plugin->getName() + " in " + group->getName() + ": " +
         std::to_string(selected));
     mViewModel->togglePlugin(group, plugin, selected);
-    try {
-        updateCheckboxStates();
-    } catch (Exception e) {
-        std::cerr << "Failed to update checkbox states: " << e.what() << std::endl;
-    }
+    updateCheckboxStates();
     if (mNextInstallButton != nullptr) {
         updateButtons();
     }
@@ -474,16 +482,16 @@ QRadioButton* FomodInstallerWindow::createPluginRadioButton(const std::shared_pt
     radioButton->installEventFilter(hoverFilter);
     connect(hoverFilter, &HoverEventFilter::hovered, this, &FomodInstallerWindow::onPluginHovered);
 
+    connect(radioButton, &QRadioButton::toggled, this, [this, radioButton, group, plugin](const bool checked) {
+        log.logMessage(INFO,
+            "Received toggled signal for radio: " + plugin->getName() + ": " + (checked ? "true" : "false") +
+            " Radio is now" + (radioButton->isChecked() ? "true" : "false"));
+        onPluginToggled(checked, group, plugin);
+    });
+
     radioButton->setEnabled(plugin->isEnabled());
     radioButton->setChecked(plugin->isSelected());
     // Bind to model function
-    connect(radioButton, &QRadioButton::toggled, this, [this, radioButton, group, plugin](const bool checked) {
-        if (radioButton->isChecked() == checked) {
-            return;
-        }
-        log.logMessage(INFO, "Received toggled signal for radio button: " + plugin->getName() + ": " + (checked ? "true" : "false"));
-        onPluginToggled(checked, group, plugin);
-    });
 
     return radioButton;
 }
@@ -502,10 +510,9 @@ QCheckBox* FomodInstallerWindow::createPluginCheckBox(const std::shared_ptr<Plug
     checkBox->setEnabled(plugin->isEnabled());
     checkBox->setChecked(plugin->isSelected());
     connect(checkBox, &QCheckBox::toggled, this, [this, checkBox, group, plugin](const bool checked) {
-        if (checkBox->isChecked() == checked) {
-            return;
-        }
-        log.logMessage(INFO, "Received toggled signal for checkbox: " + plugin->getName() + ": " + (checked ? "true" : "false"));
+        log.logMessage(INFO,
+            "Received toggled signal for checkbox: " + plugin->getName() + ": " + (checked ? "true" : "false") +
+            " Checkbox was previously " + (checkBox->isChecked() ? "true" : "false"));
         onPluginToggled(checked, group, plugin);
     });
     return checkBox;
@@ -566,8 +573,6 @@ void FomodInstallerWindow::applyFnFromJson(const std::function<void(QAbstractBut
         return;
     }
 
-    log.logMessage(INFO, "Existing JSON provided: " + mFomodJson.dump(4));
-
     const auto jsonSteps = mFomodJson["steps"];
     // for each step in JSON, create a <group>-<plugin> string out of the { groups: [ { plugins... } ] } array
     vector<std::string> selectedPlugins;
@@ -623,9 +628,15 @@ void FomodInstallerWindow::stylePreviouslySelectedOptions()
 void FomodInstallerWindow::selectPreviouslySelectedOptions()
 {
     log.logMessage(INFO, "Selecting previously selected choices");
-    applyFnFromJson([](QAbstractButton* button) {
-        if (button->isEnabled()) {
-            button->setChecked(true);
-        }
-    });
+    log.logMessage(INFO, "Existing JSON provided: " + mFomodJson.dump(4));
+    if (mFomodJson.empty()) {
+        return;
+    }
+    mViewModel->selectFromJson(mFomodJson);
+    updateCheckboxStates();
+    // applyFnFromJson([](QAbstractButton* button) {
+    //     if (button->isEnabled()) {
+    //         button->setChecked(true);
+    //     }
+    // });
 }

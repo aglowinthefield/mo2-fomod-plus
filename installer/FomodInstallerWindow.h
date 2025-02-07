@@ -97,6 +97,7 @@ private:
     GuessedValue<QString>& mModName;
     std::shared_ptr<IFileTree> mTree;
     std::shared_ptr<FomodViewModel> mViewModel;
+    bool mInitialized{false};
 
     // Meta
     bool mIsManualInstall{};
