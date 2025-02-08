@@ -119,15 +119,16 @@ void FomodViewModel::selectFromJson(nlohmann::json json) const
 
             for (const auto & jsonPlugin : group["plugins"]) {
 
-                const auto& allPlugins = currentGroup->getPlugins();
+                const auto allPlugins = currentGroup->getPlugins();
+                log.logMessage(DEBUG, "Looking for plugin " + jsonPlugin.get<std::string>());
 
-                const auto& currentPlugin = std::ranges::find_if(allPlugins,
+                const auto currentPlugin = std::ranges::find_if(allPlugins,
                     [&jsonPlugin](const std::shared_ptr<PluginViewModel>& p) {
                         return p->getName() == jsonPlugin.get<std::string>();
                     });
 
-                if (!currentPlugin->get()) {
-                    return;
+                if (currentPlugin == allPlugins.end()) {
+                    continue;
                 }
 
                 if ((*currentPlugin)->isSelected()) {
