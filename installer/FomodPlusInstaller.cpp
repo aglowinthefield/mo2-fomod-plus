@@ -91,6 +91,7 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
     int& nexusID)
 {
 
+
     log.logMessage(INFO, std::format("FomodPlusInstaller::install - modName: {}, version: {}, nexusID: {}",
         modName->toStdString(),
         version.toStdString(),
@@ -124,6 +125,7 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
     }
     return RESULT_CANCELED;
 }
+
 
 /**
  *

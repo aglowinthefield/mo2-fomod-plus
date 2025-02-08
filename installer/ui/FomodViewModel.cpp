@@ -271,7 +271,6 @@ void FomodViewModel::enforceGroupConstraints() const
 void FomodViewModel::processPlugin(const std::shared_ptr<GroupViewModel>& groupViewModel,
     const std::shared_ptr<PluginViewModel>& pluginViewModel) const
 {
-    // Might be a workaround. lets see.
     if (groupViewModel->getType() == SelectAll) {
         return;
     }
@@ -327,11 +326,10 @@ void FomodViewModel::processPluginConditions(const int fromStepIndex) const
 
 void FomodViewModel::setFlagForPluginState(const std::shared_ptr<PluginViewModel>& plugin, const bool selected) const
 {
+    log.logMessage(DEBUG, "Setting flags for " + plugin->getName());
     for (const auto& flag : plugin->plugin->conditionFlags.flags) {
-        if (flag.value == "LuxVia") {
-            log.logMessage(DEBUG, "LuxVia flag found. Setting to " + (selected ? flag.value : ""));
-        }
         const auto flagValue = selected ? flag.value : "";
+        log.logMessage(DEBUG, "Setting flag " + flag.name + " to " + flagValue);
         mFlags->setFlag(flag.name, flagValue);
     }
 }
@@ -390,18 +388,24 @@ void FomodViewModel::updateVisibleSteps() const
             mVisibleStepIndices.push_back(i);
         } else {
             log.logMessage(DEBUG, "Step " + std::to_string(i) + " is NOT visible.");
-            mFlags->forEach([this](const std::string& flag, const std::string& value) {
-                log.logMessage(DEBUG, "Flag: " + flag + ", Value: " + value);
-            });
         }
     }
 }
 
 void FomodViewModel::rebuildConditionFlags() const
 {
-    forEachPlugin([this](const auto group, const auto plugin) {
-        setFlagForPluginState(plugin, plugin->isSelected());
+    mFlags->clearAll();
+    forEachPlugin([this](const auto&, const auto& plugin) {
+        if (plugin->isSelected()) {
+            setFlagForPluginState(plugin, plugin->isSelected());
+        }
     });
+    log.logMessage(DEBUG, "Rebuilt flags");
+    log.logMessage(DEBUG, "-------------");
+    mFlags->forEach([this](const std::string& flag, const std::string& value) {
+        log.logMessage(DEBUG, "Flag: " + flag + ", Value: " + value);
+    });
+    log.logMessage(DEBUG, "-------------");
 }
 
 /*

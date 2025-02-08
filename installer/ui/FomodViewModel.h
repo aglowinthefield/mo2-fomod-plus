@@ -229,7 +229,6 @@ private:
 
     void processPluginConditions(int fromStepIndex) const;
 
-
     // Indices
     int mCurrentStepIndex{ 0 };
 };

@@ -27,6 +27,11 @@ public:
         }
     }
 
+    void clearAll()
+    {
+        flags.clear();
+    }
+
 
 private:
     std::unordered_map<std::string, std::string> flags;
