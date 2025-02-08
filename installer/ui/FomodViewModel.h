@@ -28,6 +28,7 @@ public:
     [[nodiscard]] std::string getImagePath() const { return plugin->image.path; }
     [[nodiscard]] bool isSelected() const { return selected; }
     [[nodiscard]] bool isEnabled() const { return enabled; }
+    [[nodiscard]] std::vector<ConditionFlag> getConditionFlags() const { return plugin->conditionFlags.flags; }
     int getOwnIndex() const { return ownIndex; }
 
     friend class FomodViewModel;
@@ -167,6 +168,8 @@ public:
     [[deprecated]] void setCurrentStepIndex(const int index) { mCurrentStepIndex = index; }
 
     void updateVisibleSteps() const;
+
+    void rebuildConditionFlags() const;
 
     void preinstall(const std::shared_ptr<MOBase::IFileTree>& tree, const QString& fomodPath);
 

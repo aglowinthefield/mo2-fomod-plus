@@ -2,6 +2,9 @@
 #include "xml/ModuleConfiguration.h"
 #include "lib/Logger.h"
 
+using GroupCallback = std::function<void(const std::shared_ptr<GroupViewModel>&)>;
+using PluginCallback = std::function<void(const std::shared_ptr<GroupViewModel>&, const std::shared_ptr<PluginViewModel>&)>;
+
 /*
 --------------------------------------------------------------------------------
                                Lifecycle
@@ -61,9 +64,7 @@ std::shared_ptr<FomodViewModel> FomodViewModel::create(MOBase::IOrganizer* organ
 --------------------------------------------------------------------------------
 */
 
-void FomodViewModel::forEachGroup(
-    const std::function<void(const std::shared_ptr<GroupViewModel>&)>&
-    callback) const
+void FomodViewModel::forEachGroup(const GroupCallback& callback) const
 {
     for (const auto& stepViewModel : mSteps) {
         for (const auto& groupViewModel : stepViewModel->getGroups()) {
@@ -72,9 +73,7 @@ void FomodViewModel::forEachGroup(
     }
 }
 
-void FomodViewModel::forEachPlugin(
-    const std::function<void(const std::shared_ptr<GroupViewModel>&, const std::shared_ptr<PluginViewModel>&)>&
-    callback) const
+void FomodViewModel::forEachPlugin(const PluginCallback& callback) const
 {
     for (const auto& stepViewModel : mSteps) {
         for (const auto& groupViewModel : stepViewModel->getGroups()) {
@@ -85,10 +84,7 @@ void FomodViewModel::forEachPlugin(
     }
 }
 
-void FomodViewModel::forEachFuturePlugin(
-    const int fromStepIndex,
-    const std::function<void(const std::shared_ptr<GroupViewModel>&, const std::shared_ptr<PluginViewModel>&)>&
-    callback) const
+void FomodViewModel::forEachFuturePlugin(const int fromStepIndex, const PluginCallback& callback) const
 {
     for (int i = 0; i < mSteps.size(); ++i) {
         if (i <= fromStepIndex) {
@@ -332,10 +328,11 @@ void FomodViewModel::processPluginConditions(const int fromStepIndex) const
 void FomodViewModel::setFlagForPluginState(const std::shared_ptr<PluginViewModel>& plugin, const bool selected) const
 {
     for (const auto& flag : plugin->plugin->conditionFlags.flags) {
+        if (flag.value == "LuxVia") {
+            log.logMessage(DEBUG, "LuxVia flag found. Setting to " + (selected ? flag.value : ""));
+        }
         const auto flagValue = selected ? flag.value : "";
-        log.logMessage(DEBUG, "Setting flag " + flag.name + " to " + flagValue);
         mFlags->setFlag(flag.name, flagValue);
-        log.logMessage(DEBUG, "Flag " + flag.name + " set? " + mFlags->getFlag(flag.name));
     }
 }
 
@@ -374,7 +371,6 @@ void FomodViewModel::togglePlugin(const std::shared_ptr<GroupViewModel>& group,
     plugin->setSelected(selected);
     setFlagForPluginState(plugin, selected);
 
-
     if (mInitialized) {
         mActivePlugin = plugin;
         processPluginConditions(stepIndex);
@@ -385,6 +381,8 @@ void FomodViewModel::togglePlugin(const std::shared_ptr<GroupViewModel>& group,
 void FomodViewModel::updateVisibleSteps() const
 {
     mVisibleStepIndices.clear();
+    rebuildConditionFlags();
+
     for (int i = 0; i < mSteps.size(); ++i) {
 
         // This also depends on previous flags that may have set this particular flag.
@@ -397,6 +395,13 @@ void FomodViewModel::updateVisibleSteps() const
             });
         }
     }
+}
+
+void FomodViewModel::rebuildConditionFlags() const
+{
+    forEachPlugin([this](const auto group, const auto plugin) {
+        setFlagForPluginState(plugin, plugin->isSelected());
+    });
 }
 
 /*

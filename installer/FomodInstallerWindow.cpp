@@ -632,7 +632,11 @@ void FomodInstallerWindow::selectPreviouslySelectedOptions()
     if (mFomodJson.empty()) {
         return;
     }
-    mViewModel->selectFromJson(mFomodJson);
+    try {
+        mViewModel->selectFromJson(mFomodJson);
+    } catch (Exception e) {
+        log.logMessage(ERR, std::string("Error selecting previously selected options: ") + e.what());
+    }
     updateCheckboxStates();
     // applyFnFromJson([](QAbstractButton* button) {
     //     if (button->isEnabled()) {

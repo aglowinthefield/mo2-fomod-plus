@@ -5,11 +5,24 @@
 #include <iplugingame.h>
 #include <ipluginlist.h>
 
+std::string setToString(const std::set<int> &set)
+{
+    std::string str = "";
+    for (const auto& i : set) {
+        str += std::to_string(i) + ", ";
+    }
+    return str;
+}
+
 bool ConditionTester::isStepVisible(const std::shared_ptr<FlagMap>& flags,
     const CompositeDependency& compositeDependency,
     const int stepIndex,
     const std::vector<std::shared_ptr<StepViewModel>>& steps) const
 {
+
+    if (steps[stepIndex]->getName() == "Lux Via - bridges patch") {
+        log.logMessage(DEBUG, "testing lux via bridges");
+    }
     // first things first: is it visible?
     if (!testCompositeDependency(flags, compositeDependency)) {
         return false;
@@ -22,11 +35,11 @@ bool ConditionTester::isStepVisible(const std::shared_ptr<FlagMap>& flags,
 
     std::set<int> stepsThatSetThisFlag;
 
-    for (const auto& flagDependency : flagDependencies) {
+    for (const auto flagDependency : flagDependencies) {
         // for this flag, find the plugins that set it
         for (int i = stepIndex - 1; i >= 0; --i) {
-            for (const auto& group : steps[i]->getGroups()) {
-                for (const auto& plugin : group->getPlugins()) {
+            for (const auto group : steps[i]->getGroups()) {
+                for (const auto plugin : group->getPlugins()) {
                     if (std::ranges::any_of(plugin->getPlugin()->conditionFlags.flags,
                         [&flagDependency](const ConditionFlag& flag) {
                             return flag.name == flagDependency.flag && flag.value == flagDependency.value;
@@ -37,9 +50,14 @@ bool ConditionTester::isStepVisible(const std::shared_ptr<FlagMap>& flags,
             }
         }
     }
-    return std::ranges::any_of(stepsThatSetThisFlag, [this, &steps, &flags](const int stepIndex) {
+    const auto anyVisible = std::ranges::any_of(stepsThatSetThisFlag, [this, &steps, &flags](const int stepIndex) {
         return isStepVisible(flags, steps[stepIndex]->getVisibilityConditions(), stepIndex, steps);
     });
+    if (!anyVisible) {
+        log.logMessage(DEBUG, "Step " + steps[stepIndex]->getName() + " has no dependent steps that are visible.");
+        log.logMessage(DEBUG, "Steps that set this flag: " + setToString(stepsThatSetThisFlag));
+    }
+    return anyVisible;
 
 }
 
