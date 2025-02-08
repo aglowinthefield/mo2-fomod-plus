@@ -126,6 +126,10 @@ void FomodViewModel::selectFromJson(nlohmann::json json) const
                         return p->getName() == jsonPlugin.get<std::string>();
                     });
 
+                if (!currentPlugin->get()) {
+                    return;
+                }
+
                 if ((*currentPlugin)->isSelected()) {
                     continue;
                 }
@@ -243,8 +247,9 @@ void FomodViewModel::enforceSelectAtLeastOneConstraint(const std::shared_ptr<Gro
     }
 
     if (groupViewModel->getPlugins().size() == 1) {
-        const auto& plugin = groupViewModel->getPlugins().at(0);
+        const auto plugin = groupViewModel->getPlugins().at(0);
         if (mConditionTester.getPluginTypeDescriptorState(plugin->getPlugin(), mFlags) != PluginTypeEnum::NotUsable) {
+            log.logMessage(DEBUG, "Selecting " + plugin->getName() + " because it's the only plugin in a SelectAtLeastOne.");
             togglePlugin(groupViewModel, plugin, true);
             plugin->setEnabled(false);
         }
