@@ -40,7 +40,7 @@ public:
 
     [[nodiscard]] unsigned int priority() const override
     {
-        return 120; /* Above installer_fomod's highest priority. */
+        return 999; /* Above installer_fomod's highest priority. */
     }
 
     [[nodiscard]] bool isManualInstaller() const override { return false; }

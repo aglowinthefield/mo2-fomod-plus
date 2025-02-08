@@ -122,7 +122,7 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
     if (window->isManualInstall()) {
         return RESULT_MANUALREQUESTED;
     }
-    return RESULT_NOTATTEMPTED;
+    return RESULT_CANCELED;
 }
 
 /**
