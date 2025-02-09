@@ -326,7 +326,9 @@ void FomodViewModel::processPluginConditions(const int fromStepIndex) const
 
 void FomodViewModel::setFlagForPluginState(const std::shared_ptr<PluginViewModel>& plugin, const bool selected) const
 {
-    log.logMessage(DEBUG, "Setting flags for " + plugin->getName());
+    if (!plugin->getPlugin()->conditionFlags.flags.empty()) {
+        log.logMessage(DEBUG, "Setting flags for " + plugin->getName());
+    }
     for (const auto& flag : plugin->plugin->conditionFlags.flags) {
         const auto flagValue = selected ? flag.value : "";
         log.logMessage(DEBUG, "Setting flag " + flag.name + " to " + flagValue);

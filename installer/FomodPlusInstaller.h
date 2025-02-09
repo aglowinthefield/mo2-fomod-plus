@@ -42,6 +42,7 @@ public:
     {
         return 999; /* Above installer_fomod's highest priority. */
     }
+    std::vector<std::shared_ptr<const IPluginRequirement>> requirements() const override;
 
     [[nodiscard]] bool isManualInstaller() const override { return false; }
 

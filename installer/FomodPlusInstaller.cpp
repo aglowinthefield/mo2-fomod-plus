@@ -18,23 +18,31 @@
 #include <QMessageBox>
 #include <QSettings>
 
+using namespace Qt::Literals::StringLiterals;
+
 bool FomodPlusInstaller::init(IOrganizer* organizer)
 {
     mOrganizer = organizer;
     log.setLogFilePath(QDir::currentPath().toStdString() + "/logs/fomodplus.log");
-    setupUiInjection();
+    // mOrganizer->onUserInterfaceInitialized([this](QMainWindow*) {
+        setupUiInjection();
+    // });
     return true;
 }
 
 void FomodPlusInstaller::setupUiInjection() const
 {
-    if (!mOrganizer) {
-        std::cerr << "Organizer is null" << std::endl;
-        return;
-    }
     const auto fomodContent = std::make_shared<FomodDataContent>(mOrganizer);
     // const auto managedGamePlugin = const_cast<IPluginGame *>(mOrganizer->managedGame());
     mOrganizer->gameFeatures()->registerFeature(fomodContent, 0, false);
+}
+
+std::vector<std::shared_ptr<const IPluginRequirement> > FomodPlusInstaller::requirements() const
+{
+    return { Requirements::gameDependency(
+    { u"Oblivion"_s, u"Fallout 3"_s, u"New Vegas"_s, u"Skyrim"_s, u"Enderal"_s,
+      u"Fallout 4"_s, u"Skyrim Special Edition"_s, u"Enderal Special Edition"_s,
+      u"Skyrim VR"_s, u"Fallout 4 VR"_s, u"Starfield"_s }) };
 }
 
 bool FomodPlusInstaller::isArchiveSupported(std::shared_ptr<const IFileTree> tree) const
@@ -90,7 +98,6 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
     std::shared_ptr<IFileTree>& tree, QString& version,
     int& nexusID)
 {
-
 
     log.logMessage(INFO, std::format("FomodPlusInstaller::install - modName: {}, version: {}, nexusID: {}",
         modName->toStdString(),

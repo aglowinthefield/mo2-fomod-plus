@@ -3,15 +3,16 @@
 
 #include <imoinfo.h>
 #include <moddatacontent.h>
+#include "gamebryomoddatacontent.h"
 
 namespace FomodDataContentConstants {
 constexpr int FOMOD_CONTENT_ID = 400400;
 }
 
-class FomodDataContent final : public MOBase::ModDataContent {
+class FomodDataContent final : public GamebryoModDataContent {
 public:
     explicit
-    FomodDataContent(MOBase::IOrganizer* organizer) : mOrganizer(organizer) {}
+    FomodDataContent(MOBase::IOrganizer* organizer);
 
     [[nodiscard]] std::vector<Content> getAllContents() const override;
 
