@@ -229,5 +229,9 @@ std::vector<File> FileInstaller::collectFilesToInstall() const
         return a.priority < b.priority;
     });
 
+    for (auto toInstall : filesToInstall) {
+        log.logMessage(DEBUG, "File to install: " + toInstall.source);
+    }
+
     return filesToInstall;
 }

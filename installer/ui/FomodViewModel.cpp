@@ -417,22 +417,26 @@ void FomodViewModel::rebuildConditionFlags() const
 */
 void FomodViewModel::stepBack()
 {
+    log.logMessage(DEBUG, "Stepping back from step " + mCurrentStepIndex);
     const auto it = std::ranges::find(mVisibleStepIndices, mCurrentStepIndex);
     if (it != mVisibleStepIndices.end() && it != mVisibleStepIndices.begin()) {
         mCurrentStepIndex = *std::prev(it);
         mActiveStep       = mSteps[mCurrentStepIndex];
         mActivePlugin     = getFirstPluginForActiveStep();
     }
+    log.logMessage(DEBUG, "Stepped back to step " + mCurrentStepIndex);
 }
 
 void FomodViewModel::stepForward()
 {
+    log.logMessage(DEBUG, "Stepping forward from step " + mCurrentStepIndex);
     const auto it = std::ranges::find(mVisibleStepIndices, mCurrentStepIndex);
     if (it != mVisibleStepIndices.end() && std::next(it) != mVisibleStepIndices.end()) {
         mCurrentStepIndex = *std::next(it);
         mActiveStep       = mSteps[mCurrentStepIndex];
         mActivePlugin     = getFirstPluginForActiveStep();
     }
+    log.logMessage(DEBUG, "Stepped forward from step " + mCurrentStepIndex);
 }
 
 bool FomodViewModel::isLastVisibleStep() const

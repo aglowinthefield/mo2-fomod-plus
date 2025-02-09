@@ -173,6 +173,7 @@ void FomodInstallerWindow::onInstallClicked()
 {
     saveGeometryAndState();
 
+    log.logMessage(DEBUG, "Installing mod: " + mModName->toStdString());
     mModName.update(mModNameInput->currentText(), GUESS_USER);
     mViewModel->preinstall(mTree, mFomodPath);
     // now the installer is available in the outer scope

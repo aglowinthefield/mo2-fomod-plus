@@ -13,7 +13,7 @@ public:
             return OrderTypeEnum::Ascending;
         if (orderType == "Descending")
             return OrderTypeEnum::Descending;
-        return OrderTypeEnum::Ascending; // This is the default in the spec for some reason.
+        return OrderTypeEnum::Explicit; // No sorting by default. F the spec! (jk)
     }
 };
 

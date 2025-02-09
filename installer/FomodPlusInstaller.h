@@ -88,6 +88,8 @@ private:
         const shared_ptr<const IFileTree>& tree);
 
     void setupUiInjection() const;
+
+    bool shouldFallbackToLegacyInstaller() const;
 };
 
 #endif //INSTALLERFOMODPLUS_H

@@ -37,6 +37,11 @@ void FomodPlusInstaller::setupUiInjection() const
     mOrganizer->gameFeatures()->registerFeature(fomodContent, 0, false);
 }
 
+bool FomodPlusInstaller::shouldFallbackToLegacyInstaller() const
+{
+    return mOrganizer->pluginSetting(name(), "fallback_to_legacy").value<bool>();
+}
+
 std::vector<std::shared_ptr<const IPluginRequirement> > FomodPlusInstaller::requirements() const
 {
     return { Requirements::gameDependency(
@@ -57,7 +62,9 @@ bool FomodPlusInstaller::isArchiveSupported(std::shared_ptr<const IFileTree> tre
 QList<PluginSetting> FomodPlusInstaller::settings() const
 {
 
-    return {};
+    return {
+        {u"fallback_to_legacy"_s, u"When hitting cancel, fall back to the legacy FOMOD installer."_s, false},
+    };
 }
 
 nlohmann::json FomodPlusInstaller::getExistingFomodJson(const GuessedValue<QString>& modName) const
@@ -129,6 +136,9 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
     }
     if (window->isManualInstall()) {
         return RESULT_MANUALREQUESTED;
+    }
+    if (shouldFallbackToLegacyInstaller()) {
+        return RESULT_NOTATTEMPTED;
     }
     return RESULT_CANCELED;
 }
