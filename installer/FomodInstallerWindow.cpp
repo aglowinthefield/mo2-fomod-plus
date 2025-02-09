@@ -190,14 +190,15 @@ void FomodInstallerWindow::updateButtons() const
     }
 
     if (mViewModel->isLastVisibleStep()) {
-        mNextInstallButton->setText("Install");
+        mNextInstallButton->setText(tr("Install"));
     } else {
-        mNextInstallButton->setText("Next");
+        mNextInstallButton->setText(tr("Next"));
     }
 }
 
 void FomodInstallerWindow::setupUi()
 {
+    setWindowIcon(QIcon(":/fomod/hat"));
     setWindowFlags(Qt::Window); // Allows OS-controlled resizing, including snapping
     setMinimumSize(UiConstants::WINDOW_MIN_WIDTH, UiConstants::WINDOW_MIN_HEIGHT);
     setWindowTitle(mModName);
@@ -257,9 +258,6 @@ QBoxLayout* FomodInstallerWindow::createContainerLayout()
     layout->addWidget(topRow);
     layout->addWidget(centerRow, 1); // stretch 1 here so the others are static size
     layout->addWidget(bottomRow);
-
-    // NOTE: Disable after debug done
-    // UIHelper::setDebugBorders(this);
     return layout;
 }
 
@@ -285,10 +283,10 @@ QWidget* FomodInstallerWindow::createTopRow()
 
     // left side metadata. just the titles of the metadata
     auto* labelsColumn   = new QVBoxLayout();
-    QLabel* nameLabel    = UIHelper::createLabel("Name:", topRow);
-    QLabel* authorLabel  = UIHelper::createLabel("Author:", topRow);
-    QLabel* versionLabel = UIHelper::createLabel("Version:", topRow);
-    QLabel* websiteLabel = UIHelper::createLabel("Website:", topRow);
+    QLabel* nameLabel    = UIHelper::createLabel(tr("Name:"), topRow);
+    QLabel* authorLabel  = UIHelper::createLabel(tr("Author:"), topRow);
+    QLabel* versionLabel = UIHelper::createLabel(tr("Version:"), topRow);
+    QLabel* websiteLabel = UIHelper::createLabel(tr("Website:"), topRow);
 
     labelsColumn->addWidget(nameLabel);
     labelsColumn->addWidget(authorLabel);
@@ -354,17 +352,17 @@ QWidget* FomodInstallerWindow::createBottomRow()
     auto* layout         = new QHBoxLayout(bottomRow);
 
     // Manual on far left
-    mManualButton         = UIHelper::createButton("Manual", bottomRow);
-    mSelectPreviousButton = UIHelper::createButton("Select Previously Installed", bottomRow);
+    mManualButton         = UIHelper::createButton(tr("Manual"), bottomRow);
+    mSelectPreviousButton = UIHelper::createButton(tr("Select All Previous Choices"), bottomRow);
     layout->addWidget(mManualButton);
     layout->addWidget(mSelectPreviousButton);
 
     // Space to push remaining buttons right
     layout->addStretch();
 
-    mBackButton        = UIHelper::createButton("Back", bottomRow);
-    mNextInstallButton = UIHelper::createButton("Next", bottomRow);
-    mCancelButton      = UIHelper::createButton("Cancel", bottomRow);
+    mBackButton        = UIHelper::createButton(tr("Back"), bottomRow);
+    mNextInstallButton = UIHelper::createButton(tr("Next"), bottomRow);
+    mCancelButton      = UIHelper::createButton(tr("Cancel"), bottomRow);
 
     connect(mManualButton, SIGNAL(clicked()), this, SLOT(onManualClicked()));
     connect(mNextInstallButton, SIGNAL(clicked()), this, SLOT(onNextClicked()));
