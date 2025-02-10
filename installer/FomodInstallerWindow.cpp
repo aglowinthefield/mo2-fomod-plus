@@ -113,7 +113,7 @@ void FomodInstallerWindow::updateCheckboxStates() const
                         log.logMessage(DEBUG,
                             "Updating " + plugin->getName() + " to state: " + (plugin->isSelected() ? "TRUE" : "FALSE")
                             +
-                            " because radio button selection state is " + (checkbox->isChecked() ? "TRUE" : "FALSE"));
+                            " because CHECKBOX button selection state is " + (checkbox->isChecked() ? "TRUE" : "FALSE"));
                         checkbox->setChecked(plugin->isSelected());
                     }
                     if (checkbox->isEnabled() != plugin->isEnabled()) {
@@ -131,7 +131,7 @@ void FomodInstallerWindow::updateCheckboxStates() const
                         log.logMessage(DEBUG,
                             "Updating " + plugin->getName() + " to state: " + (plugin->isSelected() ? "TRUE" : "FALSE")
                             +
-                            " because radio button selection state is " + (radio->isChecked() ? "TRUE" : "FALSE"));
+                            " because RADIO BUTTON selection state is " + (radio->isChecked() ? "TRUE" : "FALSE"));
                         radio->blockSignals(true);
                         radio->setChecked(plugin->isSelected());
                         radio->blockSignals(false);
@@ -483,8 +483,8 @@ QRadioButton* FomodInstallerWindow::createPluginRadioButton(const std::shared_pt
 
     connect(radioButton, &QRadioButton::toggled, this, [this, radioButton, group, plugin](const bool checked) {
         log.logMessage(INFO,
-            "Received toggled signal for radio: " + plugin->getName() + ": " + (checked ? "true" : "false") +
-            " Radio is now" + (radioButton->isChecked() ? "true" : "false"));
+            "Received toggled signal for radio: " + plugin->getName() + ": " + (checked ? "TRUE" : "FALSE") +
+            " Radio is now: " + (radioButton->isChecked() ? "TRUE" : "FALSE"));
         onPluginToggled(checked, group, plugin);
     });
 

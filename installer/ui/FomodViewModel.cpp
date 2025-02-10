@@ -2,8 +2,9 @@
 #include "xml/ModuleConfiguration.h"
 #include "lib/Logger.h"
 
-using GroupCallback = std::function<void(const std::shared_ptr<GroupViewModel>&)>;
-using PluginCallback = std::function<void(const std::shared_ptr<GroupViewModel>&, const std::shared_ptr<PluginViewModel>&)>;
+using GroupCallback  = std::function<void(const std::shared_ptr<GroupViewModel>&)>;
+using PluginCallback = std::function<void(const std::shared_ptr<GroupViewModel>&,
+    const std::shared_ptr<PluginViewModel>&)>;
 
 /*
 --------------------------------------------------------------------------------
@@ -55,6 +56,7 @@ std::shared_ptr<FomodViewModel> FomodViewModel::create(MOBase::IOrganizer* organ
     viewModel->mInitialized  = true;
     viewModel->mActiveStep   = viewModel->mSteps.at(0);
     viewModel->mActivePlugin = viewModel->getFirstPluginForActiveStep();
+    viewModel->getActiveStep()->setVisited(true);
     return viewModel;
 }
 
@@ -106,14 +108,14 @@ void FomodViewModel::selectFromJson(nlohmann::json json) const
     for (int stepIndex = 0; stepIndex < jsonSteps.size(); ++stepIndex) {
 
         const auto currentStep = mSteps[stepIndex];
-        const auto& step = jsonSteps[stepIndex];
+        const auto& step       = jsonSteps[stepIndex];
 
         for (int groupIndex = 0; groupIndex < step["groups"].size(); ++groupIndex) {
 
-            const auto& group        = step["groups"][groupIndex];
+            const auto& group       = step["groups"][groupIndex];
             const auto currentGroup = currentStep->getGroups()[groupIndex];
 
-            for (const auto & jsonPlugin : group["plugins"]) {
+            for (const auto& jsonPlugin : group["plugins"]) {
 
                 const auto allPlugins = currentGroup->getPlugins();
                 log.logMessage(DEBUG, "Looking for plugin " + jsonPlugin.get<std::string>());
@@ -246,7 +248,8 @@ void FomodViewModel::enforceSelectAtLeastOneConstraint(const std::shared_ptr<Gro
     if (groupViewModel->getPlugins().size() == 1) {
         const auto plugin = groupViewModel->getPlugins().at(0);
         if (mConditionTester.getPluginTypeDescriptorState(plugin->getPlugin(), mFlags) != PluginTypeEnum::NotUsable) {
-            log.logMessage(DEBUG, "Selecting " + plugin->getName() + " because it's the only plugin in a SelectAtLeastOne.");
+            log.logMessage(DEBUG,
+                "Selecting " + plugin->getName() + " because it's the only plugin in a SelectAtLeastOne.");
             togglePlugin(groupViewModel, plugin, true);
             plugin->setEnabled(false);
         }
@@ -276,8 +279,16 @@ void FomodViewModel::processPlugin(const std::shared_ptr<GroupViewModel>& groupV
     }
     const auto typeDescriptor = mConditionTester.getPluginTypeDescriptorState(pluginViewModel->plugin, mFlags);
 
+    if (typeDescriptor == pluginViewModel->getCurrentPluginType()) {
+        return;
+    }
+    pluginViewModel->setCurrentPluginType(typeDescriptor);
+
     const bool isOnlyPlugin = groupViewModel->getPlugins().size() == 1
         && (groupViewModel->getType() == SelectExactlyOne || groupViewModel->getType() == SelectAtLeastOne);
+
+    // check if step hasVisited, if it hasn't been, set it to unchecked if it's optional.
+    const auto stepNotVisitedYet = !mSteps[groupViewModel->getStepIndex()]->getHasVisited();
 
     switch (typeDescriptor) {
     case PluginTypeEnum::Recommended:
@@ -295,6 +306,10 @@ void FomodViewModel::processPlugin(const std::shared_ptr<GroupViewModel>& groupV
     case PluginTypeEnum::Optional:
         if (!isOnlyPlugin) {
             pluginViewModel->setEnabled(true);
+        }
+        // In the case where we're changing flags to make something optional from Recommended, set it back to unchecked.
+        if (pluginViewModel->isSelected() & stepNotVisitedYet && groupViewModel->getType() == SelectAll) {
+            togglePlugin(groupViewModel, pluginViewModel, false);
         }
         break;
     case PluginTypeEnum::NotUsable:
@@ -356,7 +371,7 @@ void FomodViewModel::togglePlugin(const std::shared_ptr<GroupViewModel>& group,
 
     if (selected && isRadioLike) {
         for (const auto& pluginViewModel : group->getPlugins()) {
-            if (pluginViewModel != plugin) {
+            if (pluginViewModel != plugin && plugin->isSelected()) {
                 log.logMessage(DEBUG,
                     "Deselecting " + pluginViewModel->getName() + " because " + plugin->getName() + " was selected.");
                 pluginViewModel->setSelected(false);
@@ -436,6 +451,7 @@ void FomodViewModel::stepForward()
         mActiveStep       = mSteps[mCurrentStepIndex];
         mActivePlugin     = getFirstPluginForActiveStep();
     }
+    mActiveStep->setVisited(true);
     log.logMessage(DEBUG, "Stepped forward from step " + mCurrentStepIndex);
 }
 

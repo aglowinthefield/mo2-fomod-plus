@@ -30,6 +30,8 @@ public:
     [[nodiscard]] bool isEnabled() const { return enabled; }
     [[nodiscard]] std::vector<ConditionFlag> getConditionFlags() const { return plugin->conditionFlags.flags; }
     int getOwnIndex() const { return ownIndex; }
+    PluginTypeEnum getCurrentPluginType() const { return currentPluginType; }
+    void setCurrentPluginType(const PluginTypeEnum type) { currentPluginType = type; }
 
     friend class FomodViewModel;
     friend class FileInstaller;
@@ -42,6 +44,7 @@ private:
     int ownIndex;
     bool selected;
     bool enabled;
+    PluginTypeEnum currentPluginType;
     std::shared_ptr<Plugin> plugin;
 };
 
@@ -85,9 +88,12 @@ public:
     [[nodiscard]] CompositeDependency& getVisibilityConditions() const { return installStep->visible; }
     [[nodiscard]] std::string getName() const { return installStep->name; }
     [[nodiscard]] const shared_ptr_list<GroupViewModel>& getGroups() const { return groups; }
-    int getOwnIndex() const { return ownIndex; }
+    [[nodiscard]] int getOwnIndex() const { return ownIndex; }
+    [[nodiscard]] bool getHasVisited() const { return visited; }
+    void setVisited(const bool visited) { this->visited = visited; }
 
 private:
+    bool visited{false};
     std::shared_ptr<InstallStep> installStep;
     shared_ptr_list<GroupViewModel> groups;
     int ownIndex;
