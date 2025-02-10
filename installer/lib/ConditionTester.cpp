@@ -122,7 +122,7 @@ bool ConditionTester::testFileDependency(const FileDependency& fileDependency) c
 bool ConditionTester::testGameDependency(const GameDependency& gameDependency) const
 {
     const auto gameVersion = mOrganizer->managedGame()->gameVersion().toStdString();
-    return gameVersion == gameDependency.version;
+    return gameDependency.version <= gameVersion;
 }
 
 FileDependencyTypeEnum ConditionTester::getFileDependencyStateForPlugin(const std::string& pluginName) const
