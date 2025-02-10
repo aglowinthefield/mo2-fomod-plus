@@ -241,6 +241,7 @@ void FomodPlusInstaller::onInstallationEnd(const EInstallResult result, IModInte
         writeNotes(newMod);
         mOrganizer->refresh();
     }
+    clearPriorInstallData();
 }
 
 void FomodPlusInstaller::writeNotes(IModInterface* newMod) const
