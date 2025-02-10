@@ -89,6 +89,10 @@ private:
     void setupUiInjection() const;
 
     [[nodiscard]] bool shouldFallbackToLegacyInstaller() const;
+    void logMessage(LogLevel level, const std::string& message) const
+    {
+        log.logMessage(level, "[INSTALLER] " + message);
+    };
 };
 
 #endif //INSTALLERFOMODPLUS_H
