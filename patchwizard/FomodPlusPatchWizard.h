@@ -2,8 +2,12 @@
 #define FOMODPLUSPATCHWIZARD_H
 
 
+#include "ModListItemModel.h"
+#include "../installer/lib/Logger.h"
+
 #include <iplugin.h>
 #include <iplugintool.h>
+#include <qtreeview.h>
 
 class FomodPlusPatchWizard final : public MOBase::IPluginTool {
     Q_OBJECT
@@ -32,9 +36,22 @@ public:
 
     void display() const override;
 
+    void createDialog();
+
+    QTreeView* createTreeView(QWidget* parent);
+
+    ModListItemModel* createModel();
+
+    std::shared_ptr<ModListItem> createModListItemForMod(const QString &mod);
+
 private:
+    Logger& log = Logger::getInstance();
     MOBase::IOrganizer* mOrganizer{};
     QDialog* mDialog{};
+
+    void logMessage(LogLevel level, const std::string& message) {
+        log.logMessage(level, "[PATCH WIZARD] " + message);
+    }
 
 };
 
