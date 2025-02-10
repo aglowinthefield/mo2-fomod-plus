@@ -1,0 +1,8 @@
+﻿{
+  "author" : "clearing",
+  "date" : "2025/02/06",
+  "name" : "FOMOD Plus - Patch Wizard",
+  "version" : "1.0.0",
+  "des" : "Find possible patches you have yet to install based on your LO and existing FOMODs.",
+  "dependencies" : []
+}
