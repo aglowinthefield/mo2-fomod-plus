@@ -25,7 +25,7 @@ bool FomodPlusInstaller::init(IOrganizer* organizer)
     mOrganizer = organizer;
     log.setLogFilePath(QDir::currentPath().toStdString() + "/logs/fomodplus.log");
     // mOrganizer->onUserInterfaceInitialized([this](QMainWindow*) {
-        setupUiInjection();
+    setupUiInjection();
     // });
     return true;
 }
@@ -63,7 +63,7 @@ QList<PluginSetting> FomodPlusInstaller::settings() const
 {
 
     return {
-        {u"fallback_to_legacy"_s, u"When hitting cancel, fall back to the legacy FOMOD installer."_s, false},
+        { u"fallback_to_legacy"_s, u"When hitting cancel, fall back to the legacy FOMOD installer."_s, false },
     };
 }
 
@@ -93,6 +93,14 @@ nlohmann::json FomodPlusInstaller::getExistingFomodJson(const GuessedValue<QStri
     }
 }
 
+void FomodPlusInstaller::clearPriorInstallData()
+{
+    mNotes         = "";
+    mInstallerUsed = false;
+    mFomodJson     = nullptr;
+    mFomodPath     = "";
+}
+
 /**
  *
  * @param modName
@@ -105,6 +113,8 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
     std::shared_ptr<IFileTree>& tree, QString& version,
     int& nexusID)
 {
+
+    clearPriorInstallData();
 
     log.logMessage(INFO, std::format("FomodPlusInstaller::install - modName: {}, version: {}, nexusID: {}",
         modName->toStdString(),
@@ -222,11 +232,6 @@ void FomodPlusInstaller::appendImageFiles(vector<shared_ptr<const FileTreeEntry>
 void FomodPlusInstaller::onInstallationStart(QString const& archive, const bool reinstallation,
     IModInterface* currentMod)
 {
-    mNotes         = "";
-    mInstallerUsed = false;
-    if (mFomodJson != nullptr) {
-        mFomodJson = nullptr;
-    }
     IPluginInstallerSimple::onInstallationStart(archive, reinstallation, currentMod);
 }
 

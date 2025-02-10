@@ -42,7 +42,8 @@ public:
     {
         return 999; /* Above installer_fomod's highest priority. */
     }
-    std::vector<std::shared_ptr<const IPluginRequirement>> requirements() const override;
+
+    std::vector<std::shared_ptr<const IPluginRequirement> > requirements() const override;
 
     [[nodiscard]] bool isManualInstaller() const override { return false; }
 
@@ -52,6 +53,8 @@ public:
 
     nlohmann::json getExistingFomodJson(const GuessedValue<QString>& modName) const;
 
+    void clearPriorInstallData();
+
     EInstallResult install(GuessedValue<QString>& modName, std::shared_ptr<IFileTree>& tree, QString& version,
         int& nexusID) override;
 
@@ -59,10 +62,10 @@ public:
 
     void onInstallationEnd(EInstallResult result, IModInterface* newMod) override;
 
-    void writeNotes(IModInterface *newMod) const;
+    void writeNotes(IModInterface* newMod) const;
 
 private:
-    Logger& log = Logger::getInstance();
+    Logger& log            = Logger::getInstance();
     IOrganizer* mOrganizer = nullptr;
     QString mFomodPath{};
     std::shared_ptr<nlohmann::json> mFomodJson{ nullptr };
@@ -89,7 +92,7 @@ private:
 
     void setupUiInjection() const;
 
-    bool shouldFallbackToLegacyInstaller() const;
+    [[nodiscard]] bool shouldFallbackToLegacyInstaller() const;
 };
 
 #endif //INSTALLERFOMODPLUS_H
