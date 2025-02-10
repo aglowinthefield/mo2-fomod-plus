@@ -44,7 +44,7 @@ private:
     int ownIndex;
     bool selected;
     bool enabled;
-    PluginTypeEnum currentPluginType;
+    PluginTypeEnum currentPluginType = PluginTypeEnum::UNKNOWN;
     std::shared_ptr<Plugin> plugin;
 };
 

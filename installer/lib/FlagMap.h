@@ -32,6 +32,11 @@ public:
         flags.clear();
     }
 
+    [[nodiscard]] size_t getFlagCount() const
+    {
+        return flags.size();
+    }
+
 
 private:
     std::unordered_map<std::string, std::string> flags;

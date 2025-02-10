@@ -71,8 +71,11 @@ enum class PluginTypeEnum {
     Required,
     Optional,
     NotUsable,
-    CouldBeUsable
+    CouldBeUsable,
+    UNKNOWN
 };
+
+
 
 inline std::ostream& operator<<(std::ostream& os, const PluginTypeEnum& type)
 {

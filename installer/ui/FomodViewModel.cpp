@@ -270,6 +270,24 @@ void FomodViewModel::enforceGroupConstraints() const
                                Plugin Constraints
 --------------------------------------------------------------------------------
 */
+std::string pluginTypeEnumToString(PluginTypeEnum type)
+{
+    switch (type) {
+    case PluginTypeEnum::Recommended:
+        return "Recommended";
+    case PluginTypeEnum::Required:
+        return "Required";
+    case PluginTypeEnum::Optional:
+        return "Optional";
+    case PluginTypeEnum::NotUsable:
+        return "NotUsable";
+    case PluginTypeEnum::CouldBeUsable:
+        return "CouldBeUsable";
+    default:
+        return "Unknown";
+    }
+}
+
 // TODO: This should be a group-based thing
 void FomodViewModel::processPlugin(const std::shared_ptr<GroupViewModel>& groupViewModel,
     const std::shared_ptr<PluginViewModel>& pluginViewModel) const
@@ -279,9 +297,14 @@ void FomodViewModel::processPlugin(const std::shared_ptr<GroupViewModel>& groupV
     }
     const auto typeDescriptor = mConditionTester.getPluginTypeDescriptorState(pluginViewModel->plugin, mFlags);
 
+    log.logMessage(DEBUG, "Processing plugin " + pluginViewModel->getName() + " in group " + groupViewModel->getName() +
+        " with type " + pluginTypeEnumToString(typeDescriptor));
+
     if (typeDescriptor == pluginViewModel->getCurrentPluginType()) {
         return;
     }
+    log.logMessage(DEBUG, "Plugin " + pluginViewModel->getName() + " has changed type from " +
+        pluginTypeEnumToString(pluginViewModel->getCurrentPluginType()) + " to " + pluginTypeEnumToString(typeDescriptor));
     pluginViewModel->setCurrentPluginType(typeDescriptor);
 
     const bool isOnlyPlugin = groupViewModel->getPlugins().size() == 1
@@ -307,8 +330,8 @@ void FomodViewModel::processPlugin(const std::shared_ptr<GroupViewModel>& groupV
         if (!isOnlyPlugin) {
             pluginViewModel->setEnabled(true);
         }
-        // In the case where we're changing flags to make something optional from Recommended, set it back to unchecked.
-        if (pluginViewModel->isSelected() & stepNotVisitedYet && groupViewModel->getType() == SelectAll) {
+    // In the case where we're changing flags to make something optional from Recommended, set it back to unchecked.
+        if (pluginViewModel->isSelected() & stepNotVisitedYet && groupViewModel->getType() == SelectAny) {
             togglePlugin(groupViewModel, pluginViewModel, false);
         }
         break;
@@ -329,6 +352,7 @@ void FomodViewModel::processPluginConditions(const int fromStepIndex) const
 {
     // We only want to update plugins that haven't been seen yet. Otherwise we could undo manual selections by the user.
     if (mInitialized) {
+        log.logMessage(DEBUG, "[VIEWMODEL] Processing plugins from step " + std::to_string(fromStepIndex));
         forEachFuturePlugin(fromStepIndex, [this](const auto& groupViewModel, const auto& pluginViewModel) {
             processPlugin(groupViewModel, pluginViewModel);
         });
@@ -404,7 +428,7 @@ void FomodViewModel::updateVisibleSteps() const
         if (mConditionTester.isStepVisible(mFlags, mSteps[i]->getVisibilityConditions(), i, mSteps)) {
             mVisibleStepIndices.push_back(i);
         } else {
-            log.logMessage(DEBUG, "Step " + std::to_string(i) + " is NOT visible.");
+            // log.logMessage(DEBUG, "Step " + std::to_string(i) + " is NOT visible.");
         }
     }
 }
@@ -417,12 +441,14 @@ void FomodViewModel::rebuildConditionFlags() const
             setFlagForPluginState(plugin, plugin->isSelected());
         }
     });
-    log.logMessage(DEBUG, "Rebuilt flags");
-    log.logMessage(DEBUG, "-------------");
-    mFlags->forEach([this](const std::string& flag, const std::string& value) {
-        log.logMessage(DEBUG, "Flag: " + flag + ", Value: " + value);
-    });
-    log.logMessage(DEBUG, "-------------");
+    if (mFlags->getFlagCount() > 0) {
+        log.logMessage(DEBUG, "Rebuilt flags");
+        log.logMessage(DEBUG, "-------------");
+        mFlags->forEach([this](const std::string& flag, const std::string& value) {
+            log.logMessage(DEBUG, "Flag: " + flag + ", Value: " + value);
+        });
+        log.logMessage(DEBUG, "-------------");
+    }
 }
 
 /*
@@ -432,19 +458,19 @@ void FomodViewModel::rebuildConditionFlags() const
 */
 void FomodViewModel::stepBack()
 {
-    log.logMessage(DEBUG, "Stepping back from step " + mCurrentStepIndex);
+    log.logMessage(DEBUG, "Stepping back from step " + std::to_string(mCurrentStepIndex));
     const auto it = std::ranges::find(mVisibleStepIndices, mCurrentStepIndex);
     if (it != mVisibleStepIndices.end() && it != mVisibleStepIndices.begin()) {
         mCurrentStepIndex = *std::prev(it);
         mActiveStep       = mSteps[mCurrentStepIndex];
         mActivePlugin     = getFirstPluginForActiveStep();
     }
-    log.logMessage(DEBUG, "Stepped back to step " + mCurrentStepIndex);
+    log.logMessage(DEBUG, "Stepped back to step " + std::to_string(mCurrentStepIndex));
 }
 
 void FomodViewModel::stepForward()
 {
-    log.logMessage(DEBUG, "Stepping forward from step " + mCurrentStepIndex);
+    log.logMessage(DEBUG, "Stepping forward from step " + std::to_string(mCurrentStepIndex));
     const auto it = std::ranges::find(mVisibleStepIndices, mCurrentStepIndex);
     if (it != mVisibleStepIndices.end() && std::next(it) != mVisibleStepIndices.end()) {
         mCurrentStepIndex = *std::next(it);
@@ -452,7 +478,7 @@ void FomodViewModel::stepForward()
         mActivePlugin     = getFirstPluginForActiveStep();
     }
     mActiveStep->setVisited(true);
-    log.logMessage(DEBUG, "Stepped forward from step " + mCurrentStepIndex);
+    log.logMessage(DEBUG, "Stepped forward to step " + std::to_string(mCurrentStepIndex));
 }
 
 bool FomodViewModel::isLastVisibleStep() const

@@ -1,10 +1,6 @@
 ﻿#ifndef INSTALLERFOMODPLUS_H
 #define INSTALLERFOMODPLUS_H
 
-// TODO: Log everything to a custom file
-// TODO: Ensure crash dumps are generated
-// TODO
-
 #include "stringutil.h"
 
 #include <iplugin.h>
@@ -43,7 +39,7 @@ public:
         return 999; /* Above installer_fomod's highest priority. */
     }
 
-    std::vector<std::shared_ptr<const IPluginRequirement> > requirements() const override;
+    [[nodiscard]] std::vector<std::shared_ptr<const IPluginRequirement> > requirements() const override;
 
     [[nodiscard]] bool isManualInstaller() const override { return false; }
 
