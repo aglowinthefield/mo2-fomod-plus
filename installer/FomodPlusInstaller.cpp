@@ -3,7 +3,6 @@
 #include <igamefeatures.h>
 #include <iinstallationmanager.h>
 #include <iplugingame.h>
-#include <log.h>
 #include <QEventLoop>
 #include <QTreeWidget>
 #include <xml/FomodInfoFile.h>
@@ -24,16 +23,13 @@ bool FomodPlusInstaller::init(IOrganizer* organizer)
 {
     mOrganizer = organizer;
     log.setLogFilePath(QDir::currentPath().toStdString() + "/logs/fomodplus.log");
-    // mOrganizer->onUserInterfaceInitialized([this](QMainWindow*) {
-        setupUiInjection();
-    // });
+    setupUiInjection();
     return true;
 }
 
 void FomodPlusInstaller::setupUiInjection() const
 {
     const auto fomodContent = std::make_shared<FomodDataContent>(mOrganizer);
-    // const auto managedGamePlugin = const_cast<IPluginGame *>(mOrganizer->managedGame());
     mOrganizer->gameFeatures()->registerFeature(fomodContent, 0, false);
 }
 
@@ -63,7 +59,7 @@ QList<PluginSetting> FomodPlusInstaller::settings() const
 {
 
     return {
-        {u"fallback_to_legacy"_s, u"When hitting cancel, fall back to the legacy FOMOD installer."_s, false},
+        { u"fallback_to_legacy"_s, u"When hitting cancel, fall back to the legacy FOMOD installer."_s, false },
     };
 }
 
@@ -71,7 +67,7 @@ nlohmann::json FomodPlusInstaller::getExistingFomodJson(const GuessedValue<QStri
 {
     auto existingMod = mOrganizer->modList()->getMod(modName);
     if (existingMod == nullptr) {
-        for (auto variant : modName.variants()) {
+        for (const auto& variant : modName.variants()) {
             existingMod = mOrganizer->modList()->getMod(variant);
             if (existingMod != nullptr) {
                 break;
@@ -87,10 +83,18 @@ nlohmann::json FomodPlusInstaller::getExistingFomodJson(const GuessedValue<QStri
     }
     try {
         return nlohmann::json::parse(fomodJson.toString().toStdString());
-    } catch ([[maybe_unused]] Exception e) {
-        log.logMessage(ERR, "Could not parse existing JSON, even though it appears to exist. Returning empty JSON.");
+    } catch ([[maybe_unused]] Exception& e) {
+        logMessage(ERR, "Could not parse existing JSON, even though it appears to exist. Returning empty JSON.");
         return {};
     }
+}
+
+void FomodPlusInstaller::clearPriorInstallData()
+{
+    mNotes         = "";
+    mInstallerUsed = false;
+    mFomodJson     = nullptr;
+    mFomodPath     = "";
 }
 
 /**
@@ -106,12 +110,14 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
     int& nexusID)
 {
 
-    log.logMessage(INFO, std::format("FomodPlusInstaller::install - modName: {}, version: {}, nexusID: {}",
+    clearPriorInstallData();
+
+    logMessage(INFO, std::format("FomodPlusInstaller::install - modName: {}, version: {}, nexusID: {}",
         modName->toStdString(),
         version.toStdString(),
         nexusID
         ));
-    log.logMessage(INFO, std::format("FomodPlusInstaller::install - tree size: {}", tree->size()));
+    logMessage(INFO, std::format("FomodPlusInstaller::install - tree size: {}", tree->size()));
 
     auto [infoFile, moduleConfigFile] = parseFomodFiles(tree);
 
@@ -154,7 +160,7 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> >
 {
     const auto fomodDir = findFomodDirectory(tree);
     if (fomodDir == nullptr) {
-        log.logMessage(ERR, "FomodPlusInstaller::install - fomod directory not found");
+        logMessage(ERR, "FomodPlusInstaller::install - fomod directory not found");
         return { nullptr, nullptr };
     }
 
@@ -175,7 +181,7 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> >
     if (moduleConfig) {
         toExtract.push_back(moduleConfig);
     } else {
-        log.logMessage(ERR, "FomodPlusInstaller::install - error parsing moduleConfig.xml: Not Present");
+        logMessage(ERR, "FomodPlusInstaller::install - error parsing moduleConfig.xml: Not Present");
         return { nullptr, nullptr };
     }
     if (infoXML) {
@@ -188,7 +194,7 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> >
     try {
         moduleConfiguration->deserialize(paths.at(0).toStdString());
     } catch (XmlParseException& e) {
-        log.logMessage(ERR, std::format("FomodPlusInstaller::install - error parsing moduleConfig.xml: {}", e.what()));
+        logMessage(ERR, std::format("FomodPlusInstaller::install - error parsing moduleConfig.xml: {}", e.what()));
         return { nullptr, nullptr };
     }
 
@@ -197,7 +203,7 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> >
         try {
             infoFile->deserialize(paths.at(1).toStdString());
         } catch (XmlParseException& e) {
-            log.logMessage(ERR, std::format("FomodPlusInstaller::install - error parsing info.xml: {}", e.what()));
+            logMessage(ERR, std::format("FomodPlusInstaller::install - error parsing info.xml: {}", e.what()));
         }
     }
 
@@ -222,11 +228,6 @@ void FomodPlusInstaller::appendImageFiles(vector<shared_ptr<const FileTreeEntry>
 void FomodPlusInstaller::onInstallationStart(QString const& archive, const bool reinstallation,
     IModInterface* currentMod)
 {
-    mNotes         = "";
-    mInstallerUsed = false;
-    if (mFomodJson != nullptr) {
-        mFomodJson = nullptr;
-    }
     IPluginInstallerSimple::onInstallationStart(archive, reinstallation, currentMod);
 }
 
@@ -250,7 +251,7 @@ void FomodPlusInstaller::writeNotes(IModInterface* newMod) const
 
     const auto iniKey = "installationNotes";
     newMod->setPluginSetting(this->name(), iniKey, mNotes);
-    log.logMessage(INFO, "Wrote notes to meta.ini. Needs handler for adding to actual meta.ini 'notes' field.");
+    logMessage(INFO, "Wrote notes to meta.ini. Needs handler for adding to actual meta.ini 'notes' field.");
 
     // const auto newModPath = mOrganizer->modList()->getMod(newMod->name())->absolutePath();
     // std::cout << "New mod path: " << newModPath.toStdString() << std::endl;

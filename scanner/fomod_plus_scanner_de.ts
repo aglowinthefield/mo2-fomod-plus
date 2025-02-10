@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="en_US">
+<TS version="2.1" language="de_DE">
 <context>
     <name>FomodPlusScanner</name>
     <message>
@@ -11,46 +11,46 @@
     </message>
     <message>
         <location filename="FomodPlusScanner.cpp" line="27"/>
-        <source>Greetings, traveler.
-This tool will scan your load order for mods installed via FOMOD.
-It will also fix up any erroneous FOMOD flags from previous versions of FOMOD Plus :) 
+        <source>Sei gegrüßt, Reisender.
+Dieses Tool scannt deine Ladereihenfolge nach Mods, die über einen FOMOD installiert wurden.
+Es wird außerdem fehlerhafte FOMOD-Selektierungen aus früheren Versionen von FOMOD Plus beheben. :)
 
-Safe travels, and may your load order be free of conflicts.</source>
+Gute Reise, und möge deine Ladereihenfolge frei von Konflikten sein.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="FomodPlusScanner.cpp" line="46"/>
-        <source>Scan</source>
+        <source>Scannen</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="FomodPlusScanner.cpp" line="47"/>
-        <source>Cancel</source>
+        <source>Abbrechen</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="FomodPlusScanner.cpp" line="71"/>
-        <source>Scan Complete</source>
+        <source>Scan Abgeschlossen</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="FomodPlusScanner.cpp" line="72"/>
-        <source>The load order scan is complete. Updated filter info for </source>
+        <source>Der Scan der Ladereihenfolge ist abgeschlossen. Aktualisierte Filterinformationen für </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="FomodPlusScanner.cpp" line="72"/>
-        <source> mods.</source>
+        <source> Mods.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="FomodPlusScanner.h" line="42"/>
-        <source>Scans modlist for files installed via FOMOD</source>
+        <source>Scannt die Modliste nach Dateien, die über einen FOMOD installiert wurden.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="FomodPlusScanner.h" line="49"/>
-        <source>Scan modlist for files installed via FOMOD</source>
+        <source>Modliste nach Dateien durchsuchen, die über einen FOMOD installiert wurden.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
