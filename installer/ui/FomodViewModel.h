@@ -222,8 +222,8 @@ private:
 
     void createNonePluginForGroup(const std::shared_ptr<GroupViewModel>& group) const;
 
-    void processPlugin(const std::shared_ptr<GroupViewModel>& groupViewModel,
-        const std::shared_ptr<PluginViewModel>& pluginViewModel) const;
+    void processPlugin(const std::shared_ptr<GroupViewModel>& group,
+        const std::shared_ptr<PluginViewModel>& plugin) const;
 
     void enforceRadioGroupConstraints(const std::shared_ptr<GroupViewModel>& groupViewModel) const;
 

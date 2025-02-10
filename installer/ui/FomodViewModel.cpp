@@ -51,7 +51,7 @@ std::shared_ptr<FomodViewModel> FomodViewModel::create(MOBase::IOrganizer* organ
     }
     viewModel->createStepViewModels();
     viewModel->enforceGroupConstraints();
-    viewModel->processPluginConditions(0);
+    viewModel->processPluginConditions(-1); // please dont judge me. ill fix this someday.
     viewModel->updateVisibleSteps();
     viewModel->mInitialized  = true;
     viewModel->mActiveStep   = viewModel->mSteps.at(0);
@@ -289,60 +289,62 @@ std::string pluginTypeEnumToString(PluginTypeEnum type)
 }
 
 // TODO: This should be a group-based thing
-void FomodViewModel::processPlugin(const std::shared_ptr<GroupViewModel>& groupViewModel,
-    const std::shared_ptr<PluginViewModel>& pluginViewModel) const
+void FomodViewModel::processPlugin(const std::shared_ptr<GroupViewModel>& group,
+    const std::shared_ptr<PluginViewModel>& plugin) const
 {
-    if (groupViewModel->getType() == SelectAll) {
+    if (group->getType() == SelectAll) {
         return;
     }
-    const auto typeDescriptor = mConditionTester.getPluginTypeDescriptorState(pluginViewModel->plugin, mFlags);
+    const auto typeDescriptor = mConditionTester.getPluginTypeDescriptorState(plugin->plugin, mFlags);
 
-    log.logMessage(DEBUG, "Processing plugin " + pluginViewModel->getName() + " in group " + groupViewModel->getName() +
-        " with type " + pluginTypeEnumToString(typeDescriptor));
+    log.logMessage(DEBUG,
+        "Processing plugin " + plugin->getName() + " in group " + std::to_string(group->getOwnIndex())
+        + " with type " + pluginTypeEnumToString(typeDescriptor));
 
-    if (typeDescriptor == pluginViewModel->getCurrentPluginType()) {
+    if (typeDescriptor == plugin->getCurrentPluginType()) {
         return;
     }
-    log.logMessage(DEBUG, "Plugin " + pluginViewModel->getName() + " has changed type from " +
-        pluginTypeEnumToString(pluginViewModel->getCurrentPluginType()) + " to " + pluginTypeEnumToString(typeDescriptor));
-    pluginViewModel->setCurrentPluginType(typeDescriptor);
+    log.logMessage(DEBUG,
+        "Plugin " + plugin->getName() + " in group " + std::to_string(group->getOwnIndex()) + "has changed type from " +
+        pluginTypeEnumToString(plugin->getCurrentPluginType()) + " to " + pluginTypeEnumToString(typeDescriptor));
+    plugin->setCurrentPluginType(typeDescriptor);
 
-    const bool isOnlyPlugin = groupViewModel->getPlugins().size() == 1
-        && (groupViewModel->getType() == SelectExactlyOne || groupViewModel->getType() == SelectAtLeastOne);
+    const bool isOnlyPlugin = group->getPlugins().size() == 1
+        && (group->getType() == SelectExactlyOne || group->getType() == SelectAtLeastOne);
 
     // check if step hasVisited, if it hasn't been, set it to unchecked if it's optional.
-    const auto stepNotVisitedYet = !mSteps[groupViewModel->getStepIndex()]->getHasVisited();
+    const auto stepNotVisitedYet = !mSteps[group->getStepIndex()]->getHasVisited();
 
     switch (typeDescriptor) {
     case PluginTypeEnum::Recommended:
-        pluginViewModel->setEnabled(true);
-        if (!pluginViewModel->isSelected()) {
-            togglePlugin(groupViewModel, pluginViewModel, true);
+        plugin->setEnabled(true);
+        if (!plugin->isSelected()) {
+            togglePlugin(group, plugin, true);
         }
         break;
     case PluginTypeEnum::Required:
-        pluginViewModel->setEnabled(false);
-        if (!pluginViewModel->isSelected()) {
-            togglePlugin(groupViewModel, pluginViewModel, true);
+        plugin->setEnabled(false);
+        if (!plugin->isSelected()) {
+            togglePlugin(group, plugin, true);
         }
         break;
     case PluginTypeEnum::Optional:
         if (!isOnlyPlugin) {
-            pluginViewModel->setEnabled(true);
+            plugin->setEnabled(true);
         }
     // In the case where we're changing flags to make something optional from Recommended, set it back to unchecked.
-        if (pluginViewModel->isSelected() & stepNotVisitedYet && groupViewModel->getType() == SelectAny) {
-            togglePlugin(groupViewModel, pluginViewModel, false);
+        if (plugin->isSelected() & stepNotVisitedYet && group->getType() == SelectAny) {
+            togglePlugin(group, plugin, false);
         }
         break;
     case PluginTypeEnum::NotUsable:
-        pluginViewModel->setEnabled(false);
-        if (pluginViewModel->isSelected()) {
-            togglePlugin(groupViewModel, pluginViewModel, false);
+        plugin->setEnabled(false);
+        if (plugin->isSelected()) {
+            togglePlugin(group, plugin, false);
         }
         break;
     case PluginTypeEnum::CouldBeUsable:
-        pluginViewModel->setEnabled(true);
+        plugin->setEnabled(true);
         break;
     default: ;
     }
@@ -351,7 +353,7 @@ void FomodViewModel::processPlugin(const std::shared_ptr<GroupViewModel>& groupV
 void FomodViewModel::processPluginConditions(const int fromStepIndex) const
 {
     // We only want to update plugins that haven't been seen yet. Otherwise we could undo manual selections by the user.
-    if (mInitialized) {
+    if (fromStepIndex >= 0) {
         log.logMessage(DEBUG, "[VIEWMODEL] Processing plugins from step " + std::to_string(fromStepIndex));
         forEachFuturePlugin(fromStepIndex, [this](const auto& groupViewModel, const auto& pluginViewModel) {
             processPlugin(groupViewModel, pluginViewModel);
