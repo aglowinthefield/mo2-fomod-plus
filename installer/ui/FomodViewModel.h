@@ -220,12 +220,12 @@ private:
 
     void setFlagForPluginState(const std::shared_ptr<PluginViewModel>& plugin, bool selected) const;
 
-    void createNonePluginForGroup(const std::shared_ptr<GroupViewModel>& group) const;
+    static void createNonePluginForGroup(const std::shared_ptr<GroupViewModel>& group) ;
 
     void processPlugin(const std::shared_ptr<GroupViewModel>& group,
         const std::shared_ptr<PluginViewModel>& plugin) const;
 
-    void enforceRadioGroupConstraints(const std::shared_ptr<GroupViewModel>& groupViewModel) const;
+    void enforceRadioGroupConstraints(const std::shared_ptr<GroupViewModel>& group) const;
 
     void enforceSelectAllConstraint(const std::shared_ptr<GroupViewModel>& groupViewModel) const;
 
@@ -237,6 +237,11 @@ private:
 
     // Indices
     int mCurrentStepIndex{ 0 };
+
+    void logMessage(LogLevel level, const std::string& message) const
+    {
+        log.logMessage(level, "[VIEWMODEL] " + message);
+    };
 };
 
 

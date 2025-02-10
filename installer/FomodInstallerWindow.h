@@ -22,6 +22,12 @@
 
 using namespace MOBase;
 
+struct PluginData {
+    std::shared_ptr<PluginViewModel> plugin;
+    QAbstractButton* uiElement;
+};
+
+
 class FomodPlusInstaller;
 /**
  * @class FomodInstallerWindow
@@ -53,6 +59,8 @@ public:
 
     void restoreGeometryAndState();
 
+    void populatePluginMap();
+
 
     // So FomodPlusInstaller can check if the user wants to manually install
     [[nodiscard]] bool isManualInstall() const
@@ -67,7 +75,8 @@ private slots:
 
     void updateCheckboxStates() const;
 
-    void onPluginToggled(bool selected, const std::shared_ptr<GroupViewModel>& group, const std::shared_ptr<PluginViewModel>& plugin) const;
+    void onPluginToggled(bool selected, const std::shared_ptr<GroupViewModel>& group,
+        const std::shared_ptr<PluginViewModel>& plugin) const;
 
     void onPluginHovered(const std::shared_ptr<PluginViewModel>& plugin) const;
 
@@ -97,7 +106,9 @@ private:
     GuessedValue<QString>& mModName;
     std::shared_ptr<IFileTree> mTree;
     std::shared_ptr<FomodViewModel> mViewModel;
-    bool mInitialized{false};
+    bool mInitialized{ false };
+    std::unordered_map<QString, PluginData> mPluginMap;
+
 
     // Meta
     bool mIsManualInstall{};
@@ -125,7 +136,7 @@ private:
 
     void updateDisplayForActivePlugin() const;
 
-    void applyFnFromJson(const std::function<void(QAbstractButton*)> &fn);
+    void applyFnFromJson(const std::function<void(QAbstractButton*)>& fn);
 
     void stylePreviouslySelectedOptions();
 
@@ -152,7 +163,8 @@ private:
     static QString createObjectName(const std::shared_ptr<PluginViewModel>& plugin,
         const std::shared_ptr<GroupViewModel>& group);
 
-    QRadioButton* createPluginRadioButton(const std::shared_ptr<PluginViewModel>& plugin, const std::shared_ptr<GroupViewModel>& group, QWidget* parent);
+    QRadioButton* createPluginRadioButton(const std::shared_ptr<PluginViewModel>& plugin,
+        const std::shared_ptr<GroupViewModel>& group, QWidget* parent);
 
     QCheckBox* createPluginCheckBox(const std::shared_ptr<PluginViewModel>& plugin,
         const std::shared_ptr<GroupViewModel>& group, QWidget* parent);
@@ -162,7 +174,13 @@ private:
     void renderCheckboxGroup(QWidget* parent, QLayout* parentLayout,
         const std::shared_ptr<GroupViewModel>& group);
 
-    QButtonGroup* renderRadioGroup(QWidget* parent, QLayout* parentLayout, const std::shared_ptr<GroupViewModel>& group);
+    QButtonGroup* renderRadioGroup(QWidget* parent, QLayout* parentLayout,
+        const std::shared_ptr<GroupViewModel>& group);
+
+    void logMessage(LogLevel level, const std::string& message) const
+    {
+        log.logMessage(level, "[WINDOW] " + message);
+    };
 };
 
 

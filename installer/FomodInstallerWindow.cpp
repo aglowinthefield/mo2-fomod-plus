@@ -5,7 +5,6 @@
 #include "ui/ScaleLabel.h"
 #include "ui/UIHelper.h"
 #include "xml/ModuleConfiguration.h"
-#include <log.h>
 
 #include <QButtonGroup>
 #include <QCheckBox>
@@ -23,6 +22,8 @@
 #include <utility>
 
 #include "ui/FomodViewModel.h"
+
+#include <unordered_set>
 
 /**
  * 
@@ -60,6 +61,7 @@ FomodInstallerWindow::FomodInstallerWindow(
 
     updateButtons();
     restoreGeometryAndState();
+    populatePluginMap();
 }
 
 void FomodInstallerWindow::closeEvent(QCloseEvent* event)
@@ -82,6 +84,32 @@ void FomodInstallerWindow::restoreGeometryAndState()
     restoreGeometry(settings.value("windowGeometry").toByteArray());
 }
 
+void FomodInstallerWindow::populatePluginMap()
+{
+    const auto checkboxes   = findChildren<QCheckBox*>();
+    const auto radioButtons = findChildren<QRadioButton*>();
+
+    for (const auto& step : mViewModel->getSteps()) {
+        for (const auto& group : step->getGroups()) {
+            for (const auto& plugin : group->getPlugins()) {
+
+                const auto name = createObjectName(plugin, group);
+
+                for (auto* checkbox : checkboxes) {
+                    if (checkbox->objectName() == name) {
+                        mPluginMap.insert({ name, { plugin, checkbox } });
+                    }
+                }
+                for (auto* radioButton : radioButtons) {
+                    if (radioButton->objectName() == name) {
+                        mPluginMap.insert({ name, { plugin, radioButton } });
+                    }
+                }
+            }
+        }
+    }
+}
+
 void FomodInstallerWindow::onNextClicked()
 {
     if (!mViewModel->isLastVisibleStep()) {
@@ -96,48 +124,22 @@ void FomodInstallerWindow::onNextClicked()
 
 void FomodInstallerWindow::updateCheckboxStates() const
 {
-    const auto checkboxes   = findChildren<QCheckBox*>();
-    const auto radioButtons = findChildren<QRadioButton*>();
+    // PluginMap presumed to be populated
+    for (const auto& [objectName, pluginData] : mPluginMap) {
+        if (pluginData.plugin->isSelected() != pluginData.uiElement->isChecked()) {
+            const auto widgetType = pluginData.uiElement->metaObject()->className();
+            logMessage(DEBUG,
+                "Updating " + objectName.toStdString() + " to state: " + (pluginData.plugin->isSelected()
+                    ? "TRUE"
+                    : "FALSE") + " because " + widgetType +
+                " selection state is " + (pluginData.uiElement->isChecked() ? "TRUE" : "FALSE"));
+            pluginData.uiElement->setChecked(pluginData.plugin->isSelected());
+        }
 
-    for (const auto& step : mViewModel->getSteps()) {
-        for (const auto& group : step->getGroups()) {
-            for (const auto& plugin : group->getPlugins()) {
-
-                const auto name = createObjectName(plugin, group);
-                // Find the corresponding checkbox and update its state
-                for (auto* checkbox : checkboxes) {
-                    if (checkbox->objectName() != name) {
-                        continue;
-                    }
-                    if (checkbox->isChecked() != plugin->isSelected()) {
-                        log.logMessage(DEBUG,
-                            "Updating " + plugin->getName() + " to state: " + (plugin->isSelected() ? "TRUE" : "FALSE")
-                            +
-                            " because CHECKBOX button selection state is " + (checkbox->isChecked() ? "TRUE" : "FALSE"));
-                        checkbox->setChecked(plugin->isSelected());
-                    }
-                    if (checkbox->isEnabled() != plugin->isEnabled()) {
-                        checkbox->setEnabled(plugin->isEnabled());
-                    }
-                }
-                for (auto* radio : radioButtons) {
-                    if (radio->objectName() != name) {
-                        continue;
-                    }
-                    if (radio->isEnabled() != plugin->isEnabled()) {
-                        radio->setEnabled(plugin->isEnabled());
-                    }
-                    if (radio->isChecked() != plugin->isSelected()) {
-                        log.logMessage(DEBUG,
-                            "Updating " + plugin->getName() + " to state: " + (plugin->isSelected() ? "TRUE" : "FALSE")
-                            +
-                            " because RADIO BUTTON selection state is " + (radio->isChecked() ? "TRUE" : "FALSE"));
-                        radio->blockSignals(true);
-                        radio->setChecked(plugin->isSelected());
-                        radio->blockSignals(false);
-                    }
-                }
-            }
+        if (pluginData.plugin->isEnabled() != pluginData.uiElement->isEnabled()) {
+            logMessage(DEBUG, "[WINDOW] Changing enabled state of  element " + objectName.toStdString() + " to " +
+                (pluginData.plugin->isEnabled() ? "TRUE" : "FALSE"));
+            pluginData.uiElement->setEnabled(pluginData.plugin->isEnabled());
         }
     }
 }
@@ -145,7 +147,7 @@ void FomodInstallerWindow::updateCheckboxStates() const
 void FomodInstallerWindow::onPluginToggled(const bool selected, const std::shared_ptr<GroupViewModel>& group,
     const std::shared_ptr<PluginViewModel>& plugin) const
 {
-    log.logMessage(INFO,
+    logMessage(INFO,
         "onPluginToggled called with " + plugin->getName() + " in " + group->getName() + ": " +
         std::to_string(selected));
     mViewModel->togglePlugin(group, plugin, selected);
@@ -173,7 +175,7 @@ void FomodInstallerWindow::onInstallClicked()
 {
     saveGeometryAndState();
 
-    log.logMessage(DEBUG, "Installing mod: " + mModName->toStdString());
+    logMessage(DEBUG, "Installing mod: " + mModName->toStdString());
     mModName.update(mModNameInput->currentText(), GUESS_USER);
     mViewModel->preinstall(mTree, mFomodPath);
     // now the installer is available in the outer scope
@@ -209,7 +211,7 @@ void FomodInstallerWindow::setupUi()
 void FomodInstallerWindow::updateInstallStepStack()
 {
     if (!mInstallStepStack) {
-        log::error("updateInstallStepStack called with no initialized mInstallStepStack. tf?");
+        logMessage(ERR, "updateInstallStepStack called with no initialized mInstallStepStack. tf?");
         return;
     }
     // Create the widgets for each step. Not sure if we need these as member variables. Try it like this for now.
@@ -482,7 +484,7 @@ QRadioButton* FomodInstallerWindow::createPluginRadioButton(const std::shared_pt
     connect(hoverFilter, &HoverEventFilter::hovered, this, &FomodInstallerWindow::onPluginHovered);
 
     connect(radioButton, &QRadioButton::toggled, this, [this, radioButton, group, plugin](const bool checked) {
-        log.logMessage(INFO,
+        logMessage(INFO,
             "Received toggled signal for radio: " + plugin->getName() + ": " + (checked ? "TRUE" : "FALSE") +
             " Radio is now: " + (radioButton->isChecked() ? "TRUE" : "FALSE"));
         onPluginToggled(checked, group, plugin);
@@ -509,7 +511,7 @@ QCheckBox* FomodInstallerWindow::createPluginCheckBox(const std::shared_ptr<Plug
     checkBox->setEnabled(plugin->isEnabled());
     checkBox->setChecked(plugin->isSelected());
     connect(checkBox, &QCheckBox::toggled, this, [this, checkBox, group, plugin](const bool checked) {
-        log.logMessage(INFO,
+        logMessage(INFO,
             "Received toggled signal for checkbox: " + plugin->getName() + ": " + (checked ? "true" : "false") +
             " Checkbox was previously " + (checkBox->isChecked() ? "true" : "false"));
         onPluginToggled(checked, group, plugin);
@@ -617,7 +619,7 @@ void FomodInstallerWindow::stylePreviouslySelectedOptions()
 
     const auto tooltip = "You previously selected this plugin when installing this mod.";
 
-    log.logMessage(INFO, "Styling previously selected choices");
+    logMessage(INFO, "Styling previously selected choices");
     applyFnFromJson([stylesheet, tooltip](QAbstractButton* button) {
         button->setStyleSheet(stylesheet);
         button->setToolTip(tooltip);
@@ -626,15 +628,15 @@ void FomodInstallerWindow::stylePreviouslySelectedOptions()
 
 void FomodInstallerWindow::selectPreviouslySelectedOptions()
 {
-    log.logMessage(INFO, "Selecting previously selected choices");
-    log.logMessage(INFO, "Existing JSON provided: " + mFomodJson.dump(4));
+    logMessage(INFO, "Selecting previously selected choices");
+    logMessage(INFO, "Existing JSON provided: " + mFomodJson.dump(4));
     if (mFomodJson.empty()) {
         return;
     }
     try {
         mViewModel->selectFromJson(mFomodJson);
     } catch (Exception e) {
-        log.logMessage(ERR, std::string("Error selecting previously selected options: ") + e.what());
+        logMessage(ERR, std::string("Error selecting previously selected options: ") + e.what());
     }
     updateCheckboxStates();
     // applyFnFromJson([](QAbstractButton* button) {
