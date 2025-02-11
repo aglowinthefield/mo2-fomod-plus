@@ -9,6 +9,8 @@
 #include <iplugintool.h>
 #include <qtreeview.h>
 
+using PluginToMentionsMap = std::unordered_map<QString, std::vector<MOBase::IModInterface*> >;
+
 class FomodPlusPatchWizard final : public MOBase::IPluginTool {
     Q_OBJECT
     Q_INTERFACES(MOBase::IPlugin MOBase::IPluginTool)
@@ -43,6 +45,8 @@ public:
     ModListItemModel* createModel();
 
     std::shared_ptr<ModListItem> createModListItemForMod(const QString &mod);
+
+    PluginToMentionsMap populatePatches(std::shared_ptr<ModListItem> item);
 
 private:
     Logger& log = Logger::getInstance();

@@ -127,7 +127,7 @@ std::vector<QString> getPluginNamesForMod(MOBase::IModInterface* mod)
 
     for (auto it = tree->begin(); it != tree->end(); ++it) {
         // this could be a directory too. ugh
-        const auto entry = *it;
+        const auto entry     = *it;
         const auto entryName = entry->name().toLower();
         for (const auto& extension : PLUGIN_EXTENSIONS) {
             if (entryName.endsWith(extension.toLower())) {
@@ -150,4 +150,15 @@ std::shared_ptr<ModListItem> FomodPlusPatchWizard::createModListItemForMod(const
 
     const auto pluginNames = getPluginNamesForMod(foundMod);
     return std::make_shared<ModListItem>(foundMod, pluginNames);
+}
+
+PluginToMentionsMap FomodPlusPatchWizard::populatePatches(std::shared_ptr<ModListItem> item)
+{
+    PluginToMentionsMap map;
+
+    for (const auto & pluginName : item->pluginNames) {
+
+    }
+
+    return map;
 }
