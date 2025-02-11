@@ -5,7 +5,7 @@
 
 class XmlHelper {
 public:
-    static OrderTypeEnum getOrderType(const std::string& orderType)
+    static OrderTypeEnum getOrderType(const std::string& orderType, OrderTypeEnum defaultOrder = OrderTypeEnum::Explicit)
     {
         if (orderType == "Explicit")
             return OrderTypeEnum::Explicit;
@@ -13,7 +13,7 @@ public:
             return OrderTypeEnum::Ascending;
         if (orderType == "Descending")
             return OrderTypeEnum::Descending;
-        return OrderTypeEnum::Explicit; // No sorting by default. F the spec! (jk)
+        return defaultOrder; // Ascending for plugins, Explicit for groups
     }
 };
 

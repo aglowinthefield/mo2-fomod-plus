@@ -194,7 +194,7 @@ public:
 class File final : public XmlDeserializable {
 public:
     std::string source;
-    std::string destination;
+    std::optional<std::string> destination;
     int priority{ 0 };
     bool isFolder;
 
