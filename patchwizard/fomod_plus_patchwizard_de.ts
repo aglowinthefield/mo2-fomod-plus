@@ -4,13 +4,14 @@
 <context>
     <name>FomodPlusPatchWizard</name>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="11"/>
-        <location filename="FomodPlusPatchWizard.cpp" line="36"/>
+        <location filename="FomodPlusPatchWizard.cpp" line="26"/>
+        <location filename="FomodPlusPatchWizard.cpp" line="51"/>
+        <location filename="FomodPlusPatchWizard.cpp" line="74"/>
         <source>Patch Wizard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="21"/>
+        <location filename="FomodPlusPatchWizard.cpp" line="36"/>
         <source>Finde Patches, die du aus den FOMODs in deiner Modliste installieren m&ouml;chtest.</source>
         <translation type="unfinished"></translation>
     </message>
