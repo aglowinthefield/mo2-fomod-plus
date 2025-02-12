@@ -6,6 +6,8 @@
 #include "XmlParseException.h"
 #include "stringutil.h"
 
+#include <QString>
+
 using namespace StringConstants::FomodFiles;
 
 static GroupTypeEnum groupTypeFromString(const std::string& groupType)
@@ -304,11 +306,13 @@ bool StepList::deserialize(pugi::xml_node& node)
     return true;
 }
 
-bool ModuleConfiguration::deserialize(const std::string& filePath)
+bool ModuleConfiguration::deserialize(const QString& filePath)
 {
     pugi::xml_document doc_;
 
-    if (const pugi::xml_parse_result result = doc_.load_file(filePath.c_str()); !result) {
+    const auto path = filePath;
+
+    if (const pugi::xml_parse_result result = doc_.load_file(path.toStdWString().c_str()); !result) {
         throw XmlParseException(std::format("XML parsed with errors: {}", result.description()));
     }
 

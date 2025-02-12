@@ -192,7 +192,7 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> >
 
     auto moduleConfiguration = std::make_unique<ModuleConfiguration>();
     try {
-        moduleConfiguration->deserialize(paths.at(0).toStdString());
+        moduleConfiguration->deserialize(paths.at(0));
     } catch (XmlParseException& e) {
         logMessage(ERR, std::format("FomodPlusInstaller::install - error parsing moduleConfig.xml: {}", e.what()));
         return { nullptr, nullptr };
@@ -201,7 +201,7 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> >
     auto infoFile = std::make_unique<FomodInfoFile>();
     if (infoXML) {
         try {
-            infoFile->deserialize(paths.at(1).toStdString());
+            infoFile->deserialize(paths.at(1));
         } catch (XmlParseException& e) {
             logMessage(ERR, std::format("FomodPlusInstaller::install - error parsing info.xml: {}", e.what()));
         }

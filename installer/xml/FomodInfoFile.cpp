@@ -5,11 +5,13 @@
 
 #include "stringutil.h"
 
-bool FomodInfoFile::deserialize(const std::string& filePath)
+#include <QString>
+
+bool FomodInfoFile::deserialize(const QString& filePath)
 {
     pugi::xml_document doc;
     // ReSharper disable once CppTooWideScopeInitStatement
-    const pugi::xml_parse_result result = doc.load_file(filePath.c_str());
+    const pugi::xml_parse_result result = doc.load_file(filePath.toStdWString().c_str());
 
     if (!result) {
         throw XmlParseException(std::format("XML parsed with errors: {}", result.description()));

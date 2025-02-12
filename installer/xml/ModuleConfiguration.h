@@ -6,6 +6,7 @@
 #include <pugixml.hpp>
 #include <iostream>
 #include <optional>
+#include <qstring.h>
 
 class XmlDeserializable {
 public:
@@ -303,7 +304,7 @@ public:
     StepList installSteps;
     ConditionalFileInstall conditionalFileInstalls;
 
-    bool deserialize(const std::string& filePath);
+    bool deserialize(const QString &filePath);
 };
 
 
