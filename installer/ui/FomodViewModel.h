@@ -175,7 +175,7 @@ public:
 
     void updateVisibleSteps() const;
 
-    void rebuildConditionFlags() const;
+    void rebuildConditionFlagsForStep(int stepIndex) const;
 
     void preinstall(const std::shared_ptr<MOBase::IFileTree>& tree, const QString& fomodPath);
 
@@ -242,6 +242,10 @@ private:
     {
         log.logMessage(level, "[VIEWMODEL] " + message);
     };
+
+    std::string toString();
+
+    bool isRadioLike(const std::shared_ptr<GroupViewModel>& group) const;
 };
 
 

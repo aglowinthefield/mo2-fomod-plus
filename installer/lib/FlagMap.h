@@ -1,5 +1,7 @@
 ﻿#ifndef FLAGMAP_H
 #define FLAGMAP_H
+#include "stringutil.h"
+
 #include <functional>
 #include <string>
 #include <unordered_map>
@@ -8,7 +10,7 @@ class FlagMap {
 public:
     [[nodiscard]] std::string getFlag(const std::string& flag) const
     {
-        auto it = flags.find(flag);
+        auto it = flags.find(toLower(flag));
         if (it != flags.end()) {
             return it->second;
         }
@@ -17,7 +19,7 @@ public:
 
     void setFlag(const std::string& flag, const std::string& value)
     {
-        flags[flag] = value;
+        flags[toLower(flag)] = value;
     }
 
     void forEach(const std::function<void(const std::string&, const std::string&)>& func) const

@@ -66,6 +66,13 @@ inline std::wstring toLower(const std::wstring& str)
     return lowerStr;
 }
 
+inline std::string toLower(const std::string& str)
+{
+    std::string lowerStr = str;
+    std::ranges::transform(lowerStr, lowerStr.begin(), tolower);
+    return lowerStr;
+}
+
 inline bool endsWithCaseInsensitive(const std::wstring& str, const std::wstring& suffix)
 {
     const std::wstring lowerStr = toLower(str);
