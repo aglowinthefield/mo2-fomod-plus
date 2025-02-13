@@ -36,15 +36,16 @@ std::shared_ptr<IFileTree> FileInstaller::install() const
             log.logMessage(ERR, "Could not find source: " + file.source);
             continue;
         }
-        const auto targetPath = QString::fromStdString(file.destination);
+        const auto targetPath = file.destination.has_value()
+            ? QString::fromStdString(file.destination.value())
+            : QString::fromStdString(sourcePath);
 
         // If it's a folder, copy the contents of the folder, not the folder itself.
-        if (sourceNode->isDir()) {
+        if (sourceNode->isDir()) { // TODO: Check if target path is literally undefined/null
             const auto& tree = sourceNode->astree();
             for (auto it = tree->begin(); it != tree->end(); ++it) {
-                // this could be a directory too. ugh
                 const auto entry = *it;
-                const auto path  = targetPath + "/" + entry->name();
+                const auto path  = (targetPath.isEmpty()) ? entry->name() : targetPath + "/" + entry->name();
                 installTree->copy(entry, path, IFileTree::InsertPolicy::MERGE);
             }
         } else {

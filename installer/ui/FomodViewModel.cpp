@@ -57,6 +57,8 @@ std::shared_ptr<FomodViewModel> FomodViewModel::create(MOBase::IOrganizer* organ
     viewModel->mActiveStep   = viewModel->mSteps.at(0);
     viewModel->mActivePlugin = viewModel->getFirstPluginForActiveStep();
     viewModel->getActiveStep()->setVisited(true);
+    viewModel->logMessage(DEBUG, "VIEWMODEL INITIALIZED");
+    viewModel->logMessage(DEBUG, viewModel->toString());
     return viewModel;
 }
 
@@ -197,7 +199,7 @@ bool moreThanOneSelected(const std::shared_ptr<GroupViewModel>& group)
 
 void FomodViewModel::enforceRadioGroupConstraints(const std::shared_ptr<GroupViewModel>& group) const
 {
-    if (group->getType() != SelectExactlyOne) {
+    if (!isRadioLike(group)) {
         return;
     }
 
@@ -399,10 +401,8 @@ void FomodViewModel::togglePlugin(const std::shared_ptr<GroupViewModel>& group,
     }
 
     // Disable other radio options first.
-    bool isRadioLike = group->getType() == SelectExactlyOne || (group->getType() == SelectAtMostOne && group->
-        getPlugins().size() > 1);
 
-    if (selected && isRadioLike) {
+    if (selected && isRadioLike(group)) {
         for (const auto& pluginViewModel : group->getPlugins()) {
             if (pluginViewModel != plugin && plugin->isSelected()) {
                 logMessage(DEBUG,
@@ -421,35 +421,29 @@ void FomodViewModel::togglePlugin(const std::shared_ptr<GroupViewModel>& group,
 
     if (mInitialized) {
         mActivePlugin = plugin;
-        processPluginConditions(stepIndex);
-        updateVisibleSteps();
     }
+    processPluginConditions(stepIndex);
+    updateVisibleSteps();
 }
 
 void FomodViewModel::updateVisibleSteps() const
 {
     mVisibleStepIndices.clear();
-    rebuildConditionFlags();
+    mFlags->clearAll();
 
     for (int i = 0; i < mSteps.size(); ++i) {
+        if (i == 0) {
+            rebuildConditionFlagsForStep(i);
+        }
 
         // This also depends on previous flags that may have set this particular flag.
         if (mConditionTester.isStepVisible(mFlags, mSteps[i]->getVisibilityConditions(), i, mSteps)) {
             mVisibleStepIndices.push_back(i);
+            rebuildConditionFlagsForStep(i);
         } else {
             // logMessage(DEBUG, "Step " + std::to_string(i) + " is NOT visible.");
         }
     }
-}
-
-void FomodViewModel::rebuildConditionFlags() const
-{
-    mFlags->clearAll();
-    forEachPlugin([this](const auto&, const auto& plugin) {
-        if (plugin->isSelected()) {
-            setFlagForPluginState(plugin, plugin->isSelected());
-        }
-    });
     if (mFlags->getFlagCount() > 0) {
         logMessage(DEBUG, "Rebuilt flags");
         logMessage(DEBUG, "-------------");
@@ -457,6 +451,17 @@ void FomodViewModel::rebuildConditionFlags() const
             logMessage(DEBUG, "Flag: " + flag + ", Value: " + value);
         });
         logMessage(DEBUG, "-------------");
+    }
+}
+
+void FomodViewModel::rebuildConditionFlagsForStep(const int stepIndex) const
+{
+    for (const auto& group : mSteps[stepIndex]->getGroups()) {
+        for (const auto& plugin : group->getPlugins()) {
+            if (plugin->isSelected()) {
+                setFlagForPluginState(plugin, plugin->isSelected());
+            }
+        }
     }
 }
 
@@ -519,4 +524,37 @@ std::string FomodViewModel::getDisplayImage() const
 const std::shared_ptr<PluginViewModel>& FomodViewModel::getFirstPluginForActiveStep() const
 {
     return mActiveStep->getGroups().at(0)->getPlugins().at(0);
+}
+
+/*
+--------------------------------------------------------------------------------
+                               Utility
+--------------------------------------------------------------------------------
+*/
+std::string FomodViewModel::toString()
+{
+    std::string viewModel = "\n";
+    for (const auto& step : mSteps) {
+
+        viewModel += "Step: " + step->getName() + "\n";
+
+        for (const auto& group : step->getGroups()) {
+
+            viewModel += "\tGroup: " + group->getName() + "\n";
+
+            for (const auto& plugin : group->getPlugins()) {
+                viewModel += "\t\tPlugin: " + plugin->getName() + "[Selected: " + (plugin->isSelected()
+                    ? "TRUE"
+                    : "FALSE") + "]\n";
+            }
+        }
+    }
+    viewModel += "\n";
+    return viewModel;
+}
+
+bool FomodViewModel::isRadioLike(const std::shared_ptr<GroupViewModel>& group) const
+{
+    return group->getType() == SelectExactlyOne
+        || (group->getType() == SelectAtMostOne && group-> getPlugins().size() > 1);
 }
