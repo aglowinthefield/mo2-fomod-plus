@@ -7,7 +7,6 @@
 #include "stringutil.h"
 
 #include <igamefeatures.h>
-#include <unordered_set>
 
 std::ostream& operator<<(std::ostream& os, const MOBase::ModDataContent::Content& content)
 {
@@ -23,9 +22,13 @@ FomodDataContent::FomodDataContent(MOBase::IOrganizer* organizer): GamebryoModDa
 
 std::vector<MOBase::ModDataContent::Content> FomodDataContent::getAllContents() const
 {
+    for (const auto& content : GamebryoModDataContent::getAllContents()) {
+        std::cout << "Existing Content ID: " << content.id() << std::endl;
+    }
+    std::cout << "New Content ID: " << CONTENT_FOMOD << std::endl;
     std::vector<Content> contents;
-    Content fomodContent          = {
-        FomodDataContentConstants::FOMOD_CONTENT_ID, "FOMOD", ":/fomod/hat", false
+    Content fomodContent = {
+        CONTENT_FOMOD, "FOMOD", ":/fomod/hat", false
     };
     contents.emplace_back(fomodContent);
     return contents;
@@ -39,12 +42,14 @@ std::vector<int> FomodDataContent::getContentsFor(const std::shared_ptr<const MO
 
     if (const auto fomodMeta = mod->pluginSetting(QString::fromStdString(StringConstants::Plugin::NAME.data()), "fomod",
         0); fomodMeta != 0) {
-        contents.push_back(FomodDataContentConstants::FOMOD_CONTENT_ID);
+        contents.push_back(CONTENT_FOMOD);
     }
 
-    // Dedupe the content list
-    std::unordered_set uniqueElements(contents.begin(), contents.end());
-    std::vector<int> dedupedContents = { uniqueElements.begin(), uniqueElements.end() };
-    return dedupedContents;
+    return contents;
+
+    // // Dedupe the content list
+    // std::unordered_set uniqueElements(contents.begin(), contents.end());
+    // std::vector<int> dedupedContents = { uniqueElements.begin(), uniqueElements.end() };
+    // return dedupedContents;
 
 }
