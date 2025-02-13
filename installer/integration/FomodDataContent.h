@@ -5,10 +5,6 @@
 #include <moddatacontent.h>
 #include "gamebryomoddatacontent.h"
 
-namespace FomodDataContentConstants {
-constexpr int FOMOD_CONTENT_ID = 400400;
-}
-
 class FomodDataContent final : public GamebryoModDataContent {
 public:
     explicit
@@ -17,6 +13,11 @@ public:
     [[nodiscard]] std::vector<Content> getAllContents() const override;
 
     [[nodiscard]] std::vector<int> getContentsFor(std::shared_ptr<const MOBase::IFileTree> fileTree) const override;
+
+protected:
+    enum FomodContent {
+        CONTENT_FOMOD = CONTENT_NEXT_VALUE
+    };
 
 private:
     MOBase::IOrganizer* mOrganizer;
