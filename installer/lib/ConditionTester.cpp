@@ -20,9 +20,6 @@ bool ConditionTester::isStepVisible(const std::shared_ptr<FlagMap>& flags,
     const std::vector<std::shared_ptr<StepViewModel>>& steps) const
 {
 
-    if (steps[stepIndex]->getName() == "Lux Via - bridges patch") {
-        log.logMessage(DEBUG, "testing lux via bridges");
-    }
     // first things first: is it visible?
     if (!testCompositeDependency(flags, compositeDependency)) {
         return false;

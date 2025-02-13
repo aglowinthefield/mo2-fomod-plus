@@ -185,7 +185,7 @@ void FomodInstallerWindow::onInstallClicked()
 
 void FomodInstallerWindow::updateButtons() const
 {
-    if (mViewModel->getCurrentStepIndex() == 0) {
+    if (mViewModel->isFirstVisibleStep()) {
         mBackButton->setEnabled(false);
     } else {
         mBackButton->setEnabled(true);
@@ -219,6 +219,7 @@ void FomodInstallerWindow::updateInstallStepStack()
         mInstallStepStack->addWidget(createStepWidget(installStep));
     }
     mInstallStepStack->setCurrentIndex(mViewModel->getCurrentStepIndex());
+    logMessage(DEBUG, "Initial step index: " + std::to_string(mViewModel->getCurrentStepIndex()));
 }
 
 /*

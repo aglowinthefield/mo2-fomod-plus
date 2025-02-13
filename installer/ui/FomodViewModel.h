@@ -196,6 +196,8 @@ public:
 
     bool isLastVisibleStep() const;
 
+    bool isFirstVisibleStep() const;
+
     void togglePlugin(const std::shared_ptr<GroupViewModel>&, const std::shared_ptr<PluginViewModel>& plugin,
         bool selected) const;
 
@@ -243,9 +245,9 @@ private:
         log.logMessage(level, "[VIEWMODEL] " + message);
     };
 
-    std::string toString();
+    std::string toString() const;
 
-    bool isRadioLike(const std::shared_ptr<GroupViewModel>& group) const;
+    static bool isRadioLike(const std::shared_ptr<GroupViewModel>& group);
 };
 
 

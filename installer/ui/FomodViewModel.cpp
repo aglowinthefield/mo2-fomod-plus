@@ -53,9 +53,10 @@ std::shared_ptr<FomodViewModel> FomodViewModel::create(MOBase::IOrganizer* organ
     viewModel->processPluginConditions(-1); // please dont judge me. ill fix this someday.
     viewModel->enforceGroupConstraints();
     viewModel->updateVisibleSteps();
-    viewModel->mInitialized  = true;
-    viewModel->mActiveStep   = viewModel->mSteps.at(0);
-    viewModel->mActivePlugin = viewModel->getFirstPluginForActiveStep();
+    viewModel->mInitialized      = true;
+    viewModel->mCurrentStepIndex = viewModel->mVisibleStepIndices.front();
+    viewModel->mActiveStep       = viewModel->mSteps.at(viewModel->mVisibleStepIndices.front());
+    viewModel->mActivePlugin     = viewModel->getFirstPluginForActiveStep();
     viewModel->getActiveStep()->setVisited(true);
     viewModel->logMessage(DEBUG, "VIEWMODEL INITIALIZED");
     viewModel->logMessage(DEBUG, viewModel->toString());
@@ -102,44 +103,6 @@ void FomodViewModel::forEachFuturePlugin(const int fromStepIndex, const PluginCa
     }
 }
 
-void FomodViewModel::selectFromJson(nlohmann::json json) const
-{
-
-    const auto jsonSteps = json["steps"];
-
-    for (int stepIndex = 0; stepIndex < jsonSteps.size(); ++stepIndex) {
-
-        const auto currentStep = mSteps[stepIndex];
-        const auto& step       = jsonSteps[stepIndex];
-
-        for (int groupIndex = 0; groupIndex < step["groups"].size(); ++groupIndex) {
-
-            const auto& group       = step["groups"][groupIndex];
-            const auto currentGroup = currentStep->getGroups()[groupIndex];
-
-            for (const auto& jsonPlugin : group["plugins"]) {
-
-                const auto allPlugins = currentGroup->getPlugins();
-                logMessage(DEBUG, "Looking for plugin " + jsonPlugin.get<std::string>());
-
-                const auto currentPlugin = std::ranges::find_if(allPlugins,
-                    [&jsonPlugin](const std::shared_ptr<PluginViewModel>& p) {
-                        return p->getName() == jsonPlugin.get<std::string>();
-                    });
-
-                if (currentPlugin == allPlugins.end()) {
-                    continue;
-                }
-
-                if ((*currentPlugin)->isSelected()) {
-                    continue;
-                }
-                togglePlugin(currentGroup, *currentPlugin, true);
-            }
-        }
-    }
-
-}
 
 void FomodViewModel::createStepViewModels()
 {
@@ -500,6 +463,11 @@ bool FomodViewModel::isLastVisibleStep() const
     return !mVisibleStepIndices.empty() && mCurrentStepIndex == mVisibleStepIndices.back();
 }
 
+bool FomodViewModel::isFirstVisibleStep() const
+{
+    return !mVisibleStepIndices.empty() && mCurrentStepIndex == mVisibleStepIndices.front();
+}
+
 void FomodViewModel::preinstall(const std::shared_ptr<MOBase::IFileTree>& tree, const QString& fomodPath)
 {
     mFileInstaller = std::make_shared<
@@ -531,16 +499,18 @@ const std::shared_ptr<PluginViewModel>& FomodViewModel::getFirstPluginForActiveS
                                Utility
 --------------------------------------------------------------------------------
 */
-std::string FomodViewModel::toString()
+std::string FomodViewModel::toString() const
 {
     std::string viewModel = "\n";
     for (const auto& step : mSteps) {
 
-        viewModel += "Step: " + step->getName() + "\n";
+        const auto isVisible = std::ranges::find(mVisibleStepIndices, step->getOwnIndex()) != mVisibleStepIndices.end();
+        viewModel += "Step " + std::to_string(step->getOwnIndex()) + ": " + step->getName() + "[Visible: " +
+            std::to_string(isVisible) + "]\n";
 
         for (const auto& group : step->getGroups()) {
 
-            viewModel += "\tGroup: " + group->getName() + "\n";
+            viewModel += "\tGroup " + std::to_string(group->getOwnIndex()) + ": " + group->getName() + "\n";
 
             for (const auto& plugin : group->getPlugins()) {
                 viewModel += "\t\tPlugin: " + plugin->getName() + "[Selected: " + (plugin->isSelected()
@@ -550,11 +520,56 @@ std::string FomodViewModel::toString()
         }
     }
     viewModel += "\n";
+    std::ostringstream oss;
+    std::ranges::transform(mVisibleStepIndices,
+        std::ostream_iterator<std::string>(oss, ", "),
+        [](const int i) { return std::to_string(i); });
+
+    viewModel += "Visible Steps: [" + oss.str() + "]\n";
     return viewModel;
 }
 
-bool FomodViewModel::isRadioLike(const std::shared_ptr<GroupViewModel>& group) const
+bool FomodViewModel::isRadioLike(const std::shared_ptr<GroupViewModel>& group)
 {
     return group->getType() == SelectExactlyOne
-        || (group->getType() == SelectAtMostOne && group-> getPlugins().size() > 1);
+        || (group->getType() == SelectAtMostOne && group->getPlugins().size() > 1);
+}
+
+void FomodViewModel::selectFromJson(nlohmann::json json) const
+{
+
+    const auto jsonSteps = json["steps"];
+
+    for (int stepIndex = 0; stepIndex < jsonSteps.size(); ++stepIndex) {
+
+        const auto currentStep = mSteps[stepIndex];
+        const auto& step       = jsonSteps[stepIndex];
+
+        for (int groupIndex = 0; groupIndex < step["groups"].size(); ++groupIndex) {
+
+            const auto& group       = step["groups"][groupIndex];
+            const auto currentGroup = currentStep->getGroups()[groupIndex];
+
+            for (const auto& jsonPlugin : group["plugins"]) {
+
+                const auto allPlugins = currentGroup->getPlugins();
+                logMessage(DEBUG, "Looking for plugin " + jsonPlugin.get<std::string>());
+
+                const auto currentPlugin = std::ranges::find_if(allPlugins,
+                    [&jsonPlugin](const std::shared_ptr<PluginViewModel>& p) {
+                        return p->getName() == jsonPlugin.get<std::string>();
+                    });
+
+                if (currentPlugin == allPlugins.end()) {
+                    continue;
+                }
+
+                if ((*currentPlugin)->isSelected()) {
+                    continue;
+                }
+                togglePlugin(currentGroup, *currentPlugin, true);
+            }
+        }
+    }
+
 }

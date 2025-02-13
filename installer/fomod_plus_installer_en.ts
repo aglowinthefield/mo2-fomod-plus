@@ -10,47 +10,47 @@
     </message>
     <message>
         <location filename="FomodInstallerWindow.cpp" line="197"/>
-        <location filename="FomodInstallerWindow.cpp" line="366"/>
+        <location filename="FomodInstallerWindow.cpp" line="367"/>
         <source>Next</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="288"/>
+        <location filename="FomodInstallerWindow.cpp" line="289"/>
         <source>Name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="289"/>
+        <location filename="FomodInstallerWindow.cpp" line="290"/>
         <source>Author:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="290"/>
+        <location filename="FomodInstallerWindow.cpp" line="291"/>
         <source>Version:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="291"/>
+        <location filename="FomodInstallerWindow.cpp" line="292"/>
         <source>Website:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="357"/>
+        <location filename="FomodInstallerWindow.cpp" line="358"/>
         <source>Manual</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="358"/>
+        <location filename="FomodInstallerWindow.cpp" line="359"/>
         <source>Select All Previous Choices</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="365"/>
+        <location filename="FomodInstallerWindow.cpp" line="366"/>
         <source>Back</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="367"/>
+        <location filename="FomodInstallerWindow.cpp" line="368"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
