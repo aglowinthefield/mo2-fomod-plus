@@ -539,34 +539,53 @@ void FomodViewModel::selectFromJson(nlohmann::json json) const
 {
 
     const auto jsonSteps = json["steps"];
+    const auto stepCount = jsonSteps.size();
 
-    for (int stepIndex = 0; stepIndex < jsonSteps.size(); ++stepIndex) {
+    for (int stepIndex = 0; stepIndex < stepCount; ++stepIndex) {
+
+        if (stepIndex > mSteps.size() - 1) {
+            logMessage(ERR, "Step index " + std::to_string(stepIndex) + " is out of bounds.");
+            continue;
+        }
 
         const auto currentStep = mSteps[stepIndex];
-        const auto& step       = jsonSteps[stepIndex];
+        const auto step        = jsonSteps[stepIndex];
+        const auto groupCount  = step["groups"].size();
 
-        for (int groupIndex = 0; groupIndex < step["groups"].size(); ++groupIndex) {
+        logMessage(DEBUG, "Selecting plugins for step " + std::to_string(stepIndex));
+        logMessage(DEBUG, "There are " + std::to_string(groupCount) + " groups.");
 
-            const auto& group       = step["groups"][groupIndex];
+        for (int groupIndex = 0; groupIndex < groupCount; ++groupIndex) {
+            if (groupIndex > currentStep->getGroups().size() - 1) {
+                logMessage(ERR, "Group index " + std::to_string(groupIndex) + " is out of bounds.");
+                continue;
+            }
+
+            const auto group        = step["groups"][groupIndex];
             const auto currentGroup = currentStep->getGroups()[groupIndex];
 
-            for (const auto& jsonPlugin : group["plugins"]) {
+            for (const auto jsonPlugin : group["plugins"]) {
 
                 const auto allPlugins = currentGroup->getPlugins();
-                logMessage(DEBUG, "Looking for plugin " + jsonPlugin.get<std::string>());
+                const auto searchName = jsonPlugin.get<std::string>();
+
+                logMessage(DEBUG, "Looking for plugin " + searchName);
 
                 const auto currentPlugin = std::ranges::find_if(allPlugins,
-                    [&jsonPlugin](const std::shared_ptr<PluginViewModel>& p) {
-                        return p->getName() == jsonPlugin.get<std::string>();
+                    [searchName](const std::shared_ptr<PluginViewModel>& p) {
+                        return p->getName() == searchName;
                     });
 
                 if (currentPlugin == allPlugins.end()) {
+                    logMessage(DEBUG, "Plugin " + searchName + " not found in group " + currentGroup->getName());
                     continue;
                 }
 
                 if ((*currentPlugin)->isSelected()) {
+                    logMessage(DEBUG, "Plugin " + searchName + " is already selected.");
                     continue;
                 }
+                logMessage(DEBUG, "Toggle plugin " + searchName + " to selected.");
                 togglePlugin(currentGroup, *currentPlugin, true);
             }
         }
