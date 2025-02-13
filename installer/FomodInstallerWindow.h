@@ -98,6 +98,7 @@ private slots:
     }
 
     void onInstallClicked();
+    void toggleImagesShown() const;
 
 private:
     Logger& log = Logger::getInstance();
@@ -120,6 +121,7 @@ private:
     QPushButton* mCancelButton{};
     QPushButton* mManualButton{};
     QPushButton* mSelectPreviousButton{};
+    QPushButton* mHideImagesButton{};
 
     void updateButtons() const;
 
@@ -181,6 +183,7 @@ private:
     {
         log.logMessage(level, "[WINDOW] " + message);
     };
+
 };
 
 

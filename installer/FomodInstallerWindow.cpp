@@ -17,7 +17,6 @@
 #include <QSettings>
 #include <QSizePolicy>
 #include <QSplitter>
-#include <QTextEdit>
 #include <QVBoxLayout>
 #include <utility>
 
@@ -357,8 +356,12 @@ QWidget* FomodInstallerWindow::createBottomRow()
     // Manual on far left
     mManualButton         = UIHelper::createButton(tr("Manual"), bottomRow);
     mSelectPreviousButton = UIHelper::createButton(tr("Select All Previous Choices"), bottomRow);
+
+    const auto buttonText = mInstaller->shouldShowImages() ? tr("Hide Images") : tr("Show Images");
+    mHideImagesButton     = UIHelper::createButton(buttonText, bottomRow);
     layout->addWidget(mManualButton);
     layout->addWidget(mSelectPreviousButton);
+    layout->addWidget(mHideImagesButton);
 
     // Space to push remaining buttons right
     layout->addStretch();
@@ -372,6 +375,7 @@ QWidget* FomodInstallerWindow::createBottomRow()
     connect(mBackButton, SIGNAL(clicked()), this, SLOT(onBackClicked()));
     connect(mCancelButton, SIGNAL(clicked()), this, SLOT(onCancelClicked()));
     connect(mSelectPreviousButton, SIGNAL(clicked()), this, SLOT(onSelectPreviousClicked()));
+    connect(mHideImagesButton, SIGNAL(clicked()), this, SLOT(toggleImagesShown()));
 
     layout->addWidget(mBackButton);
     layout->addWidget(mNextInstallButton);
@@ -413,6 +417,11 @@ QWidget* FomodInstallerWindow::createLeftPane()
             mViewModel->getActivePlugin());
         viewer->showMaximized();
     });
+
+    if (!mInstaller->shouldShowImages()) {
+        mImageLabel->hide();
+    }
+
     layout->addWidget(mImageLabel, 1);
 
     updateDisplayForActivePlugin();
@@ -565,6 +574,21 @@ QButtonGroup* FomodInstallerWindow::renderRadioGroup(QWidget* parent, QLayout* p
         parentLayout->addWidget(radioButton);
     }
     return buttonGroup;
+}
+
+void FomodInstallerWindow::toggleImagesShown() const
+{
+    logMessage(DEBUG, "Toggling image visibility");
+    mInstaller->toggleShouldShowImages();
+    if (mInstaller->shouldShowImages()) {
+        logMessage(DEBUG, "Turning images ON");
+        mImageLabel->show();
+        mHideImagesButton->setText(tr("Hide Images"));
+    } else {
+        logMessage(DEBUG, "Turning images OFF");
+        mImageLabel->hide();
+        mHideImagesButton->setText(tr("Show Images"));
+    }
 }
 
 

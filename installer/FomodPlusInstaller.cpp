@@ -38,6 +38,17 @@ bool FomodPlusInstaller::shouldFallbackToLegacyInstaller() const
     return mOrganizer->pluginSetting(name(), "fallback_to_legacy").value<bool>();
 }
 
+bool FomodPlusInstaller::shouldShowImages() const
+{
+    return mOrganizer->pluginSetting(name(), "show_images").value<bool>();
+}
+
+void FomodPlusInstaller::toggleShouldShowImages() const
+{
+    const bool showImages = shouldShowImages();
+    mOrganizer->setPluginSetting(name(), "show_images", !showImages);
+}
+
 std::vector<std::shared_ptr<const IPluginRequirement> > FomodPlusInstaller::requirements() const
 {
     return { Requirements::gameDependency(
@@ -60,6 +71,7 @@ QList<PluginSetting> FomodPlusInstaller::settings() const
 
     return {
         { u"fallback_to_legacy"_s, u"When hitting cancel, fall back to the legacy FOMOD installer."_s, false },
+        { u"show_images"_s, u"Show image previews and the image carousel in installer windows. "_s, true },
     };
 }
 
