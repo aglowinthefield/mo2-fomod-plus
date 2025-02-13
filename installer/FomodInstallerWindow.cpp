@@ -387,8 +387,20 @@ QWidget* FomodInstallerWindow::createLeftPane()
 
     // Add description box
     // Initialize with defaults (the first plugin's description (which defaults to the module image otherwise))
-    mDescriptionBox = new QTextEdit("", leftPane);
-    layout->addWidget(mDescriptionBox);
+    QScrollArea* scrollArea = new QScrollArea(leftPane);
+    scrollArea->setWidgetResizable(true);
+
+    mDescriptionBox = new QLabel("", leftPane);
+    mDescriptionBox->setTextFormat(Qt::RichText);
+    mDescriptionBox->setTextInteractionFlags(Qt::TextBrowserInteraction);
+    mDescriptionBox->setOpenExternalLinks(true);
+    mDescriptionBox->setWordWrap(true);
+    // mDescriptionBox->setStyleSheet("border: 1px solid gray; padding: 2px;");
+    mDescriptionBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    mDescriptionBox->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+
+    scrollArea->setWidget(mDescriptionBox);
+    layout->addWidget(scrollArea, 1);
 
     // Add image
     // Initialize with defaults (the first plugin's image)
@@ -400,7 +412,7 @@ QWidget* FomodInstallerWindow::createLeftPane()
             mViewModel->getActivePlugin());
         viewer->showMaximized();
     });
-    layout->addWidget(mImageLabel);
+    layout->addWidget(mImageLabel, 1);
 
     updateDisplayForActivePlugin();
 
@@ -558,8 +570,10 @@ QButtonGroup* FomodInstallerWindow::renderRadioGroup(QWidget* parent, QLayout* p
 // Updates the image and description field for a given plugin. Also use this on initialization of those widgets.
 void FomodInstallerWindow::updateDisplayForActivePlugin() const
 {
-    const auto& plugin = mViewModel->getActivePlugin();
-    mDescriptionBox->setText(QString::fromStdString(plugin->getDescription()));
+
+    const auto& plugin        = mViewModel->getActivePlugin();
+    const QString description = formatPluginDescription(QString::fromStdString(plugin->getDescription()));
+    mDescriptionBox->setText(description);
     const auto image     = mViewModel->getDisplayImage();
     const auto imagePath = UIHelper::getFullImagePath(mFomodPath, QString::fromStdString(image));
     if (image.empty()) {

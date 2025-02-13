@@ -125,7 +125,7 @@ private:
 
     // Widgets
     QStackedWidget* mInstallStepStack{};
-    QTextEdit* mDescriptionBox{};
+    QLabel* mDescriptionBox{};
     QComboBox* mModNameInput{};
     ScaleLabel* mImageLabel{};
 
