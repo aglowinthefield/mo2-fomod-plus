@@ -196,19 +196,11 @@ void FileInstaller::addFiles(std::vector<File>& main, std::vector<File> toAdd) c
 // TODO: Unclear if we're copying. oh well.
 std::vector<File> FileInstaller::collectFilesToInstall() const
 {
-    std::vector<File> filesToInstall;
+    std::vector<File> allFiles;
 
     // Required files from FOMOD
     const FileList requiredInstallFiles = mFomodFile->requiredInstallFiles;
-    addFiles(filesToInstall, requiredInstallFiles.files);
-
-    // ConditionalInstall files
-    const auto conditionalInstalls = mFomodFile->conditionalFileInstalls;
-    for (const auto& pattern : conditionalInstalls.patterns) {
-        if (mConditionTester.testCompositeDependency(mFlagMap, pattern.dependencies)) {
-            addFiles(filesToInstall, pattern.files.files);
-        }
-    }
+    addFiles(allFiles, requiredInstallFiles.files);
 
     // Selected files from visible steps
     for (const auto& stepViewModel : mSteps) {
@@ -218,21 +210,28 @@ std::vector<File> FileInstaller::collectFilesToInstall() const
         for (const auto& groupViewModel : stepViewModel->getGroups()) {
             for (const auto& pluginViewModel : groupViewModel->getPlugins()) {
                 if (pluginViewModel->isSelected()) {
-                    addFiles(filesToInstall, pluginViewModel->getPlugin()->files.files);
+                    addFiles(allFiles, pluginViewModel->getPlugin()->files.files);
                 }
             }
         }
     }
 
-    // Sort by priority. I don't think we need to do anything about skipping lower priority mods, but i'm not sure.
+    // ConditionalInstall files
+    for (const auto conditionals = mFomodFile->conditionalFileInstalls; const auto& pattern : conditionals.patterns) {
+        if (mConditionTester.testCompositeDependency(mFlagMap, pattern.dependencies)) {
+            addFiles(allFiles, pattern.files.files);
+        }
+    }
 
-    std::ranges::sort(filesToInstall, [](const auto& a, const auto& b) {
+    // Files will all have a default priority of 0 if not specified, so the order should also be informed by the
+    // order they appear within XML. That's why we put conditionalFileInstalls after.
+    std::ranges::sort(allFiles, [](const auto& a, const auto& b) {
         return a.priority < b.priority;
     });
 
-    for (auto toInstall : filesToInstall) {
+    for (auto toInstall : allFiles) {
         log.logMessage(DEBUG, "File to install: " + toInstall.source);
     }
 
-    return filesToInstall;
+    return allFiles;
 }
