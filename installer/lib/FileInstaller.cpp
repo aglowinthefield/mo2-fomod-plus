@@ -97,11 +97,6 @@ std::string FileInstaller::getQualifiedFilePath(const std::string& treePath) con
 QString FileInstaller::createInstallationNotes() const
 {
     QString notes = "";
-
-
-    // std::vector<std::string> selectedOptions;
-    // std::vector<std::string> allOptions;
-
     std::vector<std::string> hasPatchFor;
     std::vector<std::string> installedPatchFor;
     std::vector<std::string> notInstalledPatchFor;
@@ -121,12 +116,6 @@ QString FileInstaller::createInstallationNotes() const
                         notInstalledPatchFor.emplace_back("notInstalledPatchFor:" + fileName);
                     }
                 }
-                // if (pluginViewModel->getName() != "None") {
-                //     allOptions.emplace_back(pluginViewModel->getName());
-                //     if (pluginViewModel->isSelected()) {
-                //         selectedOptions.push_back(pluginViewModel->getName());
-                //     }
-                // }
             }
         }
     }
