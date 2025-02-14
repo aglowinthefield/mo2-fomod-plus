@@ -2,8 +2,6 @@
 #include "xml/ModuleConfiguration.h"
 #include "lib/Logger.h"
 
-using GroupRef       = const std::shared_ptr<GroupViewModel>&;
-using PluginRef      = const std::shared_ptr<PluginViewModel>&;
 using GroupCallback  = std::function<void(GroupRef)>;
 using PluginCallback = std::function<void(GroupRef, PluginRef)>;
 
@@ -301,8 +299,7 @@ void FomodViewModel::enforceGroupConstraints() const
 */
 #pragma region Plugin Constraints
 
-void FomodViewModel::processPlugin(GroupRef group,
-    PluginRef plugin) const
+void FomodViewModel::processPlugin(GroupRef group, PluginRef plugin) const
 {
     if (group->getType() == SelectAll) {
         return;
@@ -389,8 +386,7 @@ void FomodViewModel::setFlagForPluginState(PluginRef plugin) const
  *  togglePlugin(group, modB, false)
  *  togglePlugin(group, modA, true)
  */
-void FomodViewModel::togglePlugin(GroupRef group,
-    PluginRef plugin, const bool selected) const
+void FomodViewModel::togglePlugin(GroupRef group, PluginRef plugin, const bool selected) const
 {
     if (plugin->isSelected() == selected) {
         logMessage(DEBUG, "Plugin " + plugin->getName() + " is already " + (selected ? "selected" : "deselected"));
@@ -398,21 +394,20 @@ void FomodViewModel::togglePlugin(GroupRef group,
     }
 
     // Disable other radio options first.
-
     if (selected && isRadioLike(group)) {
-        for (const auto& pluginViewModel : group->getPlugins()) {
-            if (pluginViewModel != plugin && plugin->isSelected()) {
+        for (const auto& otherPlugin : group->getPlugins()) {
+            if (otherPlugin != plugin && plugin->isSelected()) {
                 logMessage(DEBUG,
-                    "Deselecting " + pluginViewModel->getName() + " because " + plugin->getName() + " was selected.");
-                pluginViewModel->setSelected(false);
-                setFlagForPluginState(pluginViewModel);
+                    "Deselecting " + otherPlugin->getName() + " because " + plugin->getName() + " was selected.");
+                otherPlugin->setSelected(false);
+                setFlagForPluginState(otherPlugin);
             }
         }
     }
 
     const auto stepIndex = group->getStepIndex();
 
-    logMessage(INFO, "[VIEWMODEL] Toggling " + plugin->getName() + " to " + (selected ? "true" : "false"));
+    logMessage(INFO, "Toggling " + plugin->getName() + " to " + (selected ? "true" : "false"));
     plugin->setSelected(selected);
     setFlagForPluginState(plugin);
 
@@ -442,12 +437,11 @@ void FomodViewModel::updateVisibleSteps() const
         }
 
         // This also depends on previous flags that may have set this particular flag.
-        if (mConditionTester.isStepVisible(mFlags, mSteps[i]->getVisibilityConditions(), i, mSteps)) {
-            mVisibleStepIndices.push_back(i);
-            rebuildConditionFlagsForStep(i);
-        } else {
-            // logMessage(DEBUG, "Step " + std::to_string(i) + " is NOT visible.");
+        if (!mConditionTester.isStepVisible(mFlags, mSteps[i]->getVisibilityConditions(), i, mSteps)) {
+            return;
         }
+        mVisibleStepIndices.push_back(i);
+        rebuildConditionFlagsForStep(i);
     }
     if (mFlags->getFlagCount() > 0) {
         logMessage(DEBUG, mFlags->toString());
@@ -458,9 +452,7 @@ void FomodViewModel::rebuildConditionFlagsForStep(const int stepIndex) const
 {
     for (const auto& group : mSteps[stepIndex]->getGroups()) {
         for (const auto& plugin : group->getPlugins()) {
-            if (plugin->isSelected()) {
-                setFlagForPluginState(plugin);
-            }
+            setFlagForPluginState(plugin);
         }
     }
 }
@@ -561,9 +553,11 @@ std::string FomodViewModel::toString() const
     std::ranges::transform(mVisibleStepIndices,
         std::ostream_iterator<std::string>(oss, ", "),
         [](const int i) { return std::to_string(i); });
-    oss.str().erase(oss.str().length() - 2);
 
-    viewModel += "Visible Steps: [" + oss.str() + "]\n";
+    std::string stepList = oss.str();
+    stepList.erase(stepList.length() - 2);
+
+    viewModel += "Visible Steps: [" + stepList + "]\n";
     viewModel += mFlags->toString();
     return viewModel;
 }

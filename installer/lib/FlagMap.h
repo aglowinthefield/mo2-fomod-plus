@@ -3,7 +3,6 @@
 #include "ViewModels.h"
 #include "stringutil.h"
 
-#include <functional>
 #include <string>
 #include <unordered_map>
 
@@ -25,7 +24,7 @@ public:
         return result;
     }
 
-    void setFlagsForPlugin(const std::shared_ptr<PluginViewModel>& plugin)
+    void setFlagsForPlugin(PluginRef plugin)
     {
         // Don't clutter the map with empty key-vals
         if (plugin->getConditionFlags().size() == 0) {
@@ -36,12 +35,14 @@ public:
         for (auto conditionFlag : plugin->getConditionFlags()) {
             flagList.emplace_back(toLower(conditionFlag.name), conditionFlag.value);
         }
-        this->flags[plugin] = flagList;
+        flags[plugin] = flagList;
     }
 
-    void unsetFlagsForPlugin(const std::shared_ptr<PluginViewModel>& plugin)
+    void unsetFlagsForPlugin(PluginRef plugin)
     {
-        flags.erase(plugin);
+        if (flags.contains(plugin)) {
+            flags.erase(plugin);
+        }
     }
 
     std::string toString()

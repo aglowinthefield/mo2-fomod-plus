@@ -6,6 +6,7 @@
 template <typename T>
 using shared_ptr_list = std::vector<std::shared_ptr<T> >;
 
+
 /*
 --------------------------------------------------------------------------------
                                 Plugins
@@ -88,11 +89,20 @@ public:
     void setVisited(const bool visited) { this->visited = visited; }
 
 private:
-    bool visited{false};
+    bool visited{ false };
     std::shared_ptr<InstallStep> installStep;
     shared_ptr_list<GroupViewModel> groups;
     int ownIndex;
 };
+
+
+/*
+--------------------------------------------------------------------------------
+                            Outbound Types
+--------------------------------------------------------------------------------
+*/
+using GroupRef  = const std::shared_ptr<GroupViewModel>&;
+using PluginRef = const std::shared_ptr<PluginViewModel>&;
 
 
 #endif //VIEWMODELS_H

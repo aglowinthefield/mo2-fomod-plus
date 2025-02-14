@@ -156,8 +156,6 @@ private:
     };
 
     std::string toString() const;
-
-    static bool isRadioLike(const std::shared_ptr<GroupViewModel>& group);
 };
 
 
