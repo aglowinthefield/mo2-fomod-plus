@@ -30,6 +30,7 @@ public:
         if (plugin->getConditionFlags().size() == 0) {
             return;
         }
+        unsetFlagsForPlugin(plugin);
 
         FlagList flagList;;
         for (auto conditionFlag : plugin->getConditionFlags()) {

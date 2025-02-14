@@ -141,7 +141,7 @@ private:
 
     void enforceSelectAllConstraint(const std::shared_ptr<GroupViewModel>& groupViewModel) const;
 
-    void enforceSelectAtLeastOneConstraint(const std::shared_ptr<GroupViewModel>& groupViewModel) const;
+    void enforceSelectAtLeastOneConstraint(const std::shared_ptr<GroupViewModel>& group) const;
 
     void enforceGroupConstraints() const;
 

@@ -27,6 +27,11 @@ bool moreThanOneSelected(GroupRef group)
     return std::ranges::distance(selectedPlugins) > 1;
 }
 
+bool anySelected(GroupRef group)
+{
+    return std::ranges::any_of(group->getPlugins(), [](const auto& plugin) { return plugin->isSelected(); });
+}
+
 std::string pluginTypeEnumToString(const PluginTypeEnum type)
 {
     switch (type) {
@@ -135,10 +140,7 @@ void FomodViewModel::forEachPlugin(const PluginCallback& callback) const
 
 void FomodViewModel::forEachFuturePlugin(const int fromStepIndex, const PluginCallback& callback) const
 {
-    for (int i = 0; i < mSteps.size(); ++i) {
-        if (i <= fromStepIndex) {
-            continue;
-        }
+    for (int i = fromStepIndex + 1; i < mSteps.size(); ++i) {
         for (const auto& groupViewModel : mSteps[i]->getGroups()) {
             for (const auto& pluginViewModel : groupViewModel->getPlugins()) {
                 callback(groupViewModel, pluginViewModel);
@@ -224,12 +226,11 @@ void FomodViewModel::enforceRadioGroupConstraints(GroupRef group) const
         for (const auto plugin : group->getPlugins()) {
             plugin->setSelected(false); // don't call toggle here, that'll do the radio stuff.
         }
-
     }
 
-    if (std::ranges::any_of(group->getPlugins(), [](const auto& plugin) { return plugin->isSelected(); })) {
+    if (anySelected(group)) {
         logMessage(INFO, "At least one plugin is selected. Nothing to enforce.");
-        return; // We're good if at least one is selected.
+        return;
     }
 
     // First, try to select the first Recommended plugin
@@ -264,20 +265,17 @@ void FomodViewModel::enforceSelectAllConstraint(GroupRef groupViewModel) const
 
 }
 
-void FomodViewModel::enforceSelectAtLeastOneConstraint(GroupRef groupViewModel) const
+void FomodViewModel::enforceSelectAtLeastOneConstraint(GroupRef group) const
 {
-    if (groupViewModel->getType() != SelectAtLeastOne) {
+    if (group->getType() != SelectAtLeastOne || group->getPlugins().size() != 1) {
         return;
     }
 
-    if (groupViewModel->getPlugins().size() == 1) {
-        const auto plugin = groupViewModel->getPlugins().at(0);
-        if (mConditionTester.getPluginTypeDescriptorState(plugin->getPlugin(), mFlags) != PluginTypeEnum::NotUsable) {
-            logMessage(DEBUG,
-                "Selecting " + plugin->getName() + " because it's the only plugin in a SelectAtLeastOne.");
-            togglePlugin(groupViewModel, plugin, true);
-            plugin->setEnabled(false);
-        }
+    const auto plugin = group->getPlugins().front();
+    if (mConditionTester.getPluginTypeDescriptorState(plugin->getPlugin(), mFlags) != PluginTypeEnum::NotUsable) {
+        logMessage(DEBUG, "Selecting " + plugin->getName() + " because it's the only plugin in a SelectAtLeastOne.");
+        togglePlugin(group, plugin, true);
+        plugin->setEnabled(false);
     }
 }
 
@@ -309,10 +307,11 @@ void FomodViewModel::processPlugin(GroupRef group, PluginRef plugin) const
     if (typeDescriptor == plugin->getCurrentPluginType()) {
         return;
     }
+
     logMessage(DEBUG,
         "Plugin " + plugin->getName() + " in group " + std::to_string(group->getOwnIndex()) + " has changed type from "
-        +
-        pluginTypeEnumToString(plugin->getCurrentPluginType()) + " to " + pluginTypeEnumToString(typeDescriptor));
+        + pluginTypeEnumToString(plugin->getCurrentPluginType()) + " to " + pluginTypeEnumToString(typeDescriptor));
+
     plugin->setCurrentPluginType(typeDescriptor);
 
     const bool isOnlyPlugin = group->getPlugins().size() == 1
@@ -358,9 +357,9 @@ void FomodViewModel::processPlugin(GroupRef group, PluginRef plugin) const
 
 void FomodViewModel::processPluginConditions(const int fromStepIndex) const
 {
-    // We only want to update plugins that haven't been seen yet. Otherwise we could undo manual selections by the user.
+    // We only want to update plugins that haven't been seen yet. Otherwise, we could undo manual selections by the user.
     if (fromStepIndex >= 0) {
-        logMessage(DEBUG, "[VIEWMODEL] Processing plugins from step " + std::to_string(fromStepIndex));
+        logMessage(DEBUG, "Processing plugins from step " + std::to_string(fromStepIndex));
         forEachFuturePlugin(fromStepIndex, [this](const auto& groupViewModel, const auto& pluginViewModel) {
             processPlugin(groupViewModel, pluginViewModel);
         });
@@ -429,7 +428,6 @@ void FomodViewModel::togglePlugin(GroupRef group, PluginRef plugin, const bool s
 void FomodViewModel::updateVisibleSteps() const
 {
     mVisibleStepIndices.clear();
-    mFlags->clearAll();
 
     for (int i = 0; i < mSteps.size(); ++i) {
         if (i == 0) {
@@ -437,11 +435,10 @@ void FomodViewModel::updateVisibleSteps() const
         }
 
         // This also depends on previous flags that may have set this particular flag.
-        if (!mConditionTester.isStepVisible(mFlags, mSteps[i]->getVisibilityConditions(), i, mSteps)) {
-            return;
+        if (mConditionTester.isStepVisible(mFlags, mSteps[i]->getVisibilityConditions(), i, mSteps)) {
+            mVisibleStepIndices.push_back(i);
+            rebuildConditionFlagsForStep(i);
         }
-        mVisibleStepIndices.push_back(i);
-        rebuildConditionFlagsForStep(i);
     }
     if (mFlags->getFlagCount() > 0) {
         logMessage(DEBUG, mFlags->toString());
