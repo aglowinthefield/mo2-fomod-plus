@@ -38,6 +38,17 @@ bool FomodPlusInstaller::shouldFallbackToLegacyInstaller() const
     return mOrganizer->pluginSetting(name(), "fallback_to_legacy").value<bool>();
 }
 
+bool FomodPlusInstaller::shouldShowImages() const
+{
+    return mOrganizer->pluginSetting(name(), "show_images").value<bool>();
+}
+
+void FomodPlusInstaller::toggleShouldShowImages() const
+{
+    const bool showImages = shouldShowImages();
+    mOrganizer->setPluginSetting(name(), "show_images", !showImages);
+}
+
 std::vector<std::shared_ptr<const IPluginRequirement> > FomodPlusInstaller::requirements() const
 {
     return { Requirements::gameDependency(
@@ -60,6 +71,7 @@ QList<PluginSetting> FomodPlusInstaller::settings() const
 
     return {
         { u"fallback_to_legacy"_s, u"When hitting cancel, fall back to the legacy FOMOD installer."_s, false },
+        { u"show_images"_s, u"Show image previews and the image carousel in installer windows. "_s, true },
     };
 }
 
@@ -192,7 +204,7 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> >
 
     auto moduleConfiguration = std::make_unique<ModuleConfiguration>();
     try {
-        moduleConfiguration->deserialize(paths.at(0).toStdString());
+        moduleConfiguration->deserialize(paths.at(0));
     } catch (XmlParseException& e) {
         logMessage(ERR, std::format("FomodPlusInstaller::install - error parsing moduleConfig.xml: {}", e.what()));
         return { nullptr, nullptr };
@@ -201,7 +213,7 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> >
     auto infoFile = std::make_unique<FomodInfoFile>();
     if (infoXML) {
         try {
-            infoFile->deserialize(paths.at(1).toStdString());
+            infoFile->deserialize(paths.at(1));
         } catch (XmlParseException& e) {
             logMessage(ERR, std::format("FomodPlusInstaller::install - error parsing info.xml: {}", e.what()));
         }

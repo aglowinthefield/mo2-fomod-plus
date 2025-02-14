@@ -1,12 +1,13 @@
 ﻿#ifndef FOMODINFOFILE_H
 #define FOMODINFOFILE_H
 
+#include <qstring.h>
 #include <string>
 #include <vector>
 
 class FomodInfoFile {
 public:
-    bool deserialize(const std::string& filePath);
+    bool deserialize(const QString &filePath);
 
     [[nodiscard]] const std::string& getName() const { return name; }
     [[nodiscard]] const std::string& getAuthor() const { return author; }

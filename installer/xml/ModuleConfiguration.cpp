@@ -6,6 +6,8 @@
 #include "XmlParseException.h"
 #include "stringutil.h"
 
+#include <QString>
+
 using namespace StringConstants::FomodFiles;
 
 static GroupTypeEnum groupTypeFromString(const std::string& groupType)
@@ -204,9 +206,14 @@ bool ConditionFlagList::deserialize(pugi::xml_node& node)
 bool File::deserialize(pugi::xml_node& node)
 {
     source      = node.attribute("source").as_string();
-    destination = node.attribute("destination").as_string();
+    // destination = node.attribute("destination").as_string();
     priority    = node.attribute("priority").as_int();
     isFolder    = strcmp(node.name(), "folder") == 0;
+    if (auto attr = node.attribute("destination"); attr) {
+        destination = attr.as_string();
+    } else {
+        destination = std::nullopt;
+    }
     return true;
 }
 
@@ -232,7 +239,7 @@ bool Plugin::deserialize(pugi::xml_node& node)
 bool PluginList::deserialize(pugi::xml_node& node)
 {
     deserializeList(node, "plugin", plugins);
-    order = XmlHelper::getOrderType(node.attribute("order").as_string());
+    order = XmlHelper::getOrderType(node.attribute("order").as_string(), OrderTypeEnum::Ascending);
 
     // Sort the plugins based on the specified order
     std::ranges::sort(plugins, [this](const Plugin& a, const Plugin& b) {
@@ -299,11 +306,13 @@ bool StepList::deserialize(pugi::xml_node& node)
     return true;
 }
 
-bool ModuleConfiguration::deserialize(const std::string& filePath)
+bool ModuleConfiguration::deserialize(const QString& filePath)
 {
     pugi::xml_document doc_;
 
-    if (const pugi::xml_parse_result result = doc_.load_file(filePath.c_str()); !result) {
+    const auto path = filePath;
+
+    if (const pugi::xml_parse_result result = doc_.load_file(path.toStdWString().c_str()); !result) {
         throw XmlParseException(std::format("XML parsed with errors: {}", result.description()));
     }
 

@@ -60,6 +60,10 @@ public:
 
     void writeNotes(IModInterface* newMod) const;
 
+    [[nodiscard]] bool shouldShowImages() const;
+
+    void toggleShouldShowImages() const;
+
 private:
     Logger& log            = Logger::getInstance();
     IOrganizer* mOrganizer = nullptr;
@@ -89,6 +93,7 @@ private:
     void setupUiInjection() const;
 
     [[nodiscard]] bool shouldFallbackToLegacyInstaller() const;
+
     void logMessage(LogLevel level, const std::string& message) const
     {
         log.logMessage(level, "[INSTALLER] " + message);

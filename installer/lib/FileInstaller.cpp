@@ -36,15 +36,16 @@ std::shared_ptr<IFileTree> FileInstaller::install() const
             log.logMessage(ERR, "Could not find source: " + file.source);
             continue;
         }
-        const auto targetPath = QString::fromStdString(file.destination);
+        const auto targetPath = file.destination.has_value()
+            ? QString::fromStdString(file.destination.value())
+            : QString::fromStdString(sourcePath);
 
         // If it's a folder, copy the contents of the folder, not the folder itself.
-        if (sourceNode->isDir()) {
+        if (sourceNode->isDir()) { // TODO: Check if target path is literally undefined/null
             const auto& tree = sourceNode->astree();
             for (auto it = tree->begin(); it != tree->end(); ++it) {
-                // this could be a directory too. ugh
                 const auto entry = *it;
-                const auto path  = targetPath + "/" + entry->name();
+                const auto path  = (targetPath.isEmpty()) ? entry->name() : targetPath + "/" + entry->name();
                 installTree->copy(entry, path, IFileTree::InsertPolicy::MERGE);
             }
         } else {
@@ -96,11 +97,6 @@ std::string FileInstaller::getQualifiedFilePath(const std::string& treePath) con
 QString FileInstaller::createInstallationNotes() const
 {
     QString notes = "";
-
-
-    // std::vector<std::string> selectedOptions;
-    // std::vector<std::string> allOptions;
-
     std::vector<std::string> hasPatchFor;
     std::vector<std::string> installedPatchFor;
     std::vector<std::string> notInstalledPatchFor;
@@ -120,12 +116,6 @@ QString FileInstaller::createInstallationNotes() const
                         notInstalledPatchFor.emplace_back("notInstalledPatchFor:" + fileName);
                     }
                 }
-                // if (pluginViewModel->getName() != "None") {
-                //     allOptions.emplace_back(pluginViewModel->getName());
-                //     if (pluginViewModel->isSelected()) {
-                //         selectedOptions.push_back(pluginViewModel->getName());
-                //     }
-                // }
             }
         }
     }
@@ -195,19 +185,11 @@ void FileInstaller::addFiles(std::vector<File>& main, std::vector<File> toAdd) c
 // TODO: Unclear if we're copying. oh well.
 std::vector<File> FileInstaller::collectFilesToInstall() const
 {
-    std::vector<File> filesToInstall;
+    std::vector<File> allFiles;
 
     // Required files from FOMOD
     const FileList requiredInstallFiles = mFomodFile->requiredInstallFiles;
-    addFiles(filesToInstall, requiredInstallFiles.files);
-
-    // ConditionalInstall files
-    const auto conditionalInstalls = mFomodFile->conditionalFileInstalls;
-    for (const auto& pattern : conditionalInstalls.patterns) {
-        if (mConditionTester.testCompositeDependency(mFlagMap, pattern.dependencies)) {
-            addFiles(filesToInstall, pattern.files.files);
-        }
-    }
+    addFiles(allFiles, requiredInstallFiles.files);
 
     // Selected files from visible steps
     for (const auto& stepViewModel : mSteps) {
@@ -217,21 +199,28 @@ std::vector<File> FileInstaller::collectFilesToInstall() const
         for (const auto& groupViewModel : stepViewModel->getGroups()) {
             for (const auto& pluginViewModel : groupViewModel->getPlugins()) {
                 if (pluginViewModel->isSelected()) {
-                    addFiles(filesToInstall, pluginViewModel->getPlugin()->files.files);
+                    addFiles(allFiles, pluginViewModel->getPlugin()->files.files);
                 }
             }
         }
     }
 
-    // Sort by priority. I don't think we need to do anything about skipping lower priority mods, but i'm not sure.
+    // ConditionalInstall files
+    for (const auto conditionals = mFomodFile->conditionalFileInstalls; const auto& pattern : conditionals.patterns) {
+        if (mConditionTester.testCompositeDependency(mFlagMap, pattern.dependencies)) {
+            addFiles(allFiles, pattern.files.files);
+        }
+    }
 
-    std::ranges::sort(filesToInstall, [](const auto& a, const auto& b) {
+    // Files will all have a default priority of 0 if not specified, so the order should also be informed by the
+    // order they appear within XML. That's why we put conditionalFileInstalls after.
+    std::ranges::sort(allFiles, [](const auto& a, const auto& b) {
         return a.priority < b.priority;
     });
 
-    for (auto toInstall : filesToInstall) {
+    for (auto toInstall : allFiles) {
         log.logMessage(DEBUG, "File to install: " + toInstall.source);
     }
 
-    return filesToInstall;
+    return allFiles;
 }

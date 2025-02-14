@@ -25,6 +25,9 @@
 
 using namespace MOBase;
 
+using FileGlobalIndex = int;
+using FileDescriptor = std::pair<File, FileGlobalIndex>;
+
 class StepViewModel;
 
 class FileInstaller {

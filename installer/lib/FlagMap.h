@@ -1,30 +1,65 @@
 ﻿#ifndef FLAGMAP_H
 #define FLAGMAP_H
-#include <functional>
+#include "ViewModels.h"
+#include "stringutil.h"
+
 #include <string>
 #include <unordered_map>
 
+using Flag = std::pair<std::string, std::string>;
+using FlagList = std::vector<Flag>;
+
 class FlagMap {
 public:
-    [[nodiscard]] std::string getFlag(const std::string& flag) const
+    [[nodiscard]] FlagList getFlagsByKey(const std::string& key) const
     {
-        auto it = flags.find(flag);
-        if (it != flags.end()) {
-            return it->second;
+        FlagList result;
+        for (const auto& [plugin, flags] : flags) {
+            for (const auto& flag : flags) {
+                if (toLower(flag.first) == toLower(key)) {
+                    result.emplace_back(flag);
+                }
+            }
         }
-        return "";
+        return result;
     }
 
-    void setFlag(const std::string& flag, const std::string& value)
+    void setFlagsForPlugin(PluginRef plugin)
     {
-        flags[flag] = value;
+        // Don't clutter the map with empty key-vals
+        if (plugin->getConditionFlags().size() == 0) {
+            return;
+        }
+        unsetFlagsForPlugin(plugin);
+
+        FlagList flagList;;
+        for (auto conditionFlag : plugin->getConditionFlags()) {
+            flagList.emplace_back(toLower(conditionFlag.name), conditionFlag.value);
+        }
+        flags[plugin] = flagList;
     }
 
-    void forEach(const std::function<void(const std::string&, const std::string&)>& func) const
+    void unsetFlagsForPlugin(PluginRef plugin)
     {
-        for (const auto& [flag, value] : flags) {
-            func(flag, value);
+        if (flags.contains(plugin)) {
+            flags.erase(plugin);
         }
+    }
+
+    std::string toString()
+    {
+        auto result = std::string();
+        result += "FlagMap:\n";
+
+        for (const auto& [plugin, flags] : flags) {
+            result += plugin->getName() + " [";
+            for (const auto& [fst, snd] : flags) {
+                result += fst + ": " + snd + ", ";
+            }
+            result.erase(result.size() - 2);
+            result += "]\n";
+        }
+        return result;
     }
 
     void clearAll()
@@ -39,6 +74,6 @@ public:
 
 
 private:
-    std::unordered_map<std::string, std::string> flags;
+    std::unordered_map<std::shared_ptr<PluginViewModel>, FlagList> flags;
 };
 #endif //FLAGMAP_H

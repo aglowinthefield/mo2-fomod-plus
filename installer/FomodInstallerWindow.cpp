@@ -17,7 +17,6 @@
 #include <QSettings>
 #include <QSizePolicy>
 #include <QSplitter>
-#include <QTextEdit>
 #include <QVBoxLayout>
 #include <utility>
 
@@ -185,7 +184,7 @@ void FomodInstallerWindow::onInstallClicked()
 
 void FomodInstallerWindow::updateButtons() const
 {
-    if (mViewModel->getCurrentStepIndex() == 0) {
+    if (mViewModel->isFirstVisibleStep()) {
         mBackButton->setEnabled(false);
     } else {
         mBackButton->setEnabled(true);
@@ -219,6 +218,7 @@ void FomodInstallerWindow::updateInstallStepStack()
         mInstallStepStack->addWidget(createStepWidget(installStep));
     }
     mInstallStepStack->setCurrentIndex(mViewModel->getCurrentStepIndex());
+    logMessage(DEBUG, "Initial step index: " + std::to_string(mViewModel->getCurrentStepIndex()));
 }
 
 /*
@@ -356,8 +356,12 @@ QWidget* FomodInstallerWindow::createBottomRow()
     // Manual on far left
     mManualButton         = UIHelper::createButton(tr("Manual"), bottomRow);
     mSelectPreviousButton = UIHelper::createButton(tr("Select All Previous Choices"), bottomRow);
+
+    const auto buttonText = mInstaller->shouldShowImages() ? tr("Hide Images") : tr("Show Images");
+    mHideImagesButton     = UIHelper::createButton(buttonText, bottomRow);
     layout->addWidget(mManualButton);
     layout->addWidget(mSelectPreviousButton);
+    layout->addWidget(mHideImagesButton);
 
     // Space to push remaining buttons right
     layout->addStretch();
@@ -371,6 +375,7 @@ QWidget* FomodInstallerWindow::createBottomRow()
     connect(mBackButton, SIGNAL(clicked()), this, SLOT(onBackClicked()));
     connect(mCancelButton, SIGNAL(clicked()), this, SLOT(onCancelClicked()));
     connect(mSelectPreviousButton, SIGNAL(clicked()), this, SLOT(onSelectPreviousClicked()));
+    connect(mHideImagesButton, SIGNAL(clicked()), this, SLOT(toggleImagesShown()));
 
     layout->addWidget(mBackButton);
     layout->addWidget(mNextInstallButton);
@@ -387,8 +392,20 @@ QWidget* FomodInstallerWindow::createLeftPane()
 
     // Add description box
     // Initialize with defaults (the first plugin's description (which defaults to the module image otherwise))
-    mDescriptionBox = new QTextEdit("", leftPane);
-    layout->addWidget(mDescriptionBox);
+    QScrollArea* scrollArea = new QScrollArea(leftPane);
+    scrollArea->setWidgetResizable(true);
+
+    mDescriptionBox = new QLabel("", leftPane);
+    mDescriptionBox->setTextFormat(Qt::RichText);
+    mDescriptionBox->setTextInteractionFlags(Qt::TextBrowserInteraction);
+    mDescriptionBox->setOpenExternalLinks(true);
+    mDescriptionBox->setWordWrap(true);
+    // mDescriptionBox->setStyleSheet("border: 1px solid gray; padding: 2px;");
+    mDescriptionBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    mDescriptionBox->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+
+    scrollArea->setWidget(mDescriptionBox);
+    layout->addWidget(scrollArea, 1);
 
     // Add image
     // Initialize with defaults (the first plugin's image)
@@ -400,7 +417,12 @@ QWidget* FomodInstallerWindow::createLeftPane()
             mViewModel->getActivePlugin());
         viewer->showMaximized();
     });
-    layout->addWidget(mImageLabel);
+
+    if (!mInstaller->shouldShowImages()) {
+        mImageLabel->hide();
+    }
+
+    layout->addWidget(mImageLabel, 1);
 
     updateDisplayForActivePlugin();
 
@@ -554,12 +576,29 @@ QButtonGroup* FomodInstallerWindow::renderRadioGroup(QWidget* parent, QLayout* p
     return buttonGroup;
 }
 
+void FomodInstallerWindow::toggleImagesShown() const
+{
+    logMessage(DEBUG, "Toggling image visibility");
+    mInstaller->toggleShouldShowImages();
+    if (mInstaller->shouldShowImages()) {
+        logMessage(DEBUG, "Turning images ON");
+        mImageLabel->show();
+        mHideImagesButton->setText(tr("Hide Images"));
+    } else {
+        logMessage(DEBUG, "Turning images OFF");
+        mImageLabel->hide();
+        mHideImagesButton->setText(tr("Show Images"));
+    }
+}
+
 
 // Updates the image and description field for a given plugin. Also use this on initialization of those widgets.
 void FomodInstallerWindow::updateDisplayForActivePlugin() const
 {
-    const auto& plugin = mViewModel->getActivePlugin();
-    mDescriptionBox->setText(QString::fromStdString(plugin->getDescription()));
+
+    const auto& plugin        = mViewModel->getActivePlugin();
+    const QString description = formatPluginDescription(QString::fromStdString(plugin->getDescription()));
+    mDescriptionBox->setText(description);
     const auto image     = mViewModel->getDisplayImage();
     const auto imagePath = UIHelper::getFullImagePath(mFomodPath, QString::fromStdString(image));
     if (image.empty()) {
