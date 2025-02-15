@@ -4,13 +4,13 @@
 <context>
     <name>FomodInstallerWindow</name>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="195"/>
+        <location filename="FomodInstallerWindow.cpp" line="194"/>
         <source>安装</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="197"/>
-        <location filename="FomodInstallerWindow.cpp" line="366"/>
+        <location filename="FomodInstallerWindow.cpp" line="196"/>
+        <location filename="FomodInstallerWindow.cpp" line="370"/>
         <source>下一步</source>
         <translation type="unfinished"></translation>
     </message>
@@ -45,13 +45,25 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="365"/>
+        <location filename="FomodInstallerWindow.cpp" line="360"/>
+        <location filename="FomodInstallerWindow.cpp" line="586"/>
+        <source>隐藏图片</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="FomodInstallerWindow.cpp" line="369"/>
         <source>上一步</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="367"/>
+        <location filename="FomodInstallerWindow.cpp" line="371"/>
         <source>取消</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="FomodInstallerWindow.cpp" line="360"/>
+        <location filename="FomodInstallerWindow.cpp" line="590"/>
+        <source>显示图片</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
