@@ -4,13 +4,13 @@
 <context>
     <name>FomodInstallerWindow</name>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="195"/>
+        <location filename="FomodInstallerWindow.cpp" line="194"/>
         <source>Install</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="197"/>
-        <location filename="FomodInstallerWindow.cpp" line="366"/>
+        <location filename="FomodInstallerWindow.cpp" line="196"/>
+        <location filename="FomodInstallerWindow.cpp" line="370"/>
         <source>Next</source>
         <translation type="unfinished"></translation>
     </message>
@@ -45,13 +45,25 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="365"/>
+        <location filename="FomodInstallerWindow.cpp" line="360"/>
+        <location filename="FomodInstallerWindow.cpp" line="586"/>
+        <source>Hide Images</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="FomodInstallerWindow.cpp" line="369"/>
         <source>Back</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="367"/>
+        <location filename="FomodInstallerWindow.cpp" line="371"/>
         <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="FomodInstallerWindow.cpp" line="360"/>
+        <location filename="FomodInstallerWindow.cpp" line="590"/>
+        <source>Show Images</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
