@@ -14,8 +14,8 @@ class ConditionTester {
 public:
     explicit ConditionTester(MOBase::IOrganizer* organizer) : mOrganizer(organizer) {}
 
-    [[nodiscard]] static std::string getValueForFlag(const std::string& flagName, const StepRefList& steps,
-        int stepIndex);
+    [[nodiscard]] std::string getValueForFlag(const std::string& flagName, const StepRefList& steps,
+        int stepIndex) const;
 
     [[nodiscard]] bool isStepVisible(int stepIndex, const StepRefList& steps) const;
 

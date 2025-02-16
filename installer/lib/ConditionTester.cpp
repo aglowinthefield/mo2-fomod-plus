@@ -15,7 +15,7 @@ std::string setToString(const std::set<int>& set)
 }
 
 std::string ConditionTester::getValueForFlag(const std::string& flagName, const StepRefList& steps,
-    const int stepIndex)
+    const int stepIndex) const
 {
     std::vector<Flag> allFlags;
     auto step = steps[stepIndex];

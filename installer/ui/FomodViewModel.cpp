@@ -92,9 +92,6 @@ std::shared_ptr<FomodViewModel> FomodViewModel::create(MOBase::IOrganizer* organ
     std::unique_ptr<FomodInfoFile> infoFile)
 {
     auto viewModel = std::make_shared<FomodViewModel>(organizer, std::move(fomodFile), std::move(infoFile));
-    // if (viewModel->mFlags == nullptr) {
-    //     viewModel->mFlags = std::make_shared<FlagMap>();
-    // }
     viewModel->createStepViewModels();
     viewModel->processPluginConditions(-1); // please dont judge me. ill fix this someday.
     viewModel->enforceGroupConstraints();
