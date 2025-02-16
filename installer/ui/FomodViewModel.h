@@ -85,7 +85,7 @@ public:
 
     void updateVisibleSteps() const;
 
-    void rebuildConditionFlagsForStep(int stepIndex) const;
+    [[deprecated]] void rebuildConditionFlagsForStep(int stepIndex) const;
 
     void preinstall(const std::shared_ptr<MOBase::IFileTree>& tree, const QString& fomodPath);
 
@@ -118,7 +118,7 @@ private:
     MOBase::IOrganizer* mOrganizer = nullptr;
     std::unique_ptr<ModuleConfiguration> mFomodFile;
     std::unique_ptr<FomodInfoFile> mInfoFile;
-    std::shared_ptr<FlagMap> mFlags{ nullptr };
+    [[deprecated]] std::shared_ptr<FlagMap> mFlags{ nullptr };
     ConditionTester mConditionTester;
     std::shared_ptr<InfoViewModel> mInfoViewModel;
     std::vector<std::shared_ptr<StepViewModel> > mSteps;
@@ -130,7 +130,7 @@ private:
 
     void createStepViewModels();
 
-    void setFlagForPluginState(const std::shared_ptr<PluginViewModel> &plugin) const;
+    [[deprecated]] void setFlagForPluginState(const std::shared_ptr<PluginViewModel> &plugin) const;
 
     static void createNonePluginForGroup(const std::shared_ptr<GroupViewModel>& group) ;
 

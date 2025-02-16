@@ -8,12 +8,10 @@
 
 #include "FomodPlusInstaller.h"
 #include "xml/ModuleConfiguration.h"
-#include "ui/ClickableWidget.h"
 
 #include <QDialog>
-#include <qradiobutton.h>
 #include <QStackedWidget>
-#include <QTextEdit>
+#include <qradiobutton.h>
 #include <ui/ScaleLabel.h>
 
 #include "FomodInstallerWindow.h"

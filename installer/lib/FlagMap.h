@@ -6,8 +6,11 @@
 #include <string>
 #include <unordered_map>
 
-using Flag = std::pair<std::string, std::string>;
-using FlagList = std::vector<Flag>;
+/* TODO: The way this should properly sort through flags is as follows:
+ * For each step going BACKWARD
+ *  look for a setting for that page going FORWARD
+ *
+*/
 
 class FlagMap {
 public:
@@ -27,13 +30,13 @@ public:
     void setFlagsForPlugin(PluginRef plugin)
     {
         // Don't clutter the map with empty key-vals
-        if (plugin->getConditionFlags().size() == 0) {
+        if (plugin->getConditionFlags().empty()) {
             return;
         }
         unsetFlagsForPlugin(plugin);
 
         FlagList flagList;;
-        for (auto conditionFlag : plugin->getConditionFlags()) {
+        for (const auto& conditionFlag : plugin->getConditionFlags()) {
             flagList.emplace_back(toLower(conditionFlag.name), conditionFlag.value);
         }
         flags[plugin] = flagList;
@@ -51,14 +54,17 @@ public:
         auto result = std::string();
         result += "FlagMap:\n";
 
+        std::multimap<std::string, std::string> sortedFlags;
         for (const auto& [plugin, flags] : flags) {
-            result += plugin->getName() + " [";
             for (const auto& [fst, snd] : flags) {
-                result += fst + ": " + snd + ", ";
+                sortedFlags.emplace(fst, snd);
             }
-            result.erase(result.size() - 2);
-            result += "]\n";
         }
+
+        for (const auto& [key, value] : sortedFlags) {
+            result += key + ": " + value + "\n";
+        }
+
         return result;
     }
 
@@ -71,7 +77,6 @@ public:
     {
         return flags.size();
     }
-
 
 private:
     std::unordered_map<std::shared_ptr<PluginViewModel>, FlagList> flags;

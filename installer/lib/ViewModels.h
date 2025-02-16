@@ -6,6 +6,9 @@
 template <typename T>
 using shared_ptr_list = std::vector<std::shared_ptr<T> >;
 
+using Flag     = std::pair<std::string, std::string>;
+using FlagList = std::vector<Flag>;
+
 
 /*
 --------------------------------------------------------------------------------
@@ -25,9 +28,15 @@ public:
     [[nodiscard]] bool isSelected() const { return selected; }
     [[nodiscard]] bool isEnabled() const { return enabled; }
     [[nodiscard]] std::vector<ConditionFlag> getConditionFlags() const { return plugin->conditionFlags.flags; }
-    int getOwnIndex() const { return ownIndex; }
-    PluginTypeEnum getCurrentPluginType() const { return currentPluginType; }
+    [[nodiscard]] int getOwnIndex() const { return ownIndex; }
+    [[nodiscard]] int getStepIndex() const { return stepIndex; }
+    [[nodiscard]] int getGroupIndex() const { return groupIndex; }
+    [[nodiscard]] PluginTypeEnum getCurrentPluginType() const { return currentPluginType; }
+    [[nodiscard]] TypeDescriptor getTypeDescriptor() const { return plugin->typeDescriptor; }
     void setCurrentPluginType(const PluginTypeEnum type) { currentPluginType = type; }
+
+    void setGroupIndex(const int groupIndex) { this->groupIndex = groupIndex; }
+    void setStepIndex(const int stepIndex) { this->stepIndex = stepIndex; }
 
     friend class FomodViewModel;
     friend class FileInstaller;
@@ -38,6 +47,8 @@ protected:
 
 private:
     int ownIndex;
+    int groupIndex{ -1 };
+    int stepIndex{ -1 };
     bool selected;
     bool enabled;
     PluginTypeEnum currentPluginType = PluginTypeEnum::UNKNOWN;
@@ -86,12 +97,39 @@ public:
     [[nodiscard]] const shared_ptr_list<GroupViewModel>& getGroups() const { return groups; }
     [[nodiscard]] int getOwnIndex() const { return ownIndex; }
     [[nodiscard]] bool getHasVisited() const { return visited; }
+    [[nodiscard]] bool isVisible() const { return visible; }
+
+    [[nodiscard]] std::shared_ptr<StepViewModel> getPrevStep() const { return prevStep; }
+    [[nodiscard]] std::shared_ptr<StepViewModel> getNextStep() const { return nextStep; }
+
+    [[nodiscard]] std::vector<Flag> getFlagsForIndividualStep() const
+    {
+        std::vector<Flag> flags;
+        for (const auto& group : groups) {
+            for (const auto& plugin : group->getPlugins()) {
+                for (const auto& flag : plugin->getConditionFlags()) {
+                    if (plugin->isSelected()) {
+                        flags.emplace_back(flag.name, flag.value);
+                    }
+                }
+            }
+        }
+        return flags;
+    }
+
     void setVisited(const bool visited) { this->visited = visited; }
+    void setVisible(const bool visible) { this->visible = visible; }
+    void setPrevStep(const std::shared_ptr<StepViewModel>& prevStep) { this->prevStep = prevStep; }
+    void setNextStep(const std::shared_ptr<StepViewModel>& nextStep) { this->nextStep = nextStep; }
 
 private:
     bool visited{ false };
     std::shared_ptr<InstallStep> installStep;
     shared_ptr_list<GroupViewModel> groups;
+
+    std::shared_ptr<StepViewModel> nextStep{ nullptr };
+    std::shared_ptr<StepViewModel> prevStep{ nullptr };
+    bool visible{false};
     int ownIndex;
 };
 
@@ -103,6 +141,9 @@ private:
 */
 using GroupRef  = const std::shared_ptr<GroupViewModel>&;
 using PluginRef = const std::shared_ptr<PluginViewModel>&;
+using StepRef   = const std::shared_ptr<StepViewModel>&;
+
+using StepRefList = shared_ptr_list<StepViewModel>;
 
 
 #endif //VIEWMODELS_H

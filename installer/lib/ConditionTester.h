@@ -7,8 +7,6 @@
 #include "Logger.h"
 #include "../xml/ModuleConfiguration.h"
 
-#include <complex.h>
-
 class CompositeDependency;
 class StepViewModel;
 
@@ -16,18 +14,20 @@ class ConditionTester {
 public:
     explicit ConditionTester(MOBase::IOrganizer* organizer) : mOrganizer(organizer) {}
 
-    bool isStepVisible(const std::shared_ptr<FlagMap>& flags, const CompositeDependency& compositeDependency,
-        int stepIndex,
-        const std::vector<std::shared_ptr<StepViewModel>>& steps) const;
+    [[nodiscard]] static std::string getValueForFlag(const std::string& flagName, const StepRefList& steps,
+        int stepIndex);
 
-    bool testCompositeDependency(const std::shared_ptr<FlagMap>& flags,
-        const CompositeDependency& compositeDependency) const;
+    [[nodiscard]] bool isStepVisible(int stepIndex, const StepRefList& steps) const;
 
-    static bool testFlagDependency(const std::shared_ptr<FlagMap>& flags, const FlagDependency& flagDependency);
+    [[nodiscard]] bool testCompositeDependency(
+        const CompositeDependency& compositeDependency, const StepRefList& steps, int stepIndex) const;
+
+    [[nodiscard]] bool testFlagDependency(const FlagDependency& flagDependency, const StepRefList& steps,
+        int stepIndex) const;
 
     [[nodiscard]] bool testFileDependency(const FileDependency& fileDependency) const;
 
-    bool testGameDependency(const GameDependency& gameDependency) const;
+    [[nodiscard]] bool testGameDependency(const GameDependency& gameDependency) const;
 
 private:
     Logger& log = Logger::getInstance();
@@ -37,8 +37,7 @@ private:
 
     [[nodiscard]] FileDependencyTypeEnum getFileDependencyStateForPlugin(const std::string& pluginName) const;
 
-    PluginTypeEnum getPluginTypeDescriptorState(const std::shared_ptr<Plugin>& plugin,
-        const std::shared_ptr<FlagMap>& flags) const;
+    PluginTypeEnum getPluginTypeDescriptorState(PluginRef plugin, const StepRefList &steps) const;
 
     mutable std::unordered_map<std::string, FileDependencyTypeEnum> pluginStateCache;
 
