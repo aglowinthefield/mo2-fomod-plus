@@ -94,9 +94,13 @@ bool ConditionTester::testCompositeDependency(const std::shared_ptr<FlagMap>& fl
 bool ConditionTester::testFlagDependency(const std::shared_ptr<FlagMap>& flags, const FlagDependency& flagDependency)
 {
     const auto flagList = flags->getFlagsByKey(flagDependency.flag);
-    return std::ranges::any_of(flagList, [&flagDependency](const Flag& flag) {
-        return flag.second == flagDependency.value;
-    });
+
+    // Find the first instance of this flag being set (in the order specified by getFlagsByKey)
+    if (flagList.empty()) {
+        return false;
+    }
+
+    return flagList.front().second == flagDependency.value;
 }
 
 bool ConditionTester::testFileDependency(const FileDependency& fileDependency) const
