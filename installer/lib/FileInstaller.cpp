@@ -23,7 +23,9 @@ FileInstaller::FileInstaller(
 std::shared_ptr<IFileTree> FileInstaller::install() const
 {
     const auto filesToInstall = collectFilesToInstall();
-    log.logMessage(INFO, "Installing " + std::to_string(filesToInstall.size()) + " files");
+    logMessage(INFO, "Installing " + std::to_string(filesToInstall.size()) + " files");
+    logMessage(INFO, "FlagMap");
+    logMessage(INFO, mFlagMap->toString());
 
     // update the file tree with the new files
     const std::shared_ptr<IFileTree> installTree = mFileTree->createOrphanTree();
@@ -33,7 +35,7 @@ std::shared_ptr<IFileTree> FileInstaller::install() const
         const auto sourcePath = getQualifiedFilePath(file.source);
         const auto sourceNode = mFileTree->find(QString::fromStdString(sourcePath));
         if (sourceNode == nullptr) {
-            log.logMessage(ERR, "Could not find source: " + file.source);
+            logMessage(ERR, "Could not find source: " + file.source);
             continue;
         }
         const auto targetPath = file.destination.has_value()
@@ -177,12 +179,13 @@ std::vector<std::string> FileInstaller::collectPositiveFileNamesFromDependencyPa
 void FileInstaller::addFiles(std::vector<File>& main, std::vector<File> toAdd) const
 {
     for (const auto& add : toAdd) {
-        log.logMessage(INFO, "Adding file with source: " + add.source);
+        logMessage(INFO, "Adding file with source: " + add.source);
     }
     main.insert(main.end(), toAdd.begin(), toAdd.end());
 }
 
 // TODO: Unclear if we're copying. oh well.
+// TODO: Rebuild flagmap and step indeces before installing
 std::vector<File> FileInstaller::collectFilesToInstall() const
 {
     std::vector<File> allFiles;
@@ -207,7 +210,14 @@ std::vector<File> FileInstaller::collectFilesToInstall() const
 
     // ConditionalInstall files
     for (const auto conditionals = mFomodFile->conditionalFileInstalls; const auto& pattern : conditionals.patterns) {
+        //<folder source="CR\Dagi-Raht LL\VLrn_Custom Race - Dagi-Raht LL" destination="" priority="2" />
+
+        if (pattern.files.files.front().source == "CR\\Dagi-Raht LL\\VLrn_Custom Race - Dagi-Raht LL") {
+            logMessage(DEBUG, "WHY IS THIS HERE");
+        }
         if (mConditionTester.testCompositeDependency(mFlagMap, pattern.dependencies)) {
+            // also check if the plugins setting these flags are visible. at least one
+
             addFiles(allFiles, pattern.files.files);
         }
     }
@@ -219,7 +229,7 @@ std::vector<File> FileInstaller::collectFilesToInstall() const
     });
 
     for (auto toInstall : allFiles) {
-        log.logMessage(DEBUG, "File to install: " + toInstall.source);
+        logMessage(DEBUG, "File to install: " + toInstall.source);
     }
 
     return allFiles;

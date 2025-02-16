@@ -88,6 +88,11 @@ private:
     std::vector<std::shared_ptr<StepViewModel> > mSteps; // TODO: Maybe this is nasty. Idk.
 
     std::vector<File> collectFilesToInstall() const;
+
+    void logMessage(LogLevel level, const std::string& message) const
+    {
+        log.logMessage(level, "[INSTALLER] " + message);
+    }
 };
 
 

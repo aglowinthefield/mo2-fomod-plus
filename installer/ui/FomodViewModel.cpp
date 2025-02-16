@@ -431,6 +431,7 @@ void FomodViewModel::togglePlugin(GroupRef group, PluginRef plugin, const bool s
 void FomodViewModel::updateVisibleSteps() const
 {
     mVisibleStepIndices.clear();
+    mFlags->clearAll();
 
     for (int i = 0; i < mSteps.size(); ++i) {
         if (i == 0) {

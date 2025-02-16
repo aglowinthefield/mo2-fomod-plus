@@ -153,7 +153,7 @@ private:
     void logMessage(LogLevel level, const std::string& message) const
     {
         log.logMessage(level, "[VIEWMODEL] " + message);
-    };
+    }
 
     std::string toString() const;
 };
