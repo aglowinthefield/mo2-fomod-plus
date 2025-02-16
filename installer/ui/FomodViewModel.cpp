@@ -172,6 +172,9 @@ void FomodViewModel::createStepViewModels()
                 const auto& plugin   = group.plugins.plugins[pluginIndex];
                 auto pluginViewModel = std::make_shared<PluginViewModel>(std::make_shared<Plugin>(plugin), false, true,
                     pluginIndex);
+
+                pluginViewModel->setStepIndex(stepIndex);
+                pluginViewModel->setGroupIndex(groupIndex);
                 pluginViewModels.emplace_back(pluginViewModel); // Assuming default values for selected and enabled
             }
             auto groupViewModel = std::make_shared<GroupViewModel>(std::make_shared<Group>(group), pluginViewModels,
