@@ -5,50 +5,71 @@
 #include <iplugingame.h>
 #include <ipluginlist.h>
 
-std::string setToString(const std::set<int> &set)
+std::string setToString(const std::set<int>& set)
 {
-    std::string str = "";
+    std::string str;
     for (const auto& i : set) {
         str += std::to_string(i) + ", ";
     }
     return str;
 }
 
-bool ConditionTester::isStepVisible(const std::shared_ptr<FlagMap>& flags,
-    const CompositeDependency& compositeDependency,
-    const int stepIndex,
-    const std::vector<std::shared_ptr<StepViewModel>>& steps) const
+std::string ConditionTester::getValueForFlag(const std::string& flagName, const StepRefList& steps,
+    const int stepIndex)
 {
+    std::vector<Flag> allFlags;
+    auto step = steps[stepIndex];
 
-    // first things first: is it visible?
-    if (!testCompositeDependency(flags, compositeDependency)) {
+    while (step) {
+        auto theseFlags = step->getFlagsForIndividualStep();
+        allFlags.insert(allFlags.end(), theseFlags.begin(), theseFlags.end());
+        step = step->getPrevStep();
+    }
+
+    // Find the first flag that matches the flagName
+    const auto it = std::ranges::find_if(allFlags, [&flagName](const Flag& flag) {
+            return flag.first == flagName;
+    });
+    return it != allFlags.end() ? it->second : "";
+
+}
+
+bool ConditionTester::isStepVisible(const int stepIndex, const StepRefList& steps) const
+{
+    const CompositeDependency& condition = steps[stepIndex]->getVisibilityConditions();
+
+    // first things first: is the current step visible
+    if (!testCompositeDependency(condition, steps, stepIndex)) {
         return false;
     }
 
-    const auto flagDependencies = compositeDependency.flagDependencies;
+    const auto flagDependencies = condition.flagDependencies;
     if (flagDependencies.empty()) {
         return true;
     }
 
+    /*
+     * For the given step N to be visible, each flag dependency it has must be set by a step that's visible
+     */
     std::set<int> stepsThatSetThisFlag;
 
-    for (const auto flagDependency : flagDependencies) {
+    for (const auto& flagDependency : flagDependencies) {
         // for this flag, find the plugins that set it
         for (int i = stepIndex - 1; i >= 0; --i) {
-            for (const auto group : steps[i]->getGroups()) {
-                for (const auto plugin : group->getPlugins()) {
+            for (const auto& group : steps[i]->getGroups()) {
+                for (const auto& plugin : group->getPlugins()) {
                     if (std::ranges::any_of(plugin->getPlugin()->conditionFlags.flags,
                         [&flagDependency](const ConditionFlag& flag) {
                             return flag.name == flagDependency.flag && flag.value == flagDependency.value;
                         })) {
-                            stepsThatSetThisFlag.insert(i);
-                        }
+                        stepsThatSetThisFlag.insert(i);
+                    }
                 }
             }
         }
     }
-    const auto anyVisible = std::ranges::any_of(stepsThatSetThisFlag, [this, &steps, &flags](const int index) {
-        return isStepVisible(flags, steps[index]->getVisibilityConditions(), index, steps);
+    const auto anyVisible = std::ranges::any_of(stepsThatSetThisFlag, [this, &steps](const int index) {
+        return isStepVisible(index, steps);
     });
     if (!anyVisible) {
         log.logMessage(DEBUG, "Step " + steps[stepIndex]->getName() + " has no dependent steps that are visible.");
@@ -58,8 +79,8 @@ bool ConditionTester::isStepVisible(const std::shared_ptr<FlagMap>& flags,
 
 }
 
-bool ConditionTester::testCompositeDependency(const std::shared_ptr<FlagMap>& flags,
-    const CompositeDependency& compositeDependency) const
+bool ConditionTester::testCompositeDependency(
+    const CompositeDependency& compositeDependency, const StepRefList& steps, const int stepIndex) const
 {
     const auto fileDependencies   = compositeDependency.fileDependencies;
     const auto flagDependencies   = compositeDependency.flagDependencies;
@@ -75,13 +96,13 @@ bool ConditionTester::testCompositeDependency(const std::shared_ptr<FlagMap>& fl
         results.emplace_back(testFileDependency(fileDependency));
     }
     for (const auto& flagDependency : flagDependencies) {
-        results.emplace_back(testFlagDependency(flags, flagDependency));
+        results.emplace_back(testFlagDependency(flagDependency, steps, stepIndex));
     }
     for (const auto& gameDependency : gameDependencies) {
         results.emplace_back(testGameDependency(gameDependency));
     }
     for (const auto& nestedDependency : nestedDependencies) {
-        results.emplace_back(testCompositeDependency(flags, nestedDependency));
+        results.emplace_back(testCompositeDependency(nestedDependency, steps, stepIndex));
     }
 
     if (globalOperatorType == OperatorTypeEnum::AND) {
@@ -91,12 +112,11 @@ bool ConditionTester::testCompositeDependency(const std::shared_ptr<FlagMap>& fl
 }
 
 
-bool ConditionTester::testFlagDependency(const std::shared_ptr<FlagMap>& flags, const FlagDependency& flagDependency)
+bool ConditionTester::testFlagDependency(const FlagDependency& flagDependency, const StepRefList& steps,
+    const int stepIndex) const
 {
-    const auto flagList = flags->getFlagsByKey(flagDependency.flag);
-    return std::ranges::any_of(flagList, [&flagDependency](const Flag& flag) {
-        return flag.second == flagDependency.value;
-    });
+    const auto flagValue = getValueForFlag(flagDependency.flag, steps, stepIndex);
+    return flagValue == flagDependency.value;
 }
 
 bool ConditionTester::testFileDependency(const FileDependency& fileDependency) const
@@ -137,8 +157,7 @@ FileDependencyTypeEnum ConditionTester::getFileDependencyStateForPlugin(const st
     return state;
 }
 
-PluginTypeEnum ConditionTester::getPluginTypeDescriptorState(const std::shared_ptr<Plugin>& plugin,
-    const std::shared_ptr<FlagMap>& flags) const
+PluginTypeEnum ConditionTester::getPluginTypeDescriptorState(PluginRef plugin, const StepRefList& steps) const
 {
     // NOTE: A plugin's ConditionFlags aren't the same thing as a step visibility one.
     // A plugin's ConditionFlags are toggled based on the selection state of the plugin
@@ -147,19 +166,21 @@ PluginTypeEnum ConditionTester::getPluginTypeDescriptorState(const std::shared_p
     // We will return the 'winning' type or the default. If multiple conditions are met,
     // ...well, I'm not sure.
     // ReSharper disable once CppTooWideScopeInitStatement
-    const auto& dependencyType = plugin->typeDescriptor.dependencyType;
+    const auto& typeDescriptor = plugin->getTypeDescriptor();
+    const auto& dependencyType = typeDescriptor.dependencyType;
+
     for (const auto& pattern : dependencyType.patterns.patterns) {
-        if (testCompositeDependency(flags, pattern.dependencies)) {
+        if (testCompositeDependency(pattern.dependencies, steps, plugin->getStepIndex())) {
             return pattern.type;
         }
     }
 
     // Sometimes authors do this.
-    if (plugin->typeDescriptor.type != PluginTypeEnum::Optional) {
-        return plugin->typeDescriptor.type;
+    if (typeDescriptor.type != PluginTypeEnum::Optional) {
+        return plugin->getTypeDescriptor().type;
     }
-    if (plugin->typeDescriptor.dependencyType.defaultType.has_value()) {
-        return plugin->typeDescriptor.dependencyType.defaultType.value();
+    if (dependencyType.defaultType.has_value()) {
+        return plugin->getTypeDescriptor().dependencyType.defaultType.value();
     }
     return PluginTypeEnum::Optional;
 }

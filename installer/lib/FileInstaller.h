@@ -37,7 +37,6 @@ public:
         QString fomodPath,
         const std::shared_ptr<IFileTree>& fileTree,
         std::unique_ptr<ModuleConfiguration> fomodFile,
-        const std::shared_ptr<FlagMap>& flagMap,
         const std::vector<std::shared_ptr<StepViewModel> >& steps);
 
     std::shared_ptr<IFileTree> install() const;
@@ -73,7 +72,7 @@ public:
 
     QString createInstallationNotes() const;
 
-    static std::vector<std::string> collectPositiveFileNamesFromDependencyPatterns(std::vector<DependencyPattern> patterns);
+    static std::vector<std::string> collectPositiveFileNamesFromDependencyPatterns(const std::vector<DependencyPattern> &patterns);
 
     void addFiles(std::vector<File>& main, std::vector<File> toAdd) const;
 
@@ -83,7 +82,6 @@ private:
     QString mFomodPath;
     std::shared_ptr<IFileTree> mFileTree;
     std::unique_ptr<ModuleConfiguration> mFomodFile;
-    std::shared_ptr<FlagMap> mFlagMap;
     ConditionTester mConditionTester;
     std::vector<std::shared_ptr<StepViewModel> > mSteps; // TODO: Maybe this is nasty. Idk.
 
