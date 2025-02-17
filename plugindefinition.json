@@ -1,0 +1,28 @@
+{
+    "Name": "FOMOD Plus - A Mod Installation Overhaul",
+    "Author": "aglowinthefield",
+    "Description": " A total rewrite and overhaul of the FOMOD experience. Show and install previous choices, filter your modlist by FOMOD-installed mods, scan to pre-populate FOMOD content detection, non-blocking, smart-resizing installer window, and more! ",
+    "DocsUrl": "https://www.nexusmods.com/skyrimspecialedition/mods/141001",
+    "GithubUrl": "https://github.com/aglowinthefield/mo2-fomod-plus",
+    "NexusUrl": "https://www.nexusmods.com/skyrimspecialedition/mods/141001",
+    "Versions": [
+        {
+            "Version": "1.11.0",
+            "Released": "2025-02-17",
+            "MinSupport": "2.5.2",
+            "MinWorking": "2.5.2",
+            "DownloadUrl": "https://github.com/aglowinthefield/mo2-fomod-plus/releases/download/v1.11.0/mo2-fomod-plus.7z",
+            "PluginPath": [
+                "fomod_plus_installer.dll",
+                "fomod_plus_installer.pdb",
+                "fomod_plus_scanner.dll",
+                "fomod_plus_scanner.pdb"
+            ],
+            "LocalePath": [],
+            "DataPath": [],
+            "ReleaseNotes": [
+                "First release on Plugin Finder~ See Nexus for changelog up until this point!"
+            ]
+        }
+    ]
+}

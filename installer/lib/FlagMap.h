@@ -3,6 +3,7 @@
 #include "ViewModels.h"
 #include "stringutil.h"
 
+#include <ranges>
 #include <string>
 #include <unordered_map>
 
@@ -11,11 +12,40 @@ using FlagList = std::vector<Flag>;
 
 class FlagMap {
 public:
+
+    std::vector<std::shared_ptr<PluginViewModel>> getPluginsSettingFlag(const std::string& key, const std::string& value) const
+    {
+        std::vector<std::shared_ptr<PluginViewModel>> result;
+        for (const auto& [plugin, flags] : flags) {
+            for (const auto& flag : flags) {
+                if (toLower(flag.first) == toLower(key) && flag.second == value) {
+                    result.emplace_back(plugin);
+                }
+            }
+        }
+        return result;
+    }
+
+    // TODO: This needs to go backward from step, forward within step.
     [[nodiscard]] FlagList getFlagsByKey(const std::string& key) const
     {
         FlagList result;
+        std::vector<std::pair<int, std::shared_ptr<PluginViewModel>>> orderedPlugins;
+
+        // Collect all plugins with their stepIndex and ownIndex
         for (const auto& [plugin, flags] : flags) {
-            for (const auto& flag : flags) {
+            orderedPlugins.emplace_back(plugin->getStepIndex(), plugin);
+        }
+
+        // Sort plugins by stepIndex and ownIndex, stepIndex descending and ownIndex ascending
+        // TODO: Might need group sorting too. How can I just do the natural order??
+        std::ranges::sort(orderedPlugins, [](const auto& a, const auto& b) {
+            return a.first > b.first || (a.first == b.first && a.second->getOwnIndex() < b.second->getOwnIndex());
+        });
+
+        // Collect flags in the sorted order
+        for (const auto& plugin : orderedPlugins | std::views::values) {
+            for (const auto& flag : flags.at(plugin)) {
                 if (toLower(flag.first) == toLower(key)) {
                     result.emplace_back(flag);
                 }
