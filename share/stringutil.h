@@ -89,7 +89,8 @@ inline QString formatPluginDescription(const QString& text)
 {
     std::string formattedText = text.toStdString();
     // Replace URLs with <a href> tags
-    const std::regex urlRegex(R"((https?://[^\s]+))");
+    const std::regex urlRegex(R"((https?:\/\/(?:[a-zA-Z0-9\-]+\.)+[a-zA-Z]{2,}(?:\/[^\s\)\]\}\.,;]*)?))");
+
     formattedText = std::regex_replace(formattedText, urlRegex, R"(<a href="$&">$&</a>)");
 
     // Replace line breaks
