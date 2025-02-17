@@ -1,16 +1,21 @@
 ﻿#ifndef MODLISTITEMMODEL_H
 #define MODLISTITEMMODEL_H
 
-
 #include <QAbstractItemModel>
 #include <imodinterface.h>
+#include "util.h"
 
 struct ModListItem {
     MOBase::IModInterface* modPtr;
     std::vector<QString> pluginNames;
+    PluginToMentionsMap pluginToMentionsMap;
+
+    ModListItem(MOBase::IModInterface* mod, const std::vector<QString>& plugins, const PluginToMentionsMap& mentions)
+    : modPtr(mod), pluginNames(plugins), pluginToMentionsMap(mentions) {}
+
 };
 
-class ModListItemModel: public QAbstractItemModel
+class ModListItemModel final : public QAbstractItemModel
 {
     Q_OBJECT
 public:

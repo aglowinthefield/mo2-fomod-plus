@@ -1,15 +1,17 @@
 ﻿#include "FomodPlusPatchWizard.h"
 
+#include "ModDetailsWidget.h"
 #include "ModListItemModel.h"
 #include "ifiletree.h"
 
 #include <QHeaderView>
 #include <QDialog>
+#include <QLabel>
 #include <QSplitter>
 #include <qboxlayout.h>
 #include <qtreeview.h>
 
-const QStringList PLUGIN_EXTENSIONS = QStringList{ "esp", "esm", "esl" };
+const auto PLUGIN_EXTENSIONS = QStringList{ "esp", "esm", "esl" };
 
 bool FomodPlusPatchWizard::init(MOBase::IOrganizer* organizer)
 {
@@ -38,7 +40,7 @@ QString FomodPlusPatchWizard::description() const
 
 MOBase::VersionInfo FomodPlusPatchWizard::version() const
 {
-    return MOBase::VersionInfo(1, 0, 0, MOBase::VersionInfo::RELEASE_FINAL);
+    return { 1, 0, 0, MOBase::VersionInfo::RELEASE_FINAL };
 }
 
 QList<MOBase::PluginSetting> FomodPlusPatchWizard::settings() const
@@ -93,26 +95,28 @@ void FomodPlusPatchWizard::createDialog()
 
     mDialog->setMinimumSize(1000, 450);
     mDialog->adjustSize();
+
+    connect(tree->selectionModel(), &QItemSelectionModel::selectionChanged, this,
+        &FomodPlusPatchWizard::onSelectionChanged);
 }
 
-QTreeView* FomodPlusPatchWizard::createTreeView(QWidget* parent)
+QTreeView* FomodPlusPatchWizard::createTreeView(QWidget* parent) const
 {
     const auto tree  = new QTreeView(parent);
     const auto model = createModel();
     tree->setModel(model);
     tree->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     tree->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    tree->header()->setStretchLastSection(false);
     return tree;
 }
 
-ModListItemModel* FomodPlusPatchWizard::createModel()
+ModListItemModel* FomodPlusPatchWizard::createModel() const
 {
     QList<std::shared_ptr<ModListItem> > modelItems;
-    const auto allMods = mOrganizer->modList()->allModsByProfilePriority();
 
-    for (const auto& thisMod : allMods) {
-        const auto mod = createModListItemForMod(thisMod);
-        if (mod && mod->pluginNames.size() > 0) {
+    for (const auto mods = mOrganizer->modList()->allModsByProfilePriority(); const auto& thisMod : mods) {
+        if (const auto mod = createModListItemForMod(thisMod); mod && !mod->pluginNames.empty()) {
             modelItems.append(mod);
         }
     }
@@ -120,7 +124,26 @@ ModListItemModel* FomodPlusPatchWizard::createModel()
     return new ModListItemModel(modelItems);
 }
 
-std::vector<QString> getPluginNamesForMod(MOBase::IModInterface* mod)
+void FomodPlusPatchWizard::onSelectionChanged(const QItemSelection& selected, const QItemSelection& /*deselected*/) const
+{
+    if (selected.indexes().isEmpty()) {
+        return;
+    }
+
+    const auto index   = selected.indexes().first();
+
+    if (const auto modItem = static_cast<ModListItem*>(index.internalPointer())) {
+        const auto tabView = mDialog->findChild<QTabWidget*>();
+        // Update the QTabWidget with data from the selected modItem
+        // For example, clear existing tabs and add new ones with relevant data
+        tabView->clear();
+
+        // Just list everything in its PluginToMentionsMap
+        tabView->addTab(new ModDetailsWidget(modItem), tr("All Mentions"));
+    }
+}
+
+std::vector<QString> getPluginNamesForMod(const MOBase::IModInterface* mod)
 {
     std::vector<QString> pluginNames;
     const auto tree = mod->fileTree();
@@ -138,7 +161,7 @@ std::vector<QString> getPluginNamesForMod(MOBase::IModInterface* mod)
     return pluginNames;
 }
 
-std::shared_ptr<ModListItem> FomodPlusPatchWizard::createModListItemForMod(const QString& mod)
+std::shared_ptr<ModListItem> FomodPlusPatchWizard::createModListItemForMod(const QString& mod) const
 {
     const auto foundMod = mOrganizer->modList()->getMod(mod);
     if (!foundMod) {
@@ -149,16 +172,88 @@ std::shared_ptr<ModListItem> FomodPlusPatchWizard::createModListItemForMod(const
     }
 
     const auto pluginNames = getPluginNamesForMod(foundMod);
-    return std::make_shared<ModListItem>(foundMod, pluginNames);
+    const auto map         = populatePatches(pluginNames);
+    return std::make_shared<ModListItem>(foundMod, pluginNames, map);
 }
 
-PluginToMentionsMap FomodPlusPatchWizard::populatePatches(std::shared_ptr<ModListItem> item)
+std::vector<FomodNotes> FomodPlusPatchWizard::getAllModsWithFomodNotes() const
+{
+    const auto pluginName      = QString::fromStdString("FOMOD Plus");
+    const auto& allModsQString = mOrganizer->modList()->allMods();
+    std::vector allMods(allModsQString.begin(), allModsQString.end());
+    std::vector<QString> fomodMods;
+
+    // find all mods with FOMOD data in the LO
+    auto hasFomod = [pluginName, this](const QString& modName) {
+        const auto mod = mOrganizer->modList()->getMod(modName);
+        return mod->pluginSetting(pluginName, "fomod", 0) != 0;
+    };
+
+    std::ranges::copy_if(allMods, std::back_inserter(fomodMods), hasFomod);
+
+    std::vector<FomodNotes> fomodModsWithNotes;
+    std::vector<std::optional<FomodNotes> > tempResults(fomodMods.size());
+
+    std::ranges::transform(fomodMods, tempResults.begin(),
+        [this, pluginName](const QString& modName) -> std::optional<FomodNotes> {
+            const auto mod = mOrganizer->modList()->getMod(modName);
+            if (const auto notes = mod->pluginSetting(pluginName, "installationNotes", "0"); notes != "0") {
+                return parseFomodNotes(modName, notes.toString());
+            }
+            return std::nullopt;
+        });
+
+    for (const auto& notes : tempResults) {
+        if (notes.has_value()) {
+            fomodModsWithNotes.push_back(*notes);
+        }
+    }
+
+    return fomodModsWithNotes;
+}
+
+PluginToMentionsMap FomodPlusPatchWizard::populatePatches(const std::vector<QString>& pluginNames) const
 {
     PluginToMentionsMap map;
 
-    for (const auto & pluginName : item->pluginNames) {
+    const std::vector<FomodNotes> fomodMods = getAllModsWithFomodNotes();
 
+    for (const auto& pluginName : pluginNames) {
+        for (auto [modName, hasPatchFor, installedPatchFor, notInstalledPatchFor] : fomodMods) {
+            bool mentions = false;
+            if (std::ranges::find(hasPatchFor, pluginName) != hasPatchFor.end()) {
+                mentions = true;
+            }
+            if (std::ranges::find(installedPatchFor, pluginName) != installedPatchFor.end()) {
+                mentions = true;
+            }
+            if (std::ranges::find(notInstalledPatchFor, pluginName) != notInstalledPatchFor.end()) {
+                mentions = true;
+            }
+            if (mentions) {
+                if (const auto modPtr = mOrganizer->modList()->getMod(modName)) {
+                    map[pluginName].push_back(modPtr);
+                }
+            }
+        }
+    }
+    return map;
+}
+
+FomodNotes FomodPlusPatchWizard::parseFomodNotes(const QString& modName, const QString& notes)
+{
+    FomodNotes fomodNotes;
+    fomodNotes.modName = modName;
+
+    for (QStringList lines = notes.split('\n', Qt::SkipEmptyParts); const QString& line : lines) {
+        if (line.startsWith("hasPatchFor:")) {
+            fomodNotes.hasPatchFor.append(line.mid(QString("hasPatchFor:").length()).trimmed());
+        } else if (line.startsWith("installedPatchFor:")) {
+            fomodNotes.installedPatchFor.append(line.mid(QString("installedPatchFor:").length()).trimmed());
+        } else if (line.startsWith("notInstalledPatchFor:")) {
+            fomodNotes.notInstalledPatchFor.append(line.mid(QString("notInstalledPatchFor:").length()).trimmed());
+        }
     }
 
-    return map;
+    return fomodNotes;
 }
