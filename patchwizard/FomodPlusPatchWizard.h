@@ -44,6 +44,7 @@ private:
     Logger& log = Logger::getInstance();
     MOBase::IOrganizer* mOrganizer{};
     QDialog* mDialog{};
+    QTabWidget* mTabView{};
 
     void logMessage(const LogLevel level, const std::string& message) const
     {
@@ -51,6 +52,10 @@ private:
     }
 
     void createDialog();
+
+    QWidget* createBottomBar(QWidget* parent) const;
+
+    void reinstallMod(MOBase::IModInterface* mod) const;
 
     QTreeView* createTreeView(QWidget* parent) const;
 

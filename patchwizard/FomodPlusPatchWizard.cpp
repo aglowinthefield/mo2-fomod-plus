@@ -7,7 +7,10 @@
 #include <QHeaderView>
 #include <QDialog>
 #include <QLabel>
+#include <QMessageBox>
+#include <QPushButton>
 #include <QSplitter>
+#include <QTableWidget>
 #include <iplugingame.h>
 #include <qboxlayout.h>
 #include <qtreeview.h>
@@ -67,7 +70,7 @@ QIcon FomodPlusPatchWizard::icon() const
 void FomodPlusPatchWizard::display() const
 {
     if (mDialog) {
-        mDialog->exec();
+        mDialog->show();
     }
 }
 
@@ -83,22 +86,85 @@ void FomodPlusPatchWizard::createDialog()
     splitter->addWidget(tree);
 
     // right pane is a QTabView, one tab for now with 'mentions'
-    const auto tabView = new QTabWidget(mDialog);
-    splitter->addWidget(tabView);
+    mTabView = new QTabWidget(mDialog);
+    splitter->addWidget(mTabView);
 
     splitter->setSizes({ 1, 1 });
     splitter->setStretchFactor(0, 1); // left pane
     splitter->setStretchFactor(1, 1); // right pane
 
     const auto layout = new QVBoxLayout(mDialog);
-    layout->addWidget(splitter);
+    layout->addWidget(splitter, 1);
+    layout->addWidget(createBottomBar(mDialog)); // Add the bottom bar
     mDialog->setLayout(layout);
 
     mDialog->setMinimumSize(1000, 450);
-    mDialog->adjustSize();
+    // mDialog->adjustSize();
 
     connect(tree->selectionModel(), &QItemSelectionModel::selectionChanged, this,
         &FomodPlusPatchWizard::onSelectionChanged);
+}
+
+QWidget* FomodPlusPatchWizard::createBottomBar(QWidget* parent) const
+{
+    const auto bottomBar = new QWidget(parent);
+    const auto layout    = new QHBoxLayout(bottomBar);
+    layout->addStretch();
+
+    const auto button = new QPushButton(tr("Install"), bottomBar);
+    button->setEnabled(false); // Initially disabled
+    layout->addWidget(button);
+
+    connect(button, &QPushButton::clicked, this, [this] {
+        if (const auto modDetailsWidget = qobject_cast<ModDetailsWidget*>(mTabView->currentWidget())) {
+            if (const auto tableWidget = modDetailsWidget->findChild<QTableWidget*>()) {
+                if (auto selectedItems = tableWidget->selectedItems(); !selectedItems.isEmpty()) {
+                    const int selectedRow = selectedItems.first()->row();
+                    const QString modName = tableWidget->item(selectedRow, 0)->text();
+                    if (const auto mod = mOrganizer->modList()->getMod(modName)) {
+                        reinstallMod(mod);
+                    }
+                } else {
+                    QMessageBox::warning(nullptr, tr("No Selection"), tr("Please select a row first."));
+                }
+            }
+        }
+    });
+
+    // Connect the selection changed signal to enable/disable the button
+    connect(mTabView, &QTabWidget::currentChanged, this, [this, button](int) {
+        if (const auto tabView = mDialog->findChild<QTabWidget*>()) {
+            if (const auto modDetailsWidget = qobject_cast<ModDetailsWidget*>(tabView->currentWidget())) {
+                if (const auto tableWidget = modDetailsWidget->findChild<QTableWidget*>()) {
+                    connect(tableWidget->selectionModel(), &QItemSelectionModel::selectionChanged, this,
+                        [button](const QItemSelection& selected) {
+                            button->setEnabled(!selected.isEmpty());
+                        });
+                }
+            }
+        }
+    });
+
+    return bottomBar;
+}
+
+void FomodPlusPatchWizard::reinstallMod(MOBase::IModInterface* mod) const
+{
+    const auto downloadsDir         = mOrganizer->downloadsPath();
+    const auto installationFilePath = mod->installationFile();
+
+    if (installationFilePath.isEmpty()) {
+        QMessageBox::warning(nullptr, tr("No Installation File"),
+            tr("No installation file found for %1.").arg(mod->name()));
+        return;
+    }
+
+    const auto qualifiedInstallerPath = QDir(installationFilePath).isAbsolute()
+        ? installationFilePath
+        : downloadsDir + "/" + installationFilePath;
+
+    mOrganizer->installMod(qualifiedInstallerPath);
+
 }
 
 QTreeView* FomodPlusPatchWizard::createTreeView(QWidget* parent) const
@@ -125,13 +191,14 @@ ModListItemModel* FomodPlusPatchWizard::createModel() const
     return new ModListItemModel(modelItems);
 }
 
-void FomodPlusPatchWizard::onSelectionChanged(const QItemSelection& selected, const QItemSelection& /*deselected*/) const
+void FomodPlusPatchWizard::onSelectionChanged(const QItemSelection& selected,
+    const QItemSelection& /*deselected*/) const
 {
     if (selected.indexes().isEmpty()) {
         return;
     }
 
-    const auto index   = selected.indexes().first();
+    const auto index = selected.indexes().first();
 
     if (const auto modItem = static_cast<ModListItem*>(index.internalPointer())) {
         const auto tabView = mDialog->findChild<QTabWidget*>();
@@ -144,6 +211,7 @@ void FomodPlusPatchWizard::onSelectionChanged(const QItemSelection& selected, co
     }
 }
 
+// These should all be lowercase for better matching
 std::vector<QString> getPluginNamesForMod(const MOBase::IModInterface* mod)
 {
     std::vector<QString> pluginNames;
@@ -155,7 +223,7 @@ std::vector<QString> getPluginNamesForMod(const MOBase::IModInterface* mod)
         const auto entryName = entry->name().toLower();
         for (const auto& extension : PLUGIN_EXTENSIONS) {
             if (entryName.endsWith(extension.toLower())) {
-                pluginNames.emplace_back(entryName);
+                pluginNames.emplace_back(entryName.toLower());
             }
         }
     }
@@ -177,7 +245,14 @@ std::shared_ptr<ModListItem> FomodPlusPatchWizard::createModListItemForMod(const
     }
 
     const auto pluginNames = getPluginNamesForMod(foundMod);
-    const auto map         = populatePatches(pluginNames);
+    if (pluginNames.empty()) {
+        return nullptr;
+    }
+
+    const auto map = populatePatches(pluginNames);
+    if (map.empty()) {
+        return nullptr;
+    }
     return std::make_shared<ModListItem>(foundMod, pluginNames, map);
 }
 
@@ -224,20 +299,21 @@ PluginToMentionsMap FomodPlusPatchWizard::populatePatches(const std::vector<QStr
     const std::vector<FomodNotes> fomodMods = getAllModsWithFomodNotes();
 
     for (const auto& pluginName : pluginNames) {
-        for (auto [modName, hasPatchFor, installedPatchFor, notInstalledPatchFor] : fomodMods) {
+        for (auto notesForMod : fomodMods) {
             bool mentions = false;
-            if (std::ranges::find(hasPatchFor, pluginName) != hasPatchFor.end()) {
+            if (std::ranges::find(notesForMod.hasPatchFor, pluginName) != notesForMod.hasPatchFor.end()) {
                 mentions = true;
             }
-            if (std::ranges::find(installedPatchFor, pluginName) != installedPatchFor.end()) {
+            if (std::ranges::find(notesForMod.installedPatchFor, pluginName) != notesForMod.installedPatchFor.end()) {
                 mentions = true;
             }
-            if (std::ranges::find(notInstalledPatchFor, pluginName) != notInstalledPatchFor.end()) {
+            if (std::ranges::find(notesForMod.notInstalledPatchFor, pluginName) != notesForMod.notInstalledPatchFor.
+                end()) {
                 mentions = true;
             }
             if (mentions) {
-                if (const auto modPtr = mOrganizer->modList()->getMod(modName)) {
-                    map[pluginName].push_back(modPtr);
+                if (const auto modPtr = mOrganizer->modList()->getMod(notesForMod.modName)) {
+                    map[pluginName].push_back({ modPtr, notesForMod });
                 }
             }
         }
@@ -252,11 +328,12 @@ FomodNotes FomodPlusPatchWizard::parseFomodNotes(const QString& modName, const Q
 
     for (QStringList lines = notes.split('\n', Qt::SkipEmptyParts); const QString& line : lines) {
         if (line.startsWith("hasPatchFor:")) {
-            fomodNotes.hasPatchFor.append(line.mid(QString("hasPatchFor:").length()).trimmed());
+            fomodNotes.hasPatchFor.append(line.mid(QString("hasPatchFor:").length()).trimmed().toLower());
         } else if (line.startsWith("installedPatchFor:")) {
-            fomodNotes.installedPatchFor.append(line.mid(QString("installedPatchFor:").length()).trimmed());
+            fomodNotes.installedPatchFor.append(line.mid(QString("installedPatchFor:").length()).trimmed().toLower());
         } else if (line.startsWith("notInstalledPatchFor:")) {
-            fomodNotes.notInstalledPatchFor.append(line.mid(QString("notInstalledPatchFor:").length()).trimmed());
+            fomodNotes.notInstalledPatchFor.append(
+                line.mid(QString("notInstalledPatchFor:").length()).trimmed().toLower());
         }
     }
 
