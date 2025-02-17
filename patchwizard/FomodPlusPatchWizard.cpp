@@ -8,6 +8,7 @@
 #include <QDialog>
 #include <QLabel>
 #include <QSplitter>
+#include <iplugingame.h>
 #include <qboxlayout.h>
 #include <qtreeview.h>
 
@@ -168,6 +169,10 @@ std::shared_ptr<ModListItem> FomodPlusPatchWizard::createModListItemForMod(const
         return nullptr;
     }
     if (foundMod->isOverwrite() || foundMod->isSeparator() || foundMod->isBackup()) {
+        return nullptr;
+    }
+    if (mOrganizer->modList()->state(mod) & MOBase::IModList::STATE_ESSENTIAL) {
+        logMessage(DEBUG, "Mod is essential, skipping: " + mod.toStdString());
         return nullptr;
     }
 
