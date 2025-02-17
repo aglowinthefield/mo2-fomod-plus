@@ -27,5 +27,5 @@ if (MSVC)
             /wd4458 # declaration of 'identifier' hides class member
     )
 endif ()
-mo2_configure_plugin(fomod_plus_patchwizard WARNINGS OFF PRIVATE_DEPENDS archive)
+mo2_configure_plugin(fomod_plus_patchwizard WARNINGS OFF PRIVATE_DEPENDS archive zlib)
 mo2_install_target(fomod_plus_patchwizard)
