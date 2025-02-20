@@ -1,6 +1,8 @@
 ﻿#ifndef FOMODPLUSSCANNER_H
 #define FOMODPLUSSCANNER_H
 
+#include "FomodArchiveReader.h"
+
 #include <iplugin.h>
 #include <iplugintool.h>
 
@@ -9,11 +11,6 @@
 
 using namespace MOBase;
 
-enum ScanResult {
-    HAS_FOMOD,
-    NO_FOMOD,
-    NO_ARCHIVE
-};
 
 
 class FomodPlusScanner final : public IPluginTool {
@@ -35,6 +32,8 @@ public:
 
     void onScanClicked() const;
 
+    void onDeepScanClicked() const;
+
     void cleanup() const;
 
     [[nodiscard]] QString name() const override { return "FOMOD Scanner"; } // This should not be translated
@@ -52,18 +51,19 @@ public:
 
     void display() const override;
 
-    int scanLoadOrder(const std::function<bool(IModInterface*, ScanResult result)> &callback) const;
+    int scanLoadOrder(const std::function<bool(IModInterface*, ArchiveScanResult result)> &callback) const;
 
-    ScanResult openInstallationArchive(const IModInterface* mod) const;
+    bool populateDbForMod(IModInterface* mod, ArchiveScanResult result) const;
 
-    static bool setFomodInfoForMod(IModInterface *mod, ScanResult result);
+    static bool setFomodInfoForMod(IModInterface *mod, ArchiveScanResult result);
 
-    static bool removeFomodInfoFromMod(IModInterface *mod, ScanResult);
+    static bool removeFomodInfoFromMod(IModInterface *mod, ArchiveScanResult);
 
 private:
     QDialog* mDialog{ nullptr };
     QProgressBar* mProgressBar{ nullptr };
     IOrganizer* mOrganizer{ nullptr };
+    std::unique_ptr<FomodArchiveReader> mReader{ nullptr };
 };
 
 #endif  // FOMODPLUSSCANNER_H

@@ -24,5 +24,6 @@ set(enable_warnings OFF)
 
 add_subdirectory(installer)
 add_subdirectory(scanner)
+add_subdirectory(FPModlist)
 add_subdirectory(patchwizard)
 add_subdirectory(tests)
