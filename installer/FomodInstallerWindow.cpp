@@ -1,5 +1,6 @@
 ﻿#include "FomodInstallerWindow.h"
 
+#include "ui/Colors.h"
 #include "ui/FomodImageViewer.h"
 
 #include "ui/ScaleLabel.h"
@@ -643,7 +644,7 @@ void FomodInstallerWindow::applyFnFromJson(const std::function<void(QAbstractBut
         }
     }
     for (auto* radio : radioButtons) {
-        for (auto selectedPlugin : selectedPlugins) {
+        for (const auto& selectedPlugin : selectedPlugins) {
             if (radio->objectName().toStdString() == selectedPlugin) {
                 fn(radio);
             }
@@ -653,8 +654,7 @@ void FomodInstallerWindow::applyFnFromJson(const std::function<void(QAbstractBut
 
 void FomodInstallerWindow::stylePreviouslySelectedOptions()
 {
-    const auto stylesheet = "QCheckBox { background-color: rgba(91, 127, 152, 0.4); } "
-        "QRadioButton { background-color: rgba(91, 127, 152, 0.4); }";
+    const auto stylesheet = getColorStyle();
 
     const auto tooltip = "You previously selected this plugin when installing this mod.";
 
@@ -665,7 +665,7 @@ void FomodInstallerWindow::stylePreviouslySelectedOptions()
     });
 }
 
-void FomodInstallerWindow::selectPreviouslySelectedOptions()
+void FomodInstallerWindow::selectPreviouslySelectedOptions() const
 {
     logMessage(INFO, "Selecting previously selected choices");
     logMessage(INFO, "Existing JSON provided: " + mFomodJson.dump(4));
@@ -678,9 +678,8 @@ void FomodInstallerWindow::selectPreviouslySelectedOptions()
         logMessage(ERR, std::string("Error selecting previously selected options: ") + e.what());
     }
     updateCheckboxStates();
-    // applyFnFromJson([](QAbstractButton* button) {
-    //     if (button->isEnabled()) {
-    //         button->setChecked(true);
-    //     }
-    // });
+}
+
+QString FomodInstallerWindow::getColorStyle() const {
+    return mInstaller->getSelectedColor();
 }

@@ -10,6 +10,7 @@
 #include <nlohmann/json.hpp>
 #include "FomodInstallerWindow.h"
 #include "lib/Logger.h"
+#include "ui/Colors.h"
 #include "xml/FomodInfoFile.h"
 #include "xml/ModuleConfiguration.h"
 
@@ -63,6 +64,8 @@ public:
     [[nodiscard]] bool shouldShowImages() const;
 
     void toggleShouldShowImages() const;
+
+    QString getSelectedColor() const;
 
 private:
     Logger& log            = Logger::getInstance();

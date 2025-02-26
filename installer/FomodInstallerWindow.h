@@ -142,7 +142,9 @@ private:
 
     void stylePreviouslySelectedOptions();
 
-    void selectPreviouslySelectedOptions();
+    void selectPreviouslySelectedOptions() const;
+
+    QString getColorStyle() const;
 
     [[nodiscard]] QBoxLayout* createContainerLayout();
 
