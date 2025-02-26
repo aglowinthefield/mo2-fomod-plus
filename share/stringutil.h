@@ -8,6 +8,7 @@
 
 
 namespace StringConstants {
+
 namespace Plugin {
     constexpr std::string_view NAME        = "FOMOD Plus";
     constexpr std::string_view AUTHOR      = "clearing";
@@ -99,8 +100,7 @@ inline QString formatPluginDescription(const QString& text)
 {
     std::string formattedText = text.toStdString();
     // Replace URLs with <a href> tags
-    const std::regex urlRegex(R"((https?:\/\/(?:[a-zA-Z0-9\-]+\.)+[a-zA-Z]{2,}(?:\/[^\s\)\]\}\.,;]*)?))");
-
+    const std::regex urlRegex(R"((http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-]))");
     formattedText = std::regex_replace(formattedText, urlRegex, R"(<a href="$&">$&</a>)");
 
     // Replace line breaks

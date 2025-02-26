@@ -1,6 +1,5 @@
 ﻿#include "FomodInstallerWindow.h"
 
-#include "ui/Colors.h"
 #include "ui/FomodImageViewer.h"
 
 #include "ui/ScaleLabel.h"
@@ -393,7 +392,7 @@ QWidget* FomodInstallerWindow::createLeftPane()
 
     // Add description box
     // Initialize with defaults (the first plugin's description (which defaults to the module image otherwise))
-    QScrollArea* scrollArea = new QScrollArea(leftPane);
+    auto* scrollArea = new QScrollArea(leftPane);
     scrollArea->setWidgetResizable(true);
 
     mDescriptionBox = new QLabel("", leftPane);
@@ -637,7 +636,7 @@ void FomodInstallerWindow::applyFnFromJson(const std::function<void(QAbstractBut
     const auto radioButtons = findChildren<QRadioButton*>();
 
     for (auto* checkbox : checkboxes) {
-        for (auto selectedPlugin : selectedPlugins) {
+        for (const auto& selectedPlugin : selectedPlugins) {
             if (checkbox->objectName().toStdString() == selectedPlugin) {
                 fn(checkbox);
             }
@@ -674,7 +673,7 @@ void FomodInstallerWindow::selectPreviouslySelectedOptions() const
     }
     try {
         mViewModel->selectFromJson(mFomodJson);
-    } catch (Exception e) {
+    } catch (Exception& e) {
         logMessage(ERR, std::string("Error selecting previously selected options: ") + e.what());
     }
     updateCheckboxStates();

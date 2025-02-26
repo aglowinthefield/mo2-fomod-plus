@@ -1,0 +1,47 @@
+﻿<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://qconsulting.ca/fo3/ModConfig5.0.xsd">
+    <moduleName>Embers XD</moduleName>
+    <installSteps order="Explicit">
+        <installStep name="Further Customization">
+            <optionalFileGroups>
+                <group name="Select Required"
+                       type="SelectAny">
+                    <plugins>
+                        <plugin name="Alternative Torch Flame">
+                            <description>
+                                An alternative torch flame style for the default torch. Only supported for the Embers XD
+                                Orange and Yellow flame style.
+
+                                ⚠️ DO NOT USE WITH NON-STICKY TORCH.
+                            </description>
+                            <image path="img/logo.jpg"/>
+                            <conditionFlags>
+                                <flag name="AltTorchFlame">active</flag>
+                            </conditionFlags>
+                            <typeDescriptor>
+                                <dependencyType>
+                                    <defaultType name="NotUsable"/>
+                                    <patterns>
+                                        <pattern>
+                                            <dependencies operator="And">
+                                                <flagDependency flag="Torches"
+                                                                value="active"/>
+                                                <dependencies operator="Or">
+                                                    <flagDependency flag="Orange"
+                                                                    value="active"/>
+                                                    <flagDependency flag="Yellow"
+                                                                    value="active"/>
+                                                </dependencies>
+                                            </dependencies>
+                                            <type name="Optional"/>
+                                        </pattern>
+                                    </patterns>
+                                </dependencyType>
+                            </typeDescriptor>
+                        </plugin>
+                    </plugins>
+                </group>
+            </optionalFileGroups>
+        </installStep>
+    </installSteps>
+</config>

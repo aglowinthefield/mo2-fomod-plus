@@ -3,21 +3,21 @@
 #include <QString>
 #include <filesystem>
 
-class MCEmbers : public testing::Test {
+class MCEmbersMini : public testing::Test {
 protected:
     ModuleConfiguration moduleConfig;
 
     void SetUp() override
     {
-        const std::string filePath = (std::filesystem::path(__FILE__).parent_path() / "test_moduleconf_embers.xml").
+        const std::string filePath = (std::filesystem::path(__FILE__).parent_path() / "test_moduleconf_miniembers.xml").
             string();
         moduleConfig.deserialize(QString::fromStdString(filePath));
     }
 };
 
-TEST_F(MCEmbers, NestedDependencies)
+TEST_F(MCEmbersMini, NestedDependencies)
 {
-    const auto step   = moduleConfig.installSteps.installSteps[3]; // further custom
+    const auto step   = moduleConfig.installSteps.installSteps[0]; // further custom
     const auto group  = step.optionalFileGroups.groups[0]; // further custom
     const auto plugin = group.plugins.plugins[0]; // further custom
     const auto deps   = plugin.typeDescriptor.dependencyType.patterns.patterns[0];
