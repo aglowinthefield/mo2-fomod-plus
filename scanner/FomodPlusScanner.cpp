@@ -1,5 +1,7 @@
 ﻿#include "FomodPlusScanner.h"
 
+#include "FomodArchiveReader.h"
+
 #include <QDialog>
 #include <QPushButton>
 #include <QProgressBar>
@@ -13,11 +15,14 @@
 
 #include "stringutil.h"
 
-using ScanCallbackFn = std::function<bool(IModInterface*, ScanResult result)>;
+#include <QSettings>
+
+using ScanCallbackFn = std::function<bool(IModInterface*, ArchiveScanResult result)>;
 
 bool FomodPlusScanner::init(IOrganizer* organizer)
 {
     mOrganizer = organizer;
+    mReader    = std::make_unique<FomodArchiveReader>(organizer);
 
     mDialog = new QDialog();
     mDialog->setWindowTitle(tr("FOMOD Scanner"));
@@ -43,17 +48,20 @@ bool FomodPlusScanner::init(IOrganizer* organizer)
     mProgressBar->setRange(0, mOrganizer->modList()->allMods().size());
     mProgressBar->setVisible(false);
 
-    const auto scanButton   = new QPushButton(tr("Scan"), mDialog);
-    const auto cancelButton = new QPushButton(tr("Cancel"), mDialog);
+    const auto scanButton     = new QPushButton(tr("Scan"), mDialog);
+    const auto cancelButton   = new QPushButton(tr("Cancel"), mDialog);
+    const auto deepScanButton = new QPushButton(tr("Deep Scan"), mDialog);
 
     layout->addWidget(descriptionLabel, 1);
     layout->addWidget(gifLabel, 1);
     layout->addWidget(mProgressBar, 1);
     layout->addWidget(scanButton, 1);
     layout->addWidget(cancelButton, 1);
+    layout->addWidget(deepScanButton, 1);
 
     connect(cancelButton, &QPushButton::clicked, mDialog, &QDialog::reject);
     connect(scanButton, &QPushButton::clicked, this, &FomodPlusScanner::onScanClicked);
+    connect(deepScanButton, &QPushButton::clicked, this, &FomodPlusScanner::onDeepScanClicked);
     connect(mDialog, &QDialog::finished, this, &FomodPlusScanner::cleanup);
 
     mDialog->setLayout(layout);
@@ -67,6 +75,18 @@ void FomodPlusScanner::onScanClicked() const
 {
     mProgressBar->setVisible(true);
     const int added = scanLoadOrder(setFomodInfoForMod);
+    mDialog->accept();
+    QMessageBox::information(mDialog, tr("Scan Complete"),
+        tr("The load order scan is complete. Updated filter info for ") + QString::number(added) + tr(" mods."));
+    mOrganizer->refresh();
+}
+
+void FomodPlusScanner::onDeepScanClicked() const
+{
+    mProgressBar->setVisible(true);
+    const int added = scanLoadOrder([&](IModInterface* mod, ArchiveScanResult result) {
+        return populateDbForMod(mod, result);
+    });
     mDialog->accept();
     QMessageBox::information(mDialog, tr("Scan Complete"),
         tr("The load order scan is complete. Updated filter info for ") + QString::number(added) + tr(" mods."));
@@ -89,8 +109,8 @@ int FomodPlusScanner::scanLoadOrder(const ScanCallbackFn& callback) const
     int progress = 0;
     int modified = 0;
     for (const auto& modName : mOrganizer->modList()->allMods()) {
-        const auto mod          = mOrganizer->modList()->getMod(modName);
-        const ScanResult result = openInstallationArchive(mod);
+        const auto mod    = mOrganizer->modList()->getMod(modName);
+        const auto result = mReader->scanInstallationArchive(mod);
         if (callback(mod, result)) {
             modified++;
         }
@@ -99,83 +119,31 @@ int FomodPlusScanner::scanLoadOrder(const ScanCallbackFn& callback) const
     return modified;
 }
 
-bool hasFomodFiles(const std::vector<FileData*>& files)
-{
-    bool hasModuleXml = false;
-    bool hasInfoXml   = false;
 
-    for (const auto* file : files) {
-        if (endsWithCaseInsensitive(file->getArchiveFilePath(), StringConstants::FomodFiles::W_MODULE_CONFIG.data())) {
-            hasModuleXml = true;
-        }
-        if (endsWithCaseInsensitive(file->getArchiveFilePath(), StringConstants::FomodFiles::W_INFO_XML.data())) {
-            hasInfoXml = true;
-        }
-    }
-    return hasModuleXml && hasInfoXml;
+/*
+ * Somewhere we need to make and persist a map that looks like this:
+ * {
+ *      FOMODModName: [
+ *          { "modName": "ModName", masters: ["Master1.esp", "Master2.esl"] }
+ *      ]
+ * }
+ */
+void collectMasters()
+{
+    const auto cwd = QDir::currentPath();
+    QSettings settings(cwd + "/fomod-plus-settings.ini", QSettings::IniFormat);
 }
 
-std::ostream& operator<<(std::ostream& os, const Archive::Error& error)
+bool FomodPlusScanner::populateDbForMod(IModInterface* mod, ArchiveScanResult result) const
 {
-    switch (error) {
-    case Archive::Error::ERROR_NONE:
-        os << "No error";
-        break;
-    case Archive::Error::ERROR_ARCHIVE_NOT_FOUND:
-        os << "File not found";
-        break;
-    case Archive::Error::ERROR_FAILED_TO_OPEN_ARCHIVE:
-        os << "Failed to open file";
-        break;
-    case Archive::Error::ERROR_INVALID_ARCHIVE_FORMAT:
-        os << "Invalid archive format";
-        break;
-    default:
-        os << "Unknown error??";
+    if (result != HAS_FOMOD) {
+        return false;
     }
-    return os;
+    const auto results = mReader->getModsWithMasters(mod);
+    return true;
 }
 
-ScanResult FomodPlusScanner::openInstallationArchive(const IModInterface* mod) const
-{
-    const auto downloadsDir         = mOrganizer->downloadsPath();
-    const auto installationFilePath = mod->installationFile();
-
-    if (installationFilePath.isEmpty()) {
-        return NO_ARCHIVE;
-    }
-
-    const auto qualifiedInstallerPath = QDir(installationFilePath).isAbsolute()
-        ? installationFilePath
-        : downloadsDir + "/" + installationFilePath;
-
-    const auto archive = CreateArchive();
-
-    if (!archive->isValid()) {
-        std::cerr << "[" << mod->name().toStdString() << "] Failed to load the archive module: " << archive->
-            getLastError() << std::endl;
-        return NO_ARCHIVE;
-    }
-
-    // Open the archive:
-    if (!archive->open(qualifiedInstallerPath.toStdWString(), nullptr)) {
-        std::cerr << "[" << mod->name().toStdString() << "] Failed to open the archive [" << qualifiedInstallerPath.
-            toStdString() << "]: " << archive->getLastError() << std::endl;
-        return NO_ARCHIVE;
-    }
-
-    // Mark all files for extraction to their path in the archive:
-    if (hasFomodFiles(archive->getFileList())) {
-        std::cout << "Found FOMOD files in " << qualifiedInstallerPath.toStdString() << std::endl;
-        return HAS_FOMOD;
-    } else {
-        return NO_FOMOD;
-    }
-
-    return NO_ARCHIVE;
-}
-
-bool FomodPlusScanner::setFomodInfoForMod(IModInterface* mod, ScanResult result)
+bool FomodPlusScanner::setFomodInfoForMod(IModInterface* mod, ArchiveScanResult result)
 {
     const auto pluginName = "FOMOD Plus";
     const auto setting    = mod->pluginSetting(pluginName, "fomod", 0);
@@ -188,7 +156,7 @@ bool FomodPlusScanner::setFomodInfoForMod(IModInterface* mod, ScanResult result)
     return false;
 }
 
-bool FomodPlusScanner::removeFomodInfoFromMod(IModInterface* mod, ScanResult)
+bool FomodPlusScanner::removeFomodInfoFromMod(IModInterface* mod, ArchiveScanResult)
 {
     const auto pluginName = QString::fromStdString("FOMOD Plus"); // TODO: can this be read from shared constants?
     // const auto settings = mod->clearPluginSettings(pluginName);

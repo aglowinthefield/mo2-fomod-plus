@@ -103,6 +103,12 @@ inline QString formatPluginDescription(const QString& text)
     return QString::fromStdString(formattedText);
 }
 
+// Function to convert std::wstring to std::string
+inline std::string wstringToString(const std::wstring& wstr) {
+    std::string str(wstr.begin(), wstr.end());
+    return str;
+}
+
 
 
 
