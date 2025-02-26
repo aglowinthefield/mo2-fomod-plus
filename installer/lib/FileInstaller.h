@@ -73,7 +73,7 @@ public:
 
     QString createInstallationNotes() const;
 
-    static std::vector<std::string> collectPositiveFileNamesFromDependencyPatterns(std::vector<DependencyPattern> patterns);
+    static std::vector<std::string> collectPositiveFileNamesFromDependencyPatterns(const std::vector<DependencyPattern> &patterns);
 
     void addFiles(std::vector<File>& main, std::vector<File> toAdd) const;
 
