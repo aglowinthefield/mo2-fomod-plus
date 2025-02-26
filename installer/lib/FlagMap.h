@@ -26,7 +26,12 @@ public:
         return result;
     }
 
-    // TODO: This needs to go backward from step, forward within step.
+    /**
+     *
+     * @param key The flag key
+     * @return A list of flags currently set in this map with the given key. The list is ordered by step descending, then plugin ascending.
+     * So if steps 1, 2, and 3 set flag X in their first two plugins, it'll be ordered [3:1, 3:2, 2:1, 2:2, 1:2, 1:1]
+     */
     [[nodiscard]] FlagList getFlagsByKey(const std::string& key) const
     {
         FlagList result;
