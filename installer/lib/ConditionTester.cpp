@@ -7,7 +7,7 @@
 
 std::string setToString(const std::set<int> &set)
 {
-    std::string str = "";
+    std::string str;
     for (const auto& i : set) {
         str += std::to_string(i) + ", ";
     }
@@ -20,9 +20,6 @@ bool ConditionTester::isStepVisible(const std::shared_ptr<FlagMap>& flags,
     const std::vector<std::shared_ptr<StepViewModel>>& steps) const
 {
 
-    if (steps[stepIndex]->getName() == "Lux Via - bridges patch") {
-        log.logMessage(DEBUG, "testing lux via bridges");
-    }
     // first things first: is it visible?
     if (!testCompositeDependency(flags, compositeDependency)) {
         return false;
@@ -35,11 +32,11 @@ bool ConditionTester::isStepVisible(const std::shared_ptr<FlagMap>& flags,
 
     std::set<int> stepsThatSetThisFlag;
 
-    for (const auto flagDependency : flagDependencies) {
+    for (const auto& flagDependency : flagDependencies) {
         // for this flag, find the plugins that set it
         for (int i = stepIndex - 1; i >= 0; --i) {
-            for (const auto group : steps[i]->getGroups()) {
-                for (const auto plugin : group->getPlugins()) {
+            for (const auto& group : steps[i]->getGroups()) {
+                for (const auto& plugin : group->getPlugins()) {
                     if (std::ranges::any_of(plugin->getPlugin()->conditionFlags.flags,
                         [&flagDependency](const ConditionFlag& flag) {
                             return flag.name == flagDependency.flag && flag.value == flagDependency.value;
@@ -50,8 +47,8 @@ bool ConditionTester::isStepVisible(const std::shared_ptr<FlagMap>& flags,
             }
         }
     }
-    const auto anyVisible = std::ranges::any_of(stepsThatSetThisFlag, [this, &steps, &flags](const int stepIndex) {
-        return isStepVisible(flags, steps[stepIndex]->getVisibilityConditions(), stepIndex, steps);
+    const auto anyVisible = std::ranges::any_of(stepsThatSetThisFlag, [this, &steps, &flags](const int index) {
+        return isStepVisible(flags, steps[index]->getVisibilityConditions(), index, steps);
     });
     if (!anyVisible) {
         log.logMessage(DEBUG, "Step " + steps[stepIndex]->getName() + " has no dependent steps that are visible.");
@@ -64,15 +61,6 @@ bool ConditionTester::isStepVisible(const std::shared_ptr<FlagMap>& flags,
 bool ConditionTester::testCompositeDependency(const std::shared_ptr<FlagMap>& flags,
     const CompositeDependency& compositeDependency) const
 {
-    // if (compositeDependency.totalDependencies == 0) {
-    //     return true;
-    // }
-    //
-    // Log the flags
-    // flags->forEach([this](const std::string& flag, const std::string& value) {
-    //     log.logMessage(DEBUG, "Flag: " + flag + ", Value: " + value);
-    // });
-
     const auto fileDependencies   = compositeDependency.fileDependencies;
     const auto flagDependencies   = compositeDependency.flagDependencies;
     const auto gameDependencies   = compositeDependency.gameDependencies;
@@ -99,17 +87,23 @@ bool ConditionTester::testCompositeDependency(const std::shared_ptr<FlagMap>& fl
     if (globalOperatorType == OperatorTypeEnum::AND) {
         return std::ranges::all_of(results, [](const bool result) { return result; });
     }
-    if (globalOperatorType == OperatorTypeEnum::OR) {
-        return std::ranges::any_of(results, [](const bool result) { return result; });
-    }
-    // Not sure why this would happen, but it's here for now.
-    return true;
+    return std::ranges::any_of(results, [](const bool result) { return result; });
 }
 
 
 bool ConditionTester::testFlagDependency(const std::shared_ptr<FlagMap>& flags, const FlagDependency& flagDependency)
 {
-    return flags->getFlag(flagDependency.flag) == flagDependency.value;
+    // Every instance of this flag being set in the map.
+    const auto flagList = flags->getFlagsByKey(flagDependency.flag);
+
+    // Find the first instance of this flag being set (in the order specified by getFlagsByKey)
+    if (flagList.empty()) {
+        // If the dependency value is an empty string, it means this flag should be unset.
+        // So if we don't have any value for this flag, the result is true.
+        return flagDependency.value.empty();
+    }
+
+    return flagList.front().second == flagDependency.value;
 }
 
 bool ConditionTester::testFileDependency(const FileDependency& fileDependency) const

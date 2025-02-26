@@ -1,6 +1,7 @@
 ﻿#include <gtest/gtest.h>
 #include "../../installer/xml/ModuleConfiguration.h"
 #include <filesystem>
+#include <QString>
 
 class ModuleConfigurationTest_Xavbio : public ::testing::Test {
 protected:
@@ -9,7 +10,7 @@ protected:
     void SetUp() override
     {
         std::string filePath = (std::filesystem::path(__FILE__).parent_path() / "test_moduleconf_xavbio.xml").string();
-        moduleConfig.deserialize(filePath);
+        moduleConfig.deserialize(QString::fromStdString(filePath));
     }
 };
 

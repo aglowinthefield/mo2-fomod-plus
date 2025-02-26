@@ -1,32 +1,100 @@
 ﻿#ifndef FLAGMAP_H
 #define FLAGMAP_H
+#include "ViewModels.h"
 #include "stringutil.h"
 
-#include <functional>
+#include <ranges>
 #include <string>
 #include <unordered_map>
 
+using Flag = std::pair<std::string, std::string>;
+using FlagList = std::vector<Flag>;
+
 class FlagMap {
 public:
-    [[nodiscard]] std::string getFlag(const std::string& flag) const
+
+    std::vector<std::shared_ptr<PluginViewModel>> getPluginsSettingFlag(const std::string& key, const std::string& value) const
     {
-        auto it = flags.find(toLower(flag));
-        if (it != flags.end()) {
-            return it->second;
+        std::vector<std::shared_ptr<PluginViewModel>> result;
+        for (const auto& [plugin, flags] : flags) {
+            for (const auto& flag : flags) {
+                if (toLower(flag.first) == toLower(key) && flag.second == value) {
+                    result.emplace_back(plugin);
+                }
+            }
         }
-        return "";
+        return result;
     }
 
-    void setFlag(const std::string& flag, const std::string& value)
+    /**
+     *
+     * @param key The flag key
+     * @return A list of flags currently set in this map with the given key. The list is ordered by step descending, then plugin ascending.
+     * So if steps 1, 2, and 3 set flag X in their first two plugins, it'll be ordered [3:1, 3:2, 2:1, 2:2, 1:2, 1:1]
+     */
+    [[nodiscard]] FlagList getFlagsByKey(const std::string& key) const
     {
-        flags[toLower(flag)] = value;
+        FlagList result;
+        std::vector<std::pair<int, std::shared_ptr<PluginViewModel>>> orderedPlugins;
+
+        // Collect all plugins with their stepIndex and ownIndex
+        for (const auto& [plugin, flags] : flags) {
+            orderedPlugins.emplace_back(plugin->getStepIndex(), plugin);
+        }
+
+        // Sort plugins by stepIndex and ownIndex, stepIndex descending and ownIndex ascending
+        // TODO: Might need group sorting too. How can I just do the natural order??
+        std::ranges::sort(orderedPlugins, [](const auto& a, const auto& b) {
+            return a.first > b.first || (a.first == b.first && a.second->getOwnIndex() < b.second->getOwnIndex());
+        });
+
+        // Collect flags in the sorted order
+        for (const auto& plugin : orderedPlugins | std::views::values) {
+            for (const auto& flag : flags.at(plugin)) {
+                if (toLower(flag.first) == toLower(key)) {
+                    result.emplace_back(flag);
+                }
+            }
+        }
+        return result;
     }
 
-    void forEach(const std::function<void(const std::string&, const std::string&)>& func) const
+    void setFlagsForPlugin(PluginRef plugin)
     {
-        for (const auto& [flag, value] : flags) {
-            func(flag, value);
+        // Don't clutter the map with empty key-vals
+        if (plugin->getConditionFlags().size() == 0) {
+            return;
         }
+        unsetFlagsForPlugin(plugin);
+
+        FlagList flagList;;
+        for (auto conditionFlag : plugin->getConditionFlags()) {
+            flagList.emplace_back(toLower(conditionFlag.name), conditionFlag.value);
+        }
+        flags[plugin] = flagList;
+    }
+
+    void unsetFlagsForPlugin(PluginRef plugin)
+    {
+        if (flags.contains(plugin)) {
+            flags.erase(plugin);
+        }
+    }
+
+    std::string toString()
+    {
+        auto result = std::string();
+        result += "FlagMap:\n";
+
+        for (const auto& [plugin, flags] : flags) {
+            result += plugin->getName() + " [";
+            for (const auto& [fst, snd] : flags) {
+                result += fst + ": " + snd + ", ";
+            }
+            result.erase(result.size() - 2);
+            result += "]\n";
+        }
+        return result;
     }
 
     void clearAll()
@@ -41,6 +109,6 @@ public:
 
 
 private:
-    std::unordered_map<std::string, std::string> flags;
+    std::unordered_map<std::shared_ptr<PluginViewModel>, FlagList> flags;
 };
 #endif //FLAGMAP_H

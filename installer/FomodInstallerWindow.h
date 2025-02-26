@@ -98,6 +98,7 @@ private slots:
     }
 
     void onInstallClicked();
+    void toggleImagesShown() const;
 
 private:
     Logger& log = Logger::getInstance();
@@ -120,12 +121,13 @@ private:
     QPushButton* mCancelButton{};
     QPushButton* mManualButton{};
     QPushButton* mSelectPreviousButton{};
+    QPushButton* mHideImagesButton{};
 
     void updateButtons() const;
 
     // Widgets
     QStackedWidget* mInstallStepStack{};
-    QTextEdit* mDescriptionBox{};
+    QLabel* mDescriptionBox{};
     QComboBox* mModNameInput{};
     ScaleLabel* mImageLabel{};
 
@@ -140,7 +142,9 @@ private:
 
     void stylePreviouslySelectedOptions();
 
-    void selectPreviouslySelectedOptions();
+    void selectPreviouslySelectedOptions() const;
+
+    QString getColorStyle() const;
 
     [[nodiscard]] QBoxLayout* createContainerLayout();
 
@@ -181,6 +185,7 @@ private:
     {
         log.logMessage(level, "[WINDOW] " + message);
     };
+
 };
 
 

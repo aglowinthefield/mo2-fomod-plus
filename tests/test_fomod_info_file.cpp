@@ -8,7 +8,7 @@ TEST(FomodInfoFileTest, DeserializeValidFile)
 {
     FomodInfoFile fomodInfo;
     std::string filePath = (std::filesystem::path(__FILE__).parent_path() / "test_fomod.xml").string();
-    bool result          = fomodInfo.deserialize(filePath);
+    bool result          = fomodInfo.deserialize(QString::fromStdString(filePath));
     EXPECT_TRUE(result);
     EXPECT_EQ(fomodInfo.getName(), "Ancient Nord Armors and Weapons Retexture SE");
     EXPECT_EQ(fomodInfo.getAuthor(), "xavbio");

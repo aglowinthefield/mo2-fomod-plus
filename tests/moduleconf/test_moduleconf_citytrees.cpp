@@ -1,4 +1,5 @@
 ﻿#include <gtest/gtest.h>
+#include <QString>
 #include "../../installer/xml/ModuleConfiguration.h"
 #include <filesystem>
 
@@ -10,7 +11,7 @@ protected:
     {
         const std::string filePath = (std::filesystem::path(__FILE__).parent_path() / "test_moduleconf_citytrees.xml").
             string();
-        moduleConfig.deserialize(filePath);
+        moduleConfig.deserialize(QString::fromStdString(filePath));
     }
 };
 

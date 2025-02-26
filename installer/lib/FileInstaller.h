@@ -25,6 +25,9 @@
 
 using namespace MOBase;
 
+using FileGlobalIndex = int;
+using FileDescriptor = std::pair<File, FileGlobalIndex>;
+
 class StepViewModel;
 
 class FileInstaller {
@@ -70,7 +73,7 @@ public:
 
     QString createInstallationNotes() const;
 
-    static std::vector<std::string> collectPositiveFileNamesFromDependencyPatterns(std::vector<DependencyPattern> patterns);
+    static std::vector<std::string> collectPositiveFileNamesFromDependencyPatterns(const std::vector<DependencyPattern> &patterns);
 
     void addFiles(std::vector<File>& main, std::vector<File> toAdd) const;
 
@@ -85,6 +88,11 @@ private:
     std::vector<std::shared_ptr<StepViewModel> > mSteps; // TODO: Maybe this is nasty. Idk.
 
     std::vector<File> collectFilesToInstall() const;
+
+    void logMessage(LogLevel level, const std::string& message) const
+    {
+        log.logMessage(level, "[INSTALLER] " + message);
+    }
 };
 
 
