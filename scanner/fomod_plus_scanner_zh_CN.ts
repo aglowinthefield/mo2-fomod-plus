@@ -12,8 +12,8 @@
     <message>
         <location filename="FomodPlusScanner.cpp" line="27"/>
         <source>你好，旅行者。
-该工具将扫描 load order 来查找您通过 FOMOD 安装的模组，
-并修正之前版本中错误的 FOMOD 标记（需保留安装包才能被检测到） :) 
+该工具将扫描模组列表来查找通过 FOMOD 安装的模组，
+并修正旧版本错误的 FOMOD 标志（需保留安装包才能被检测到）:) 
 
 一路平安，祝您的 load order 没有冲突。</source>
         <translation type="unfinished"></translation>
@@ -35,7 +35,7 @@
     </message>
     <message>
         <location filename="FomodPlusScanner.cpp" line="72"/>
-        <source>load order 扫描已完成。更新了 </source>
+        <source>模组扫描已完成。更新了 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -45,12 +45,12 @@
     </message>
     <message>
         <location filename="FomodPlusScanner.h" line="42"/>
-        <source>扫描 modlist 查找通过 FOMOD 安装的文件</source>
+        <source>扫描模组列表查找通过 FOMOD 安装的文件</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="FomodPlusScanner.h" line="49"/>
-        <source>扫描 modlist 查找通过 FOMOD 安装的文件</source>
+        <source>扫描模组列表查找通过 FOMOD 安装的文件</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
