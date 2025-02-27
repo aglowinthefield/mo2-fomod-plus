@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "../../installer/xml/ModuleConfiguration.h"
+#include <QString>
 #include <filesystem>
 
 class MCBos : public testing::Test {
@@ -10,7 +11,7 @@ protected:
     {
         const std::string filePath = (std::filesystem::path(__FILE__).parent_path() / "test_moduleconf_bos.xml").
             string();
-        moduleConfig.deserialize(filePath);
+        moduleConfig.deserialize(QString::fromStdString(filePath));
     }
 };
 

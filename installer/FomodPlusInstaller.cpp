@@ -12,6 +12,7 @@
 #include "FomodInstallerWindow.h"
 #include "stringutil.h"
 #include "integration/FomodDataContent.h"
+#include "ui/Colors.h"
 #include "ui/FomodViewModel.h"
 
 #include <QMessageBox>
@@ -49,6 +50,13 @@ void FomodPlusInstaller::toggleShouldShowImages() const
     mOrganizer->setPluginSetting(name(), "show_images", !showImages);
 }
 
+QString FomodPlusInstaller::getSelectedColor() const
+{
+    const auto colorName = mOrganizer->pluginSetting(name(), "color_theme").toString();
+    const auto it = UiColors::colorStyles.find(colorName);
+    return it != UiColors::colorStyles.end() ? it->second : UiColors::colorStyles.at("Blue");
+}
+
 std::vector<std::shared_ptr<const IPluginRequirement> > FomodPlusInstaller::requirements() const
 {
     return { Requirements::gameDependency(
@@ -68,10 +76,10 @@ bool FomodPlusInstaller::isArchiveSupported(std::shared_ptr<const IFileTree> tre
 
 QList<PluginSetting> FomodPlusInstaller::settings() const
 {
-
     return {
         { u"fallback_to_legacy"_s, u"When hitting cancel, fall back to the legacy FOMOD installer."_s, false },
-        { u"show_images"_s, u"Show image previews and the image carousel in installer windows. "_s, true },
+        { u"show_images"_s, u"Show image previews and the image carousel in installer windows."_s, true },
+        { u"color_theme"_s, u"Select the color theme for the installer"_s, QString("Blue") } // Default color name
     };
 }
 

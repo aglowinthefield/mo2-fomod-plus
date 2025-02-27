@@ -392,7 +392,7 @@ QWidget* FomodInstallerWindow::createLeftPane()
 
     // Add description box
     // Initialize with defaults (the first plugin's description (which defaults to the module image otherwise))
-    QScrollArea* scrollArea = new QScrollArea(leftPane);
+    auto* scrollArea = new QScrollArea(leftPane);
     scrollArea->setWidgetResizable(true);
 
     mDescriptionBox = new QLabel("", leftPane);
@@ -636,14 +636,14 @@ void FomodInstallerWindow::applyFnFromJson(const std::function<void(QAbstractBut
     const auto radioButtons = findChildren<QRadioButton*>();
 
     for (auto* checkbox : checkboxes) {
-        for (auto selectedPlugin : selectedPlugins) {
+        for (const auto& selectedPlugin : selectedPlugins) {
             if (checkbox->objectName().toStdString() == selectedPlugin) {
                 fn(checkbox);
             }
         }
     }
     for (auto* radio : radioButtons) {
-        for (auto selectedPlugin : selectedPlugins) {
+        for (const auto& selectedPlugin : selectedPlugins) {
             if (radio->objectName().toStdString() == selectedPlugin) {
                 fn(radio);
             }
@@ -653,8 +653,7 @@ void FomodInstallerWindow::applyFnFromJson(const std::function<void(QAbstractBut
 
 void FomodInstallerWindow::stylePreviouslySelectedOptions()
 {
-    const auto stylesheet = "QCheckBox { background-color: rgba(91, 127, 152, 0.4); } "
-        "QRadioButton { background-color: rgba(91, 127, 152, 0.4); }";
+    const auto stylesheet = getColorStyle();
 
     const auto tooltip = "You previously selected this plugin when installing this mod.";
 
@@ -665,7 +664,7 @@ void FomodInstallerWindow::stylePreviouslySelectedOptions()
     });
 }
 
-void FomodInstallerWindow::selectPreviouslySelectedOptions()
+void FomodInstallerWindow::selectPreviouslySelectedOptions() const
 {
     logMessage(INFO, "Selecting previously selected choices");
     logMessage(INFO, "Existing JSON provided: " + mFomodJson.dump(4));
@@ -674,13 +673,12 @@ void FomodInstallerWindow::selectPreviouslySelectedOptions()
     }
     try {
         mViewModel->selectFromJson(mFomodJson);
-    } catch (Exception e) {
+    } catch (Exception& e) {
         logMessage(ERR, std::string("Error selecting previously selected options: ") + e.what());
     }
     updateCheckboxStates();
-    // applyFnFromJson([](QAbstractButton* button) {
-    //     if (button->isEnabled()) {
-    //         button->setChecked(true);
-    //     }
-    // });
+}
+
+QString FomodInstallerWindow::getColorStyle() const {
+    return mInstaller->getSelectedColor();
 }

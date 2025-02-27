@@ -7,7 +7,7 @@
 
 std::string setToString(const std::set<int> &set)
 {
-    std::string str = "";
+    std::string str;
     for (const auto& i : set) {
         str += std::to_string(i) + ", ";
     }
@@ -32,11 +32,11 @@ bool ConditionTester::isStepVisible(const std::shared_ptr<FlagMap>& flags,
 
     std::set<int> stepsThatSetThisFlag;
 
-    for (const auto flagDependency : flagDependencies) {
+    for (const auto& flagDependency : flagDependencies) {
         // for this flag, find the plugins that set it
         for (int i = stepIndex - 1; i >= 0; --i) {
-            for (const auto group : steps[i]->getGroups()) {
-                for (const auto plugin : group->getPlugins()) {
+            for (const auto& group : steps[i]->getGroups()) {
+                for (const auto& plugin : group->getPlugins()) {
                     if (std::ranges::any_of(plugin->getPlugin()->conditionFlags.flags,
                         [&flagDependency](const ConditionFlag& flag) {
                             return flag.name == flagDependency.flag && flag.value == flagDependency.value;
@@ -93,10 +93,17 @@ bool ConditionTester::testCompositeDependency(const std::shared_ptr<FlagMap>& fl
 
 bool ConditionTester::testFlagDependency(const std::shared_ptr<FlagMap>& flags, const FlagDependency& flagDependency)
 {
+    // Every instance of this flag being set in the map.
     const auto flagList = flags->getFlagsByKey(flagDependency.flag);
-    return std::ranges::any_of(flagList, [&flagDependency](const Flag& flag) {
-        return flag.second == flagDependency.value;
-    });
+
+    // Find the first instance of this flag being set (in the order specified by getFlagsByKey)
+    if (flagList.empty()) {
+        // If the dependency value is an empty string, it means this flag should be unset.
+        // So if we don't have any value for this flag, the result is true.
+        return flagDependency.value.empty();
+    }
+
+    return flagList.front().second == flagDependency.value;
 }
 
 bool ConditionTester::testFileDependency(const FileDependency& fileDependency) const

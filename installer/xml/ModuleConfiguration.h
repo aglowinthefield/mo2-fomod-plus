@@ -138,7 +138,6 @@ public:
     std::vector<GameDependency> gameDependencies;
     std::vector<CompositeDependency> nestedDependencies;
     OperatorTypeEnum operatorType = OperatorTypeEnum::AND; // safest default.
-    int totalDependencies         = 0;
 
     bool deserialize(pugi::xml_node& node) override;
 };

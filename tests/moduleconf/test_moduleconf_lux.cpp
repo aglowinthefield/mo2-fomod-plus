@@ -1,4 +1,5 @@
 ﻿#include <gtest/gtest.h>
+#include <QString>
 #include <pugixml.hpp>
 #include <filesystem>
 #include "../../installer/xml/ModuleConfiguration.h"
@@ -14,7 +15,7 @@ protected:
         ASSERT_TRUE(result) << "Failed to load XML file: " << result.description();
         configNode = doc.child("config");
         ASSERT_TRUE(configNode) << "No <config> node found";
-        moduleConfig.deserialize(filePath);
+        moduleConfig.deserialize(QString::fromStdString(filePath));
     }
 
     pugi::xml_document doc;

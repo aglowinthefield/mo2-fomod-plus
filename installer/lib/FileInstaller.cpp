@@ -1,6 +1,5 @@
 ﻿#include "FileInstaller.h"
 
-#include <fstream>
 #include <utility>
 
 #include "ui/FomodViewModel.h"
@@ -23,7 +22,9 @@ FileInstaller::FileInstaller(
 std::shared_ptr<IFileTree> FileInstaller::install() const
 {
     const auto filesToInstall = collectFilesToInstall();
-    log.logMessage(INFO, "Installing " + std::to_string(filesToInstall.size()) + " files");
+    logMessage(INFO, "Installing " + std::to_string(filesToInstall.size()) + " files");
+    logMessage(INFO, "FlagMap");
+    logMessage(INFO, mFlagMap->toString());
 
     // update the file tree with the new files
     const std::shared_ptr<IFileTree> installTree = mFileTree->createOrphanTree();
@@ -33,7 +34,7 @@ std::shared_ptr<IFileTree> FileInstaller::install() const
         const auto sourcePath = getQualifiedFilePath(file.source);
         const auto sourceNode = mFileTree->find(QString::fromStdString(sourcePath));
         if (sourceNode == nullptr) {
-            log.logMessage(ERR, "Could not find source: " + file.source);
+            logMessage(ERR, "Could not find source: " + file.source);
             continue;
         }
         const auto targetPath = file.destination.has_value()
@@ -41,11 +42,12 @@ std::shared_ptr<IFileTree> FileInstaller::install() const
             : QString::fromStdString(sourcePath);
 
         // If it's a folder, copy the contents of the folder, not the folder itself.
-        if (sourceNode->isDir()) { // TODO: Check if target path is literally undefined/null
+        if (sourceNode->isDir()) {
+            // TODO: Check if target path is literally undefined/null
             const auto& tree = sourceNode->astree();
             for (auto it = tree->begin(); it != tree->end(); ++it) {
-                const auto entry = *it;
-                const auto path  = (targetPath.isEmpty()) ? entry->name() : targetPath + "/" + entry->name();
+                const auto& entry = *it;
+                const auto path  = targetPath.isEmpty() ? entry->name() : targetPath + "/" + entry->name();
                 installTree->copy(entry, path, IFileTree::InsertPolicy::MERGE);
             }
         } else {
@@ -101,14 +103,14 @@ QString FileInstaller::createInstallationNotes() const
     std::vector<std::string> installedPatchFor;
     std::vector<std::string> notInstalledPatchFor;
 
-    for (const auto stepViewModel : mSteps) {
-        for (const auto groupViewModel : stepViewModel->getGroups()) {
-            for (const auto pluginViewModel : groupViewModel->getPlugins()) {
+    for (const auto& stepViewModel : mSteps) {
+        for (const auto& groupViewModel : stepViewModel->getGroups()) {
+            for (const auto& pluginViewModel : groupViewModel->getPlugins()) {
 
                 const auto patterns = pluginViewModel->getPlugin()->typeDescriptor.dependencyType.patterns.patterns;
-                const auto fileNames = collectPositiveFileNamesFromDependencyPatterns(patterns);
 
-                for (auto fileName : fileNames) {
+                for (const auto fileNames = collectPositiveFileNamesFromDependencyPatterns(patterns); const auto&
+                     fileName : fileNames) {
                     hasPatchFor.emplace_back("hasPatchFor:" + fileName);
                     if (pluginViewModel->isSelected()) {
                         installedPatchFor.emplace_back("installedPatchFor:" + fileName);
@@ -121,46 +123,47 @@ QString FileInstaller::createInstallationNotes() const
     }
 
     notes += "BEGIN FOMOD NOTES\n";
-    for (auto patchFor : hasPatchFor) {
+    for (const auto& patchFor : hasPatchFor) {
         notes += patchFor + "\n";
     }
     notes += "\n";
-    for (auto patchFor : installedPatchFor) {
+    for (const auto& patchFor : installedPatchFor) {
         notes += patchFor + "\n";
     }
     notes += "\n";
-    for (auto patchFor : notInstalledPatchFor) {
+    for (const auto& patchFor : notInstalledPatchFor) {
         notes += patchFor + "\n";
     }
     notes += "\nEND FOMOD NOTES\n";
     return notes;
 }
 
-std::vector<std::string> FileInstaller::collectPositiveFileNamesFromDependencyPatterns(std::vector<DependencyPattern> patterns)
+std::vector<std::string> FileInstaller::collectPositiveFileNamesFromDependencyPatterns(
+    const std::vector<DependencyPattern>& patterns)
 {
     std::vector<std::string> usableFileDependencyPluginNames = {};
 
-    for (const auto pattern : patterns) {
+    for (const auto& pattern : patterns) {
         if (pattern.type == PluginTypeEnum::NotUsable) {
             continue;
         }
 
-        if (pattern.dependencies.fileDependencies.size() == 0 && pattern.dependencies.nestedDependencies.size() == 0) {
+        if (pattern.dependencies.fileDependencies.empty() && pattern.dependencies.nestedDependencies.empty()) {
             continue;
         }
 
         const auto fileDependencies   = pattern.dependencies.fileDependencies;
         const auto nestedDependencies = pattern.dependencies.nestedDependencies;
 
-        for (const auto fileDependency : fileDependencies) {
+        for (const auto& fileDependency : fileDependencies) {
             if (fileDependency.state != FileDependencyTypeEnum::Active) {
                 continue;
             }
             usableFileDependencyPluginNames.emplace_back(fileDependency.file);
         }
 
-        for (const auto nestedDependency : nestedDependencies) {
-            for (const auto fileDependency : nestedDependency.fileDependencies) {
+        for (const auto& nestedDependency : nestedDependencies) {
+            for (const auto& fileDependency : nestedDependency.fileDependencies) {
                 if (fileDependency.state != FileDependencyTypeEnum::Active) {
                     continue;
                 }
@@ -177,12 +180,13 @@ std::vector<std::string> FileInstaller::collectPositiveFileNamesFromDependencyPa
 void FileInstaller::addFiles(std::vector<File>& main, std::vector<File> toAdd) const
 {
     for (const auto& add : toAdd) {
-        log.logMessage(INFO, "Adding file with source: " + add.source);
+        logMessage(INFO, "Adding file with source: " + add.source);
     }
     main.insert(main.end(), toAdd.begin(), toAdd.end());
 }
 
 // TODO: Unclear if we're copying. oh well.
+// TODO: Rebuild flagmap and step indeces before installing
 std::vector<File> FileInstaller::collectFilesToInstall() const
 {
     std::vector<File> allFiles;
@@ -207,7 +211,14 @@ std::vector<File> FileInstaller::collectFilesToInstall() const
 
     // ConditionalInstall files
     for (const auto conditionals = mFomodFile->conditionalFileInstalls; const auto& pattern : conditionals.patterns) {
+        //<folder source="CR\Dagi-Raht LL\VLrn_Custom Race - Dagi-Raht LL" destination="" priority="2" />
+
+        if (pattern.files.files.front().source == "CR\\Dagi-Raht LL\\VLrn_Custom Race - Dagi-Raht LL") {
+            logMessage(DEBUG, "WHY IS THIS HERE");
+        }
         if (mConditionTester.testCompositeDependency(mFlagMap, pattern.dependencies)) {
+            // also check if the plugins setting these flags are visible. at least one
+
             addFiles(allFiles, pattern.files.files);
         }
     }
@@ -218,8 +229,8 @@ std::vector<File> FileInstaller::collectFilesToInstall() const
         return a.priority < b.priority;
     });
 
-    for (auto toInstall : allFiles) {
-        log.logMessage(DEBUG, "File to install: " + toInstall.source);
+    for (const auto& toInstall : allFiles) {
+        logMessage(DEBUG, "File to install: " + toInstall.source);
     }
 
     return allFiles;

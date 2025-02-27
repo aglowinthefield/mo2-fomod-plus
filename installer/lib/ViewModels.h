@@ -29,6 +29,12 @@ public:
     PluginTypeEnum getCurrentPluginType() const { return currentPluginType; }
     void setCurrentPluginType(const PluginTypeEnum type) { currentPluginType = type; }
 
+    void setStepIndex(const int stepIndex) { this->stepIndex = stepIndex; }
+    void setGroupIndex(const int groupIndex) { this->groupIndex = groupIndex; }
+
+    [[nodiscard]] int getStepIndex() const { return stepIndex; }
+    [[nodiscard]] int getGroupIndex() const { return groupIndex; }
+
     friend class FomodViewModel;
     friend class FileInstaller;
     friend class ConditionTester;
@@ -42,6 +48,9 @@ private:
     bool enabled;
     PluginTypeEnum currentPluginType = PluginTypeEnum::UNKNOWN;
     std::shared_ptr<Plugin> plugin;
+
+    int stepIndex{-1};
+    int groupIndex{-1};
 };
 
 /*

@@ -18,22 +18,6 @@
           "type": "PATH",
           "value": "${sourceDir}/../../boost_1_85_0"
         },
-        "BOOST_LIBRARYDIR": {
-          "type": "PATH",
-          "value": "${sourceDir}/../../boost_1_85_0/lib64-msvc-14.3/lib"
-        },
-        "FMT_ROOT": {
-          "type": "PATH",
-          "value": "${sourceDir}/../../fmt-8.1.1"
-        },
-        "SPDLOG_ROOT": {
-          "type": "PATH",
-          "value": "${sourceDir}/../../spdlog-v1.10.0"
-        },
-        "LOOT_PATH": {
-          "type": "PATH",
-          "value": "${sourceDir}/../../libloot-0.22.1-win64"
-        },
         "LZ4_ROOT": {
           "type": "PATH",
           "value": "${sourceDir}/../../lz4-v1.9.4"
@@ -49,22 +33,6 @@
         "PYTHON_ROOT": {
           "type": "PATH",
           "value": "${sourceDir}/../../python-3.12.3"
-        },
-        "SEVENZ_ROOT": {
-          "type": "PATH",
-          "value": "${sourceDir}/../../7zip-23.01"
-        },
-        "LIBBSARCH_ROOT": {
-          "type": "PATH",
-          "value": "${sourceDir}/../../libbsarch-0.0.12-release-x64"
-        },
-        "BOOST_DI_ROOT": {
-          "type": "PATH",
-          "value": "${sourceDir}/../../di"
-        },
-        "GTEST_ROOT": {
-          "type": "PATH",
-          "value": "${sourceDir}/../../googletest"
         }
       }
     }

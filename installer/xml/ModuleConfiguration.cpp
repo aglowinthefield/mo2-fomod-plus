@@ -112,7 +112,6 @@ bool CompositeDependency::deserialize(pugi::xml_node& node)
         operatorType = OperatorTypeEnum::OR;
     }
 
-    totalDependencies = static_cast<int>(fileDependencies.size() + flagDependencies.size() + gameDependencies.size());
     return true;
 }
 
@@ -310,7 +309,7 @@ bool ModuleConfiguration::deserialize(const QString& filePath)
 {
     pugi::xml_document doc_;
 
-    const auto path = filePath;
+    const auto& path = filePath;
 
     if (const pugi::xml_parse_result result = doc_.load_file(path.toStdWString().c_str()); !result) {
         throw XmlParseException(std::format("XML parsed with errors: {}", result.description()));
