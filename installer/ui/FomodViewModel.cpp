@@ -615,6 +615,10 @@ void FomodViewModel::selectFromJson(nlohmann::json json) const
                     continue;
                 }
                 logMessage(DEBUG, "Toggle plugin " + searchName + " to selected.");
+                if (!(*currentPlugin)->isEnabled()) {
+                    logMessage(DEBUG, "Plugin " + searchName + " is not enabled.");
+                    continue;
+                }
                 togglePlugin(currentGroup, *currentPlugin, true);
             }
         }
