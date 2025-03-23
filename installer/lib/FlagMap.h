@@ -1,5 +1,5 @@
-﻿#ifndef FLAGMAP_H
-#define FLAGMAP_H
+﻿#pragma once
+
 #include "ViewModels.h"
 #include "stringutil.h"
 
@@ -111,4 +111,3 @@ public:
 private:
     std::unordered_map<std::shared_ptr<PluginViewModel>, FlagList> flags;
 };
-#endif //FLAGMAP_H

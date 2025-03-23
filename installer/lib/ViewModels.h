@@ -1,5 +1,4 @@
-﻿#ifndef VIEWMODELS_H
-#define VIEWMODELS_H
+﻿#pragma once
 #include "xml/ModuleConfiguration.h"
 
 
@@ -112,6 +111,3 @@ private:
 */
 using GroupRef  = const std::shared_ptr<GroupViewModel>&;
 using PluginRef = const std::shared_ptr<PluginViewModel>&;
-
-
-#endif //VIEWMODELS_H

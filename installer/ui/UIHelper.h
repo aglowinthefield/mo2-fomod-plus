@@ -1,10 +1,8 @@
-﻿#ifndef UIHELPER_H
-#define UIHELPER_H
-
+﻿#pragma once
 
 #include <QPushButton>
-#include <Qlabel>
 #include <QVBoxLayout>
+#include <Qlabel>
 
 #include "FomodViewModel.h"
 
@@ -61,5 +59,3 @@ public:
     */
     static void setDebugBorders(QWidget* widget);
 };
-
-#endif //UIHELPER_H

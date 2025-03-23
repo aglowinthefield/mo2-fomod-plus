@@ -357,11 +357,11 @@ QWidget* FomodInstallerWindow::createBottomRow()
     mManualButton         = UIHelper::createButton(tr("Manual"), bottomRow);
     mSelectPreviousButton = UIHelper::createButton(tr("Select All Previous Choices"), bottomRow);
 
-    const auto buttonText = mInstaller->shouldShowImages() ? tr("Hide Images") : tr("Show Images");
-    mHideImagesButton     = UIHelper::createButton(buttonText, bottomRow);
+    // const auto buttonText = mInstaller->shouldShowImages() ? tr("Hide Images") : tr("Show Images");
+    // mHideImagesButton     = UIHelper::createButton(buttonText, bottomRow);
     layout->addWidget(mManualButton);
     layout->addWidget(mSelectPreviousButton);
-    layout->addWidget(mHideImagesButton);
+    // layout->addWidget(mHideImagesButton);
 
     // Space to push remaining buttons right
     layout->addStretch();
@@ -375,7 +375,7 @@ QWidget* FomodInstallerWindow::createBottomRow()
     connect(mBackButton, SIGNAL(clicked()), this, SLOT(onBackClicked()));
     connect(mCancelButton, SIGNAL(clicked()), this, SLOT(onCancelClicked()));
     connect(mSelectPreviousButton, SIGNAL(clicked()), this, SLOT(onSelectPreviousClicked()));
-    connect(mHideImagesButton, SIGNAL(clicked()), this, SLOT(toggleImagesShown()));
+    // connect(mHideImagesButton, SIGNAL(clicked()), this, SLOT(toggleImagesShown()));
 
     layout->addWidget(mBackButton);
     layout->addWidget(mNextInstallButton);
@@ -576,6 +576,7 @@ QButtonGroup* FomodInstallerWindow::renderRadioGroup(QWidget* parent, QLayout* p
     return buttonGroup;
 }
 
+[[deprecated]]
 void FomodInstallerWindow::toggleImagesShown() const
 {
     logMessage(DEBUG, "Toggling image visibility");

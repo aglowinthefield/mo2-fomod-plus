@@ -98,7 +98,7 @@ private slots:
     }
 
     void onInstallClicked();
-    void toggleImagesShown() const;
+    [[deprecated]] void toggleImagesShown() const;
 
 private:
     Logger& log = Logger::getInstance();

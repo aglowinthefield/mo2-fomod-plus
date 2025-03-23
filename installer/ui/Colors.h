@@ -1,5 +1,5 @@
-﻿#ifndef COLORS_H
-#define COLORS_H
+﻿#pragma once
+
 #include <QString>
 #include <map>
 
@@ -92,5 +92,3 @@ const static std::map<QString, QString> colorStyles = {
 };
 
 }
-
-#endif //COLORS_H

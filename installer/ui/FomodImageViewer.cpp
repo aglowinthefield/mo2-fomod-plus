@@ -5,7 +5,6 @@
 
 #include <QLabel>
 #include <QScrollArea>
-#include <QStackedWidget>
 #include <QtConcurrent/QtConcurrent>
 
 constexpr int PREVIEW_IMAGE_WIDTH  = 160;

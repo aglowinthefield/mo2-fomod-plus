@@ -1,5 +1,4 @@
-﻿#ifndef FOMODIMAGEVIEWER_H
-#define FOMODIMAGEVIEWER_H
+﻿#pragma once
 
 #include "FomodViewModel.h"
 
@@ -7,7 +6,6 @@
 #include <QKeyEvent>
 #include <QLabel>
 #include <QScrollArea>
-#include <QStackedWidget>
 
 class ScaleLabel;
 using LabelImagePair = std::pair<QString, QString>;
@@ -49,7 +47,7 @@ private:
 
     QWidget* createCenterRow(QWidget* parent);
 
-    QWidget* createSinglePhotoPane(QWidget *parent);
+    QWidget* createSinglePhotoPane(QWidget* parent);
 
     QScrollArea* createPreviewImages(QWidget* parent);
 
@@ -92,6 +90,3 @@ private:
     QLabel* mLabel{ nullptr };
     QScrollArea* mPreviewImages{ nullptr };
 };
-
-
-#endif //FOMODIMAGEVIEWER_H

@@ -1,12 +1,11 @@
-﻿#ifndef MODULECONFIGURATION_H
-#define MODULECONFIGURATION_H
+﻿#pragma once
 
-#include <string>
-#include <vector>
-#include <pugixml.hpp>
 #include <iostream>
 #include <optional>
+#include <pugixml.hpp>
 #include <qstring.h>
+#include <string>
+#include <vector>
 
 class XmlDeserializable {
 public:
@@ -77,7 +76,6 @@ enum class PluginTypeEnum {
 };
 
 
-
 inline std::ostream& operator<<(std::ostream& os, const PluginTypeEnum& type)
 {
     switch (type) {
@@ -91,7 +89,7 @@ inline std::ostream& operator<<(std::ostream& os, const PluginTypeEnum& type)
         os << "Optional";
         break;
     case PluginTypeEnum::NotUsable:
-        os <<"NotUsable";
+        os << "NotUsable";
         break;
     case PluginTypeEnum::CouldBeUsable:
         os << "CouldBeUsable";
@@ -303,8 +301,5 @@ public:
     StepList installSteps;
     ConditionalFileInstall conditionalFileInstalls;
 
-    bool deserialize(const QString &filePath);
+    bool deserialize(const QString& filePath);
 };
-
-
-#endif //MODULECONFIGURATION_H

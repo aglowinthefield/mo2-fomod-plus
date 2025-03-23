@@ -1,5 +1,4 @@
-﻿#ifndef XMLHELPER_H
-#define XMLHELPER_H
+﻿#pragma once
 
 #include "ModuleConfiguration.h"
 
@@ -16,5 +15,3 @@ public:
         return defaultOrder; // Ascending for plugins, Explicit for groups
     }
 };
-
-#endif //XMLHELPER_H

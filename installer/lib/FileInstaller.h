@@ -1,5 +1,5 @@
-﻿#ifndef FILEINSTALLER_H
-#define FILEINSTALLER_H
+﻿#pragma once
+
 #include <ifiletree.h>
 #include <nlohmann/json.hpp>
 
@@ -94,6 +94,3 @@ private:
         log.logMessage(level, "[INSTALLER] " + message);
     }
 };
-
-
-#endif //FILEINSTALLER_H

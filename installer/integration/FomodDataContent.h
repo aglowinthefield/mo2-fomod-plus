@@ -1,5 +1,4 @@
-﻿#ifndef FOMODDATACONTENT_H
-#define FOMODDATACONTENT_H
+﻿#pragma once
 
 #include <imoinfo.h>
 #include <moddatacontent.h>
@@ -21,6 +20,3 @@ public:
 private:
     MOBase::IOrganizer* mOrganizer;
 };
-
-
-#endif //FOMODDATACONTENT_H

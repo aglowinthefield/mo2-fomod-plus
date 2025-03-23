@@ -1,5 +1,4 @@
-﻿#ifndef FOMODINFOFILE_H
-#define FOMODINFOFILE_H
+﻿#pragma once
 
 #include <qstring.h>
 #include <string>
@@ -24,5 +23,3 @@ private:
     std::string description;
     std::vector<std::string> groups;
 };
-
-#endif //FOMODINFOFILE_H

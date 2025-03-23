@@ -1,5 +1,4 @@
-﻿#ifndef CONDITIONTESTER_H
-#define CONDITIONTESTER_H
+﻿#pragma once
 
 #include <imoinfo.h>
 
@@ -43,6 +42,3 @@ private:
     mutable std::unordered_map<std::string, FileDependencyTypeEnum> pluginStateCache;
 
 };
-
-
-#endif //CONDITIONTESTER_H

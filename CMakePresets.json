@@ -24,7 +24,7 @@
         },
         "QT_ROOT": {
           "type": "PATH",
-          "value": "C:/Qt/6.7.3/msvc2019_64"
+          "value": "C:/Qt/6.7.1/msvc2019_64"
         },
         "ZLIB_ROOT": {
           "type": "PATH",
@@ -33,6 +33,10 @@
         "PYTHON_ROOT": {
           "type": "PATH",
           "value": "${sourceDir}/../../python-3.12.3"
+        },
+        "MO2_PLUGIN_TARGET_DIR": {
+          "type": "PATH",
+          "value": "D:/Modding/MO2/Plugins"
         }
       }
     }

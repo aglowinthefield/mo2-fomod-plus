@@ -1,10 +1,9 @@
-﻿#ifndef CLICKABLEWIDGET_H
-#define CLICKABLEWIDGET_H
+﻿#pragma once
 
-#include <QWidget>
 #include <QMouseEvent>
+#include <QWidget>
 
-class ClickableWidget : public QWidget {
+class ClickableWidget final : public QWidget {
     Q_OBJECT
 
 public:
@@ -23,5 +22,3 @@ protected:
         QWidget::mousePressEvent(event);
     }
 };
-
-#endif //CLICKABLEWIDGET_H

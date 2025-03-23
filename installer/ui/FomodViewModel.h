@@ -1,5 +1,5 @@
-﻿#ifndef DIALOGSTATEMANAGER_H
-#define DIALOGSTATEMANAGER_H
+﻿#pragma once
+
 #include <imoinfo.h>
 #include <string>
 
@@ -150,13 +150,10 @@ private:
     // Indices
     int mCurrentStepIndex{ 0 };
 
-    void logMessage(LogLevel level, const std::string& message) const
+    void logMessage(const LogLevel level, const std::string& message) const
     {
         log.logMessage(level, "[VIEWMODEL] " + message);
     }
 
     std::string toString() const;
 };
-
-
-#endif //DIALOGSTATEMANAGER_H

@@ -29,19 +29,20 @@ public:
         if (mLogFile.is_open()) {
             mLogFile.close();
         }
-        mLogFile.open(filePath, std::ios::out); // std::ios::app is an option for appending but dont wanna grow it forever.
+        mLogFile.open(filePath, std::ios::out);
+        // std::ios::app is an option for appending but dont wanna grow it forever.
     }
 
     void logMessage(const LogLevel level, const std::string& message)
     {
 
-        #if defined(__GNUC__) || defined(__clang__)
+#if defined(__GNUC__) || defined(__clang__)
                 std::string functionName = __PRETTY_FUNCTION__;
-        #elif defined(_MSC_VER)
-                std::string functionName = __FUNCSIG__;
-        #else
+#elif defined(_MSC_VER)
+        std::string functionName = __FUNCSIG__;
+#else
                 std::string functionName = "UnknownFunction";
-        #endif
+#endif
 
         std::regex classNameRegex(R"((\w+)::\w+\()");
         std::smatch match;
@@ -50,8 +51,6 @@ public:
         if (std::regex_search(functionName, match, classNameRegex) && match.size() > 1) {
             className = match.str(1);
         }
-
-        std::string logEntry = "[" + className + "] " + message;
 
         std::lock_guard lock(mMutex);
         std::ostream& out = mLogFile.is_open() ? mLogFile : std::cout;

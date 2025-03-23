@@ -49,6 +49,15 @@ You'll want to follow all setup instructions for `mob` before proceeding.
 
 *Note: I don't have a good setup for building to DLLs within the repo at the moment.*
 
+### Environment Variables
+I recommend setting the following system environment variables to make 
+building super seamless:
+
+| Variable  | Example Value                       |
+|-----------|-------------------------------------|
+| `Qt6_DIR` | `C:\Qt\6.7.1\msvc2019_64\lib\cmake` |
+
+
 The project is divided into two targets, `fomod_plus_installer` and `fomod_plus_scanner`. Hopefully the 
 distinction is self-explanatory.
 

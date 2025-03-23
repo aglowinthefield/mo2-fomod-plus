@@ -1,5 +1,4 @@
-﻿#ifndef SCALELABEL_H
-#define SCALELABEL_H
+﻿#pragma once
 
 // Taken from https://github.com/ModOrganizer2/modorganizer-installer_fomod/blob/master/src/scalelabel.h
 #include <QLabel>
@@ -45,6 +44,3 @@ private:
     QSize mOriginalMovieSize;
     bool misStatic = false;
 };
-
-
-#endif //SCALELABEL_H
