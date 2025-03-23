@@ -74,6 +74,7 @@ void FomodInstallerWindow::saveGeometryAndState() const
     const auto cwd = QDir::currentPath();
     QSettings settings(cwd + "/fomod-plus-settings.ini", QSettings::IniFormat);
     settings.setValue("windowGeometry", saveGeometry());
+    settings.setValue("centerSplitState", mCenterRow->saveState());
 }
 
 void FomodInstallerWindow::restoreGeometryAndState()
@@ -81,6 +82,7 @@ void FomodInstallerWindow::restoreGeometryAndState()
     const auto cwd = QDir::currentPath();
     const QSettings settings(cwd + "/fomod-plus-settings.ini", QSettings::IniFormat);
     restoreGeometry(settings.value("windowGeometry").toByteArray());
+    mCenterRow->restoreState(settings.value("centerSplitState").toByteArray());
 }
 
 void FomodInstallerWindow::populatePluginMap()
@@ -253,17 +255,17 @@ QBoxLayout* FomodInstallerWindow::createContainerLayout()
 {
     const auto layout = new QVBoxLayout(this);
 
-    const auto topRow    = createTopRow();
-    const auto centerRow = createCenterRow();
-    const auto bottomRow = createBottomRow();
+    mTopRow    = createTopRow();
+    mCenterRow = createCenterRow();
+    mBottomRow = createBottomRow();
 
-    layout->addWidget(topRow);
-    layout->addWidget(centerRow, 1); // stretch 1 here so the others are static size
-    layout->addWidget(bottomRow);
+    layout->addWidget(mTopRow);
+    layout->addWidget(mCenterRow, 1); // stretch 1 here so the others are static size
+    layout->addWidget(mBottomRow);
     return layout;
 }
 
-QWidget* FomodInstallerWindow::createCenterRow()
+QSplitter* FomodInstallerWindow::createCenterRow()
 {
     const auto centerRow = new QSplitter(Qt::Horizontal, this);
     const auto leftPane  = createLeftPane();
@@ -514,8 +516,6 @@ QRadioButton* FomodInstallerWindow::createPluginRadioButton(const std::shared_pt
 
     radioButton->setEnabled(plugin->isEnabled());
     radioButton->setChecked(plugin->isSelected());
-    // Bind to model function
-
     return radioButton;
 }
 
@@ -680,6 +680,7 @@ void FomodInstallerWindow::selectPreviouslySelectedOptions() const
     updateCheckboxStates();
 }
 
-QString FomodInstallerWindow::getColorStyle() const {
+QString FomodInstallerWindow::getColorStyle() const
+{
     return mInstaller->getSelectedColor();
 }

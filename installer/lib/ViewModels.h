@@ -14,7 +14,7 @@ using shared_ptr_list = std::vector<std::shared_ptr<T> >;
 class PluginViewModel {
 public:
     PluginViewModel(const std::shared_ptr<Plugin>& plugin_, const bool selected, bool, const int index)
-        : ownIndex(index), selected(selected), enabled(true), plugin(plugin_) {}
+        : ownIndex(index), selected(selected), enabled(true), wasManuallySet(false), plugin(plugin_) {}
 
     void setSelected(const bool selected) { this->selected = selected; }
     void setEnabled(const bool enabled) { this->enabled = enabled; }
@@ -23,11 +23,11 @@ public:
     [[nodiscard]] std::string getImagePath() const { return plugin->image.path; }
     [[nodiscard]] bool isSelected() const { return selected; }
     [[nodiscard]] bool isEnabled() const { return enabled; }
+    [[nodiscard]] int getOwnIndex() const { return ownIndex; }
     [[nodiscard]] std::vector<ConditionFlag> getConditionFlags() const { return plugin->conditionFlags.flags; }
-    int getOwnIndex() const { return ownIndex; }
-    PluginTypeEnum getCurrentPluginType() const { return currentPluginType; }
-    void setCurrentPluginType(const PluginTypeEnum type) { currentPluginType = type; }
+    [[nodiscard]] PluginTypeEnum getCurrentPluginType() const { return currentPluginType; }
 
+    void setCurrentPluginType(const PluginTypeEnum type) { currentPluginType = type; }
     void setStepIndex(const int stepIndex) { this->stepIndex = stepIndex; }
     void setGroupIndex(const int groupIndex) { this->groupIndex = groupIndex; }
 
@@ -45,11 +45,12 @@ private:
     int ownIndex;
     bool selected;
     bool enabled;
+    bool wasManuallySet;
     PluginTypeEnum currentPluginType = PluginTypeEnum::UNKNOWN;
     std::shared_ptr<Plugin> plugin;
 
-    int stepIndex{-1};
-    int groupIndex{-1};
+    int stepIndex{ -1 };
+    int groupIndex{ -1 };
 };
 
 /*

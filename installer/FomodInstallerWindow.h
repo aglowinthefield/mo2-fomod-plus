@@ -20,6 +20,8 @@
 #include "lib/FileInstaller.h"
 #include "ui/FomodViewModel.h"
 
+#include <QSplitter>
+
 using namespace MOBase;
 
 struct PluginData {
@@ -98,6 +100,7 @@ private slots:
     }
 
     void onInstallClicked();
+
     [[deprecated]] void toggleImagesShown() const;
 
 private:
@@ -130,6 +133,9 @@ private:
     QLabel* mDescriptionBox{};
     QComboBox* mModNameInput{};
     ScaleLabel* mImageLabel{};
+    QWidget* mTopRow{};
+    QSplitter* mCenterRow{};
+    QWidget* mBottomRow{};
 
     // Fn
     void setupUi();
@@ -144,11 +150,11 @@ private:
 
     void selectPreviouslySelectedOptions() const;
 
-    QString getColorStyle() const;
+    [[nodiscard]] QString getColorStyle() const;
 
     [[nodiscard]] QBoxLayout* createContainerLayout();
 
-    [[nodiscard]] QWidget* createCenterRow();
+    [[nodiscard]] QSplitter* createCenterRow();
 
     [[nodiscard]] QWidget* createTopRow();
 
