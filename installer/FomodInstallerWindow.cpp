@@ -14,6 +14,7 @@
 #include <QLabel>
 #include <QRadioButton>
 #include <QScrollArea>
+#include <QScrollBar>
 #include <QSettings>
 #include <QSizePolicy>
 #include <QSplitter>
@@ -271,6 +272,13 @@ QBoxLayout* FomodInstallerWindow::createContainerLayout()
     layout->addWidget(mTopRow);
     layout->addWidget(mCenterRow, 1); // stretch 1 here so the others are static size
     layout->addWidget(mBottomRow);
+
+    if (mInstaller->shouldShowNotifications()) {
+        mNotificationsPanel = createNotificationPanel();
+        layout->addWidget(mNotificationsPanel);
+        // Set a default welcome message
+        addNotification("FOMOD Plus notification panel initialized :)", "INFO");
+    }
     return layout;
 }
 
@@ -450,6 +458,16 @@ QWidget* FomodInstallerWindow::createRightPane()
     return rightPane;
 }
 
+QTextEdit* FomodInstallerWindow::createNotificationPanel()
+{
+    auto* panel = new QTextEdit(this);
+    panel->setReadOnly(true);
+    panel->setMaximumHeight(100); // Limit height
+    panel->setStyleSheet("font-family: monospace; font-size: 9pt;");
+
+    return panel;
+}
+
 QWidget* FomodInstallerWindow::createStepWidget(const std::shared_ptr<StepViewModel>& installStep)
 {
     const auto stepBox       = new QGroupBox(QString::fromStdString(installStep->getName()), this);
@@ -592,6 +610,23 @@ QButtonGroup* FomodInstallerWindow::renderRadioGroup(QWidget* parent, QLayout* p
     return buttonGroup;
 }
 
+void FomodInstallerWindow::addNotification(const QString& message, const QString& level) const
+{
+    if (!mNotificationsPanel) {
+        return;
+    }
+
+    const QString timestamp    = QDateTime::currentDateTime().toString("hh:mm:ss");
+    const QString formattedMsg = QString("<span>[%2] [%3] %4</span>")
+        .arg(timestamp).arg(level).arg(message);
+
+    mNotificationsPanel->append(formattedMsg);
+
+    // Auto-scroll to bottom
+    QScrollBar* scrollbar = mNotificationsPanel->verticalScrollBar();
+    scrollbar->setValue(scrollbar->maximum());
+}
+
 [[deprecated]]
 void FomodInstallerWindow::toggleImagesShown() const
 {
@@ -628,7 +663,8 @@ void FomodInstallerWindow::updateDisplayForActivePlugin() const
  * @param pluginSelector For now either 'plugins', or 'deselected'. The key of the member of 'groups' to iterate over.
  * @param fn The callback for each plugin in the chosen group member.
  */
-void FomodInstallerWindow::applyFnFromJson(const std::string& pluginSelector, const std::function<void(QAbstractButton*)>& fn)
+void FomodInstallerWindow::applyFnFromJson(const std::string& pluginSelector,
+    const std::function<void(QAbstractButton*)>& fn)
 {
     if (mFomodJson.empty()) {
         return;
@@ -693,7 +729,7 @@ void FomodInstallerWindow::stylePreviouslySelectedOptions()
 void FomodInstallerWindow::stylePreviouslyDeselectedOptions()
 {
     const auto stylesheet = getColorStyle(UiColors::ColorApplication::BORDER);
-    const auto tooltip = "You previously unchecked this plugin when installing this mod.";
+    const auto tooltip    = "You previously unchecked this plugin when installing this mod.";
     applyFnFromJson("deselected", [stylesheet, tooltip](QAbstractButton* button) {
         button->setStyleSheet(stylesheet);
         button->setToolTip(tooltip);

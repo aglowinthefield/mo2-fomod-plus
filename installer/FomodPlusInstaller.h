@@ -63,6 +63,8 @@ public:
 
     [[nodiscard]] bool shouldShowImages() const;
 
+    [[nodiscard]] bool shouldShowNotifications() const;
+
     void toggleShouldShowImages() const;
 
     QString getSelectedColor() const;

@@ -5,6 +5,7 @@
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
 #include <qcombobox.h>
+#include <qtextedit.h>
 
 #include "FomodPlusInstaller.h"
 #include "xml/ModuleConfiguration.h"
@@ -133,6 +134,7 @@ private:
     QSplitter* mCenterRow{};
     QSplitter* mLeftPane{};
     QStackedWidget* mInstallStepStack{};
+    QTextEdit* mNotificationsPanel{};
     QWidget* mBottomRow{};
     QWidget* mTopRow{};
     ScaleLabel* mImageLabel{};
@@ -170,6 +172,8 @@ private:
 
     [[nodiscard]] QWidget* createRightPane();
 
+    [[nodiscard]] QTextEdit* createNotificationPanel();
+
     [[nodiscard]] QWidget* createStepWidget(const std::shared_ptr<StepViewModel>& installStep);
 
     [[nodiscard]] QWidget* renderGroup(const std::shared_ptr<GroupViewModel>& group);
@@ -190,6 +194,8 @@ private:
 
     QButtonGroup* renderRadioGroup(QWidget* parent, QLayout* parentLayout,
         const std::shared_ptr<GroupViewModel>& group);
+
+    void addNotification(const QString& message, const QString& level) const;
 
     void logMessage(LogLevel level, const std::string& message) const
     {
