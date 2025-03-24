@@ -572,7 +572,6 @@ std::string FomodViewModel::toString() const
 
 void FomodViewModel::selectFromJson(nlohmann::json json) const
 {
-
     const auto jsonSteps = json["steps"];
     const auto stepCount = jsonSteps.size();
 
@@ -626,6 +625,41 @@ void FomodViewModel::selectFromJson(nlohmann::json json) const
                     continue;
                 }
                 togglePlugin(currentGroup, *currentPlugin, true);
+            }
+
+            if (!group.contains("deselected")) {
+                continue;
+            }
+
+            // Do the opposite of the above. For unchecked plugins, disable them.
+            for (const auto jsonPlugin : group["deselected"]) {
+
+                const auto allPlugins = currentGroup->getPlugins();
+                const auto searchName = jsonPlugin.get<std::string>();
+
+                logMessage(DEBUG, "Looking for plugin to disable: " + searchName);
+
+                const auto currentPlugin = std::ranges::find_if(allPlugins,
+                    [searchName](PluginRef p) {
+                        return p->getName() == searchName;
+                    });
+
+                if (currentPlugin == allPlugins.end()) {
+                    logMessage(DEBUG, "Plugin " + searchName + " not found in group " + currentGroup->getName());
+                    continue;
+                }
+
+                if (!(*currentPlugin)->isSelected()) {
+                    logMessage(DEBUG, "Plugin " + searchName + " is already deselected.");
+                    continue;
+                }
+                logMessage(DEBUG, "Toggle plugin " + searchName + " to deselected.");
+                if (!(*currentPlugin)->isEnabled()) {
+                    logMessage(DEBUG, "Plugin " + searchName + " is not enabled.");
+                    continue;
+                }
+                togglePlugin(currentGroup, *currentPlugin, false);
+                (*currentPlugin)->manuallySet = true; // To preserve this state when serializing JSON.
             }
         }
     }
