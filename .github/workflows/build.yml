@@ -25,7 +25,7 @@ jobs:
         uses: ModOrganizer2/build-with-mob-action@master
         with:
 #          mo2-third-parties:
-          mo2-dependencies: cmake_common uibase gamebryo
+          mo2-dependencies: cmake_common uibase
 #          qt-modules:
 
       - name: Install
