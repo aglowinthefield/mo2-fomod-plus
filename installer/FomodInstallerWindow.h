@@ -195,12 +195,15 @@ private:
     QButtonGroup* renderRadioGroup(QWidget* parent, QLayout* parentLayout,
         const std::shared_ptr<GroupViewModel>& group);
 
-    void addNotification(const QString& message, const QString& level) const;
+    void addNotification(const QString& message, LogLevel level) const;
 
-    void logMessage(LogLevel level, const std::string& message) const
+    void logMessage(const LogLevel level, const std::string& message, const bool asNotification = false) const
     {
         log.logMessage(level, "[WINDOW] " + message);
-    };
+        if (asNotification) {
+            addNotification(QString::fromStdString(message), level);
+        }
+    }
 
 };
 

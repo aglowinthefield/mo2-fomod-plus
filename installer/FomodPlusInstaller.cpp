@@ -49,6 +49,11 @@ bool FomodPlusInstaller::shouldShowNotifications() const
     return mOrganizer->pluginSetting(name(), "show_notifications").value<bool>();
 }
 
+bool FomodPlusInstaller::shouldAutoRestoreChoices() const
+{
+    return mOrganizer->pluginSetting(name(), "always_restore_choices").value<bool>();
+}
+
 void FomodPlusInstaller::toggleShouldShowImages() const
 {
     const bool showImages = shouldShowImages();
@@ -83,6 +88,7 @@ QList<PluginSetting> FomodPlusInstaller::settings() const
 {
     return {
         { u"fallback_to_legacy"_s, u"When hitting cancel, fall back to the legacy FOMOD installer."_s, false },
+        { u"always_restore_choices"_s, u"Restore previous choices without clicking the magic button"_s, false },
         { u"show_images"_s, u"Show image previews and the image carousel in installer windows."_s, true },
         { u"color_theme"_s, u"Select the color theme for the installer"_s, QString("Blue") }, // Default color name
         { u"show_notifications"_s, u"Show the notifications panel"_s, false } //WIP

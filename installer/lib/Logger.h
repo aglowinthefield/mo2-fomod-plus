@@ -14,6 +14,17 @@ enum LogLevel {
     ERR = 3
 };
 
+// Convert LogLevel to string
+inline const char* logLevelToString(const LogLevel level) {
+    switch (level) {
+    case DEBUG: return "DEBUG";
+    case INFO:  return "INFO";
+    case WARN:  return "WARN";
+    case ERR:   return "ERROR";
+    default:    return "UNKNOWN";
+    }
+}
+
 
 class Logger {
 public:

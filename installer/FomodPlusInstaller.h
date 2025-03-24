@@ -1,5 +1,4 @@
-﻿#ifndef INSTALLERFOMODPLUS_H
-#define INSTALLERFOMODPLUS_H
+﻿#pragma once
 
 #include "stringutil.h"
 
@@ -65,6 +64,8 @@ public:
 
     [[nodiscard]] bool shouldShowNotifications() const;
 
+    [[nodiscard]] bool shouldAutoRestoreChoices() const;
+
     void toggleShouldShowImages() const;
 
     QString getSelectedColor() const;
@@ -99,10 +100,8 @@ private:
 
     [[nodiscard]] bool shouldFallbackToLegacyInstaller() const;
 
-    void logMessage(LogLevel level, const std::string& message) const
+    void logMessage(const LogLevel level, const std::string& message) const
     {
         log.logMessage(level, "[INSTALLER] " + message);
-    };
+    }
 };
-
-#endif //INSTALLERFOMODPLUS_H

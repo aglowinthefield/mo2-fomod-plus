@@ -63,6 +63,10 @@ FomodInstallerWindow::FomodInstallerWindow(
     updateButtons();
     restoreGeometryAndState();
     populatePluginMap();
+
+    if (mInstaller->shouldAutoRestoreChoices()) {
+        onSelectPreviousClicked();
+    }
 }
 
 void FomodInstallerWindow::closeEvent(QCloseEvent* event)
@@ -230,7 +234,6 @@ void FomodInstallerWindow::updateInstallStepStack()
         mInstallStepStack->addWidget(createStepWidget(installStep));
     }
     mInstallStepStack->setCurrentIndex(mViewModel->getCurrentStepIndex());
-    logMessage(DEBUG, "Initial step index: " + std::to_string(mViewModel->getCurrentStepIndex()));
 }
 
 /*
@@ -277,7 +280,7 @@ QBoxLayout* FomodInstallerWindow::createContainerLayout()
         mNotificationsPanel = createNotificationPanel();
         layout->addWidget(mNotificationsPanel);
         // Set a default welcome message
-        addNotification("FOMOD Plus notification panel initialized :)", "INFO");
+        addNotification("FOMOD Plus notification panel initialized :)", INFO);
     }
     return layout;
 }
@@ -415,7 +418,6 @@ QSplitter* FomodInstallerWindow::createLeftPane()
     mDescriptionBox->setTextInteractionFlags(Qt::TextBrowserInteraction);
     mDescriptionBox->setOpenExternalLinks(true);
     mDescriptionBox->setWordWrap(true);
-    // mDescriptionBox->setStyleSheet("border: 1px solid gray; padding: 2px;");
     mDescriptionBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     mDescriptionBox->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 
@@ -610,7 +612,7 @@ QButtonGroup* FomodInstallerWindow::renderRadioGroup(QWidget* parent, QLayout* p
     return buttonGroup;
 }
 
-void FomodInstallerWindow::addNotification(const QString& message, const QString& level) const
+void FomodInstallerWindow::addNotification(const QString& message, const LogLevel level) const
 {
     if (!mNotificationsPanel) {
         return;
@@ -618,7 +620,7 @@ void FomodInstallerWindow::addNotification(const QString& message, const QString
 
     const QString timestamp    = QDateTime::currentDateTime().toString("hh:mm:ss");
     const QString formattedMsg = QString("<span>[%2] [%3] %4</span>")
-        .arg(timestamp).arg(level).arg(message);
+        .arg(timestamp).arg(logLevelToString(level)).arg(message);
 
     mNotificationsPanel->append(formattedMsg);
 
@@ -719,7 +721,7 @@ void FomodInstallerWindow::stylePreviouslySelectedOptions()
 
     const auto tooltip = "You previously selected this plugin when installing this mod.";
 
-    logMessage(INFO, "Styling previously selected choices with stylesheet " + stylesheet.toStdString());
+    logMessage(INFO, "Styling previously selected choices with stylesheet " + stylesheet.toStdString(), true);
     applyFnFromJson("plugins", [stylesheet, tooltip](QAbstractButton* button) {
         button->setStyleSheet(stylesheet);
         button->setToolTip(tooltip);
@@ -738,7 +740,7 @@ void FomodInstallerWindow::stylePreviouslyDeselectedOptions()
 
 void FomodInstallerWindow::selectPreviouslySelectedOptions() const
 {
-    logMessage(INFO, "Selecting previously selected choices");
+    logMessage(INFO, "Selecting previously selected choices", true);
     logMessage(INFO, "Existing JSON provided: " + mFomodJson.dump(4));
     if (mFomodJson.empty()) {
         return;
@@ -746,7 +748,7 @@ void FomodInstallerWindow::selectPreviouslySelectedOptions() const
     try {
         mViewModel->selectFromJson(mFomodJson);
     } catch (Exception& e) {
-        logMessage(ERR, std::string("Error selecting previously selected options: ") + e.what());
+        logMessage(ERR, std::string("Error selecting previously selected options: ") + e.what(), true);
     }
     updateCheckboxStates();
 }
