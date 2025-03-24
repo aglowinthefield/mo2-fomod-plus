@@ -416,6 +416,9 @@ QSplitter* FomodInstallerWindow::createLeftPane()
     mImageLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     connect(mImageLabel, &ScaleLabel::clicked, this, [this] {
+        if (!mImageLabel->hasResource()) {
+            return;
+        }
         const auto viewer = new FomodImageViewer(this, mFomodPath, mViewModel->getActiveStep(),
             mViewModel->getActivePlugin());
         viewer->showMaximized();
@@ -598,7 +601,6 @@ void FomodInstallerWindow::toggleImagesShown() const
 // Updates the image and description field for a given plugin. Also use this on initialization of those widgets.
 void FomodInstallerWindow::updateDisplayForActivePlugin() const
 {
-
     const auto& plugin        = mViewModel->getActivePlugin();
     const QString description = formatPluginDescription(QString::fromStdString(plugin->getDescription()));
     mDescriptionBox->setText(description);

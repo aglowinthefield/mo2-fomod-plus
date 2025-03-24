@@ -16,8 +16,8 @@ public:
     }
 
     void setScalableResource(const QString& path);
-
     void setStatic(bool isStatic);
+    [[nodiscard]] bool hasResource() const { return mHasResource; }
 
 signals:
     void clicked();
@@ -32,15 +32,14 @@ protected:
     }
 
     void resizeEvent(QResizeEvent* event) override;
-
     void showEvent(QShowEvent* event) override;
 
 private:
     void setScalableMovie(const QString& path);
-
     void setScalableImage(const QString& path);
 
     QImage mUnscaledImage;
     QSize mOriginalMovieSize;
-    bool misStatic = false;
+    bool mHasResource = false;
+    bool misStatic    = false;
 };

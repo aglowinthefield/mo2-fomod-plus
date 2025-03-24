@@ -67,6 +67,7 @@ void ScaleLabel::setScalableMovie(const QString& path)
     if (!misStatic) {
         m->start();
     }
+    mHasResource = true;
 }
 
 void ScaleLabel::setScalableImage(const QString& path)
@@ -76,6 +77,7 @@ void ScaleLabel::setScalableImage(const QString& path)
     } else {
         mUnscaledImage = image;
         setPixmap(QPixmap::fromImage(image).scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        mHasResource = true;
     }
 }
 

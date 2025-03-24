@@ -45,7 +45,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="589"/>
+        <location filename="FomodInstallerWindow.cpp" line="592"/>
         <source>Hide Images</source>
         <translation type="unfinished"></translation>
     </message>
@@ -60,7 +60,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="593"/>
+        <location filename="FomodInstallerWindow.cpp" line="596"/>
         <source>Show Images</source>
         <translation type="unfinished"></translation>
     </message>
