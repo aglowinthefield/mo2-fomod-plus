@@ -54,6 +54,7 @@ FomodInstallerWindow::FomodInstallerWindow(
     mInstallStepStack = new QStackedWidget(this);
     updateInstallStepStack();
     stylePreviouslySelectedOptions();
+    stylePreviouslyDeselectedOptions();
 
     const auto containerLayout = createContainerLayout();
     setLayout(containerLayout);
@@ -158,6 +159,12 @@ void FomodInstallerWindow::onPluginToggled(const bool selected, const std::share
     if (mNextInstallButton != nullptr) {
         updateButtons();
     }
+}
+
+void FomodInstallerWindow::onPluginManuallyUnchecked(const std::shared_ptr<PluginViewModel>& plugin) const
+{
+    logMessage(INFO, "onPluginManuallyUnchecked called with " + plugin->getName());
+    mViewModel->markManuallySet(plugin);
 }
 
 void FomodInstallerWindow::onPluginHovered(const std::shared_ptr<PluginViewModel>& plugin) const
@@ -537,6 +544,13 @@ QCheckBox* FomodInstallerWindow::createPluginCheckBox(const std::shared_ptr<Plug
 
     checkBox->setEnabled(plugin->isEnabled());
     checkBox->setChecked(plugin->isSelected());
+    connect(checkBox, &QCheckBox::clicked, this, [this, plugin](const bool checked) {
+        // Send a message to viewModel saying the user deactivated the plugin manually.
+        // This may get overridden later by automatic checking, but we'll reconcile that at JSON serialization time.
+        if (!checked) {
+            onPluginManuallyUnchecked(plugin);
+        }
+    });
     connect(checkBox, &QCheckBox::toggled, this, [this, checkBox, group, plugin](const bool checked) {
         logMessage(INFO,
             "Received toggled signal for checkbox: " + plugin->getName() + ": " + (checked ? "true" : "false") +
@@ -612,7 +626,12 @@ void FomodInstallerWindow::updateDisplayForActivePlugin() const
     mImageLabel->setScalableResource(imagePath);
 }
 
-void FomodInstallerWindow::applyFnFromJson(const std::function<void(QAbstractButton*)>& fn)
+/**
+ *
+ * @param pluginSelector For now either 'plugins', or 'deselected'. The key of the member of 'groups' to iterate over.
+ * @param fn The callback for each plugin in the chosen group member.
+ */
+void FomodInstallerWindow::applyFnFromJson(const std::string& pluginSelector, const std::function<void(QAbstractButton*)>& fn)
 {
     if (mFomodJson.empty()) {
         return;
@@ -627,8 +646,13 @@ void FomodInstallerWindow::applyFnFromJson(const std::function<void(QAbstractBut
         const auto& step = jsonSteps[stepIndex];
         for (int groupIndex = 0; groupIndex < step["groups"].size(); ++groupIndex) {
             const auto& group = step["groups"][groupIndex];
-            for (int pluginIndex = 0; pluginIndex < group["plugins"].size(); ++pluginIndex) {
-                const auto& plugin = group["plugins"][pluginIndex];
+
+            if (group[pluginSelector] == nullptr) {
+                continue;
+            }
+
+            for (int pluginIndex = 0; pluginIndex < group[pluginSelector].size(); ++pluginIndex) {
+                const auto& plugin = group[pluginSelector][pluginIndex];
 
                 std::string name = std::format("[{}:{}] {}-{}",
                     stepIndex, groupIndex, group["name"].get<std::string>(), plugin.get<std::string>());
@@ -658,12 +682,22 @@ void FomodInstallerWindow::applyFnFromJson(const std::function<void(QAbstractBut
 
 void FomodInstallerWindow::stylePreviouslySelectedOptions()
 {
-    const auto stylesheet = getColorStyle();
+    const auto stylesheet = getColorStyle(UiColors::ColorApplication::BACKGROUND);
 
     const auto tooltip = "You previously selected this plugin when installing this mod.";
 
-    logMessage(INFO, "Styling previously selected choices");
-    applyFnFromJson([stylesheet, tooltip](QAbstractButton* button) {
+    logMessage(INFO, "Styling previously selected choices with stylesheet " + stylesheet.toStdString());
+    applyFnFromJson("plugins", [stylesheet, tooltip](QAbstractButton* button) {
+        button->setStyleSheet(stylesheet);
+        button->setToolTip(tooltip);
+    });
+}
+
+void FomodInstallerWindow::stylePreviouslyDeselectedOptions()
+{
+    const auto stylesheet = getColorStyle(UiColors::ColorApplication::BORDER);
+    const auto tooltip = "You previously unchecked this plugin when installing this mod.";
+    applyFnFromJson("deselected", [stylesheet, tooltip](QAbstractButton* button) {
         button->setStyleSheet(stylesheet);
         button->setToolTip(tooltip);
     });
@@ -684,7 +718,9 @@ void FomodInstallerWindow::selectPreviouslySelectedOptions() const
     updateCheckboxStates();
 }
 
-QString FomodInstallerWindow::getColorStyle() const
+QString FomodInstallerWindow::getColorStyle(const UiColors::ColorApplication color_application) const
 {
-    return mInstaller->getSelectedColor();
+    const auto selectedColor = mInstaller->getSelectedColor();
+    logMessage(DEBUG, "Selected color: " + selectedColor.toStdString());
+    return getStyle(selectedColor, color_application);
 }

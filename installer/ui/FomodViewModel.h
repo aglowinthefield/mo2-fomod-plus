@@ -45,8 +45,6 @@ private:
                                View Model
 --------------------------------------------------------------------------------
 */
-enum class NEXT_OP { NEXT, INSTALL };
-
 class FomodViewModel {
 public:
     FomodViewModel(
@@ -59,19 +57,11 @@ public:
         std::unique_ptr<ModuleConfiguration> fomodFile,
         std::unique_ptr<FomodInfoFile> infoFile);
 
-    void forEachGroup(
-        const std::function<void(const std::shared_ptr<GroupViewModel>&)>& callback)
-    const;
+    void forEachGroup(const std::function<void(GroupRef)>& callback) const;
 
-    void forEachPlugin(
-        const std::function<void(const std::shared_ptr<GroupViewModel>&, const std::shared_ptr<PluginViewModel>&)>&
-        callback)
-    const;
+    void forEachPlugin(const std::function<void(GroupRef, PluginRef)>& callback) const;
 
-    void forEachFuturePlugin(
-        int fromStepIndex, const std::function<void(const std::shared_ptr<GroupViewModel>&, const std::shared_ptr<
-            PluginViewModel>&)> &callback)
-    const;
+    void forEachFuturePlugin(int fromStepIndex, const std::function<void(GroupRef, PluginRef)>& callback) const;
 
     void selectFromJson(nlohmann::json json) const;
 
@@ -79,7 +69,7 @@ public:
 
     // Steps
     [[nodiscard]] shared_ptr_list<StepViewModel> getSteps() const { return mSteps; }
-    [[nodiscard]] const std::shared_ptr<StepViewModel>& getActiveStep() const { return mActiveStep; }
+    [[nodiscard]] StepRef getActiveStep() const { return mActiveStep; }
     [[nodiscard]] int getCurrentStepIndex() const { return mCurrentStepIndex; }
     [[deprecated]] void setCurrentStepIndex(const int index) { mCurrentStepIndex = index; }
 
@@ -94,7 +84,7 @@ public:
     std::string getDisplayImage() const;
 
     // Plugins
-    [[nodiscard]] std::shared_ptr<PluginViewModel> getActivePlugin() const { return mActivePlugin; }
+    [[nodiscard]] PluginRef getActivePlugin() const { return mActivePlugin; }
 
     // Info
     [[nodiscard]] std::shared_ptr<InfoViewModel> getInfoViewModel() const { return mInfoViewModel; }
@@ -108,13 +98,14 @@ public:
 
     bool isFirstVisibleStep() const;
 
-    void togglePlugin(const std::shared_ptr<GroupViewModel>&, const std::shared_ptr<PluginViewModel>& plugin,
-        bool selected) const;
+    void togglePlugin(const GroupRef, const PluginRef, bool selected) const;
 
-    void setActivePlugin(const std::shared_ptr<PluginViewModel>& plugin) const { mActivePlugin = plugin; }
+    void setActivePlugin(const PluginRef plugin) const { mActivePlugin = plugin; }
+
+    static void markManuallySet(PluginRef plugin);
 
 private:
-    Logger& log = Logger::getInstance();
+    Logger& log                    = Logger::getInstance();
     MOBase::IOrganizer* mOrganizer = nullptr;
     std::unique_ptr<ModuleConfiguration> mFomodFile;
     std::unique_ptr<FomodInfoFile> mInfoFile;
@@ -130,9 +121,9 @@ private:
 
     void createStepViewModels();
 
-    void setFlagForPluginState(const std::shared_ptr<PluginViewModel> &plugin) const;
+    void setFlagForPluginState(const std::shared_ptr<PluginViewModel>& plugin) const;
 
-    static void createNonePluginForGroup(const std::shared_ptr<GroupViewModel>& group) ;
+    static void createNonePluginForGroup(const std::shared_ptr<GroupViewModel>& group);
 
     void processPlugin(const std::shared_ptr<GroupViewModel>& group,
         const std::shared_ptr<PluginViewModel>& plugin) const;

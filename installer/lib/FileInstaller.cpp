@@ -73,16 +73,22 @@ nlohmann::json FileInstaller::generateFomodJson() const
         stepJson["groups"] = nlohmann::json::array();
 
         for (const auto& groupViewModel : stepViewModel->getGroups()) {
-            auto groupJson    = nlohmann::json::object();
-            groupJson["name"] = groupViewModel->getName();
-            auto pluginArray  = nlohmann::json::array();
+            auto groupJson       = nlohmann::json::object();
+            groupJson["name"]    = groupViewModel->getName();
+            auto pluginArray     = nlohmann::json::array();
+            auto deselectedArray = nlohmann::json::array();
 
             for (const auto& pluginViewModel : groupViewModel->getPlugins()) {
                 if (pluginViewModel->isSelected()) {
                     pluginArray.emplace_back(pluginViewModel->getName());
                 }
+                // Add deselected plugins here. (TODO: This will be replaced with an embedded db.)
+                if (!pluginViewModel->isSelected() && pluginViewModel->wasManuallySet()) {
+                    deselectedArray.emplace_back(pluginViewModel->getName());
+                }
             }
-            groupJson["plugins"] = pluginArray;
+            groupJson["plugins"]    = pluginArray;
+            groupJson["deselected"] = deselectedArray;
             stepJson["groups"].emplace_back(groupJson);
         }
         fomodJson["steps"].emplace_back(stepJson);

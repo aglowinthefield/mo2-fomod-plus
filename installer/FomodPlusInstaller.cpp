@@ -54,7 +54,7 @@ QString FomodPlusInstaller::getSelectedColor() const
 {
     const auto colorName = mOrganizer->pluginSetting(name(), "color_theme").toString();
     const auto it = UiColors::colorStyles.find(colorName);
-    return it != UiColors::colorStyles.end() ? it->second : UiColors::colorStyles.at("Blue");
+    return it != UiColors::colorStyles.end() ? it->first : "Blue";
 }
 
 std::vector<std::shared_ptr<const IPluginRequirement> > FomodPlusInstaller::requirements() const

@@ -8,17 +8,16 @@
 
 #include "FomodPlusInstaller.h"
 #include "xml/ModuleConfiguration.h"
-#include "ui/ClickableWidget.h"
 
 #include <QDialog>
-#include <qradiobutton.h>
 #include <QStackedWidget>
-#include <QTextEdit>
+#include <qradiobutton.h>
 #include <ui/ScaleLabel.h>
 
 #include "FomodInstallerWindow.h"
 #include "lib/FileInstaller.h"
 #include "ui/FomodViewModel.h"
+#include "ui/Colors.h"
 
 #include <QSplitter>
 
@@ -80,6 +79,8 @@ private slots:
     void onPluginToggled(bool selected, const std::shared_ptr<GroupViewModel>& group,
         const std::shared_ptr<PluginViewModel>& plugin) const;
 
+    void onPluginManuallyUnchecked(const std::shared_ptr<PluginViewModel>& plugin) const;
+
     void onPluginHovered(const std::shared_ptr<PluginViewModel>& plugin) const;
 
     void onSelectPreviousClicked() { this->selectPreviouslySelectedOptions(); }
@@ -126,32 +127,34 @@ private:
     QPushButton* mSelectPreviousButton{};
     QPushButton* mHideImagesButton{};
 
-    void updateButtons() const;
-
     // Widgets
-    QStackedWidget* mInstallStepStack{};
-    QLabel* mDescriptionBox{};
     QComboBox* mModNameInput{};
-    ScaleLabel* mImageLabel{};
-    QWidget* mTopRow{};
+    QLabel* mDescriptionBox{};
     QSplitter* mCenterRow{};
-    QWidget* mBottomRow{};
     QSplitter* mLeftPane{};
+    QStackedWidget* mInstallStepStack{};
+    QWidget* mBottomRow{};
+    QWidget* mTopRow{};
+    ScaleLabel* mImageLabel{};
 
     // Fn
     void setupUi();
+
+    void updateButtons() const;
 
     void updateInstallStepStack();
 
     void updateDisplayForActivePlugin() const;
 
-    void applyFnFromJson(const std::function<void(QAbstractButton*)>& fn);
+    void applyFnFromJson(const std::string& pluginSelector, const std::function<void(QAbstractButton*)> &fn);
 
     void stylePreviouslySelectedOptions();
 
+    void stylePreviouslyDeselectedOptions();
+
     void selectPreviouslySelectedOptions() const;
 
-    [[nodiscard]] QString getColorStyle() const;
+    [[nodiscard]] QString getColorStyle(UiColors::ColorApplication color_application) const;
 
     [[nodiscard]] QBoxLayout* createContainerLayout();
 

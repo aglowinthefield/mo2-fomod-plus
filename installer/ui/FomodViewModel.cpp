@@ -419,6 +419,12 @@ void FomodViewModel::togglePlugin(GroupRef group, PluginRef plugin, const bool s
     processPluginConditions(stepIndex);
     updateVisibleSteps();
 }
+
+void FomodViewModel::markManuallySet(PluginRef plugin)
+{
+    plugin->manuallySet = true;
+}
+
 #pragma endregion
 
 /*

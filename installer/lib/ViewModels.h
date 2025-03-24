@@ -14,7 +14,7 @@ using shared_ptr_list = std::vector<std::shared_ptr<T> >;
 class PluginViewModel {
 public:
     PluginViewModel(const std::shared_ptr<Plugin>& plugin_, const bool selected, bool, const int index)
-        : ownIndex(index), selected(selected), enabled(true), wasManuallySet(false), plugin(plugin_) {}
+        : ownIndex(index), selected(selected), enabled(true), manuallySet(false), plugin(plugin_) {}
 
     void setSelected(const bool selected) { this->selected = selected; }
     void setEnabled(const bool enabled) { this->enabled = enabled; }
@@ -26,6 +26,7 @@ public:
     [[nodiscard]] int getOwnIndex() const { return ownIndex; }
     [[nodiscard]] std::vector<ConditionFlag> getConditionFlags() const { return plugin->conditionFlags.flags; }
     [[nodiscard]] PluginTypeEnum getCurrentPluginType() const { return currentPluginType; }
+    [[nodiscard]] bool wasManuallySet() const { return manuallySet; }
 
     void setCurrentPluginType(const PluginTypeEnum type) { currentPluginType = type; }
     void setStepIndex(const int stepIndex) { this->stepIndex = stepIndex; }
@@ -45,7 +46,7 @@ private:
     int ownIndex;
     bool selected;
     bool enabled;
-    bool wasManuallySet;
+    bool manuallySet;
     PluginTypeEnum currentPluginType = PluginTypeEnum::UNKNOWN;
     std::shared_ptr<Plugin> plugin;
 
@@ -110,5 +111,6 @@ private:
                             Outbound Types
 --------------------------------------------------------------------------------
 */
+using StepRef   = const std::shared_ptr<StepViewModel>&;
 using GroupRef  = const std::shared_ptr<GroupViewModel>&;
 using PluginRef = const std::shared_ptr<PluginViewModel>&;
