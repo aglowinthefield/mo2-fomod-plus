@@ -19,7 +19,7 @@ jobs:
         uses: ModOrganizer2/build-with-mob-action@master
         with:
           mo2-third-parties: 7z zlib
-          mo2-dependencies: cmake_common uibase game_gamebryo archive 7z zlib
+          mo2-dependencies: cmake_common uibase game_gamebryo archive 7z zlib lz4
 
       - name: Install
         run: cmake --install ${{env.SOURCE_ROOT}}/vsbuild --config ${{env.BUILD_TYPE}} --prefix ${{env.SOURCE_ROOT}}/install
