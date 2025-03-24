@@ -32,7 +32,7 @@ jobs:
         run: cmake --install ./vsbuild --config RelWithDebInfo --prefix ./install
 
       - name: Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mo2-fomod-plus
           path: ./install/bin
