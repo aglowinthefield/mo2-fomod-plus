@@ -83,7 +83,7 @@ private slots:
 
     void onPluginHovered(const std::shared_ptr<PluginViewModel>& plugin) const;
 
-    void onSelectPreviousClicked() { this->selectPreviouslySelectedOptions(); }
+    void onSelectPreviousClicked() const { this->selectPreviouslySelectedOptions(); }
 
     void onBackClicked() const;
 

@@ -10,7 +10,7 @@
     </message>
     <message>
         <location filename="FomodInstallerWindow.cpp" line="207"/>
-        <location filename="FomodInstallerWindow.cpp" line="381"/>
+        <location filename="FomodInstallerWindow.cpp" line="378"/>
         <source>Next</source>
         <translation type="unfinished"></translation>
     </message>
@@ -41,26 +41,27 @@
     </message>
     <message>
         <location filename="FomodInstallerWindow.cpp" line="369"/>
-        <source>Select All Previous Choices</source>
+        <source>Restore Previous Choices</source>
+        <oldsource>Select All Previous Choices</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="606"/>
+        <location filename="FomodInstallerWindow.cpp" line="603"/>
         <source>Hide Images</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="380"/>
+        <location filename="FomodInstallerWindow.cpp" line="377"/>
         <source>Back</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="382"/>
+        <location filename="FomodInstallerWindow.cpp" line="379"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="610"/>
+        <location filename="FomodInstallerWindow.cpp" line="607"/>
         <source>Show Images</source>
         <translation type="unfinished"></translation>
     </message>

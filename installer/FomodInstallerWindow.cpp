@@ -366,13 +366,10 @@ QWidget* FomodInstallerWindow::createBottomRow()
 
     // Manual on far left
     mManualButton         = UIHelper::createButton(tr("Manual"), bottomRow);
-    mSelectPreviousButton = UIHelper::createButton(tr("Select All Previous Choices"), bottomRow);
+    mSelectPreviousButton = UIHelper::createButton(tr("Restore Previous Choices"), bottomRow);
 
-    // const auto buttonText = mInstaller->shouldShowImages() ? tr("Hide Images") : tr("Show Images");
-    // mHideImagesButton     = UIHelper::createButton(buttonText, bottomRow);
     layout->addWidget(mManualButton);
     layout->addWidget(mSelectPreviousButton);
-    // layout->addWidget(mHideImagesButton);
 
     // Space to push remaining buttons right
     layout->addStretch();
