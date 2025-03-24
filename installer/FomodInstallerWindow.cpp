@@ -75,6 +75,7 @@ void FomodInstallerWindow::saveGeometryAndState() const
     QSettings settings(cwd + "/fomod-plus-settings.ini", QSettings::IniFormat);
     settings.setValue("windowGeometry", saveGeometry());
     settings.setValue("centerSplitState", mCenterRow->saveState());
+    settings.setValue("leftSplitState", mLeftPane->saveState());
 }
 
 void FomodInstallerWindow::restoreGeometryAndState()
@@ -83,6 +84,7 @@ void FomodInstallerWindow::restoreGeometryAndState()
     const QSettings settings(cwd + "/fomod-plus-settings.ini", QSettings::IniFormat);
     restoreGeometry(settings.value("windowGeometry").toByteArray());
     mCenterRow->restoreState(settings.value("centerSplitState").toByteArray());
+    mLeftPane->restoreState(settings.value("leftSplitState").toByteArray());
 }
 
 void FomodInstallerWindow::populatePluginMap()
@@ -267,10 +269,10 @@ QBoxLayout* FomodInstallerWindow::createContainerLayout()
 
 QSplitter* FomodInstallerWindow::createCenterRow()
 {
+    mLeftPane            = createLeftPane(); // Instance var to persist the geometry
     const auto centerRow = new QSplitter(Qt::Horizontal, this);
-    const auto leftPane  = createLeftPane();
     const auto rightPane = createRightPane();
-    centerRow->addWidget(leftPane);
+    centerRow->addWidget(mLeftPane);
     centerRow->addWidget(rightPane);
     centerRow->setSizes({ width() / 2, width() / 2 });
     return centerRow;
@@ -387,10 +389,9 @@ QWidget* FomodInstallerWindow::createBottomRow()
     return bottomRow;
 }
 
-QWidget* FomodInstallerWindow::createLeftPane()
+QSplitter* FomodInstallerWindow::createLeftPane()
 {
-    const auto leftPane = new QWidget(this);
-    auto* layout        = new QVBoxLayout(leftPane);
+    const auto leftPane = new QSplitter(Qt::Vertical, this);
 
     // Add description box
     // Initialize with defaults (the first plugin's description (which defaults to the module image otherwise))
@@ -407,7 +408,7 @@ QWidget* FomodInstallerWindow::createLeftPane()
     mDescriptionBox->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 
     scrollArea->setWidget(mDescriptionBox);
-    layout->addWidget(scrollArea, 1);
+    leftPane->addWidget(scrollArea);
 
     // Add image
     // Initialize with defaults (the first plugin's image)
@@ -424,7 +425,8 @@ QWidget* FomodInstallerWindow::createLeftPane()
         mImageLabel->hide();
     }
 
-    layout->addWidget(mImageLabel, 1);
+    leftPane->addWidget(mImageLabel);
+    leftPane->setSizes({ height() / 2, height() / 2 });
 
     updateDisplayForActivePlugin();
 

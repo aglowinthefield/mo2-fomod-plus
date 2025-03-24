@@ -136,6 +136,7 @@ private:
     QWidget* mTopRow{};
     QSplitter* mCenterRow{};
     QWidget* mBottomRow{};
+    QSplitter* mLeftPane{};
 
     // Fn
     void setupUi();
@@ -162,7 +163,7 @@ private:
 
     [[nodiscard]] QWidget* createBottomRow();
 
-    [[nodiscard]] QWidget* createLeftPane();
+    [[nodiscard]] QSplitter* createLeftPane();
 
     [[nodiscard]] QWidget* createRightPane();
 
