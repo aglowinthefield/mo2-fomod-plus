@@ -213,9 +213,6 @@ std::vector<File> FileInstaller::collectFilesToInstall() const
     for (const auto conditionals = mFomodFile->conditionalFileInstalls; const auto& pattern : conditionals.patterns) {
         //<folder source="CR\Dagi-Raht LL\VLrn_Custom Race - Dagi-Raht LL" destination="" priority="2" />
 
-        if (pattern.files.files.front().source == "CR\\Dagi-Raht LL\\VLrn_Custom Race - Dagi-Raht LL") {
-            logMessage(DEBUG, "WHY IS THIS HERE");
-        }
         if (mConditionTester.testCompositeDependency(mFlagMap, pattern.dependencies)) {
             // also check if the plugins setting these flags are visible. at least one
 
