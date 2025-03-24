@@ -1,0 +1,37 @@
+﻿name: Build Plugin
+
+on:
+  push:
+    branches: main
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+
+env:
+  BUILD_TYPE: RelWithDebInfo
+  SOURCE_ROOT: ./build/modorganizer_super/${{ github.event.repository.name }}
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - name: Configure Pagefile
+        uses: al-cheb/configure-pagefile-action@v1.4
+        with:
+          minimum-size: 2GB
+          maximum-size: 48GB
+
+      - name: Build
+        uses: ModOrganizer2/build-with-mob-action@master
+        with:
+#          mo2-third-parties:
+          mo2-dependencies: cmake_common uibase gamebryo
+          qt-modules: qtpositioning qtwebchannel qtwebengine
+
+      - name: Install
+        run: cmake --install ${{env.SOURCE_ROOT}}/vsbuild --config ${{env.BUILD_TYPE}} --prefix ${{env.SOURCE_ROOT}}/install
+
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: mo2-fomod-plus
+          path: ${{env.SOURCE_ROOT}}/install/bin
