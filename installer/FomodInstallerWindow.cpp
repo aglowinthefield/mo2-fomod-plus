@@ -647,7 +647,7 @@ void FomodInstallerWindow::applyFnFromJson(const std::string& pluginSelector, co
         for (int groupIndex = 0; groupIndex < step["groups"].size(); ++groupIndex) {
             const auto& group = step["groups"][groupIndex];
 
-            if (group[pluginSelector] == nullptr) {
+            if (!group.contains(pluginSelector)) {
                 continue;
             }
 
