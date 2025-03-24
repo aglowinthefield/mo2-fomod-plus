@@ -18,7 +18,7 @@ jobs:
       - name: Build
         uses: ModOrganizer2/build-with-mob-action@master
         with:
-          mo2-third-parties: 7zip
+          mo2-third-parties: 7z
           mo2-dependencies: cmake_common uibase game_gamebryo archive
 
       - name: Install
