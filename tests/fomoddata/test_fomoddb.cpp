@@ -42,7 +42,7 @@ TEST(FomodDBTest, ParseFomodDb) {
 TEST_F(FomodDBTest, UpsertReplacesExistingEntry) {
     // Arrange
     FomodDB db(tempDir, "test.db");
-    const int modId = 12345;
+    constexpr int modId = 12345;
 
     // Initial entry with modId 12345
     std::vector<FomodOption> options1 = {
@@ -79,7 +79,7 @@ TEST_F(FomodDBTest, UpsertReplacesExistingEntry) {
 TEST_F(FomodDBTest, AddEntryWithoutUpsertDoesNotReplace) {
     // Arrange
     FomodDB db(tempDir, "test.db");
-    const int modId = 12345;
+    constexpr int modId = 12345;
 
     // Initial entry with modId 12345
     std::vector<FomodOption> options1 = {
