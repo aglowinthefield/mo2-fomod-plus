@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <string>
+#include <utility>
 #include <vector>
 #include <nlohmann/json.hpp>
 
@@ -34,6 +35,9 @@ struct FomodOption {
   std::vector<std::string> masters;
   std::string step;
   std::string group;
+
+  FomodOption(std::string n, std::string fn, std::vector<std::string> m, std::string s, std::string g)
+  : name(std::move(n)), fileName(std::move(fn)), masters(std::move(m)), step(std::move(s)), group(std::move(g)) {}
 };
 
 class FomodDbEntry {
@@ -54,13 +58,34 @@ public:
     }
   }
 
-  explicit FomodDbEntry(const int modId, const std::string &displayName, const std::vector<FomodOption> &options)
-    : modId(modId), displayName(displayName), options(options) {
+  explicit FomodDbEntry(const int modId, std::string displayName, const std::vector<FomodOption> &options)
+    : modId(modId), displayName(std::move(displayName)), options(options) {
   }
+
 
   [[nodiscard]] int getModId() const { return modId; }
   [[nodiscard]] std::string getDisplayName() const { return displayName; }
-  std::vector<FomodOption> getOptions() { return options; }
+  [[nodiscard]] const std::vector<FomodOption>& getOptions() { return options; }
+
+  [[nodiscard]] nlohmann::json toJson() const {
+    nlohmann::json result;
+    result["modId"] = modId;
+    result["displayName"] = displayName;
+
+    nlohmann::json optionsArray = nlohmann::json::array();
+    for (const auto &[name, fileName, masters, step, group]: options) {
+      nlohmann::json optionJson;
+      optionJson["name"] = name;
+      optionJson["fileName"] = fileName;
+      optionJson["masters"] = masters;
+      optionJson["step"] = step;
+      optionJson["group"] = group;
+      optionsArray.push_back(optionJson);
+    }
+
+    result["options"] = optionsArray;
+    return result;
+  }
 
 private:
   int modId;

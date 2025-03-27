@@ -66,7 +66,6 @@ public:
   }
 
   void addEntry(std::unique_ptr<FomodDbEntry> entry, const bool upsert = true) {
-
     // TODO: Test this upsert.
     if (upsert) {
       const auto it = std::ranges::find_if(entries, [&entry](const std::unique_ptr<FomodDbEntry> &e) {
@@ -78,11 +77,35 @@ public:
         entries.emplace_back(std::move(entry));
       }
     } else {
-        entries.emplace_back(std::move(entry));
+      entries.emplace_back(std::move(entry));
     }
   }
 
   [[nodiscard]] const FOMODDBEntries &getEntries() { return entries; }
+
+  void saveToFile() const {
+    try {
+      std::ofstream file(dbFilePath);
+      if (!file.is_open()) {
+        return;
+      }
+
+      file << toJson().dump(2); // Pretty-print with 2-space indentation
+      file.close();
+    } catch ([[maybe_unused]] const std::exception &e) {
+      // Handle saving errors
+    }
+  }
+
+  [[nodiscard]] nlohmann::json toJson() const {
+    nlohmann::json jsonArray = nlohmann::json::array();
+
+    for (const auto &entry: entries) {
+      jsonArray.push_back(entry->toJson());
+    }
+
+    return jsonArray;
+  }
 
 private:
   FOMODDBEntries entries;
@@ -122,5 +145,4 @@ private:
       // Handle parsing errors (leave entries empty)
     }
   }
-
 };
