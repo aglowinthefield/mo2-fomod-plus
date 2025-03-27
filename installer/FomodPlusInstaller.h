@@ -20,6 +20,8 @@ class FomodInstallerWindow;
 using namespace MOBase;
 using namespace std;
 
+using ParsedFilesTuple = std::tuple<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration>, QStringList>;
+
 class FomodPlusInstaller final : public IPluginInstallerSimple {
     Q_OBJECT
     Q_INTERFACES(MOBase::IPlugin MOBase::IPluginInstaller)
@@ -66,6 +68,8 @@ public:
 
     [[nodiscard]] bool shouldAutoRestoreChoices() const;
 
+    bool isWizardIntegrated() const;
+
     void toggleShouldShowImages() const;
 
     QString getSelectedColor() const;
@@ -91,11 +95,12 @@ private:
 
     [[nodiscard]] static QDialog::DialogCode showInstallerWindow(const shared_ptr<FomodInstallerWindow>& window);
 
-    [[nodiscard]] std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> > parseFomodFiles(
-        const shared_ptr<IFileTree>& tree);
+    [[nodiscard]] ParsedFilesTuple parseFomodFiles(const shared_ptr<IFileTree>& tree);
 
     static void appendImageFiles(vector<shared_ptr<const FileTreeEntry> >& entries,
         const shared_ptr<const IFileTree>& tree);
+
+    void appendPluginFiles(vector<shared_ptr<const FileTreeEntry> >& entries, const shared_ptr<const IFileTree>& tree);
 
     void setupUiInjection() const;
 
