@@ -11,7 +11,9 @@
           "JK's The Hag's Cure.esp",
           "Lux - Resources.esp",
           "Lux.esp"
-        ]
+        ],
+        "step": "Step One",
+        "group": "Group One"
       }
     ]
   },
@@ -27,7 +29,9 @@
           "JK's Arcadia's Cauldron.esp",
           "Lux - Resources.esp",
           "Lux.esp"
-        ]
+        ],
+        "step": "Step Two",
+        "group": "Group Two"
       }
     ]
   }

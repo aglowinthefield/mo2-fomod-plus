@@ -20,7 +20,9 @@ in the FOMOD with their respective masters.
                 "JK's The Hag's Cure.esp",
                 "Lux - Resources.esp",
                 "Lux.esp"
-            ]
+            ],
+            "step": "Page One",
+            "group": "Group One"
         }
     ]
 }
@@ -30,6 +32,8 @@ struct FomodOption {
   std::string name;
   std::string fileName;
   std::vector<std::string> masters;
+  std::string step;
+  std::string group;
 };
 
 class FomodDbEntry {
@@ -42,7 +46,9 @@ public:
       FomodOption fomodOption(
         option["name"],
         option["fileName"],
-        option["masters"]
+        option["masters"],
+        option["step"],
+        option["group"]
       );
       options.push_back(fomodOption);
     }

@@ -10,7 +10,9 @@
         "JK's The Hag's Cure.esp",
         "Lux - Resources.esp",
         "Lux.esp"
-      ]
+      ],
+      "step": "Step One",
+      "group": "Group One"
     }
   ]
 }

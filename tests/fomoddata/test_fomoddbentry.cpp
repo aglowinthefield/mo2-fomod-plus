@@ -46,4 +46,8 @@ TEST(FomodDbEntryTest, ParseFomodDbEntry) {
     EXPECT_EQ(fomodDbEntry.getOptions()[0].masters[1], "JK's The Hag's Cure.esp");
     EXPECT_EQ(fomodDbEntry.getOptions()[0].masters[2], "Lux - Resources.esp");
     EXPECT_EQ(fomodDbEntry.getOptions()[0].masters[3], "Lux.esp");
+
+    // Verify step and group
+    EXPECT_EQ(fomodDbEntry.getOptions()[0].step, "Step One");
+    EXPECT_EQ(fomodDbEntry.getOptions()[0].group, "Group One");
 }
