@@ -1,0 +1,34 @@
+﻿[
+  {
+    "modId": 12345,
+    "displayName": "Lux (Patch Hub)",
+    "options": [
+      {
+        "name": "JK's The Hag's Cure",
+        "fileName": "Lux - JK's The Hag's Cure patch.esp",
+        "masters": [
+          "Skyrim.esm",
+          "JK's The Hag's Cure.esp",
+          "Lux - Resources.esp",
+          "Lux.esp"
+        ]
+      }
+    ]
+  },
+  {
+    "modId": 12347,
+    "displayName": "Lux (Patch Hub)",
+    "options": [
+      {
+        "name": "JK's Arcadia's Cauldron",
+        "fileName": "Lux - JK's Arcadia's Cauldron.esp",
+        "masters": [
+          "Skyrim.esm",
+          "JK's Arcadia's Cauldron.esp",
+          "Lux - Resources.esp",
+          "Lux.esp"
+        ]
+      }
+    ]
+  }
+]

@@ -1,12 +1,13 @@
-﻿#include "FOMODData/FomodDbEntry.h"
+﻿#include "FOMODData/FomodDb.h"
+#include "FOMODData/FomodDbEntry.h"
 
 #include <fstream>
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
 
-TEST(FomodDbEntryTest, ParseFomodDbEntry) {
+TEST(FomodDbTest, ParseFomodDb) {
     // Path to the test JSON file
-    std::string jsonPath = (std::filesystem::path(TEST_DATA_DIR) / "test-entry.json").string();
+    std::string jsonPath = (std::filesystem::path(TEST_DATA_DIR) / "test-db.json").string();
 
     // Check if the file exists
     ASSERT_TRUE(std::filesystem::exists(jsonPath))

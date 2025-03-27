@@ -24,6 +24,9 @@ bool FomodPlusInstaller::init(IOrganizer* organizer)
 {
     mOrganizer = organizer;
     log.setLogFilePath(QDir::currentPath().toStdString() + "/logs/fomodplus.log");
+    std::cout << "QDir::currentPath(): " << QDir::currentPath().toStdString() << std::endl;
+    std::cout << "mOrganizer->basePath() : " << mOrganizer->basePath().toStdString() << std::endl;
+    mFomodDb = std::make_unique<FomodDB>(mOrganizer->basePath().toStdString());
     setupUiInjection();
     return true;
 }

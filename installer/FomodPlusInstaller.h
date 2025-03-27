@@ -9,11 +9,11 @@
 #include <nlohmann/json.hpp>
 #include "FomodInstallerWindow.h"
 #include "lib/Logger.h"
-#include "ui/Colors.h"
 #include "xml/FomodInfoFile.h"
 #include "xml/ModuleConfiguration.h"
 
 #include <QDialog>
+#include <FOMODData/FomodDb.h>
 
 class FomodInstallerWindow;
 
@@ -77,6 +77,7 @@ private:
     std::shared_ptr<nlohmann::json> mFomodJson{ nullptr };
     QString mNotes{};
     bool mInstallerUsed{ false };
+    std::unique_ptr<FomodDB> mFomodDb;
 
     /**
    * @brief Retrieve the tree entry corresponding to the fomod directory.
