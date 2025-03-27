@@ -54,10 +54,13 @@ public:
     }
   }
 
+  explicit FomodDbEntry(const int modId, const std::string &displayName, const std::vector<FomodOption> &options)
+    : modId(modId), displayName(displayName), options(options) {
+  }
+
   [[nodiscard]] int getModId() const { return modId; }
   [[nodiscard]] std::string getDisplayName() const { return displayName; }
   std::vector<FomodOption> getOptions() { return options; }
-
 
 private:
   int modId;

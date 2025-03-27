@@ -25,13 +25,15 @@ public:
     loadFromFile();
   }
 
-  FOMODDBEntries getEntriesFromFomod(ModuleConfiguration* fomod, std::vector<QString> pluginPaths) {
+  FOMODDBEntries getEntriesFromFomod(ModuleConfiguration *fomod, std::vector<QString> pluginPaths, int modId) {
     FOMODDBEntries entries;
     for (auto installStep: fomod->installSteps.installSteps) {
       for (auto group: installStep.optionalFileGroups.groups) {
         for (auto plugin: group.plugins.plugins) {
           // Create a DB entry for the given plugin if it has an ESP
           std::cout << "\nPlugin: " << plugin.name << std::endl;
+          std::vector<FomodOption> options;
+
           for (auto file: plugin.files.files) {
             if (file.isFolder) {
               continue;
@@ -41,7 +43,8 @@ public:
             }
 
             // Find the path in pluginPaths that ends with this path
-            auto it = std::find_if(pluginPaths.begin(), pluginPaths.end(), [&file](const QString &path) {
+            // PluginPaths is gathered from the archive contents.
+            auto it = std::ranges::find_if(pluginPaths, [&file](const QString &path) {
               return path.endsWith(file.source.c_str());
             });
             if (it == pluginPaths.end()) {
@@ -53,9 +56,14 @@ public:
             std::cout << "Plugin path: " << pluginPath.toStdString() << std::endl;
 
             const auto masters = PluginReader::readMasters(pluginPath.toStdString());
-            for (auto master : masters) {
-              std::cout << "Master: " << master << std::endl;
-            }
+            options.emplace_back(FomodOption(
+              plugin.name,
+              file.source,
+              masters,
+              installStep.name,
+              group.name
+            ));
+            entries.emplace_back(std::make_unique<FomodDbEntry>(modId, fomod->moduleName, options));
           }
         }
       }

@@ -185,7 +185,7 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
         }
     }
 
-    mFomodDb->getEntriesFromFomod(moduleConfigFile.get(), pluginPaths);
+    const auto dbEntries = mFomodDb->getEntriesFromFomod(moduleConfigFile.get(), pluginPaths, nexusID);
 
     if (infoFile == nullptr || moduleConfigFile == nullptr) {
         return RESULT_FAILED;
