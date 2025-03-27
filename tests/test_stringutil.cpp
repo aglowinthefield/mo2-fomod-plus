@@ -1,4 +1,4 @@
-﻿#include "../share/stringutil.h"
+﻿#include "stringutil.h"
 #include <gtest/gtest.h>
 #include <QString>
 

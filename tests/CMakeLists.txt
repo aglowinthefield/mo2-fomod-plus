@@ -23,27 +23,35 @@ enable_testing()
 
 find_package(Qt6 COMPONENTS Core Gui REQUIRED)
 
+file(GLOB SHARE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../share/**/*.cpp")
+file(GLOB INSTALLER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../installer/lib/Logger.cpp")
+file(GLOB TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/**/*.cpp")
+
 add_executable(runTests
-        ${CMAKE_CURRENT_SOURCE_DIR}/../installer/xml/FomodInfoFile.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/../tests/test_fomod_info_file.cpp
-        ../installer/lib/Logger.h
-        ../installer/xml/ModuleConfiguration.cpp
-        ../share/stringutil.h
-        ../share/FOMODData/PluginReader.h
-        moduleconf/test_moduleconf_bos.cpp
-        moduleconf/test_moduleconf_citytrees.cpp
-        moduleconf/test_moduleconf_embers.cpp
-        moduleconf/test_moduleconf_lux.cpp
-        moduleconf/test_moduleconf_miniembers.cpp
-        moduleconf/test_moduleconf_precision.cpp
-        moduleconf/test_moduleconf_xavbio.cpp
-        test_stringutil.cpp
-        fomoddata/test_pluginreader.cpp
-        fomoddata/test_fomoddbentry.cpp
+        ${SHARE_SOURCES}
+        ${TEST_SOURCES}
+        ${INSTALLER_SOURCES}
+#        ../share/xml/FomodInfoFile.cpp
+#        ${CMAKE_CURRENT_SOURCE_DIR}/../tests/test_fomod_info_file.cpp
+#        ../installer/lib/Logger.h
+#        ../share/xml/ModuleConfiguration.cpp
+#        ../share/stringutil.h
+#        ../share/FOMODData/PluginReader.h
+#        moduleconf/test_moduleconf_bos.cpp
+#        moduleconf/test_moduleconf_citytrees.cpp
+#        moduleconf/test_moduleconf_embers.cpp
+#        moduleconf/test_moduleconf_lux.cpp
+#        moduleconf/test_moduleconf_miniembers.cpp
+#        moduleconf/test_moduleconf_precision.cpp
+#        moduleconf/test_moduleconf_xavbio.cpp
+#        test_stringutil.cpp
+#        fomoddata/test_pluginreader.cpp
+#        fomoddata/test_fomoddbentry.cpp
 )
 
-target_include_directories(runTests PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../share)
 
+target_sources(runTests PRIVATE ${TEST_SOURCES} ${SHARE_SOURCES} ${INSTALLER_SOURCES})
+target_include_directories(runTests PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../share)
 
 target_link_libraries(runTests gtest gtest_main nlohmann_json::nlohmann_json pugixml Qt6::Core Qt6::Gui)
 add_test(NAME runTests COMMAND runTests)

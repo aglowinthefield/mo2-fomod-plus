@@ -8,9 +8,12 @@ set(CMAKE_GENERATOR_PLATFORM x64)
 target_include_directories(
         fomod_plus_installer
         PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/../share
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
+
+file(GLOB SHARE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../share/**/*.cpp")
+target_sources(fomod_plus_installer PRIVATE ${SHARE_SOURCES})
 
 FetchContent_Declare(pugixml GIT_REPOSITORY https://github.com/zeux/pugixml GIT_TAG v1.14)
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)

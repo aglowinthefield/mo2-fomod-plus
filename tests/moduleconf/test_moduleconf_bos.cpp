@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "../../installer/xml/ModuleConfiguration.h"
+#include "xml/ModuleConfiguration.h"
 #include <QString>
 #include <filesystem>
 
