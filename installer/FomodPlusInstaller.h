@@ -68,7 +68,7 @@ public:
 
     [[nodiscard]] bool shouldAutoRestoreChoices() const;
 
-    bool isWizardIntegrated() const;
+    [[nodiscard]] bool isWizardIntegrated() const;
 
     void toggleShouldShowImages() const;
 

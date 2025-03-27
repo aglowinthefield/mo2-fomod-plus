@@ -25,6 +25,7 @@ public:
     loadFromFile();
   }
 
+  // TODO: Also pull from non install steps (requiredInstallFiles or whatever, and optional);
   FOMODDBEntries getEntriesFromFomod(ModuleConfiguration *fomod, std::vector<QString> pluginPaths, int modId) {
     FOMODDBEntries entries;
     for (auto installStep: fomod->installSteps.installSteps) {
@@ -35,10 +36,7 @@ public:
           std::vector<FomodOption> options;
 
           for (auto file: plugin.files.files) {
-            if (file.isFolder) {
-              continue;
-            }
-            if (!isPluginFile(file.source)) {
+            if (file.isFolder || !isPluginFile(file.source)) {
               continue;
             }
 
@@ -51,10 +49,6 @@ public:
               continue;
             }
             const auto pluginPath = *it;
-
-            std::cout << "File: " << file.source << std::endl;
-            std::cout << "Plugin path: " << pluginPath.toStdString() << std::endl;
-
             const auto masters = PluginReader::readMasters(pluginPath.toStdString());
             options.emplace_back(FomodOption(
               plugin.name,
@@ -71,12 +65,29 @@ public:
     return entries;
   }
 
+  void addEntry(std::unique_ptr<FomodDbEntry> entry, const bool upsert = true) {
+
+    // TODO: Test this upsert.
+    if (upsert) {
+      const auto it = std::ranges::find_if(entries, [&entry](const std::unique_ptr<FomodDbEntry> &e) {
+        return e->getModId() == entry->getModId();
+      });
+      if (it != entries.end()) {
+        *it = std::move(entry);
+      } else {
+        entries.emplace_back(std::move(entry));
+      }
+    } else {
+        entries.emplace_back(std::move(entry));
+    }
+  }
+
   [[nodiscard]] const FOMODDBEntries &getEntries() { return entries; }
 
 private:
-  void addEntry(std::unique_ptr<FomodDbEntry> entry) {
-    entries.push_back(std::move(entry));
-  }
+  FOMODDBEntries entries;
+  std::string dbFilePath;
+
 
   void loadFromFile() {
     entries.clear();
@@ -112,7 +123,4 @@ private:
     }
   }
 
-
-  FOMODDBEntries entries;
-  std::string dbFilePath;
 };

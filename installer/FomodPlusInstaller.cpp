@@ -33,6 +33,8 @@ bool FomodPlusInstaller::init(IOrganizer* organizer)
     log.setLogFilePath(QDir::currentPath().toStdString() + "/logs/fomodplus.log");
     std::cout << "QDir::currentPath(): " << QDir::currentPath().toStdString() << std::endl;
     std::cout << "mOrganizer->basePath() : " << mOrganizer->basePath().toStdString() << std::endl;
+
+    // REMEMBER: This mFomodDB persists beyond the scope of an individual install. Do not do anything nasty to it.
     mFomodDb = std::make_unique<FomodDB>(mOrganizer->basePath().toStdString());
     setupUiInjection();
     return true;
@@ -337,17 +339,6 @@ void FomodPlusInstaller::writeNotes(IModInterface* newMod) const
     const auto iniKey = "installationNotes";
     newMod->setPluginSetting(this->name(), iniKey, mNotes);
     logMessage(INFO, "Wrote notes to meta.ini. Needs handler for adding to actual meta.ini 'notes' field.");
-
-    // const auto newModPath = mOrganizer->modList()->getMod(newMod->name())->absolutePath();
-    // std::cout << "New mod path: " << newModPath.toStdString() << std::endl;
-    // const auto metaPath = newModPath + "/meta.ini";
-    // QSettings meta(metaPath, QSettings::IniFormat);
-    // QString fullNotes        = "";
-    // const auto existingNotes = meta.value(iniKey).toString();
-    // fullNotes += existingNotes;
-    // fullNotes += mNotes;
-    // meta.setValue(iniKey, fullNotes);
-    // meta.sync();
 }
 
 // Borrowed from https://github.com/ModOrganizer2/modorganizer-installer_fomod/blob/master/src/installerfomod.cpp
