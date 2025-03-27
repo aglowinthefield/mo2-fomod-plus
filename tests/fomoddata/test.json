@@ -1,0 +1,16 @@
+﻿{
+  "modId": 12345,
+  "displayName": "Lux (Patch Hub)",
+  "options": [
+    {
+      "name": "JK's The Hag's Cure",
+      "fileName": "Lux - JK's The Hag's Cure patch.esp",
+      "masters": [
+        "Skyrim.esm",
+        "JK's The Hag's Cure.esp",
+        "Lux - Resources.esp",
+        "Lux.esp"
+      ]
+    }
+  ]
+}

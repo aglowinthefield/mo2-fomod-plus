@@ -1,6 +1,7 @@
 ﻿#include "FomodPlusScanner.h"
 
 #include "archiveparser.h"
+#include "FomodDbEntry.h"
 
 #include <QDialog>
 #include <QPushButton>

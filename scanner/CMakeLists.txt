@@ -8,11 +8,16 @@ set_property(TARGET fomod_plus_scanner PROPERTY CXX_STANDARD 20)
 
 set(CMAKE_GENERATOR_PLATFORM x64)
 
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
+FetchContent_Declare(pugixml GIT_REPOSITORY https://github.com/zeux/pugixml GIT_TAG v1.14)
+FetchContent_MakeAvailable(pugixml json)
+
 target_include_directories(
         fomod_plus_scanner
         PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/../share
+        ${CMAKE_CURRENT_SOURCE_DIR}/../share/FOMODData
         ${RESOURCE_DIR}
 )
 
@@ -27,5 +32,7 @@ if (MSVC)
             /wd4458 # declaration of 'identifier' hides class member
     )
 endif ()
+
+target_link_libraries(fomod_plus_scanner PRIVATE pugixml nlohmann_json::nlohmann_json)
 mo2_configure_plugin(fomod_plus_scanner WARNINGS OFF PRIVATE_DEPENDS archive)
 mo2_install_target(fomod_plus_scanner)
