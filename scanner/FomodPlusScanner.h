@@ -1,6 +1,8 @@
 ﻿#ifndef FOMODPLUSSCANNER_H
 #define FOMODPLUSSCANNER_H
 
+#include "archiveparser.h"
+
 #include <iplugin.h>
 #include <iplugintool.h>
 
@@ -8,13 +10,6 @@
 #include <QProgressBar>
 
 using namespace MOBase;
-
-enum ScanResult {
-    HAS_FOMOD,
-    NO_FOMOD,
-    NO_ARCHIVE
-};
-
 
 class FomodPlusScanner final : public IPluginTool {
     Q_OBJECT
