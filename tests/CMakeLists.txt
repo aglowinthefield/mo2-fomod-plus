@@ -8,6 +8,7 @@ set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(CMAKE_MINIMUM_REQUIRED_VERSION 3.30)
 
 set(CMAKE_PREFIX_PATH "C:/Qt/6.7.3/msvc2019_64")
+add_definitions(-DTEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/fomoddata")
 
 FetchContent_Declare(
         googletest
@@ -27,6 +28,7 @@ add_executable(runTests
         ../installer/lib/Logger.h
         ../installer/xml/ModuleConfiguration.cpp
         ../share/stringutil.h
+        ../share/FOMODData/PluginReader.h
         moduleconf/test_moduleconf_bos.cpp
         moduleconf/test_moduleconf_citytrees.cpp
         moduleconf/test_moduleconf_embers.cpp
@@ -35,6 +37,7 @@ add_executable(runTests
         moduleconf/test_moduleconf_precision.cpp
         moduleconf/test_moduleconf_xavbio.cpp
         test_stringutil.cpp
+        fomoddata/test_pluginreader.cpp
 )
 
 target_include_directories(runTests PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../share)
