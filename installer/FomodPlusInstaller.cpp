@@ -181,13 +181,13 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
 
     auto [infoFile, moduleConfigFile, filePaths] = parseFomodFiles(tree);
     std::vector<QString> pluginPaths = {};
-    for (auto filePath : filePaths) {
+    for (const auto& filePath : filePaths) {
         if (isPluginFile(filePath)) {
             pluginPaths.emplace_back(filePath);
         }
     }
 
-    const auto dbEntries = mFomodDb->getEntriesFromFomod(moduleConfigFile.get(), pluginPaths, nexusID);
+    const auto dbEntry = mFomodDb->getEntryFromFomod(moduleConfigFile.get(), pluginPaths, nexusID);
 
     if (infoFile == nullptr || moduleConfigFile == nullptr) {
         return RESULT_FAILED;
@@ -206,7 +206,14 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
         tree = installTree;
         mFomodJson = std::make_shared<nlohmann::json>(window->getFileInstaller()->generateFomodJson());
         mNotes = window->getFileInstaller()->createInstallationNotes();
-        // TODO: This is where we write the FOMOD stuff to the DB
+
+        try {
+            mFomodDb->addEntry(dbEntry);
+            mFomodDb->saveToFile();
+        } catch ([[maybe_unused]] Exception& e) {
+            logMessage(ERR, "Failed to add FomodDB entries.");
+            logMessage(ERR, e.what());
+        }
         return RESULT_SUCCESS;
     }
     if (window->isManualInstall()) {

@@ -9,7 +9,7 @@
 
 #include "PluginReader.h"
 
-using FOMODDBEntries = std::vector<std::unique_ptr<FomodDbEntry> >;
+using FOMODDBEntries = std::vector<std::shared_ptr<FomodDbEntry> >;
 
 constexpr std::string FOMOD_DB_FILE = "fomod.db";
 
@@ -26,14 +26,14 @@ public:
   }
 
   // TODO: Also pull from non install steps (requiredInstallFiles or whatever, and optional);
-  FOMODDBEntries getEntriesFromFomod(ModuleConfiguration *fomod, std::vector<QString> pluginPaths, int modId) {
-    FOMODDBEntries entries;
-    for (auto installStep: fomod->installSteps.installSteps) {
-      for (auto group: installStep.optionalFileGroups.groups) {
-        for (auto plugin: group.plugins.plugins) {
+  std::shared_ptr<FomodDbEntry> getEntryFromFomod(ModuleConfiguration *fomod, std::vector<QString> pluginPaths,
+                                                  int modId) {
+    std::vector<FomodOption> options;
+    for (const auto &installStep: fomod->installSteps.installSteps) {
+      for (const auto &group: installStep.optionalFileGroups.groups) {
+        for (const auto &plugin: group.plugins.plugins) {
           // Create a DB entry for the given plugin if it has an ESP
           std::cout << "\nPlugin: " << plugin.name << std::endl;
-          std::vector<FomodOption> options;
 
           for (auto file: plugin.files.files) {
             if (file.isFolder || !isPluginFile(file.source)) {
@@ -48,36 +48,35 @@ public:
             if (it == pluginPaths.end()) {
               continue;
             }
-            const auto pluginPath = *it;
-            const auto masters = PluginReader::readMasters(pluginPath.toStdString());
-            options.emplace_back(FomodOption(
+            const auto &pluginPath = *it;
+            const auto masters = PluginReader::readMasters(pluginPath.toStdString(), true);
+            options.emplace_back(
               plugin.name,
               file.source,
               masters,
               installStep.name,
               group.name
-            ));
-            entries.emplace_back(std::make_unique<FomodDbEntry>(modId, fomod->moduleName, options));
+            );
           }
         }
       }
     }
-    return entries;
+    return std::make_shared<FomodDbEntry>(modId, fomod->moduleName, options);
   }
 
-  void addEntry(std::unique_ptr<FomodDbEntry> entry, const bool upsert = true) {
+  void addEntry(const std::shared_ptr<FomodDbEntry> &entry, const bool upsert = true) {
     // TODO: Test this upsert.
     if (upsert) {
-      const auto it = std::ranges::find_if(entries, [&entry](const std::unique_ptr<FomodDbEntry> &e) {
+      const auto it = std::ranges::find_if(entries, [&entry](const std::shared_ptr<FomodDbEntry> &e) {
         return e->getModId() == entry->getModId();
       });
       if (it != entries.end()) {
-        *it = std::move(entry);
+        *it = entry;
       } else {
-        entries.emplace_back(std::move(entry));
+        entries.emplace_back(entry);
       }
     } else {
-      entries.emplace_back(std::move(entry));
+      entries.emplace_back(entry);
     }
   }
 

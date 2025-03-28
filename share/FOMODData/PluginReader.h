@@ -4,16 +4,26 @@
 #include <string>
 #include <vector>
 #include <cstdint>
-#include <iostream>
+#include <unordered_set>
+
+static const std::unordered_set<std::string> VANILLA_MASTERS = {
+    "Skyrim.esm",
+    "Update.esm",
+    "Dawnguard.esm",
+    "HearthFires.esm",
+    "Dragonborn.esm"
+};
 
 class PluginReader {
 public:
+
     /**
      * Reads the master files from a Bethesda plugin file (ESP/ESM/ESL)
      * @param filePath Path to the plugin file
+     * @param trimVanilla Exclude the vanilla game masters or not. Mostly to save DB space.
      * @return Vector of master filenames
      */
-    static std::vector<std::string> readMasters(const std::string& filePath)
+    static std::vector<std::string> readMasters(const std::string& filePath, const bool trimVanilla = false)
     {
         std::vector<std::string> masters;
         std::ifstream file(filePath, std::ios::binary);
@@ -66,7 +76,10 @@ public:
                     masterName.pop_back();
                 }
 
-                masters.push_back(masterName);
+                // Only add if it's not a vanilla master or if we're not trimming
+                if (!trimVanilla || !VANILLA_MASTERS.contains(masterName)) {
+                    masters.push_back(masterName);
+                }
 
                 // Each MAST is followed by a DATA subrecord
                 char dataType[4];
