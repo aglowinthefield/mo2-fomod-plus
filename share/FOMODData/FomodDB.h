@@ -26,7 +26,7 @@ public:
   }
 
   // TODO: Also pull from non install steps (requiredInstallFiles or whatever, and optional);
-  std::shared_ptr<FomodDbEntry> getEntryFromFomod(ModuleConfiguration *fomod, std::vector<QString> pluginPaths,
+  static std::shared_ptr<FomodDbEntry> getEntryFromFomod(ModuleConfiguration *fomod, std::vector<QString> pluginPaths,
                                                   int modId) {
     std::vector<FomodOption> options;
     for (const auto &installStep: fomod->installSteps.installSteps) {
@@ -109,7 +109,6 @@ public:
 private:
   FOMODDBEntries entries;
   std::string dbFilePath;
-
 
   void loadFromFile() {
     entries.clear();

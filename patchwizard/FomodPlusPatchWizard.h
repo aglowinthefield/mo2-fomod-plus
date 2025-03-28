@@ -1,5 +1,7 @@
 ﻿#pragma once
-#include <dllimport.h>
+#include "../installer/lib/Logger.h"
+#include "lib/PatchFinder.h"
+
 #include <iplugintool.h>
 #include <qtmetamacros.h>
 
@@ -34,7 +36,14 @@ public:
     void display() const override;
 
 private:
+    Logger& log = Logger::getInstance();
     QDialog* mDialog { nullptr };
     IOrganizer* mOrganizer{ nullptr };
+    std::unique_ptr<PatchFinder> mPatchFinder{ nullptr };
+
+    void logMessage(const LogLevel level, const std::string& message) const
+    {
+        log.logMessage(level, "[PATCHFINDER] " + message);
+    }
 
 };

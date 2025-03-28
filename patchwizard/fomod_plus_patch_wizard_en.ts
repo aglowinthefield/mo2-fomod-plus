@@ -4,15 +4,15 @@
 <context>
     <name>FomodPlusPatchWizard</name>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="9"/>
-        <location filename="FomodPlusPatchWizard.h" line="18"/>
-        <location filename="FomodPlusPatchWizard.h" line="28"/>
+        <location filename="FomodPlusPatchWizard.cpp" line="10"/>
+        <location filename="FomodPlusPatchWizard.h" line="20"/>
+        <location filename="FomodPlusPatchWizard.h" line="30"/>
         <source>Patch Wizard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.h" line="22"/>
-        <location filename="FomodPlusPatchWizard.h" line="30"/>
+        <location filename="FomodPlusPatchWizard.h" line="24"/>
+        <location filename="FomodPlusPatchWizard.h" line="32"/>
         <source>Find missing patches from FOMODs in your load order.</source>
         <translation type="unfinished"></translation>
     </message>
