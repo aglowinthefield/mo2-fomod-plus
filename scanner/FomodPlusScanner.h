@@ -35,7 +35,7 @@ public:
     [[nodiscard]] QString name() const override { return "FOMOD Scanner"; } // This should not be translated
     [[nodiscard]] QString author() const override { return "clearing"; }
     [[nodiscard]] QString description() const override { return tr("Scans modlist for files installed via FOMOD"); }
-    [[nodiscard]] VersionInfo version() const override { return VersionInfo(1, 0, 0, VersionInfo::RELEASE_FINAL); }
+    [[nodiscard]] VersionInfo version() const override { return {1, 0, 0, VersionInfo::RELEASE_FINAL}; }
 
     [[nodiscard]] QList<PluginSetting> settings() const override { return {}; }
 
