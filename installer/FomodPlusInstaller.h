@@ -58,7 +58,7 @@ public:
 
     void onInstallationEnd(EInstallResult result, IModInterface* newMod) override;
 
-    void writeNotes(IModInterface* newMod) const;
+    [[deprecated]] void writeNotes(IModInterface* newMod) const;
 
     [[nodiscard]] bool shouldShowImages() const;
 
