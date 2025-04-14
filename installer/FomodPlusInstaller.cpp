@@ -331,12 +331,13 @@ void FomodPlusInstaller::onInstallationEnd(const EInstallResult result, IModInte
     // Update the meta.ini file with the fomod information
     if (mFomodJson != nullptr && result == RESULT_SUCCESS && newMod != nullptr && mInstallerUsed) {
         newMod->setPluginSetting(this->name(), "fomod", mFomodJson->dump().c_str());
-        writeNotes(newMod);
+        // writeNotes(newMod);
         mOrganizer->refresh();
     }
     clearPriorInstallData();
 }
 
+[[deprecated]]
 void FomodPlusInstaller::writeNotes(IModInterface* newMod) const
 {
     if (mNotes.isEmpty()) {
