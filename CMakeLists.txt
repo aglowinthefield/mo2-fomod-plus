@@ -25,5 +25,6 @@ project(fomod_plus)
 set(enable_warnings OFF)
 
 add_subdirectory(installer)
+add_subdirectory(patchwizard)
 add_subdirectory(scanner)
 add_subdirectory(tests)

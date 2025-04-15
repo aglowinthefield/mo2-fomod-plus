@@ -1,6 +1,6 @@
 ﻿#include <gtest/gtest.h>
 #include <QString>
-#include "../../installer/xml/ModuleConfiguration.h"
+#include "xml/ModuleConfiguration.h"
 #include <filesystem>
 
 class MCCityTrees : public testing::Test {

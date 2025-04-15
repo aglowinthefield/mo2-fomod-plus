@@ -2,7 +2,7 @@
 
 #include <filesystem>
 
-#include "../installer/xml/FomodInfoFile.h"
+#include "xml/FomodInfoFile.h"
 
 TEST(FomodInfoFileTest, DeserializeValidFile)
 {

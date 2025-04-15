@@ -3,8 +3,8 @@
 #include <imoinfo.h>
 #include <string>
 
-#include "../lib/ConditionTester.h"
-#include "../lib/FlagMap.h"
+#include "lib/ConditionTester.h"
+#include "lib/FlagMap.h"
 #include "lib/FileInstaller.h"
 #include "lib/ViewModels.h"
 #include "xml/FomodInfoFile.h"

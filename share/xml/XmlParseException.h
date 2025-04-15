@@ -1,5 +1,4 @@
-﻿#ifndef XMLPARSEEXCEPTION_H
-#define XMLPARSEEXCEPTION_H
+﻿#pragma once
 
 #include <stdexcept>
 #include <string>
@@ -9,6 +8,3 @@ public:
     explicit XmlParseException(const std::string& message)
         : std::runtime_error(message) {}
 };
-
-
-#endif //XMLPARSEEXCEPTION_H
