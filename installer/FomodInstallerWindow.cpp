@@ -389,6 +389,9 @@ QWidget* FomodInstallerWindow::createBottomRow()
     mNextInstallButton = UIHelper::createButton(tr("Next"), bottomRow);
     mCancelButton      = UIHelper::createButton(tr("Cancel"), bottomRow);
 
+    mNextInstallButton->setDefault(true);
+    mNextInstallButton->setAutoDefault(true);
+
     connect(mManualButton, SIGNAL(clicked()), this, SLOT(onManualClicked()));
     connect(mNextInstallButton, SIGNAL(clicked()), this, SLOT(onNextClicked()));
     connect(mBackButton, SIGNAL(clicked()), this, SLOT(onBackClicked()));
