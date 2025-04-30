@@ -1,10 +1,10 @@
 ﻿cmake_minimum_required(VERSION 3.30)
-project(fomod_plus_scanner)
+project(fomod_plus_patch_wizard)
 
-add_library(fomod_plus_scanner SHARED)
+add_library(fomod_plus_patch_wizard SHARED)
 include(FetchContent)
 set(project_type plugin)
-set_property(TARGET fomod_plus_scanner PROPERTY CXX_STANDARD 20)
+set_property(TARGET fomod_plus_patch_wizard PROPERTY CXX_STANDARD 20)
 
 set(CMAKE_GENERATOR_PLATFORM x64)
 
@@ -13,7 +13,7 @@ FetchContent_Declare(pugixml GIT_REPOSITORY https://github.com/zeux/pugixml GIT_
 FetchContent_MakeAvailable(pugixml json)
 
 target_include_directories(
-        fomod_plus_scanner
+        fomod_plus_patch_wizard
         PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/../share
@@ -23,7 +23,7 @@ target_include_directories(
 
 if (MSVC)
     target_compile_options(
-            fomod_plus_scanner
+            fomod_plus_patch_wizard
             PRIVATE
             /bigobj # increase number of sections in .obj file
             /W4     # level 4 warnings
@@ -33,6 +33,6 @@ if (MSVC)
     )
 endif ()
 
-target_link_libraries(fomod_plus_scanner PRIVATE pugixml nlohmann_json::nlohmann_json)
-mo2_configure_plugin(fomod_plus_scanner WARNINGS OFF PRIVATE_DEPENDS archive)
-mo2_install_target(fomod_plus_scanner)
+target_link_libraries(fomod_plus_patch_wizard PRIVATE pugixml nlohmann_json::nlohmann_json)
+mo2_configure_plugin(fomod_plus_patch_wizard WARNINGS OFF PRIVATE_DEPENDS archive)
+mo2_install_target(fomod_plus_patch_wizard)

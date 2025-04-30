@@ -9,16 +9,18 @@
 #include <nlohmann/json.hpp>
 #include "FomodInstallerWindow.h"
 #include "lib/Logger.h"
-#include "ui/Colors.h"
 #include "xml/FomodInfoFile.h"
 #include "xml/ModuleConfiguration.h"
 
 #include <QDialog>
+#include <FOMODData/FomodDb.h>
 
 class FomodInstallerWindow;
 
 using namespace MOBase;
 using namespace std;
+
+using ParsedFilesTuple = std::tuple<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration>, QStringList>;
 
 class FomodPlusInstaller final : public IPluginInstallerSimple {
     Q_OBJECT
@@ -66,6 +68,8 @@ public:
 
     [[nodiscard]] bool shouldAutoRestoreChoices() const;
 
+    [[nodiscard]] bool isWizardIntegrated() const;
+
     void toggleShouldShowImages() const;
 
     QString getSelectedColor() const;
@@ -77,6 +81,7 @@ private:
     std::shared_ptr<nlohmann::json> mFomodJson{ nullptr };
     QString mNotes{};
     bool mInstallerUsed{ false };
+    std::unique_ptr<FomodDB> mFomodDb;
 
     /**
    * @brief Retrieve the tree entry corresponding to the fomod directory.
@@ -90,11 +95,12 @@ private:
 
     [[nodiscard]] static QDialog::DialogCode showInstallerWindow(const shared_ptr<FomodInstallerWindow>& window);
 
-    [[nodiscard]] std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> > parseFomodFiles(
-        const shared_ptr<IFileTree>& tree);
+    [[nodiscard]] ParsedFilesTuple parseFomodFiles(const shared_ptr<IFileTree>& tree);
 
     static void appendImageFiles(vector<shared_ptr<const FileTreeEntry> >& entries,
         const shared_ptr<const IFileTree>& tree);
+
+    void appendPluginFiles(vector<shared_ptr<const FileTreeEntry> >& entries, const shared_ptr<const IFileTree>& tree);
 
     void setupUiInjection() const;
 
