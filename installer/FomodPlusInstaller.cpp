@@ -63,7 +63,7 @@ void FomodPlusInstaller::toggleShouldShowImages() const
 QString FomodPlusInstaller::getSelectedColor() const
 {
     const auto colorName = mOrganizer->pluginSetting(name(), "color_theme").toString();
-    const auto it = UiColors::colorStyles.find(colorName);
+    const auto it        = UiColors::colorStyles.find(colorName);
     return it != UiColors::colorStyles.end() ? it->first : "Blue";
 }
 
@@ -95,30 +95,125 @@ QList<PluginSetting> FomodPlusInstaller::settings() const
     };
 }
 
-nlohmann::json FomodPlusInstaller::getExistingFomodJson(const GuessedValue<QString>& modName) const
+nlohmann::json FomodPlusInstaller::getExistingFomodJson(const GuessedValue<QString>& modName,
+    const int& nexusId,
+    const int& stepsInCurrentFomod) const
 {
-    auto existingMod = mOrganizer->modList()->getMod(modName);
-    if (existingMod == nullptr) {
-        for (const auto& variant : modName.variants()) {
-            existingMod = mOrganizer->modList()->getMod(variant);
-            if (existingMod != nullptr) {
-                break;
+    logMessage(DEBUG, "FomodPlusInstaller::getExistingFomodJson - modName: " + modName->toStdString() +
+        " nexusId: " + std::to_string(nexusId));
+
+    // Need to have better mod matching based on presence of FOMOD plugin data.
+    struct ModMatch {
+        MOBase::IModInterface* mod;
+        bool hasFomodData;
+        int stepCount;
+        nlohmann::json fomodJson;
+    };
+    std::vector<ModMatch> matches;
+
+    auto parseStepCount = [](const QVariant& fomodData) -> std::pair<bool, int> {
+        try {
+            if (fomodData.isValid() && !fomodData.isNull()) {
+                if (auto json = nlohmann::json::parse(fomodData.toString().toStdString()); json.contains("steps") && json["steps"].is_array()) {
+                    return { true, static_cast<int>(json["steps"].size()) };
+                }
+            }
+        } catch (...) {
+            // Ignore parsing errors
+        }
+        return { false, 0 };
+    };
+
+    // Check exact match first
+    if (const auto exactMod = mOrganizer->modList()->getMod(modName)) {
+        const auto fomodData    = exactMod->pluginSetting(name(), "fomod", 0);
+        if (auto [valid, stepCount] = parseStepCount(fomodData); valid) {
+            matches.push_back({
+                exactMod,
+                true,
+                stepCount,
+                nlohmann::json::parse(fomodData.toString().toStdString())
+            });
+        } else {
+            matches.push_back({
+                exactMod,
+                false,
+                0,
+                nlohmann::json()
+            });
+        }
+    }
+
+    // Check all variants
+    for (const auto& variant : modName.variants()) {
+        if (const auto variantMod = mOrganizer->modList()->getMod(variant)) {
+            const auto fomodData = variantMod->pluginSetting(name(), "fomod", 0);
+            if (auto [valid, stepCount] = parseStepCount(fomodData); valid) {
+                matches.push_back({
+                    variantMod,
+                    true,
+                    stepCount,
+                    nlohmann::json::parse(fomodData.toString().toStdString())
+                });
+            } else {
+                matches.push_back({
+                    variantMod,
+                    false,
+                    0,
+                    nlohmann::json()
+                });
             }
         }
     }
-    if (existingMod == nullptr) {
+
+    // No matches found
+    if (matches.empty()) {
         return {};
     }
-    const auto fomodJson = existingMod->pluginSetting(name(), "fomod", 0);
-    if (fomodJson == 0) {
-        return {};
+
+    // First try to find exact step count match
+    const auto exactMatch = std::find_if(matches.begin(), matches.end(),
+        [stepsInCurrentFomod](const ModMatch& match) {
+            return match.hasFomodData && match.stepCount == stepsInCurrentFomod;
+        });
+
+    if (exactMatch != matches.end()) {
+        logMessage(DEBUG, "Found exact step count match in mod: " +
+            exactMatch->mod->name().toStdString() +
+            " with " + std::to_string(exactMatch->stepCount) + " steps");
+        return exactMatch->fomodJson;
     }
-    try {
-        return nlohmann::json::parse(fomodJson.toString().toStdString());
-    } catch ([[maybe_unused]] Exception& e) {
-        logMessage(ERR, "Could not parse existing JSON, even though it appears to exist. Returning empty JSON.");
-        return {};
+
+    // Find closest step count among mods with FOMOD data
+    const auto closestMatch = ranges::min_element(matches,
+        [stepsInCurrentFomod](const ModMatch& a, const ModMatch& b) {
+            if (!a.hasFomodData)
+                return false;
+            if (!b.hasFomodData)
+                return true;
+            return std::abs(a.stepCount - stepsInCurrentFomod) <
+                std::abs(b.stepCount - stepsInCurrentFomod);
+        });
+
+    if (closestMatch != matches.end() && closestMatch->hasFomodData) {
+        logMessage(DEBUG, "Using closest step count match from mod: " +
+            closestMatch->mod->name().toStdString() +
+            " with " + std::to_string(closestMatch->stepCount) + " steps");
+        return closestMatch->fomodJson;
     }
+
+    // Fallback to first mod with any FOMOD data
+    const auto anyFomod = ranges::find_if(matches,
+        [](const ModMatch& match) { return match.hasFomodData; });
+
+    if (anyFomod != matches.end()) {
+        logMessage(DEBUG, "Using first available FOMOD data from mod: " +
+            anyFomod->mod->name().toStdString());
+        return anyFomod->fomodJson;
+    }
+
+    logMessage(DEBUG, "No matching FOMOD data found");
+    return {};
 }
 
 void FomodPlusInstaller::clearPriorInstallData()
@@ -158,8 +253,8 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
     }
 
     // create ui & pass xml classes to ui
+    auto json           = getExistingFomodJson(modName, nexusID, static_cast<int>(moduleConfigFile->installSteps.installSteps.size()));
     auto fomodViewModel = FomodViewModel::create(mOrganizer, std::move(moduleConfigFile), std::move(infoFile));
-    auto json           = getExistingFomodJson(modName);
     const auto window   = std::make_shared<FomodInstallerWindow>(this, modName, tree, mFomodPath, fomodViewModel, json);
 
     const QDialog::DialogCode result = showInstallerWindow(window);

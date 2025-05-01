@@ -47,7 +47,7 @@ public:
 
     [[nodiscard]] QList<PluginSetting> settings() const override;
 
-    nlohmann::json getExistingFomodJson(const GuessedValue<QString>& modName) const;
+    nlohmann::json getExistingFomodJson(const GuessedValue<QString> &modName, const int &nexusId, const int &stepsInCurrentFomod) const;
 
     void clearPriorInstallData();
 

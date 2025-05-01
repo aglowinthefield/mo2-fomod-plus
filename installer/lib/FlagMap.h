@@ -38,7 +38,7 @@ public:
         std::vector<std::pair<int, std::shared_ptr<PluginViewModel>>> orderedPlugins;
 
         // Collect all plugins with their stepIndex and ownIndex
-        for (const auto& plugin : flags | views::keys) {
+        for (const auto& plugin : flags | std::views::keys) {
             orderedPlugins.emplace_back(plugin->getStepIndex(), plugin);
         }
 
@@ -62,13 +62,13 @@ public:
     void setFlagsForPlugin(PluginRef plugin)
     {
         // Don't clutter the map with empty key-vals
-        if (plugin->getConditionFlags().size() == 0) {
+        if (plugin->getConditionFlags().empty()) {
             return;
         }
         unsetFlagsForPlugin(plugin);
 
-        FlagList flagList;;
-        for (auto conditionFlag : plugin->getConditionFlags()) {
+        FlagList flagList;
+        for (const auto& conditionFlag : plugin->getConditionFlags()) {
             flagList.emplace_back(toLower(conditionFlag.name), conditionFlag.value);
         }
         flags[plugin] = flagList;
