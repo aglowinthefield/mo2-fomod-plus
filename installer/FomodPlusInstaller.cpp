@@ -95,7 +95,7 @@ QList<PluginSetting> FomodPlusInstaller::settings() const
     };
 }
 
-nlohmann::json FomodPlusInstaller::getExistingFomodJson(const GuessedValue<QString>& modName,
+std::pair<nlohmann::json, IModInterface*> FomodPlusInstaller::getExistingFomodJson(const GuessedValue<QString>& modName,
     const int& nexusId,
     const int& stepsInCurrentFomod) const
 {
@@ -181,7 +181,7 @@ nlohmann::json FomodPlusInstaller::getExistingFomodJson(const GuessedValue<QStri
         logMessage(DEBUG, "Found exact step count match in mod: " +
             exactMatch->mod->name().toStdString() +
             " with " + std::to_string(exactMatch->stepCount) + " steps");
-        return exactMatch->fomodJson;
+        return std::make_pair(exactMatch->fomodJson, exactMatch->mod);
     }
 
     // Find the closest step count among mods with FOMOD data
@@ -198,7 +198,7 @@ nlohmann::json FomodPlusInstaller::getExistingFomodJson(const GuessedValue<QStri
         logMessage(DEBUG, "Using closest step count match from mod: " +
             closestMatch->mod->name().toStdString() +
             " with " + std::to_string(closestMatch->stepCount) + " steps");
-        return closestMatch->fomodJson;
+        return std::make_pair(closestMatch->fomodJson, closestMatch->mod);
     }
 
     // Fallback to first mod with any FOMOD data
@@ -208,7 +208,7 @@ nlohmann::json FomodPlusInstaller::getExistingFomodJson(const GuessedValue<QStri
     if (anyFomod != matches.end()) {
         logMessage(DEBUG, "Using first available FOMOD data from mod: " +
             anyFomod->mod->name().toStdString());
-        return anyFomod->fomodJson;
+        return std::make_pair(anyFomod->fomodJson, anyFomod->mod);
     }
 
     logMessage(DEBUG, "No matching FOMOD data found");
@@ -251,7 +251,10 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
     }
 
     // create ui & pass xml classes to ui
-    auto json           = getExistingFomodJson(modName, nexusID, static_cast<int>(moduleConfigFile->installSteps.installSteps.size()));
+    auto [json, matchMod]           = getExistingFomodJson(modName, nexusID, static_cast<int>(moduleConfigFile->installSteps.installSteps.size()));
+    if (matchMod != nullptr) {
+        modName.update(matchMod->name(), GUESS_USER);
+    }
     auto fomodViewModel = FomodViewModel::create(mOrganizer, std::move(moduleConfigFile), std::move(infoFile));
     const auto window   = std::make_shared<FomodInstallerWindow>(this, modName, tree, mFomodPath, fomodViewModel, json);
 
