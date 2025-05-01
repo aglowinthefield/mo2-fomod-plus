@@ -172,7 +172,7 @@ nlohmann::json FomodPlusInstaller::getExistingFomodJson(const GuessedValue<QStri
     }
 
     // First try to find exact step count match
-    const auto exactMatch = std::find_if(matches.begin(), matches.end(),
+    const auto exactMatch = ranges::find_if(matches,
         [stepsInCurrentFomod](const ModMatch& match) {
             return match.hasFomodData && match.stepCount == stepsInCurrentFomod;
         });
@@ -184,13 +184,12 @@ nlohmann::json FomodPlusInstaller::getExistingFomodJson(const GuessedValue<QStri
         return exactMatch->fomodJson;
     }
 
-    // Find closest step count among mods with FOMOD data
+    // Find the closest step count among mods with FOMOD data
     const auto closestMatch = ranges::min_element(matches,
         [stepsInCurrentFomod](const ModMatch& a, const ModMatch& b) {
-            if (!a.hasFomodData)
+            if (!a.hasFomodData || !b.hasFomodData)
                 return false;
-            if (!b.hasFomodData)
-                return true;
+            // The min difference between the step counts
             return std::abs(a.stepCount - stepsInCurrentFomod) <
                 std::abs(b.stepCount - stepsInCurrentFomod);
         });
@@ -218,7 +217,6 @@ nlohmann::json FomodPlusInstaller::getExistingFomodJson(const GuessedValue<QStri
 
 void FomodPlusInstaller::clearPriorInstallData()
 {
-    mNotes         = "";
     mInstallerUsed = false;
     mFomodJson     = nullptr;
     mFomodPath     = "";
@@ -264,7 +262,6 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
         const std::shared_ptr<IFileTree> installTree = window->getFileInstaller()->install();
         tree = installTree;
         mFomodJson = std::make_shared<nlohmann::json>(window->getFileInstaller()->generateFomodJson());
-        mNotes = window->getFileInstaller()->createInstallationNotes();
         return RESULT_SUCCESS;
     }
     if (window->isManualInstall()) {
@@ -365,33 +362,9 @@ void FomodPlusInstaller::onInstallationEnd(const EInstallResult result, IModInte
     // Update the meta.ini file with the fomod information
     if (mFomodJson != nullptr && result == RESULT_SUCCESS && newMod != nullptr && mInstallerUsed) {
         newMod->setPluginSetting(this->name(), "fomod", mFomodJson->dump().c_str());
-        // writeNotes(newMod);
         mOrganizer->refresh();
     }
     clearPriorInstallData();
-}
-
-[[deprecated]]
-void FomodPlusInstaller::writeNotes(IModInterface* newMod) const
-{
-    if (mNotes.isEmpty()) {
-        return;
-    }
-
-    const auto iniKey = "installationNotes";
-    newMod->setPluginSetting(this->name(), iniKey, mNotes);
-    logMessage(INFO, "Wrote notes to meta.ini. Needs handler for adding to actual meta.ini 'notes' field.");
-
-    // const auto newModPath = mOrganizer->modList()->getMod(newMod->name())->absolutePath();
-    // std::cout << "New mod path: " << newModPath.toStdString() << std::endl;
-    // const auto metaPath = newModPath + "/meta.ini";
-    // QSettings meta(metaPath, QSettings::IniFormat);
-    // QString fullNotes        = "";
-    // const auto existingNotes = meta.value(iniKey).toString();
-    // fullNotes += existingNotes;
-    // fullNotes += mNotes;
-    // meta.setValue(iniKey, fullNotes);
-    // meta.sync();
 }
 
 // Borrowed from https://github.com/ModOrganizer2/modorganizer-installer_fomod/blob/master/src/installerfomod.cpp

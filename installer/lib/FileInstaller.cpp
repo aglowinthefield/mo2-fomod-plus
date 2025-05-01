@@ -102,48 +102,6 @@ std::string FileInstaller::getQualifiedFilePath(const std::string& treePath) con
     return mFomodPath.toStdString() + "/" + treePath;
 }
 
-QString FileInstaller::createInstallationNotes() const
-{
-    QString notes = "";
-    std::vector<std::string> hasPatchFor;
-    std::vector<std::string> installedPatchFor;
-    std::vector<std::string> notInstalledPatchFor;
-
-    for (const auto& stepViewModel : mSteps) {
-        for (const auto& groupViewModel : stepViewModel->getGroups()) {
-            for (const auto& pluginViewModel : groupViewModel->getPlugins()) {
-
-                const auto patterns = pluginViewModel->getPlugin()->typeDescriptor.dependencyType.patterns.patterns;
-
-                for (const auto fileNames = collectPositiveFileNamesFromDependencyPatterns(patterns); const auto&
-                     fileName : fileNames) {
-                    hasPatchFor.emplace_back("hasPatchFor:" + fileName);
-                    if (pluginViewModel->isSelected()) {
-                        installedPatchFor.emplace_back("installedPatchFor:" + fileName);
-                    } else {
-                        notInstalledPatchFor.emplace_back("notInstalledPatchFor:" + fileName);
-                    }
-                }
-            }
-        }
-    }
-
-    notes += "BEGIN FOMOD NOTES\n";
-    for (const auto& patchFor : hasPatchFor) {
-        notes += patchFor + "\n";
-    }
-    notes += "\n";
-    for (const auto& patchFor : installedPatchFor) {
-        notes += patchFor + "\n";
-    }
-    notes += "\n";
-    for (const auto& patchFor : notInstalledPatchFor) {
-        notes += patchFor + "\n";
-    }
-    notes += "\nEND FOMOD NOTES\n";
-    return notes;
-}
-
 std::vector<std::string> FileInstaller::collectPositiveFileNamesFromDependencyPatterns(
     const std::vector<DependencyPattern>& patterns)
 {

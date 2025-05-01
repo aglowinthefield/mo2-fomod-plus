@@ -58,8 +58,6 @@ public:
 
     void onInstallationEnd(EInstallResult result, IModInterface* newMod) override;
 
-    [[deprecated]] void writeNotes(IModInterface* newMod) const;
-
     [[nodiscard]] bool shouldShowImages() const;
 
     [[nodiscard]] bool shouldShowNotifications() const;
@@ -75,7 +73,6 @@ private:
     IOrganizer* mOrganizer = nullptr;
     QString mFomodPath{};
     std::shared_ptr<nlohmann::json> mFomodJson{ nullptr };
-    QString mNotes{};
     bool mInstallerUsed{ false };
 
     /**
