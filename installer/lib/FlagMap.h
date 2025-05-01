@@ -38,7 +38,7 @@ public:
         std::vector<std::pair<int, std::shared_ptr<PluginViewModel>>> orderedPlugins;
 
         // Collect all plugins with their stepIndex and ownIndex
-        for (const auto& [plugin, flags] : flags) {
+        for (const auto& plugin : flags | views::keys) {
             orderedPlugins.emplace_back(plugin->getStepIndex(), plugin);
         }
 

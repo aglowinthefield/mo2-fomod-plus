@@ -226,7 +226,7 @@ void FomodViewModel::enforceRadioGroupConstraints(GroupRef group) const
 
     if (moreThanOneSelected(group)) {
         logMessage(ERR, "More than one plugin is selected in a SelectExactlyOne group. Deselecting all.");
-        for (const auto plugin : group->getPlugins()) {
+        for (const auto& plugin : group->getPlugins()) {
             plugin->setSelected(false); // don't call toggle here, that'll do the radio stuff.
         }
     }
