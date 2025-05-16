@@ -16,8 +16,9 @@ jobs:
     runs-on: windows-2022
     steps:
       - name: Build
-        uses: ModOrganizer2/build-with-mob-action@master
+        uses: aglowinthefield/build-with-mob-action@master
         with:
+          mob-branch: 'qt-6.9-dep-updates'
           mo2-branch: "obvrem"
           qt-version: '6.7.3'
           mo2-third-parties: 7z zlib
