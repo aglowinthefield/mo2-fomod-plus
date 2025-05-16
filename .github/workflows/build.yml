@@ -18,6 +18,8 @@ jobs:
       - name: Build
         uses: ModOrganizer2/build-with-mob-action@master
         with:
+          mo2-branch: "obvrem"
+          qt-version: '6.7.3'
           mo2-third-parties: 7z zlib
           mo2-dependencies: cmake_common uibase game_gamebryo archive 7z zlib lz4
 

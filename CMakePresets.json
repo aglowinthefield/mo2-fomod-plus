@@ -33,10 +33,6 @@
         "PYTHON_ROOT": {
           "type": "PATH",
           "value": "${sourceDir}/../../python-3.12.3"
-        },
-        "MO2_PLUGIN_TARGET_DIR": {
-          "type": "PATH",
-          "value": "D:/Modding/MO2/Plugins"
         }
       }
     }
