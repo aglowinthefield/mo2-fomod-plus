@@ -116,6 +116,10 @@ bool ConditionTester::testFileDependency(const FileDependency& fileDependency) c
 bool ConditionTester::testGameDependency(const GameDependency& gameDependency) const
 {
     const auto gameVersion = mOrganizer->managedGame()->gameVersion().toStdString();
+    log.logMessage(DEBUG, "Comparing condition version " + gameDependency.version + " against " + gameVersion);
+    if ( gameDependency.version <= gameVersion) {
+        log.logMessage(DEBUG, "Version matches!");
+    }
     return gameDependency.version <= gameVersion;
 }
 
