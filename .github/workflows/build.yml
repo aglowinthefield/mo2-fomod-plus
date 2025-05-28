@@ -18,6 +18,7 @@ jobs:
       - name: Build
         uses: modorganizer2/build-with-mob-action@master
         with:
+          mo2-owner: 'modorganizer2'
           mo2-third-parties: 7z zlib
           mo2-dependencies: uibase game_gamebryo archive 7z zlib lz4
 
