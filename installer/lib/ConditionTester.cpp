@@ -115,6 +115,11 @@ bool ConditionTester::testFileDependency(const FileDependency& fileDependency) c
 
 bool ConditionTester::testGameDependency(const GameDependency& gameDependency) const
 {
+    std::cout << mOrganizer->managedGame()->gameDirectory().absolutePath().toStdString() << std::endl;
+    // std::cout << mOrganizer->managedGame()->executables().first().binary().absolutePath().toStdString() << std::endl;
+    std::cout << mOrganizer->managedGame()->gameVersion().toStdString() << std::endl;
+    std::wcout << mOrganizer->managedGame()->gameVersion().toStdWString() << std::endl;
+    std::cout << "Executable count : " << mOrganizer->managedGame()->executables().count() << std::endl;
     const auto gameVersion = mOrganizer->managedGame()->gameVersion().toStdString();
     log.logMessage(DEBUG, "Comparing condition version " + gameDependency.version + " against " + gameVersion);
     if ( gameDependency.version <= gameVersion) {

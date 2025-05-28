@@ -16,11 +16,6 @@ else ()
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_CURRENT_LIST_DIR}/../../../install/bin/plugins)
 endif ()
 
-# For some reason MSVC doesn't get picked up by CLion.
-set(CMAKE_GENERATOR_PLATFORM x64)
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zi /Od")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /Zi /O2")
-
 if (DEFINED DEPENDENCIES_DIR)
     include(${DEPENDENCIES_DIR}/modorganizer_super/cmake_common/mo2.cmake)
 else ()

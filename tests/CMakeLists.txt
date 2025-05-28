@@ -7,7 +7,7 @@ include(FetchContent)
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(CMAKE_MINIMUM_REQUIRED_VERSION 3.30)
 
-set(CMAKE_PREFIX_PATH "C:/Qt/6.7.3/msvc2019_64")
+set(CMAKE_PREFIX_PATH "C:/Qt/6.7.3/msvc2022_64")
 
 FetchContent_Declare(
         googletest

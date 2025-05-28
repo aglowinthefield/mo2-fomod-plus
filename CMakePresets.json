@@ -16,23 +16,23 @@
         },
         "BOOST_ROOT": {
           "type": "PATH",
-          "value": "${sourceDir}/../../boost_1_85_0"
+          "value": "${sourceDir}/../../boost_1_88_0"
         },
         "LZ4_ROOT": {
           "type": "PATH",
-          "value": "${sourceDir}/../../lz4-v1.9.4"
-        },
-        "QT_ROOT": {
-          "type": "PATH",
-          "value": "C:/Qt/6.7.1/msvc2019_64"
+          "value": "${sourceDir}/../../lz4-v1.10.0"
         },
         "ZLIB_ROOT": {
           "type": "PATH",
           "value": "${sourceDir}/../../zlib-v1.3.1"
         },
+        "QT_ROOT": {
+          "type": "PATH",
+          "value": "C:/Qt/6.7.3/msvc2019_64"
+        },
         "PYTHON_ROOT": {
           "type": "PATH",
-          "value": "${sourceDir}/../../python-3.12.3"
+          "value": "${sourceDir}/../../python-3.12.10"
         }
       }
     }
