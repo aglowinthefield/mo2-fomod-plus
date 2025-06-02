@@ -2,7 +2,7 @@
   "version": 3,
   "configurePresets": [
     {
-      "name": "windows-2022",
+      "name": "vs2022-windows",
       "generator": "Visual Studio 17 2022",
       "binaryDir": "${sourceDir}/vsbuild",
       "cacheVariables": {
