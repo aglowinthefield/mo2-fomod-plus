@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/install")
 
-#set(MO2_PLUGIN_TARGET_DIR "D:/Modding/mo2-dev-build/plugins")
+set(MO2_PLUGIN_TARGET_DIR "D:/Modding/MO2/plugins")
 if (NOT DEFINED MO2_PLUGIN_TARGET_DIR AND DEFINED ENV{MO2_PLUGIN_TARGET_DIR})
     set(MO2_PLUGIN_TARGET_DIR $ENV{MO2_PLUGIN_TARGET_DIR})
 endif ()
@@ -17,7 +17,7 @@ else ()
 endif ()
 
 if (DEFINED DEPENDENCIES_DIR)
-    include(${DEPENDENCIES_DIR}/modorganizer_super/cmake_common/mo2.cmake)
+    include(${DEPENDENCIES_DIR}/cmake_common/mo2.cmake)
 else ()
     include(${CMAKE_CURRENT_LIST_DIR}/cmake_common/mo2.cmake)
 endif ()

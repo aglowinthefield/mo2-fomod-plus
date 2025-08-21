@@ -84,6 +84,15 @@ for some reason on my main PC I can't use the `mob`-built MO2 instance to debug 
 of exceptions. This is not the case on my laptop. So if you get lots of exceptions pointing to the 
 `mob` dev build, try changing the hardcoded path in that second line to your _real_ MO2 instance.
 
+### NOTE
+MO2 upstream dependencies have started migrating to VCPKG and have different builds and sources vs 2.5.2. As such,
+have to do some very odd/painful workarounds to build against the stable release. Inside `CMakePresets.json` there's the `DEPENDENCIES_DIR`
+variable which you should point to the 2.5.2 sources directory you can download from the MO2 github releases page. 
+
+https://github.com/ModOrganizer2/modorganizer/releases/tag/v2.5.2
+
+They've also consolidated game_gamebryo to [this](https://github.com/ModOrganizer2/modorganizer-game_bethesda) repo. 
+
 ## License
 This project is licensed under the MIT License.
 

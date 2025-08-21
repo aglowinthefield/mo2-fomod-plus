@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(where cmake)",
+      "Bash(\"/c/Program Files/JetBrains/CLion 2025.2/bin/cmake/win/x64/bin/cmake.exe\" --build . --config RelWithDebInfo)",
+      "Bash(\"/c/Program Files/JetBrains/CLion 2025.2/bin/cmake/win/x64/bin/cmake.exe\" --install . --config RelWithDebInfo)",
+      "Bash(cp:*)",
+      "Bash(mkdir:*)",
+      "Bash(\"/c/Program Files/JetBrains/CLion 2025.2/bin/cmake/win/x64/bin/cmake.exe\" --build vsbuild --config RelWithDebInfo)"
+    ],
+    "additionalDirectories": [
+      "D:\\var",
+      "D:\\d\\var\\Mod.Organizer-2.5.2-src\\uibase",
+      "D:\\d\\var"
+    ]
+  }
+}

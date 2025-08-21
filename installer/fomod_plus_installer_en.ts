@@ -42,12 +42,6 @@
     <message>
         <location filename="FomodInstallerWindow.cpp" line="380"/>
         <source>Restore Previous Choices</source>
-        <oldsource>Select All Previous Choices</oldsource>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="FomodInstallerWindow.cpp" line="643"/>
-        <source>Hide Images</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -58,6 +52,11 @@
     <message>
         <location filename="FomodInstallerWindow.cpp" line="390"/>
         <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="FomodInstallerWindow.cpp" line="643"/>
+        <source>Hide Images</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

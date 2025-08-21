@@ -165,14 +165,17 @@ ScanResult FomodPlusScanner::openInstallationArchive(const IModInterface* mod) c
     }
 
     // Mark all files for extraction to their path in the archive:
+    ScanResult result;
     if (hasFomodFiles(archive->getFileList())) {
         std::cout << "Found FOMOD files in " << qualifiedInstallerPath.toStdString() << std::endl;
-        return HAS_FOMOD;
+        result = HAS_FOMOD;
     } else {
-        return NO_FOMOD;
+        result = NO_FOMOD;
     }
 
-    return NO_ARCHIVE;
+    // Explicitly close archive to free resources
+    archive->close();
+    return result;
 }
 
 bool FomodPlusScanner::setFomodInfoForMod(IModInterface* mod, ScanResult result)
