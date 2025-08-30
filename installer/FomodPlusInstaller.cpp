@@ -25,6 +25,7 @@ bool FomodPlusInstaller::init(IOrganizer* organizer)
 {
     CrashHandler::initialize();
     mOrganizer = organizer;
+    mFomodContent = make_shared<FomodDataContent>(organizer);
     log.setLogFilePath(QDir::currentPath().toStdString() + "/logs/fomodplus.log");
     setupUiInjection();
     return true;
@@ -32,8 +33,25 @@ bool FomodPlusInstaller::init(IOrganizer* organizer)
 
 void FomodPlusInstaller::setupUiInjection() const
 {
-    const auto fomodContent = std::make_shared<FomodDataContent>(mOrganizer);
-    mOrganizer->gameFeatures()->registerFeature(fomodContent, 29382, false);
+    if (shouldShowSidebarFilter()) {
+        mOrganizer->gameFeatures()->registerFeature(mFomodContent, 9999, false);
+    }
+
+    mOrganizer->onPluginSettingChanged([this](const QString& pluginName, const QString& key, const QVariant& oldValue, const QVariant& newValue) {
+        if (pluginName == name() && key == "show_fomod_filter") {
+            toggleFeature(newValue.toBool());
+        }
+    });
+}
+
+void FomodPlusInstaller::toggleFeature(const bool enabled) const
+{
+    if (enabled) {
+        mOrganizer->gameFeatures()->registerFeature(mFomodContent, 9999, false);
+    } else {
+        mOrganizer->gameFeatures()->unregisterFeature(mFomodContent);
+    }
+    mOrganizer->refresh();
 }
 
 bool FomodPlusInstaller::shouldFallbackToLegacyInstaller() const
@@ -49,6 +67,11 @@ bool FomodPlusInstaller::shouldShowImages() const
 bool FomodPlusInstaller::shouldShowNotifications() const
 {
     return mOrganizer->pluginSetting(name(), "show_notifications").value<bool>();
+}
+
+bool FomodPlusInstaller::shouldShowSidebarFilter() const
+{
+    return mOrganizer->pluginSetting(name(), "show_fomod_filter").value<bool>();
 }
 
 bool FomodPlusInstaller::shouldAutoRestoreChoices() const
@@ -93,7 +116,8 @@ QList<PluginSetting> FomodPlusInstaller::settings() const
         { u"always_restore_choices"_s, u"Restore previous choices without clicking the magic button"_s, true },
         { u"show_images"_s, u"Show image previews and the image carousel in installer windows."_s, true },
         { u"color_theme"_s, u"Select the color theme for the installer"_s, QString("Blue") }, // Default color name
-        { u"show_notifications"_s, u"Show the notifications panel"_s, false } //WIP
+        { u"show_notifications"_s, u"Show the notifications panel"_s, false },
+        { u"show_fomod_filter"_s, u"Show the filter in the sidebar (may break other content filters)"_s, true }
     };
 }
 

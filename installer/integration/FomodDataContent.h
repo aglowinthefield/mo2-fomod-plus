@@ -4,7 +4,7 @@
 #include <moddatacontent.h>
 
 namespace FomodDataContentConstants {
-constexpr int FOMOD_CONTENT_ID = 0;
+constexpr int FOMOD_CONTENT_ID = 400400;
 }
 
 class FomodDataContent final : public MOBase::ModDataContent {

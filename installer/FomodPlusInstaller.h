@@ -14,6 +14,7 @@
 #include "xml/ModuleConfiguration.h"
 
 #include <QDialog>
+#include <integration/FomodDataContent.h>
 
 class FomodInstallerWindow;
 
@@ -62,6 +63,7 @@ public:
     [[nodiscard]] bool shouldShowImages() const;
 
     [[nodiscard]] bool shouldShowNotifications() const;
+    bool shouldShowSidebarFilter() const;
 
     [[nodiscard]] bool shouldAutoRestoreChoices() const;
 
@@ -75,6 +77,7 @@ private:
     QString mFomodPath{};
     std::shared_ptr<nlohmann::json> mFomodJson{ nullptr };
     bool mInstallerUsed{ false };
+    std::shared_ptr<FomodDataContent> mFomodContent{ nullptr };
 
     /**
    * @brief Retrieve the tree entry corresponding to the fomod directory.
@@ -95,6 +98,7 @@ private:
         const shared_ptr<const IFileTree>& tree);
 
     void setupUiInjection() const;
+    void toggleFeature(bool enabled) const;
 
     [[nodiscard]] bool shouldFallbackToLegacyInstaller() const;
 
