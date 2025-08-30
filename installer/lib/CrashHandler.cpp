@@ -45,23 +45,54 @@ LONG WINAPI CrashHandler::vectoredExceptionHandler(EXCEPTION_POINTERS* exception
         exceptionInfo->ExceptionRecord->ExceptionCode == EXCEPTION_STACK_OVERFLOW ||
         exceptionInfo->ExceptionRecord->ExceptionCode == EXCEPTION_ILLEGAL_INSTRUCTION) {
         
-        logCrashInfo(exceptionInfo);
-        
-        // Generate minidump
-        HANDLE file = CreateFileA("fomod_plus_crash.dmp", GENERIC_WRITE, 0, nullptr,
-                                 CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
-        
-        if (file != INVALID_HANDLE_VALUE) {
-            MINIDUMP_EXCEPTION_INFORMATION dumpInfo = {0};
-            dumpInfo.ThreadId = GetCurrentThreadId();
-            dumpInfo.ExceptionPointers = exceptionInfo;
-            dumpInfo.ClientPointers = FALSE;
+        // For stack overflow, we need to handle it on a different thread with its own stack
+        if (exceptionInfo->ExceptionRecord->ExceptionCode == EXCEPTION_STACK_OVERFLOW) {
+            // Create a new thread to handle the crash dump since our stack is corrupted
+            HANDLE dumpThread = CreateThread(nullptr, 0, [](LPVOID param) -> DWORD {
+                auto* exceptionInfo = static_cast<EXCEPTION_POINTERS*>(param);
+                logCrashInfo(exceptionInfo);
+                
+                HANDLE file = CreateFileA("fomod_plus_stack_overflow.dmp", GENERIC_WRITE, 0, nullptr,
+                                         CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+                
+                if (file != INVALID_HANDLE_VALUE) {
+                    MINIDUMP_EXCEPTION_INFORMATION dumpInfo = {0};
+                    dumpInfo.ThreadId = GetCurrentThreadId();
+                    dumpInfo.ExceptionPointers = exceptionInfo;
+                    dumpInfo.ClientPointers = FALSE;
+                    
+                    MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), file,
+                                     MiniDumpNormal, &dumpInfo, nullptr, nullptr);
+                    CloseHandle(file);
+                    
+                    std::cout << "Stack overflow crash dump written to fomod_plus_stack_overflow.dmp" << std::endl;
+                }
+                return 0;
+            }, exceptionInfo, 0, nullptr);
             
-            MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), file,
-                             MiniDumpNormal, &dumpInfo, nullptr, nullptr);
-            CloseHandle(file);
+            if (dumpThread) {
+                WaitForSingleObject(dumpThread, 5000); // Wait up to 5 seconds
+                CloseHandle(dumpThread);
+            }
+        } else {
+            logCrashInfo(exceptionInfo);
             
-            std::cout << "Crash dump written to fomod_plus_crash.dmp" << std::endl;
+            // Generate minidump
+            HANDLE file = CreateFileA("fomod_plus_crash.dmp", GENERIC_WRITE, 0, nullptr,
+                                     CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+            
+            if (file != INVALID_HANDLE_VALUE) {
+                MINIDUMP_EXCEPTION_INFORMATION dumpInfo = {0};
+                dumpInfo.ThreadId = GetCurrentThreadId();
+                dumpInfo.ExceptionPointers = exceptionInfo;
+                dumpInfo.ClientPointers = FALSE;
+                
+                MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), file,
+                                 MiniDumpNormal, &dumpInfo, nullptr, nullptr);
+                CloseHandle(file);
+                
+                std::cout << "Crash dump written to fomod_plus_crash.dmp" << std::endl;
+            }
         }
     }
     

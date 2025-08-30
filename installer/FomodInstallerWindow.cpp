@@ -159,11 +159,13 @@ void FomodInstallerWindow::updateCheckboxStates() const
     for (const auto& [objectName, pluginData] : mPluginMap) {
         if (pluginData.plugin->isSelected() != pluginData.uiElement->isChecked()) {
             const auto widgetType = pluginData.uiElement->metaObject()->className();
-            logMessage(DEBUG,
-                "Updating " + objectName.toStdString() + " to state: " + (pluginData.plugin->isSelected()
-                    ? "TRUE"
-                    : "FALSE") + " because " + widgetType +
-                " selection state is " + (pluginData.uiElement->isChecked() ? "TRUE" : "FALSE"));
+            if (objectName != nullptr) {
+                logMessage(DEBUG,
+                    "Updating " + objectName.toStdString() + " to state: " + (pluginData.plugin->isSelected()
+                        ? "TRUE"
+                        : "FALSE") + " because " + widgetType +
+                    " selection state is " + (pluginData.uiElement->isChecked() ? "TRUE" : "FALSE"));
+            }
             pluginData.uiElement->setChecked(pluginData.plugin->isSelected());
         }
 
@@ -181,8 +183,9 @@ void FomodInstallerWindow::onPluginToggled(const bool selected, const std::share
     logMessage(INFO,
         "onPluginToggled called with " + plugin->getName() + " in " + group->getName() + ": " +
         std::to_string(selected));
-    mViewModel->togglePlugin(group, plugin, selected);
-    updateCheckboxStates();
+    if (mViewModel->togglePlugin(group, plugin, selected)) {
+        updateCheckboxStates();
+    }
     if (mNextInstallButton != nullptr) {
         updateButtons();
     }

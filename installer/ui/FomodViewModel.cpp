@@ -402,11 +402,11 @@ void FomodViewModel::setFlagForPluginState(PluginRef plugin) const
  *  togglePlugin(group, modB, false)
  *  togglePlugin(group, modA, true)
  */
-void FomodViewModel::togglePlugin(GroupRef group, PluginRef plugin, const bool selected) const
+bool FomodViewModel::togglePlugin(GroupRef group, PluginRef plugin, const bool selected) const
 {
     if (plugin->isSelected() == selected) {
         logMessage(DEBUG, "Plugin " + plugin->getName() + " is already " + (selected ? "selected" : "deselected"));
-        return;
+        return false;
     }
 
     // Disable other radio options first.
@@ -432,6 +432,7 @@ void FomodViewModel::togglePlugin(GroupRef group, PluginRef plugin, const bool s
     }
     processPluginConditions(stepIndex);
     updateVisibleSteps();
+    return true;
 }
 
 void FomodViewModel::markManuallySet(PluginRef plugin)

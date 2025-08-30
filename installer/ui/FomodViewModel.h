@@ -98,7 +98,7 @@ public:
 
     bool isFirstVisibleStep() const;
 
-    void togglePlugin(const GroupRef, const PluginRef, bool selected) const;
+    bool togglePlugin(const GroupRef, const PluginRef, bool selected) const;
 
     void setActivePlugin(const PluginRef plugin) const { mActivePlugin = plugin; }
 
