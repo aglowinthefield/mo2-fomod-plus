@@ -14,6 +14,7 @@
 #include "integration/FomodDataContent.h"
 #include "ui/Colors.h"
 #include "ui/FomodViewModel.h"
+#include "lib/CrashHandler.h"
 
 #include <QMessageBox>
 #include <QSettings>
@@ -22,6 +23,7 @@ using namespace Qt::Literals::StringLiterals;
 
 bool FomodPlusInstaller::init(IOrganizer* organizer)
 {
+    CrashHandler::initialize();
     mOrganizer = organizer;
     log.setLogFilePath(QDir::currentPath().toStdString() + "/logs/fomodplus.log");
     setupUiInjection();

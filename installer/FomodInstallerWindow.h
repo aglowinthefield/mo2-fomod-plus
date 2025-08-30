@@ -197,7 +197,7 @@ private:
 
     void addNotification(const QString& message, LogLevel level) const;
 
-    void logMessage(const LogLevel level, const std::string& message, const bool asNotification = false) const
+    void logMessage(const LogLevel level, const std::string& message, const bool asNotification = true) const
     {
         log.logMessage(level, "[WINDOW] " + message);
         if (asNotification) {
