@@ -28,3 +28,25 @@ set(enable_warnings OFF)
 add_subdirectory(installer)
 add_subdirectory(scanner)
 add_subdirectory(tests)
+
+# Package target to create plugin distribution
+add_custom_target(package
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_LIST_DIR}/package/plugins"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_LIST_DIR}/package/translations"
+    
+    # Copy DLLs
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+        "$<TARGET_FILE:fomod_plus_installer>" 
+        "${CMAKE_CURRENT_LIST_DIR}/package/plugins/"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+        "$<TARGET_FILE:fomod_plus_scanner>" 
+        "${CMAKE_CURRENT_LIST_DIR}/package/plugins/"
+    
+    # Copy all .qm files using CMake script
+    COMMAND ${CMAKE_COMMAND} -DSOURCE_DIR="${CMAKE_CURRENT_BINARY_DIR}" 
+        -DDEST_DIR="${CMAKE_CURRENT_LIST_DIR}/package/translations"
+        -P "${CMAKE_CURRENT_LIST_DIR}/copy_translations.cmake"
+    
+    DEPENDS fomod_plus_installer fomod_plus_scanner
+    COMMENT "Packaging FOMOD Plus plugin for distribution"
+)
