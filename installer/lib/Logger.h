@@ -44,6 +44,12 @@ public:
         // std::ios::app is an option for appending but dont wanna grow it forever.
     }
 
+    void setDebugMode(bool debug)
+    {
+        std::lock_guard lock(mMutex);
+        mDebugMode = debug;
+    }
+
     void logMessage(const LogLevel level, const std::string& message)
     {
 
@@ -64,21 +70,29 @@ public:
         }
 
         std::lock_guard lock(mMutex);
-        std::ostream& out = mLogFile.is_open() ? mLogFile : std::cout;
-        switch (level) {
-        case DEBUG:
-            out << "[DEBUG] " << message << std::endl;
-            break;
-        case INFO:
-            out << "[INFO] " << message << std::endl;
-            break;
-        case WARN:
-            out << "[WARN] " << message << std::endl;
-            break;
-        case ERR:
-            out << "[ERROR] " << message << std::endl;
-            break;
+        
+        auto writeLog = [&](std::ostream& stream) {
+            switch (level) {
+            case DEBUG:
+                stream << "[DEBUG] " << message << std::endl;
+                break;
+            case INFO:
+                stream << "[INFO] " << message << std::endl;
+                break;
+            case WARN:
+                stream << "[WARN] " << message << std::endl;
+                break;
+            case ERR:
+                stream << "[ERROR] " << message << std::endl;
+                break;
+            }
+        };
+
+        if (mLogFile.is_open()) {
+            writeLog(mLogFile);
         }
+        
+        writeLog(std::cout);
     }
 
     Logger& operator=(const Logger&) = delete;
@@ -97,4 +111,9 @@ private:
 
     std::ofstream mLogFile;
     std::mutex mMutex;
+#if !defined(NDEBUG) || defined(CMAKE_BUILD_TYPE_RELWITHDEBINFO)
+    bool mDebugMode = true;   // Auto-enable in debug/RelWithDebInfo builds
+#else
+    bool mDebugMode = false;  // Disable in release builds
+#endif
 };

@@ -53,19 +53,35 @@ FomodInstallerWindow::FomodInstallerWindow(
     setupUi();
 
     mInstallStepStack = new QStackedWidget(this);
-    updateInstallStepStack();
-    stylePreviouslySelectedOptions();
-    stylePreviouslyDeselectedOptions();
+    
+    // Handle legacy FOMODs with no steps
+    if (mViewModel->getSteps().empty()) {
+        // Create a simple "Install" widget for legacy FOMODs
+        auto* legacyWidget = new QWidget(this);
+        auto* layout = new QVBoxLayout(legacyWidget);
+        auto* label = new QLabel("This mod will install all files automatically.", legacyWidget);
+        layout->addWidget(label);
+        mInstallStepStack->addWidget(legacyWidget);
+    } else {
+        updateInstallStepStack();
+        stylePreviouslySelectedOptions();
+        stylePreviouslyDeselectedOptions();
+    }
 
     const auto containerLayout = createContainerLayout();
     setLayout(containerLayout);
 
     updateButtons();
     restoreGeometryAndState();
-    populatePluginMap();
-
-    if (mInstaller->shouldAutoRestoreChoices()) {
-        onSelectPreviousClicked();
+    
+    if (!mViewModel->getSteps().empty()) {
+        populatePluginMap();
+        if (mInstaller->shouldAutoRestoreChoices()) {
+            onSelectPreviousClicked();
+        }
+    } else {
+        // For empty FOMODs, set default description
+        mDescriptionBox->setText("This mod will install all files automatically.");
     }
 }
 
@@ -121,6 +137,12 @@ void FomodInstallerWindow::populatePluginMap()
 
 void FomodInstallerWindow::onNextClicked()
 {
+    // For legacy FOMODs with no steps, always install
+    if (mViewModel->getSteps().empty()) {
+        onInstallClicked();
+        return;
+    }
+    
     if (!mViewModel->isLastVisibleStep()) {
         mViewModel->stepForward();
         mInstallStepStack->setCurrentIndex(mViewModel->getCurrentStepIndex());
@@ -200,6 +222,13 @@ void FomodInstallerWindow::onInstallClicked()
 
 void FomodInstallerWindow::updateButtons() const
 {
+    // For legacy FOMODs with no steps, always show Install
+    if (mViewModel->getSteps().empty()) {
+        mBackButton->setEnabled(false);
+        mNextInstallButton->setText(tr("Install"));
+        return;
+    }
+    
     if (mViewModel->isFirstVisibleStep()) {
         mBackButton->setEnabled(false);
     } else {
@@ -652,6 +681,11 @@ void FomodInstallerWindow::toggleImagesShown() const
 // Updates the image and description field for a given plugin. Also use this on initialization of those widgets.
 void FomodInstallerWindow::updateDisplayForActivePlugin() const
 {
+    // Skip if no steps (legacy FOMOD)
+    if (mViewModel->getSteps().empty()) {
+        return;
+    }
+    
     const auto& plugin        = mViewModel->getActivePlugin();
     const QString description = formatPluginDescription(QString::fromStdString(plugin->getDescription()));
     mDescriptionBox->setText(description);

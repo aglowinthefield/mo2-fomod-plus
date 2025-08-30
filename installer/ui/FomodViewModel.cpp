@@ -97,6 +97,14 @@ std::shared_ptr<FomodViewModel> FomodViewModel::create(MOBase::IOrganizer* organ
         viewModel->mFlags = std::make_shared<FlagMap>();
     }
     viewModel->createStepViewModels();
+    
+    // Handle FOMODs with no steps
+    if (viewModel->mSteps.empty()) {
+        viewModel->mInitialized = true;
+        viewModel->logMessage(INFO, "FOMOD with no steps - initialization complete");
+        return viewModel;
+    }
+    
     viewModel->processPluginConditions(-1); // please dont judge me. ill fix this someday.
     viewModel->enforceGroupConstraints();
     viewModel->updateVisibleSteps();
@@ -159,6 +167,12 @@ void FomodViewModel::forEachFuturePlugin(const int fromStepIndex, const PluginCa
 void FomodViewModel::createStepViewModels()
 {
     shared_ptr_list<StepViewModel> stepViewModels;
+
+    // Handle legacy FOMODs with no install steps
+    if (mFomodFile->installSteps.installSteps.empty()) {
+        logMessage(INFO, "No install steps found - creating default step for legacy FOMOD");
+        return;
+    }
 
     for (int stepIndex = 0; stepIndex < mFomodFile->installSteps.installSteps.size(); ++stepIndex) {
         const auto& installStep = mFomodFile->installSteps.installSteps[stepIndex];
@@ -474,6 +488,10 @@ void FomodViewModel::rebuildConditionFlagsForStep(const int stepIndex) const
 
 void FomodViewModel::stepBack()
 {
+    if (mSteps.empty()) {
+        return;  // No steps to move back to
+    }
+    
     logMessage(DEBUG, "Stepping back from step " + std::to_string(mCurrentStepIndex));
     const auto it = std::ranges::find(mVisibleStepIndices, mCurrentStepIndex);
     if (it != mVisibleStepIndices.end() && it != mVisibleStepIndices.begin()) {
@@ -486,6 +504,10 @@ void FomodViewModel::stepBack()
 
 void FomodViewModel::stepForward()
 {
+    if (mSteps.empty()) {
+        return;  // No steps to move forward to
+    }
+    
     logMessage(DEBUG, "Stepping forward from step " + std::to_string(mCurrentStepIndex));
     const auto it = std::ranges::find(mVisibleStepIndices, mCurrentStepIndex);
     if (it != mVisibleStepIndices.end() && std::next(it) != mVisibleStepIndices.end()) {
@@ -499,11 +521,17 @@ void FomodViewModel::stepForward()
 
 bool FomodViewModel::isLastVisibleStep() const
 {
+    if (mSteps.empty()) {
+        return true;  // Legacy FOMODs are always "last step"
+    }
     return !mVisibleStepIndices.empty() && mCurrentStepIndex == mVisibleStepIndices.back();
 }
 
 bool FomodViewModel::isFirstVisibleStep() const
 {
+    if (mSteps.empty()) {
+        return true;  // Legacy FOMODs are always "first step"
+    }
     return !mVisibleStepIndices.empty() && mCurrentStepIndex == mVisibleStepIndices.front();
 }
 
