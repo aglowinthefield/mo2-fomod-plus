@@ -18,8 +18,5 @@ set(project_type plugin)
 project(fomod_plus_installer)
 
 target_link_libraries(fomod_plus_installer PRIVATE pugixml nlohmann_json::nlohmann_json dbghelp)
-
-mo2_configure_plugin(fomod_plus_installer
-        WARNINGS OFF
-        PRIVATE_DEPENDS gamebryo)
+mo2_configure_plugin(fomod_plus_installer WARNINGS OFF PRIVATE_DEPENDS)
 mo2_install_target(fomod_plus_installer)

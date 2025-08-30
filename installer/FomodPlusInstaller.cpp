@@ -33,7 +33,7 @@ bool FomodPlusInstaller::init(IOrganizer* organizer)
 void FomodPlusInstaller::setupUiInjection() const
 {
     const auto fomodContent = std::make_shared<FomodDataContent>(mOrganizer);
-    mOrganizer->gameFeatures()->registerFeature(fomodContent, 0, false);
+    mOrganizer->gameFeatures()->registerFeature(fomodContent, 29382, false);
 }
 
 bool FomodPlusInstaller::shouldFallbackToLegacyInstaller() const

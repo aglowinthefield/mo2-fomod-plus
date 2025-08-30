@@ -4,6 +4,8 @@
 
 #include "stringutil.h"
 
+#include <iplugingame.h>
+
 FomodDataContent::FomodDataContent(MOBase::IOrganizer* organizer) : mOrganizer(organizer)
 {
 }
@@ -16,15 +18,19 @@ std::vector<MOBase::ModDataContent::Content> FomodDataContent::getAllContents() 
     return contents;
 }
 
+// Confirmed working, no need to update
 std::vector<int> FomodDataContent::getContentsFor(const std::shared_ptr<const MOBase::IFileTree> fileTree) const
 {
     std::vector<int> contents;
-
-    const auto mod = mOrganizer->modList()->getMod(fileTree->name());
-
-    if (const auto fomodMeta = mod->pluginSetting(QString::fromStdString(StringConstants::Plugin::NAME.data()), "fomod", 0); fomodMeta != 0) {
-        contents.push_back(FomodDataContentConstants::FOMOD_CONTENT_ID);
+    if (modHasFomodContent(mOrganizer->modList()->getMod(fileTree->name()))) {
+       contents.emplace_back(FomodDataContentConstants::FOMOD_CONTENT_ID);
     }
-
     return contents;
+}
+
+bool FomodDataContent::modHasFomodContent(const MOBase::IModInterface* mod)
+{
+    const auto pluginName = QString::fromStdString(StringConstants::Plugin::NAME.data());
+    const auto fomodMeta = mod->pluginSetting(pluginName, "fomod", 0);
+    return fomodMeta != 0;
 }

@@ -6,7 +6,8 @@
       "Bash(\"/c/Program Files/JetBrains/CLion 2025.2/bin/cmake/win/x64/bin/cmake.exe\" --install . --config RelWithDebInfo)",
       "Bash(cp:*)",
       "Bash(mkdir:*)",
-      "Bash(\"/c/Program Files/JetBrains/CLion 2025.2/bin/cmake/win/x64/bin/cmake.exe\" --build vsbuild --config RelWithDebInfo)"
+      "Bash(\"/c/Program Files/JetBrains/CLion 2025.2/bin/cmake/win/x64/bin/cmake.exe\" --build vsbuild --config RelWithDebInfo)",
+      "WebFetch(domain:github.com)"
     ],
     "additionalDirectories": [
       "D:\\var",

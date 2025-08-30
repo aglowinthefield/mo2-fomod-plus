@@ -4,7 +4,7 @@
 #include <moddatacontent.h>
 
 namespace FomodDataContentConstants {
-constexpr int FOMOD_CONTENT_ID = 1000;  // High ID to avoid offset conflicts
+constexpr int FOMOD_CONTENT_ID = 0;
 }
 
 class FomodDataContent final : public MOBase::ModDataContent {
@@ -17,4 +17,5 @@ public:
 
 private:
     MOBase::IOrganizer* mOrganizer;
+    static bool modHasFomodContent(const MOBase::IModInterface* mod);
 };
