@@ -3,7 +3,7 @@
 #include <format>
 #include <pugixml.hpp>
 
-#include "stringutil.h"
+#include <fomod_plus_shared/stringutil.h>
 
 #include <QString>
 

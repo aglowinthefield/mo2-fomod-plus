@@ -5,12 +5,12 @@
 #include <uibase/iplugingame.h>
 #include <QEventLoop>
 #include <QTreeWidget>
-#include <xml/FomodInfoFile.h>
-#include <xml/ModuleConfiguration.h>
-#include <xml/XmlParseException.h>
+#include "xml/FomodInfoFile.h"
+#include "xml/ModuleConfiguration.h"
+#include "xml/XmlParseException.h"
 
 #include "FomodInstallerWindow.h"
-#include "stringutil.h"
+#include <fomod_plus_shared/stringutil.h>
 #include "integration/FomodDataContent.h"
 #include "ui/Colors.h"
 #include "ui/FomodViewModel.h"

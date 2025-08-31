@@ -2,7 +2,7 @@
 
 #include <utility>
 
-#include "ui/FomodViewModel.h"
+#include "../ui/FomodViewModel.h"
 
 using namespace MOBase;
 

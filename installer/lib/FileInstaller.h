@@ -6,7 +6,7 @@
 #include "ConditionTester.h"
 #include "FlagMap.h"
 #include "Logger.h"
-#include "xml/ModuleConfiguration.h"
+#include "../xml/ModuleConfiguration.h"
 
 
 /* This is what legacy fomodInstaller does:

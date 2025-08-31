@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "ViewModels.h"
-#include "stringutil.h"
+#include <fomod_plus_shared/stringutil.h>
 
 #include <ranges>
 #include <string>

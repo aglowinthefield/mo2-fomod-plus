@@ -1,6 +1,6 @@
 ﻿#include "ConditionTester.h"
 
-#include "ui/FomodViewModel.h"
+#include "../ui/FomodViewModel.h"
 
 #include <uibase/iplugingame.h>
 #include <uibase/ipluginlist.h>

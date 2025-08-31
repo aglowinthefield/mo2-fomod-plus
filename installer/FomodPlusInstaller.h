@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "stringutil.h"
+#include <fomod_plus_shared/stringutil.h>
 
 #include <uibase/iplugin.h>
 #include <uibase/iplugininstaller.h>
@@ -13,7 +13,7 @@
 #include "xml/ModuleConfiguration.h"
 
 #include <QDialog>
-#include <integration/FomodDataContent.h>
+#include "integration/FomodDataContent.h"
 
 class FomodInstallerWindow;
 

@@ -7,43 +7,8 @@
       "binaryDir": "${sourceDir}/vsbuild",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "RelWithDebInfo",
-        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
-        "DEPENDENCIES_DIR": {
-          "type": "PATH",
-          "value": "D:/MO2-test-branch/build"
-        },
-        "BOOST_ROOT": {
-          "type": "PATH",
-          "value": "D:/var/boost_1_85_0/lib64-msvc-14.3"
-        },
-        "LZ4_ROOT": {
-          "type": "PATH",
-          "value": "D:/var/lz4-1.9.4"
-        },
-        "ZLIB_ROOT": {
-          "type": "PATH",
-          "value": "D:/var/zlib-1.3.1"
-        },
-        "PYTHON_ROOT": {
-          "type": "PATH",
-          "value": "D:/var/python-3.12.10"
-        },
-        "SEVENZ_ROOT": {
-          "type": "PATH",
-          "value": "D:/var"
-        },
-        "SPDLOG_ROOT": {
-          "type": "PATH",
-          "value": "D:/var/spdlog-1.14.1"
-        },
-        "CMAKE_PREFIX_PATH": {
-          "type": "PATH",
-          "value": "C:/Qt/6.7.3/msvc2022_64"
-        },
-        "MO2_PATH": {
-          "type": "PATH",
-          "value": "D:/MO2-test-branch/install/bin"
-        }
+        "CMAKE_TOOLCHAIN_FILE": "D:/var/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "Qt6_DIR": "C:/Qt/6.7.3/msvc2022_64/lib/cmake/Qt6"
       }
     }
   ]

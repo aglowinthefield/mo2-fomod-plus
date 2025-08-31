@@ -2,7 +2,7 @@
 #include <uibase/ifiletree.h>
 #include <uibase/iplugingame.h>
 #include <uibase/game_features/moddatacontent.h>
-#include "stringutil.h"
+#include <fomod_plus_shared/stringutil.h>
 
 FomodDataContent::FomodDataContent(MOBase::IOrganizer* organizer) : mOrganizer(organizer)
 {

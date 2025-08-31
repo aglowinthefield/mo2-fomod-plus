@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "xml/ModuleConfiguration.h"
+#include "../xml/ModuleConfiguration.h"
 
 
 template <typename T>

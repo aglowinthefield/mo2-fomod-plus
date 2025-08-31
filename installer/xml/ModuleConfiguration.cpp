@@ -4,7 +4,7 @@
 
 #include "XmlHelper.h"
 #include "XmlParseException.h"
-#include "stringutil.h"
+#include <fomod_plus_shared/stringutil.h>
 
 #include <QString>
 

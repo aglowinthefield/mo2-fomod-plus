@@ -1,6 +1,6 @@
 ﻿#include "FomodViewModel.h"
-#include "xml/ModuleConfiguration.h"
-#include "lib/Logger.h"
+#include "../xml/ModuleConfiguration.h"
+#include "../lib/Logger.h"
 
 using GroupCallback  = std::function<void(GroupRef)>;
 using PluginCallback = std::function<void(GroupRef, PluginRef)>;

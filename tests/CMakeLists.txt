@@ -26,7 +26,6 @@ add_executable(runTests
         ${CMAKE_CURRENT_SOURCE_DIR}/../tests/test_fomod_info_file.cpp
         ../installer/lib/Logger.h
         ../installer/xml/ModuleConfiguration.cpp
-        ../share/stringutil.h
         moduleconf/test_moduleconf_bos.cpp
         moduleconf/test_moduleconf_citytrees.cpp
         moduleconf/test_moduleconf_embers.cpp
@@ -37,8 +36,5 @@ add_executable(runTests
         test_stringutil.cpp
 )
 
-target_include_directories(runTests PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../share)
-
-
-target_link_libraries(runTests gtest gtest_main pugixml Qt6::Core Qt6::Gui)
+target_link_libraries(runTests gtest gtest_main pugixml Qt6::Core Qt6::Gui fomod_plus_shared)
 add_test(NAME runTests COMMAND runTests)

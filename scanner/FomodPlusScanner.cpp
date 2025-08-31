@@ -11,7 +11,7 @@
 #include <QMovie>
 #include <iostream>
 
-#include "stringutil.h"
+#include <fomod_plus_shared/stringutil.h>
 
 using ScanCallbackFn = std::function<bool(IModInterface*, ScanResult result)>;
 

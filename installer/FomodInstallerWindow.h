@@ -13,9 +13,8 @@
 #include <QDialog>
 #include <QStackedWidget>
 #include <qradiobutton.h>
-#include <ui/ScaleLabel.h>
+#include "ui/ScaleLabel.h"
 
-#include "FomodInstallerWindow.h"
 #include "lib/FileInstaller.h"
 #include "ui/FomodViewModel.h"
 #include "ui/Colors.h"
