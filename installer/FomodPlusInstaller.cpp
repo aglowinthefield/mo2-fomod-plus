@@ -1,8 +1,8 @@
 ﻿#include "FomodPlusInstaller.h"
 
-#include <igamefeatures.h>
-#include <iinstallationmanager.h>
-#include <iplugingame.h>
+#include <uibase/game_features/igamefeatures.h>
+#include <uibase/iinstallationmanager.h>
+#include <uibase/iplugingame.h>
 #include <QEventLoop>
 #include <QTreeWidget>
 #include <xml/FomodInfoFile.h>

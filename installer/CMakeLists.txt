@@ -1,22 +1,28 @@
 ﻿cmake_minimum_required(VERSION 3.30)
-include(FetchContent)
-add_library(fomod_plus_installer SHARED)
-set_property(TARGET fomod_plus_installer PROPERTY CXX_STANDARD 20)
+project(fomod_plus_installer LANGUAGES CXX)
+
+file(GLOB_RECURSE SRCS "*.cpp" "*.h")
+add_library(fomod_plus_installer ${SRCS})
+set_property(TARGET fomod_plus_installer PROPERTY CXX_STANDARD 23)
 
 target_include_directories(
-        fomod_plus_installer
-        PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}/../share
+    fomod_plus_installer
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../share
 )
 
-FetchContent_Declare(pugixml GIT_REPOSITORY https://github.com/zeux/pugixml GIT_TAG v1.14)
-FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
-FetchContent_MakeAvailable(pugixml json)
+find_package(nlohmann_json CONFIG REQUIRED)
+find_package(pugixml CONFIG REQUIRED)
+find_package(mo2-uibase CONFIG REQUIRED)
+find_package(Qt6 CONFIG REQUIRED COMPONENTS Widgets)
 
-set(project_type plugin)
-project(fomod_plus_installer)
-
-target_link_libraries(fomod_plus_installer PRIVATE pugixml nlohmann_json::nlohmann_json dbghelp)
-mo2_configure_plugin(fomod_plus_installer WARNINGS OFF PRIVATE_DEPENDS)
-mo2_install_target(fomod_plus_installer)
+target_link_libraries(fomod_plus_installer PUBLIC
+        pugixml::shared
+        pugixml::pugixml
+        nlohmann_json::nlohmann_json
+        Qt6::Widgets
+        dbghelp
+        mo2-uibase
+)
+install(TARGETS fomod_plus_installer RUNTIME DESTINATION "D:/MO2-test-branch/install/bin/plugins")

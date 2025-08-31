@@ -2,8 +2,8 @@
 
 #include "ui/FomodViewModel.h"
 
-#include <iplugingame.h>
-#include <ipluginlist.h>
+#include <uibase/iplugingame.h>
+#include <uibase/ipluginlist.h>
 
 std::string setToString(const std::set<int> &set)
 {

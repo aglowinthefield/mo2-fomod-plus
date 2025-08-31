@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <imoinfo.h>
+#include <uibase/imoinfo.h>
 #include <string>
 
 #include "../lib/ConditionTester.h"

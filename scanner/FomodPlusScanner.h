@@ -1,8 +1,7 @@
-﻿#ifndef FOMODPLUSSCANNER_H
-#define FOMODPLUSSCANNER_H
+﻿#pragma once
 
-#include <iplugin.h>
-#include <iplugintool.h>
+#include <uibase/iplugin.h>
+#include <uibase/iplugintool.h>
 
 #include <QDialog>
 #include <QProgressBar>
@@ -66,4 +65,3 @@ private:
     IOrganizer* mOrganizer{ nullptr };
 };
 
-#endif  // FOMODPLUSSCANNER_H

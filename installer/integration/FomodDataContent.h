@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include <imoinfo.h>
-#include <moddatacontent.h>
+#include <uibase/imoinfo.h>
+#include <uibase/game_features/moddatacontent.h>
 
 namespace FomodDataContentConstants {
 constexpr int FOMOD_CONTENT_ID = 400400;

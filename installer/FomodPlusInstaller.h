@@ -2,14 +2,13 @@
 
 #include "stringutil.h"
 
-#include <iplugin.h>
-#include <iplugininstaller.h>
-#include <iplugininstallersimple.h>
+#include <uibase/iplugin.h>
+#include <uibase/iplugininstaller.h>
+#include <uibase/iplugininstallersimple.h>
 
 #include <nlohmann/json.hpp>
 #include "FomodInstallerWindow.h"
 #include "lib/Logger.h"
-#include "ui/Colors.h"
 #include "xml/FomodInfoFile.h"
 #include "xml/ModuleConfiguration.h"
 

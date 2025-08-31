@@ -6,13 +6,11 @@
       "generator": "Visual Studio 17 2022",
       "binaryDir": "${sourceDir}/vsbuild",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": {
-          "type": "STRING",
-          "value": "RelWithDebInfo"
-        },
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
         "DEPENDENCIES_DIR": {
           "type": "PATH",
-          "value": "D:/var/Mod.Organizer-2.5.2-src"
+          "value": "D:/MO2-test-branch/build"
         },
         "BOOST_ROOT": {
           "type": "PATH",
@@ -26,10 +24,6 @@
           "type": "PATH",
           "value": "D:/var/zlib-1.3.1"
         },
-        "QT_ROOT": {
-          "type": "PATH",
-          "value": "C:/Qt/6.7.1/msvc2019_64"
-        },
         "PYTHON_ROOT": {
           "type": "PATH",
           "value": "D:/var/python-3.12.10"
@@ -41,6 +35,14 @@
         "SPDLOG_ROOT": {
           "type": "PATH",
           "value": "D:/var/spdlog-1.14.1"
+        },
+        "CMAKE_PREFIX_PATH": {
+          "type": "PATH",
+          "value": "C:/Qt/6.7.3/msvc2022_64"
+        },
+        "MO2_PATH": {
+          "type": "PATH",
+          "value": "D:/MO2-test-branch/install/bin"
         }
       }
     }

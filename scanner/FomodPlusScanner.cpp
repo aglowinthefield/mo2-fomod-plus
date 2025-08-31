@@ -5,7 +5,7 @@
 #include <QProgressBar>
 #include <QVBoxLayout>
 #include <QMessageBox>
-#include <archive.h>
+#include <archive/archive.h>
 
 #include <QLabel>
 #include <QMovie>

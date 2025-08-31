@@ -166,7 +166,9 @@ void FomodInstallerWindow::updateCheckboxStates() const
                         : "FALSE") + " because " + widgetType +
                     " selection state is " + (pluginData.uiElement->isChecked() ? "TRUE" : "FALSE"));
             }
+            pluginData.uiElement->blockSignals(true);
             pluginData.uiElement->setChecked(pluginData.plugin->isSelected());
+            pluginData.uiElement->blockSignals(false);
         }
 
         if (pluginData.plugin->isEnabled() != pluginData.uiElement->isEnabled()) {

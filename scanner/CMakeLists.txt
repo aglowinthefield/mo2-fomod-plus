@@ -1,32 +1,24 @@
 ﻿cmake_minimum_required(VERSION 3.30)
-project(fomod_plus_scanner)
+project(fomod_plus_scanner LANGUAGES CXX)
 
-add_library(fomod_plus_scanner SHARED)
-include(FetchContent)
-set(project_type plugin)
-set_property(TARGET fomod_plus_scanner PROPERTY CXX_STANDARD 20)
-
-set(CMAKE_GENERATOR_PLATFORM x64)
+file(GLOB_RECURSE SRCS "*.cpp" "*.h")
+add_library(fomod_plus_scanner ${SRCS})
+set_property(TARGET fomod_plus_scanner PROPERTY CXX_STANDARD 23)
 
 target_include_directories(
-        fomod_plus_scanner
-        PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}/../share
-        ${RESOURCE_DIR}
+    fomod_plus_scanner
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../share
 )
 
-if (MSVC)
-    target_compile_options(
-            fomod_plus_scanner
-            PRIVATE
-            /bigobj # increase number of sections in .obj file
-            /W4     # level 4 warnings
-            /WX     # treat all compiler warnings as errors
-            /wd4201 # nonstandard extension used: nameless struct/union
-            /wd4458 # declaration of 'identifier' hides class member
-    )
-endif ()
+find_package(mo2-archive CONFIG REQUIRED)
+find_package(mo2-uibase CONFIG REQUIRED)
+find_package(Qt6 CONFIG REQUIRED COMPONENTS Widgets)
 
-mo2_configure_plugin(fomod_plus_scanner WARNINGS OFF PRIVATE_DEPENDS archive)
-mo2_install_target(fomod_plus_scanner)
+target_link_libraries(fomod_plus_scanner PUBLIC
+        Qt6::Widgets
+        mo2-archive
+        mo2-uibase
+)
+install(TARGETS fomod_plus_scanner RUNTIME DESTINATION "D:/MO2-test-branch/install/bin/plugins")
