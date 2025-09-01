@@ -1,4 +1,6 @@
 ﻿#include "FomodDataContent.h"
+
+#include <iostream>
 #include <uibase/ifiletree.h>
 #include <uibase/iplugingame.h>
 #include <uibase/game_features/moddatacontent.h>
@@ -29,6 +31,9 @@ std::vector<int> FomodDataContent::getContentsFor(const std::shared_ptr<const MO
 bool FomodDataContent::modHasFomodContent(const MOBase::IModInterface* mod)
 {
     const auto pluginName = QString::fromStdString(StringConstants::Plugin::NAME.data());
+    if (mod->isSeparator() || mod->isForeign() || mod->isBackup() || mod->isOverwrite()) {
+        return false;
+    }
     const auto fomodMeta = mod->pluginSetting(pluginName, "fomod", 0);
     return fomodMeta != 0;
 }

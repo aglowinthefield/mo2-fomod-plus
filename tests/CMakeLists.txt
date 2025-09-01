@@ -19,7 +19,7 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-find_package(Qt6 COMPONENTS Core Gui REQUIRED)
+find_package(Qt6 COMPONENTS Core Gui Widgets REQUIRED)
 
 add_executable(runTests
         ${CMAKE_CURRENT_SOURCE_DIR}/../installer/xml/FomodInfoFile.cpp

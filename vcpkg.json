@@ -1,0 +1,9 @@
+{
+  "name": "fomod-plus",
+  "version": "1.0.0",
+  "dependencies": [
+    "nlohmann-json",
+    "mo2-archive",
+    "mo2-uibase"
+  ]
+}
