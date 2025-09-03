@@ -1,16 +1,17 @@
-﻿#include <gtest/gtest.h>
+﻿#include "../../installer/xml/ModuleConfiguration.h"
 #include <QString>
-#include <pugixml.hpp>
 #include <filesystem>
-#include "../../installer/xml/ModuleConfiguration.h"
+#include <gtest/gtest.h>
+#include <pugixml.hpp>
 
 class ModuleConfigurationTest_Lux : public testing::Test {
-protected:
+  protected:
     ModuleConfiguration moduleConfig;
 
     void SetUp() override
     {
-        const std::string filePath          = (std::filesystem::path(__FILE__).parent_path() / "test_moduleconf_lux.xml").string();
+        const std::string filePath
+            = (std::filesystem::path(__FILE__).parent_path() / "test_moduleconf_lux.xml").string();
         const pugi::xml_parse_result result = doc.load_file(filePath.c_str());
         ASSERT_TRUE(result) << "Failed to load XML file: " << result.description();
         configNode = doc.child("config");
@@ -46,20 +47,26 @@ TEST_F(ModuleConfigurationTest_Lux, DeserializeModuleConfiguration)
 TEST_F(ModuleConfigurationTest_Lux, DeserializePlugin)
 {
     Plugin plugin;
-    pugi::xml_node pluginNode = configNode.child("installSteps").child("installStep").child("optionalFileGroups").
-        child("group").child("plugins").child("plugin");
+    pugi::xml_node pluginNode = configNode.child("installSteps")
+                                    .child("installStep")
+                                    .child("optionalFileGroups")
+                                    .child("group")
+                                    .child("plugins")
+                                    .child("plugin");
     ASSERT_TRUE(pluginNode);
     ASSERT_TRUE(plugin.deserialize(pluginNode));
 
     EXPECT_EQ(plugin.name, "Fort Windpoint"); // Replace with actual expected name
-    EXPECT_EQ(plugin.description, "Compatibility patch for Fort Windpoint (Credits to AgentW) (ESPFE) Fixed version by Xtudo is required.");
+    EXPECT_EQ(plugin.description,
+        "Compatibility patch for Fort Windpoint (Credits to AgentW) (ESPFE) Fixed version by Xtudo is required.");
     EXPECT_EQ(plugin.image.path, ""); // lux has no plugin images
 }
 
 TEST_F(ModuleConfigurationTest_Lux, DeserializeGroup)
 {
     Group group;
-    pugi::xml_node groupNode = configNode.child("installSteps").child("installStep").child("optionalFileGroups").child("group");
+    pugi::xml_node groupNode
+        = configNode.child("installSteps").child("installStep").child("optionalFileGroups").child("group");
     ASSERT_TRUE(groupNode);
     ASSERT_TRUE(group.deserialize(groupNode));
 
@@ -81,9 +88,17 @@ TEST_F(ModuleConfigurationTest_Lux, DeserializeInstallStep)
 
 TEST_F(ModuleConfigurationTest_Lux, DeserializeDependencies)
 {
-    const pugi::xml_node dependencyNode = configNode.child("installSteps").child("installStep").
-        child("optionalFileGroups").child("group").child("plugins").child("plugin").child("typeDescriptor").
-        child("dependencyType").child("patterns").child("pattern").child("dependencies");
+    const pugi::xml_node dependencyNode = configNode.child("installSteps")
+                                              .child("installStep")
+                                              .child("optionalFileGroups")
+                                              .child("group")
+                                              .child("plugins")
+                                              .child("plugin")
+                                              .child("typeDescriptor")
+                                              .child("dependencyType")
+                                              .child("patterns")
+                                              .child("pattern")
+                                              .child("dependencies");
     ASSERT_TRUE(dependencyNode) << "No <dependencies> node found";
 
     const std::string operatorType = dependencyNode.attribute("operator").as_string();

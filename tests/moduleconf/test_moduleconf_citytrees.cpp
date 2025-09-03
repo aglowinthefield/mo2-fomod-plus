@@ -1,24 +1,21 @@
-﻿#include <gtest/gtest.h>
+﻿#include "../../installer/xml/ModuleConfiguration.h"
 #include <QString>
-#include "../../installer/xml/ModuleConfiguration.h"
 #include <filesystem>
+#include <gtest/gtest.h>
 
 class MCCityTrees : public testing::Test {
-protected:
+  protected:
     ModuleConfiguration moduleConfig;
 
     void SetUp() override
     {
-        const std::string filePath = (std::filesystem::path(__FILE__).parent_path() / "test_moduleconf_citytrees.xml").
-            string();
+        const std::string filePath
+            = (std::filesystem::path(__FILE__).parent_path() / "test_moduleconf_citytrees.xml").string();
         moduleConfig.deserialize(QString::fromStdString(filePath));
     }
 };
 
-TEST_F(MCCityTrees, Deserializes)
-{
-    EXPECT_EQ(moduleConfig.moduleName, "RogueUnicorn - City Trees");
-}
+TEST_F(MCCityTrees, Deserializes) { EXPECT_EQ(moduleConfig.moduleName, "RogueUnicorn - City Trees"); }
 
 // 521 conditionalFileInstalls->patterns->pattern. thank you intellij xpath
 // done via count(//conditionalFileInstalls/patterns/pattern)

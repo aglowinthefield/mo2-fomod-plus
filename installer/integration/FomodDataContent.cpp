@@ -1,20 +1,19 @@
 ﻿#include "FomodDataContent.h"
 
-#include <iostream>
+#include <fomod_plus_shared/stringutil.h>
+#include <uibase/game_features/moddatacontent.h>
 #include <uibase/ifiletree.h>
 #include <uibase/iplugingame.h>
-#include <uibase/game_features/moddatacontent.h>
-#include <fomod_plus_shared/stringutil.h>
 
-FomodDataContent::FomodDataContent(MOBase::IOrganizer* organizer) : mOrganizer(organizer)
+FomodDataContent::FomodDataContent(MOBase::IOrganizer* organizer)
+    : mOrganizer(organizer)
 {
 }
 
 std::vector<MOBase::ModDataContent::Content> FomodDataContent::getAllContents() const
 {
-    static const std::vector<Content> contents = {
-        {FomodDataContentConstants::FOMOD_CONTENT_ID, "FOMOD", ":/fomod/hat", false}
-    };
+    static const std::vector<Content> contents
+        = { { FomodDataContentConstants::FOMOD_CONTENT_ID, "FOMOD", ":/fomod/hat", false } };
     return contents;
 }
 
@@ -23,7 +22,7 @@ std::vector<int> FomodDataContent::getContentsFor(const std::shared_ptr<const MO
 {
     std::vector<int> contents;
     if (modHasFomodContent(mOrganizer->modList()->getMod(fileTree->name()))) {
-       contents.emplace_back(FomodDataContentConstants::FOMOD_CONTENT_ID);
+        contents.emplace_back(FomodDataContentConstants::FOMOD_CONTENT_ID);
     }
     return contents;
 }

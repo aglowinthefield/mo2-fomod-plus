@@ -10,7 +10,6 @@
 class ScaleLabel;
 using LabelImagePair = std::pair<QString, QString>;
 
-
 /*
 +----------------------------------------------------------+
 |n/N                                                    X  |
@@ -36,13 +35,11 @@ using LabelImagePair = std::pair<QString, QString>;
 class FomodImageViewer final : public QDialog {
     Q_OBJECT
 
-public:
-    explicit FomodImageViewer(QWidget* parent,
-        const QString& fomodPath,
-        const std::shared_ptr<StepViewModel>& activeStep,
-        const std::shared_ptr<PluginViewModel>& activePlugin);
+  public:
+    explicit FomodImageViewer(QWidget* parent, const QString& fomodPath,
+        const std::shared_ptr<StepViewModel>& activeStep, const std::shared_ptr<PluginViewModel>& activePlugin);
 
-private:
+  private:
     void collectImages();
 
     QWidget* createCenterRow(QWidget* parent);
@@ -72,21 +69,21 @@ private:
     void showEvent(QShowEvent* event) override;
 
     std::vector<LabelImagePair> mLabelsAndImages;
-    std::vector<QWidget*> mImagePanes{};
-    int mCurrentIndex{ 0 };
+    std::vector<QWidget*> mImagePanes {};
+    int mCurrentIndex { 0 };
 
     QString mFomodPath;
     const std::shared_ptr<StepViewModel>& mActiveStep;
     const std::shared_ptr<PluginViewModel>& mActivePlugin;
 
-    QWidget* mCenterRow{ nullptr };
-    QWidget* mTopBar{ nullptr };
-    QWidget* mCloseButton{ nullptr };
-    QPushButton* mBackButton{ nullptr };
-    QPushButton* mForwardButton{ nullptr };
-    QLabel* mCounter{ nullptr };
-    QWidget* mMainImageWrapper{ nullptr };
-    ScaleLabel* mMainImage{ nullptr };
-    QLabel* mLabel{ nullptr };
-    QScrollArea* mPreviewImages{ nullptr };
+    QWidget* mCenterRow { nullptr };
+    QWidget* mTopBar { nullptr };
+    QWidget* mCloseButton { nullptr };
+    QPushButton* mBackButton { nullptr };
+    QPushButton* mForwardButton { nullptr };
+    QLabel* mCounter { nullptr };
+    QWidget* mMainImageWrapper { nullptr };
+    ScaleLabel* mMainImage { nullptr };
+    QLabel* mLabel { nullptr };
+    QScrollArea* mPreviewImages { nullptr };
 };

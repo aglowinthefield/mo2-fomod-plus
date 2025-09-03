@@ -4,29 +4,28 @@
 #include <mutex>
 #include <regex>
 
-
 // Log levels
-enum LogLevel {
-    DEBUG = 0,
-    INFO = 1,
-    WARN = 2,
-    ERR = 3
-};
+enum LogLevel { DEBUG = 0, INFO = 1, WARN = 2, ERR = 3 };
 
 // Convert LogLevel to string
-inline const char* logLevelToString(const LogLevel level) {
+inline const char* logLevelToString(const LogLevel level)
+{
     switch (level) {
-    case DEBUG: return "DEBUG";
-    case INFO:  return "INFO";
-    case WARN:  return "WARN";
-    case ERR:   return "ERROR";
-    default:    return "UNKNOWN";
+    case DEBUG:
+        return "DEBUG";
+    case INFO:
+        return "INFO";
+    case WARN:
+        return "WARN";
+    case ERR:
+        return "ERROR";
+    default:
+        return "UNKNOWN";
     }
 }
 
-
 class Logger {
-public:
+  public:
     static Logger& getInstance()
     {
         static Logger instance;
@@ -53,11 +52,11 @@ public:
     {
 
 #if defined(__GNUC__) || defined(__clang__)
-                std::string functionName = __PRETTY_FUNCTION__;
+        std::string functionName = __PRETTY_FUNCTION__;
 #elif defined(_MSC_VER)
         std::string functionName = __FUNCSIG__;
 #else
-                std::string functionName = "UnknownFunction";
+        std::string functionName = "UnknownFunction";
 #endif
 
         std::regex classNameRegex(R"((\w+)::\w+\()");
@@ -69,7 +68,7 @@ public:
         }
 
         std::lock_guard lock(mMutex);
-        
+
         auto writeLog = [&](std::ostream& stream) {
             switch (level) {
             case DEBUG:
@@ -90,13 +89,13 @@ public:
         if (mLogFile.is_open()) {
             writeLog(mLogFile);
         }
-        
+
         writeLog(std::cout);
     }
 
     Logger& operator=(const Logger&) = delete;
 
-private:
+  private:
     Logger() = default;
 
     ~Logger()
@@ -111,8 +110,8 @@ private:
     std::ofstream mLogFile;
     std::mutex mMutex;
 #if !defined(NDEBUG) || defined(CMAKE_BUILD_TYPE_RELWITHDEBINFO)
-    bool mDebugMode = true;   // Auto-enable in debug/RelWithDebInfo builds
+    bool mDebugMode = true; // Auto-enable in debug/RelWithDebInfo builds
 #else
-    bool mDebugMode = false;  // Disable in release builds
+    bool mDebugMode = false; // Disable in release builds
 #endif
 };

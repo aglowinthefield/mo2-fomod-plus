@@ -21,4 +21,5 @@ target_link_libraries(fomod_plus_installer
         dbghelp
         fomod_plus_shared
 )
+
 install(TARGETS fomod_plus_installer RUNTIME DESTINATION "D:/MO2-test-branch/install/bin/plugins")

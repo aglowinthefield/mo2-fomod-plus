@@ -1,10 +1,9 @@
 ﻿#include "FomodViewModel.h"
-#include "../xml/ModuleConfiguration.h"
 #include "../lib/Logger.h"
+#include "../xml/ModuleConfiguration.h"
 
 using GroupCallback  = std::function<void(GroupRef)>;
 using PluginCallback = std::function<void(GroupRef, PluginRef)>;
-
 
 /*
 --------------------------------------------------------------------------------
@@ -21,9 +20,8 @@ bool isRadioLike(GroupRef group)
 
 bool moreThanOneSelected(GroupRef group)
 {
-    auto selectedPlugins = group->getPlugins() | std::views::filter([](const auto& plugin) {
-        return plugin->isSelected();
-    });
+    auto selectedPlugins
+        = group->getPlugins() | std::views::filter([](const auto& plugin) { return plugin->isSelected(); });
     return std::ranges::distance(selectedPlugins) > 1;
 }
 
@@ -71,12 +69,13 @@ std::string pluginTypeEnumToString(const PluginTypeEnum type)
  *
  * @return A FomodViewModel instance
  */
-FomodViewModel::FomodViewModel(MOBase::IOrganizer* organizer,
-    std::unique_ptr<ModuleConfiguration> fomodFile,
+FomodViewModel::FomodViewModel(MOBase::IOrganizer* organizer, std::unique_ptr<ModuleConfiguration> fomodFile,
     std::unique_ptr<FomodInfoFile> infoFile)
-    : mOrganizer(organizer), mFomodFile(std::move(fomodFile)), mInfoFile(std::move(infoFile)),
-      mConditionTester(organizer),
-      mInfoViewModel(std::make_shared<InfoViewModel>(mInfoFile))
+    : mOrganizer(organizer)
+    , mFomodFile(std::move(fomodFile))
+    , mInfoFile(std::move(infoFile))
+    , mConditionTester(organizer)
+    , mInfoViewModel(std::make_shared<InfoViewModel>(mInfoFile))
 {
     mFlags = std::make_shared<FlagMap>();
 }
@@ -89,22 +88,21 @@ FomodViewModel::FomodViewModel(MOBase::IOrganizer* organizer,
  * @return A shared pointer to the FomodViewModel instance
  */
 std::shared_ptr<FomodViewModel> FomodViewModel::create(MOBase::IOrganizer* organizer,
-    std::unique_ptr<ModuleConfiguration> fomodFile,
-    std::unique_ptr<FomodInfoFile> infoFile)
+    std::unique_ptr<ModuleConfiguration> fomodFile, std::unique_ptr<FomodInfoFile> infoFile)
 {
     auto viewModel = std::make_shared<FomodViewModel>(organizer, std::move(fomodFile), std::move(infoFile));
     if (viewModel->mFlags == nullptr) {
         viewModel->mFlags = std::make_shared<FlagMap>();
     }
     viewModel->createStepViewModels();
-    
+
     // Handle FOMODs with no steps
     if (viewModel->mSteps.empty()) {
         viewModel->mInitialized = true;
         viewModel->logMessage(INFO, "FOMOD with no steps - initialization complete");
         return viewModel;
     }
-    
+
     viewModel->processPluginConditions(-1); // please dont judge me. ill fix this someday.
     viewModel->enforceGroupConstraints();
     viewModel->updateVisibleSteps();
@@ -183,25 +181,24 @@ void FomodViewModel::createStepViewModels()
             shared_ptr_list<PluginViewModel> pluginViewModels;
 
             for (int pluginIndex = 0; pluginIndex < group.plugins.plugins.size(); ++pluginIndex) {
-                const auto& plugin   = group.plugins.plugins[pluginIndex];
-                auto pluginViewModel = std::make_shared<PluginViewModel>(std::make_shared<Plugin>(plugin), false, true,
-                    pluginIndex);
+                const auto& plugin = group.plugins.plugins[pluginIndex];
+                auto pluginViewModel
+                    = std::make_shared<PluginViewModel>(std::make_shared<Plugin>(plugin), false, true, pluginIndex);
 
                 pluginViewModel->setStepIndex(stepIndex);
                 pluginViewModel->setGroupIndex(groupIndex);
                 pluginViewModels.emplace_back(pluginViewModel); // Assuming default values for selected and enabled
             }
-            auto groupViewModel = std::make_shared<GroupViewModel>(std::make_shared<Group>(group), pluginViewModels,
-                groupIndex, stepIndex);
+            auto groupViewModel = std::make_shared<GroupViewModel>(
+                std::make_shared<Group>(group), pluginViewModels, groupIndex, stepIndex);
             if (groupViewModel->getType() == SelectAtMostOne && groupViewModel->getPlugins().size() > 1) {
                 createNonePluginForGroup(groupViewModel);
             }
             groupViewModels.emplace_back(groupViewModel);
         }
-        auto stepViewModel = std::make_shared<StepViewModel>(std::make_shared<InstallStep>(installStep),
-            std::move(groupViewModels), stepIndex);
+        auto stepViewModel = std::make_shared<StepViewModel>(
+            std::make_shared<InstallStep>(installStep), std::move(groupViewModels), stepIndex);
         stepViewModels.emplace_back(stepViewModel);
-
     }
     mSteps = std::move(stepViewModels);
 }
@@ -233,8 +230,7 @@ void FomodViewModel::enforceRadioGroupConstraints(GroupRef group) const
     logMessage(INFO, "Enforcing group constraints for group " + group->getName());
 
     if (group->getType() == SelectExactlyOne && group->getPlugins().size() == 1) {
-        logMessage(INFO,
-            "Disabling " + group->getPlugins().at(0)->getName() + " because it's the only plugin.");
+        logMessage(INFO, "Disabling " + group->getPlugins().at(0)->getName() + " because it's the only plugin.");
         group->getPlugins().at(0)->setEnabled(false);
     }
 
@@ -279,7 +275,6 @@ void FomodViewModel::enforceSelectAllConstraint(GroupRef groupViewModel) const
         togglePlugin(groupViewModel, pluginViewModel, true);
         pluginViewModel->setEnabled(false);
     }
-
 }
 
 void FomodViewModel::enforceSelectAtLeastOneConstraint(GroupRef group) const
@@ -327,7 +322,7 @@ void FomodViewModel::processPlugin(GroupRef group, PluginRef plugin) const
 
     logMessage(DEBUG,
         "Plugin " + plugin->getName() + " in group " + std::to_string(group->getOwnIndex()) + " has changed type from "
-        + pluginTypeEnumToString(plugin->getCurrentPluginType()) + " to " + pluginTypeEnumToString(typeDescriptor));
+            + pluginTypeEnumToString(plugin->getCurrentPluginType()) + " to " + pluginTypeEnumToString(typeDescriptor));
 
     plugin->setCurrentPluginType(typeDescriptor);
 
@@ -354,7 +349,7 @@ void FomodViewModel::processPlugin(GroupRef group, PluginRef plugin) const
         if (!isOnlyPlugin) {
             plugin->setEnabled(true);
         }
-    // In the case where we're changing flags to make something optional from Recommended, set it back to unchecked.
+        // In the case where we're changing flags to make something optional from Recommended, set it back to unchecked.
         if (plugin->isSelected() & stepNotVisitedYet && group->getType() == SelectAny) {
             togglePlugin(group, plugin, false);
         }
@@ -368,13 +363,14 @@ void FomodViewModel::processPlugin(GroupRef group, PluginRef plugin) const
     case PluginTypeEnum::CouldBeUsable:
         plugin->setEnabled(true);
         break;
-    default: ;
+    default:;
     }
 }
 
 void FomodViewModel::processPluginConditions(const int fromStepIndex) const
 {
-    // We only want to update plugins that haven't been seen yet. Otherwise, we could undo manual selections by the user.
+    // We only want to update plugins that haven't been seen yet. Otherwise, we could undo manual selections by the
+    // user.
     if (fromStepIndex >= 0) {
         logMessage(DEBUG, "Processing plugins from step " + std::to_string(fromStepIndex));
         forEachFuturePlugin(fromStepIndex, [this](const auto& groupViewModel, const auto& pluginViewModel) {
@@ -435,10 +431,7 @@ bool FomodViewModel::togglePlugin(GroupRef group, PluginRef plugin, const bool s
     return true;
 }
 
-void FomodViewModel::markManuallySet(PluginRef plugin)
-{
-    plugin->manuallySet = true;
-}
+void FomodViewModel::markManuallySet(PluginRef plugin) { plugin->manuallySet = true; }
 
 #pragma endregion
 
@@ -490,9 +483,9 @@ void FomodViewModel::rebuildConditionFlagsForStep(const int stepIndex) const
 void FomodViewModel::stepBack()
 {
     if (mSteps.empty()) {
-        return;  // No steps to move back to
+        return; // No steps to move back to
     }
-    
+
     logMessage(DEBUG, "Stepping back from step " + std::to_string(mCurrentStepIndex));
     const auto it = std::ranges::find(mVisibleStepIndices, mCurrentStepIndex);
     if (it != mVisibleStepIndices.end() && it != mVisibleStepIndices.begin()) {
@@ -506,9 +499,9 @@ void FomodViewModel::stepBack()
 void FomodViewModel::stepForward()
 {
     if (mSteps.empty()) {
-        return;  // No steps to move forward to
+        return; // No steps to move forward to
     }
-    
+
     logMessage(DEBUG, "Stepping forward from step " + std::to_string(mCurrentStepIndex));
     const auto it = std::ranges::find(mVisibleStepIndices, mCurrentStepIndex);
     if (it != mVisibleStepIndices.end() && std::next(it) != mVisibleStepIndices.end()) {
@@ -523,7 +516,7 @@ void FomodViewModel::stepForward()
 bool FomodViewModel::isLastVisibleStep() const
 {
     if (mSteps.empty()) {
-        return true;  // Legacy FOMODs are always "last step"
+        return true; // Legacy FOMODs are always "last step"
     }
     return !mVisibleStepIndices.empty() && mCurrentStepIndex == mVisibleStepIndices.back();
 }
@@ -531,17 +524,16 @@ bool FomodViewModel::isLastVisibleStep() const
 bool FomodViewModel::isFirstVisibleStep() const
 {
     if (mSteps.empty()) {
-        return true;  // Legacy FOMODs are always "first step"
+        return true; // Legacy FOMODs are always "first step"
     }
     return !mVisibleStepIndices.empty() && mCurrentStepIndex == mVisibleStepIndices.front();
 }
 
 void FomodViewModel::preinstall(const std::shared_ptr<MOBase::IFileTree>& tree, const QString& fomodPath)
 {
-    mFileInstaller = std::make_shared<
-        FileInstaller>(mOrganizer, fomodPath, tree, std::move(mFomodFile), mFlags, mSteps);
+    mFileInstaller
+        = std::make_shared<FileInstaller>(mOrganizer, fomodPath, tree, std::move(mFomodFile), mFlags, mSteps);
 }
-
 
 std::string FomodViewModel::getDisplayImage() const
 {
@@ -570,24 +562,22 @@ std::string FomodViewModel::toString() const
     for (const auto& step : mSteps) {
 
         const auto isVisible = std::ranges::find(mVisibleStepIndices, step->getOwnIndex()) != mVisibleStepIndices.end();
-        viewModel += "Step " + std::to_string(step->getOwnIndex()) + ": " + step->getName() + "[Visible: " +
-            std::to_string(isVisible) + "]\n";
+        viewModel += "Step " + std::to_string(step->getOwnIndex()) + ": " + step->getName()
+            + "[Visible: " + std::to_string(isVisible) + "]\n";
 
         for (const auto& group : step->getGroups()) {
 
             viewModel += "\tGroup " + std::to_string(group->getOwnIndex()) + ": " + group->getName() + "\n";
 
             for (const auto& plugin : group->getPlugins()) {
-                viewModel += "\t\tPlugin: " + plugin->getName() + "[Selected: " + (plugin->isSelected()
-                    ? "TRUE"
-                    : "FALSE") + "]\n";
+                viewModel += "\t\tPlugin: " + plugin->getName()
+                    + "[Selected: " + (plugin->isSelected() ? "TRUE" : "FALSE") + "]\n";
             }
         }
     }
     viewModel += "\n";
     std::ostringstream oss;
-    std::ranges::transform(mVisibleStepIndices,
-        std::ostream_iterator<std::string>(oss, ", "),
+    std::ranges::transform(mVisibleStepIndices, std::ostream_iterator<std::string>(oss, ", "),
         [](const int i) { return std::to_string(i); });
 
     std::string stepList = oss.str();
@@ -597,7 +587,6 @@ std::string FomodViewModel::toString() const
     viewModel += mFlags->toString();
     return viewModel;
 }
-
 
 void FomodViewModel::selectFromJson(nlohmann::json json) const
 {
@@ -634,10 +623,8 @@ void FomodViewModel::selectFromJson(nlohmann::json json) const
 
                 logMessage(DEBUG, "Looking for plugin " + searchName);
 
-                const auto currentPlugin = std::ranges::find_if(allPlugins,
-                    [searchName](PluginRef p) {
-                        return p->getName() == searchName;
-                    });
+                const auto currentPlugin = std::ranges::find_if(
+                    allPlugins, [searchName](PluginRef p) { return p->getName() == searchName; });
 
                 if (currentPlugin == allPlugins.end()) {
                     logMessage(DEBUG, "Plugin " + searchName + " not found in group " + currentGroup->getName());
@@ -668,10 +655,8 @@ void FomodViewModel::selectFromJson(nlohmann::json json) const
 
                 logMessage(DEBUG, "Looking for plugin to disable: " + searchName);
 
-                const auto currentPlugin = std::ranges::find_if(allPlugins,
-                    [searchName](PluginRef p) {
-                        return p->getName() == searchName;
-                    });
+                const auto currentPlugin = std::ranges::find_if(
+                    allPlugins, [searchName](PluginRef p) { return p->getName() == searchName; });
 
                 if (currentPlugin == allPlugins.end()) {
                     logMessage(DEBUG, "Plugin " + searchName + " not found in group " + currentGroup->getName());

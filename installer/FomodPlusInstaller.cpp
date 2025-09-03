@@ -1,20 +1,20 @@
 ﻿#include "FomodPlusInstaller.h"
 
-#include <uibase/game_features/igamefeatures.h>
-#include <uibase/iinstallationmanager.h>
-#include <uibase/iplugingame.h>
-#include <QEventLoop>
-#include <QTreeWidget>
 #include "xml/FomodInfoFile.h"
 #include "xml/ModuleConfiguration.h"
 #include "xml/XmlParseException.h"
+#include <QEventLoop>
+#include <QTreeWidget>
+#include <uibase/game_features/igamefeatures.h>
+#include <uibase/iinstallationmanager.h>
+#include <uibase/iplugingame.h>
 
 #include "FomodInstallerWindow.h"
-#include <fomod_plus_shared/stringutil.h>
 #include "integration/FomodDataContent.h"
+#include "lib/CrashHandler.h"
 #include "ui/Colors.h"
 #include "ui/FomodViewModel.h"
-#include "lib/CrashHandler.h"
+#include <fomod_plus_shared/stringutil.h>
 
 #include <QMessageBox>
 #include <QSettings>
@@ -24,7 +24,7 @@ using namespace Qt::Literals::StringLiterals;
 bool FomodPlusInstaller::init(IOrganizer* organizer)
 {
     CrashHandler::initialize();
-    mOrganizer = organizer;
+    mOrganizer    = organizer;
     mFomodContent = make_shared<FomodDataContent>(organizer);
     log.setLogFilePath(QDir::currentPath().toStdString() + "/logs/fomodplus.log");
     setupUiInjection();
@@ -37,11 +37,12 @@ void FomodPlusInstaller::setupUiInjection() const
         mOrganizer->gameFeatures()->registerFeature(mFomodContent, 9999, false);
     }
 
-    mOrganizer->onPluginSettingChanged([this](const QString& pluginName, const QString& key, const QVariant& oldValue, const QVariant& newValue) {
-        if (pluginName == name() && key == "show_fomod_filter") {
-            toggleFeature(newValue.toBool());
-        }
-    });
+    mOrganizer->onPluginSettingChanged(
+        [this](const QString& pluginName, const QString& key, const QVariant& oldValue, const QVariant& newValue) {
+            if (pluginName == name() && key == "show_fomod_filter") {
+                toggleFeature(newValue.toBool());
+            }
+        });
 }
 
 void FomodPlusInstaller::toggleFeature(const bool enabled) const
@@ -92,12 +93,11 @@ QString FomodPlusInstaller::getSelectedColor() const
     return it != UiColors::colorStyles.end() ? it->first : "Blue";
 }
 
-std::vector<std::shared_ptr<const IPluginRequirement> > FomodPlusInstaller::requirements() const
+std::vector<std::shared_ptr<const IPluginRequirement>> FomodPlusInstaller::requirements() const
 {
-    return { Requirements::gameDependency(
-    { u"Morrowind"_s, u"Oblivion"_s, u"Fallout 3"_s, u"New Vegas"_s, u"Skyrim"_s, u"Enderal"_s,
-      u"Fallout 4"_s, u"Skyrim Special Edition"_s, u"Enderal Special Edition"_s,
-      u"Skyrim VR"_s, u"Fallout 4 VR"_s, u"Starfield"_s }) };
+    return { Requirements::gameDependency({ u"Morrowind"_s, u"Oblivion"_s, u"Fallout 3"_s, u"New Vegas"_s, u"Skyrim"_s,
+        u"Enderal"_s, u"Fallout 4"_s, u"Skyrim Special Edition"_s, u"Enderal Special Edition"_s, u"Skyrim VR"_s,
+        u"Fallout 4 VR"_s, u"Starfield"_s }) };
 }
 
 bool FomodPlusInstaller::isArchiveSupported(std::shared_ptr<const IFileTree> tree) const
@@ -111,22 +111,20 @@ bool FomodPlusInstaller::isArchiveSupported(std::shared_ptr<const IFileTree> tre
 
 QList<PluginSetting> FomodPlusInstaller::settings() const
 {
-    return {
-        { u"fallback_to_legacy"_s, u"When hitting cancel, fall back to the legacy FOMOD installer."_s, false },
+    return { { u"fallback_to_legacy"_s, u"When hitting cancel, fall back to the legacy FOMOD installer."_s, false },
         { u"always_restore_choices"_s, u"Restore previous choices without clicking the magic button"_s, true },
         { u"show_images"_s, u"Show image previews and the image carousel in installer windows."_s, true },
         { u"color_theme"_s, u"Select the color theme for the installer"_s, QString("Blue") }, // Default color name
         { u"show_notifications"_s, u"Show the notifications panel"_s, false },
-        { u"show_fomod_filter"_s, u"Show the filter in the sidebar (may break other content filters)"_s, true }
-    };
+        { u"show_fomod_filter"_s, u"Show the filter in the sidebar (may break other content filters)"_s, true } };
 }
 
-std::pair<nlohmann::json, IModInterface*> FomodPlusInstaller::getExistingFomodJson(const GuessedValue<QString>& modName,
-    const int& nexusId,
-    const int& stepsInCurrentFomod) const
+std::pair<nlohmann::json, IModInterface*> FomodPlusInstaller::getExistingFomodJson(
+    const GuessedValue<QString>& modName, const int& nexusId, const int& stepsInCurrentFomod) const
 {
-    logMessage(DEBUG, "FomodPlusInstaller::getExistingFomodJson - modName: " + modName->toStdString() +
-        " nexusId: " + std::to_string(nexusId));
+    logMessage(DEBUG,
+        "FomodPlusInstaller::getExistingFomodJson - modName: " + modName->toStdString()
+            + " nexusId: " + std::to_string(nexusId));
 
     // Need to have better mod matching based on presence of FOMOD plugin data.
     struct ModMatch {
@@ -140,7 +138,8 @@ std::pair<nlohmann::json, IModInterface*> FomodPlusInstaller::getExistingFomodJs
     auto parseStepCount = [](const QVariant& fomodData) -> std::pair<bool, int> {
         try {
             if (fomodData.isValid() && !fomodData.isNull()) {
-                if (auto json = nlohmann::json::parse(fomodData.toString().toStdString()); json.contains("steps") && json["steps"].is_array()) {
+                if (auto json = nlohmann::json::parse(fomodData.toString().toStdString());
+                    json.contains("steps") && json["steps"].is_array()) {
                     return { true, static_cast<int>(json["steps"].size()) };
                 }
             }
@@ -152,21 +151,11 @@ std::pair<nlohmann::json, IModInterface*> FomodPlusInstaller::getExistingFomodJs
 
     // Check exact match first
     if (const auto exactMod = mOrganizer->modList()->getMod(modName)) {
-        const auto fomodData    = exactMod->pluginSetting(name(), "fomod", 0);
+        const auto fomodData = exactMod->pluginSetting(name(), "fomod", 0);
         if (auto [valid, stepCount] = parseStepCount(fomodData); valid) {
-            matches.push_back({
-                exactMod,
-                true,
-                stepCount,
-                nlohmann::json::parse(fomodData.toString().toStdString())
-            });
+            matches.push_back({ exactMod, true, stepCount, nlohmann::json::parse(fomodData.toString().toStdString()) });
         } else {
-            matches.push_back({
-                exactMod,
-                false,
-                0,
-                nlohmann::json()
-            });
+            matches.push_back({ exactMod, false, 0, nlohmann::json() });
         }
     }
 
@@ -175,19 +164,10 @@ std::pair<nlohmann::json, IModInterface*> FomodPlusInstaller::getExistingFomodJs
         if (const auto variantMod = mOrganizer->modList()->getMod(variant)) {
             const auto fomodData = variantMod->pluginSetting(name(), "fomod", 0);
             if (auto [valid, stepCount] = parseStepCount(fomodData); valid) {
-                matches.push_back({
-                    variantMod,
-                    true,
-                    stepCount,
-                    nlohmann::json::parse(fomodData.toString().toStdString())
-                });
+                matches.push_back(
+                    { variantMod, true, stepCount, nlohmann::json::parse(fomodData.toString().toStdString()) });
             } else {
-                matches.push_back({
-                    variantMod,
-                    false,
-                    0,
-                    nlohmann::json()
-                });
+                matches.push_back({ variantMod, false, 0, nlohmann::json() });
             }
         }
     }
@@ -198,42 +178,37 @@ std::pair<nlohmann::json, IModInterface*> FomodPlusInstaller::getExistingFomodJs
     }
 
     // First try to find exact step count match
-    const auto exactMatch = ranges::find_if(matches,
-        [stepsInCurrentFomod](const ModMatch& match) {
-            return match.hasFomodData && match.stepCount == stepsInCurrentFomod;
-        });
+    const auto exactMatch = ranges::find_if(matches, [stepsInCurrentFomod](const ModMatch& match) {
+        return match.hasFomodData && match.stepCount == stepsInCurrentFomod;
+    });
 
     if (exactMatch != matches.end()) {
-        logMessage(DEBUG, "Found exact step count match in mod: " +
-            exactMatch->mod->name().toStdString() +
-            " with " + std::to_string(exactMatch->stepCount) + " steps");
+        logMessage(DEBUG,
+            "Found exact step count match in mod: " + exactMatch->mod->name().toStdString() + " with "
+                + std::to_string(exactMatch->stepCount) + " steps");
         return std::make_pair(exactMatch->fomodJson, exactMatch->mod);
     }
 
     // Find the closest step count among mods with FOMOD data
-    const auto closestMatch = ranges::min_element(matches,
-        [stepsInCurrentFomod](const ModMatch& a, const ModMatch& b) {
-            if (!a.hasFomodData || !b.hasFomodData)
-                return false;
-            // The min difference between the step counts
-            return std::abs(a.stepCount - stepsInCurrentFomod) <
-                std::abs(b.stepCount - stepsInCurrentFomod);
-        });
+    const auto closestMatch = ranges::min_element(matches, [stepsInCurrentFomod](const ModMatch& a, const ModMatch& b) {
+        if (!a.hasFomodData || !b.hasFomodData)
+            return false;
+        // The min difference between the step counts
+        return std::abs(a.stepCount - stepsInCurrentFomod) < std::abs(b.stepCount - stepsInCurrentFomod);
+    });
 
     if (closestMatch != matches.end() && closestMatch->hasFomodData) {
-        logMessage(DEBUG, "Using closest step count match from mod: " +
-            closestMatch->mod->name().toStdString() +
-            " with " + std::to_string(closestMatch->stepCount) + " steps");
+        logMessage(DEBUG,
+            "Using closest step count match from mod: " + closestMatch->mod->name().toStdString() + " with "
+                + std::to_string(closestMatch->stepCount) + " steps");
         return std::make_pair(closestMatch->fomodJson, closestMatch->mod);
     }
 
     // Fallback to first mod with any FOMOD data
-    const auto anyFomod = ranges::find_if(matches,
-        [](const ModMatch& match) { return match.hasFomodData; });
+    const auto anyFomod = ranges::find_if(matches, [](const ModMatch& match) { return match.hasFomodData; });
 
     if (anyFomod != matches.end()) {
-        logMessage(DEBUG, "Using first available FOMOD data from mod: " +
-            anyFomod->mod->name().toStdString());
+        logMessage(DEBUG, "Using first available FOMOD data from mod: " + anyFomod->mod->name().toStdString());
         return std::make_pair(anyFomod->fomodJson, anyFomod->mod);
     }
 
@@ -256,18 +231,15 @@ void FomodPlusInstaller::clearPriorInstallData()
  * @param nexusID
  * @return
  */
-IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QString>& modName,
-    std::shared_ptr<IFileTree>& tree, QString& version,
-    int& nexusID)
+IPluginInstaller::EInstallResult FomodPlusInstaller::install(
+    GuessedValue<QString>& modName, std::shared_ptr<IFileTree>& tree, QString& version, int& nexusID)
 {
 
     clearPriorInstallData();
 
-    logMessage(INFO, std::format("FomodPlusInstaller::install - modName: {}, version: {}, nexusID: {}",
-        modName->toStdString(),
-        version.toStdString(),
-        nexusID
-        ));
+    logMessage(INFO,
+        std::format("FomodPlusInstaller::install - modName: {}, version: {}, nexusID: {}", modName->toStdString(),
+            version.toStdString(), nexusID));
     logMessage(INFO, std::format("FomodPlusInstaller::install - tree size: {}", tree->size()));
 
     auto [infoFile, moduleConfigFile] = parseFomodFiles(tree);
@@ -277,7 +249,8 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
     }
 
     // create ui & pass xml classes to ui
-    auto [json, matchMod]           = getExistingFomodJson(modName, nexusID, static_cast<int>(moduleConfigFile->installSteps.installSteps.size()));
+    auto [json, matchMod]
+        = getExistingFomodJson(modName, nexusID, static_cast<int>(moduleConfigFile->installSteps.installSteps.size()));
     if (matchMod != nullptr) {
         modName.update(matchMod->name(), GUESS_USER);
     }
@@ -287,9 +260,9 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
     const QDialog::DialogCode result = showInstallerWindow(window);
     if (result == QDialog::Accepted) {
         // modname was updated in window
-        mInstallerUsed = true;
+        mInstallerUsed                               = true;
         const std::shared_ptr<IFileTree> installTree = window->getFileInstaller()->install();
-        tree = installTree;
+        tree                                         = installTree;
         mFomodJson = std::make_shared<nlohmann::json>(window->getFileInstaller()->generateFomodJson());
         return RESULT_SUCCESS;
     }
@@ -302,13 +275,12 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
     return RESULT_CANCELED;
 }
 
-
 /**
  *
  * @param tree
  * @return
  */
-std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> > FomodPlusInstaller::parseFomodFiles(
+std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration>> FomodPlusInstaller::parseFomodFiles(
     const std::shared_ptr<IFileTree>& tree)
 {
     const auto fomodDir = findFomodDirectory(tree);
@@ -320,17 +292,11 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> >
     // This is a strange place to set this value but okay for now.
     mFomodPath = fomodDir->parent()->path();
 
-    const auto infoXML = fomodDir->find(
-        StringConstants::FomodFiles::INFO_XML.data(),
-        FileTreeEntry::FILE
-        );
-    const auto moduleConfig = fomodDir->find(
-        StringConstants::FomodFiles::MODULE_CONFIG.data(),
-        FileTreeEntry::FILE
-        );
+    const auto infoXML      = fomodDir->find(StringConstants::FomodFiles::INFO_XML.data(), FileTreeEntry::FILE);
+    const auto moduleConfig = fomodDir->find(StringConstants::FomodFiles::MODULE_CONFIG.data(), FileTreeEntry::FILE);
 
     // Extract files first.
-    vector<std::shared_ptr<const FileTreeEntry> > toExtract = {};
+    vector<std::shared_ptr<const FileTreeEntry>> toExtract = {};
     if (moduleConfig) {
         toExtract.push_back(moduleConfig);
     } else {
@@ -364,10 +330,10 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> >
 }
 
 // Taken from https://github.com/ModOrganizer2/modorganizer-installer_fomod/blob/master/src/installerfomod.cpp#L123
-void FomodPlusInstaller::appendImageFiles(vector<shared_ptr<const FileTreeEntry> >& entries,
-    const shared_ptr<const IFileTree>& tree)
+void FomodPlusInstaller::appendImageFiles(
+    vector<shared_ptr<const FileTreeEntry>>& entries, const shared_ptr<const IFileTree>& tree)
 {
-    static std::set<QString, FileNameComparator> imageSuffixes{ "png", "jpg", "jpeg", "gif", "bmp" };
+    static std::set<QString, FileNameComparator> imageSuffixes { "png", "jpg", "jpeg", "gif", "bmp" };
     for (auto entry : *tree) {
         if (entry->isDir()) {
             appendImageFiles(entries, entry->astree());
@@ -377,9 +343,8 @@ void FomodPlusInstaller::appendImageFiles(vector<shared_ptr<const FileTreeEntry>
     }
 }
 
-
-void FomodPlusInstaller::onInstallationStart(QString const& archive, const bool reinstallation,
-    IModInterface* currentMod)
+void FomodPlusInstaller::onInstallationStart(
+    QString const& archive, const bool reinstallation, IModInterface* currentMod)
 {
     IPluginInstallerSimple::onInstallationStart(archive, reinstallation, currentMod);
 }
@@ -423,17 +388,18 @@ QDialog::DialogCode FomodPlusInstaller::showInstallerWindow(const std::shared_pt
 
 void showError(const Exception& e)
 {
-    const QString errorText = "Mod Name: \n" "Nexus ID: " "\n" "Exception: " + QString(e.what()) + "\n";
+    const QString errorText = "Mod Name: \n"
+                              "Nexus ID: "
+                              "\n"
+                              "Exception: "
+        + QString(e.what()) + "\n";
 
     QMessageBox msgBox;
     msgBox.setWindowTitle("FOMOD Plus Error :(");
     msgBox.setTextFormat(Qt::RichText);
     msgBox.setText("Sorry this happened. Please copy the following error and report it to me on Nexus or GitHub.\n"
-        "<pre style='background-color: #f0f0f0; padding: 10px;'>"
-        + errorText +
-        "</pre>"
-        );
+                   "<pre style='background-color: #f0f0f0; padding: 10px;'>"
+        + errorText + "</pre>");
     msgBox.setIcon(QMessageBox::Critical);
     msgBox.exec();
-
 }

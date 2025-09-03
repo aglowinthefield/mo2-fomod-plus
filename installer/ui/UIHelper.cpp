@@ -1,10 +1,13 @@
 ﻿#include "UIHelper.h"
 
-#include <qcoreevent.h>
 #include <QDir>
+#include <qcoreevent.h>
 
 HoverEventFilter::HoverEventFilter(const std::shared_ptr<PluginViewModel>& plugin, QObject* parent)
-    : QObject(parent), mPlugin(plugin) {}
+    : QObject(parent)
+    , mPlugin(plugin)
+{
+}
 
 bool HoverEventFilter::eventFilter(QObject* obj, QEvent* event)
 {

@@ -9,19 +9,18 @@
 class HoverEventFilter final : public QObject {
     Q_OBJECT
 
-public:
+  public:
     explicit HoverEventFilter(const std::shared_ptr<PluginViewModel>& plugin, QObject* parent = nullptr);
 
-signals:
+  signals:
     void hovered(const std::shared_ptr<PluginViewModel>& plugin);
 
-protected:
+  protected:
     bool eventFilter(QObject* obj, QEvent* event) override;
 
-private:
+  private:
     std::shared_ptr<PluginViewModel> mPlugin;
 };
-
 
 namespace UiConstants {
 constexpr int WINDOW_MIN_WIDTH  = 900;
@@ -29,7 +28,7 @@ constexpr int WINDOW_MIN_HEIGHT = 600;
 }
 
 class UIHelper {
-public:
+  public:
     /*
     --------------------------------------------------------------------------------
                                Widgets & Events

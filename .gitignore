@@ -1,10 +1,10 @@
-﻿vsbuild/
+﻿.cache/
 .idea/
-cmake-build-debug/
-install/
-.claude/
-package/
-nul
+compile_commands.json
 /vcpkg_installed/
 build/
-/.claude/
+cmake-build-debug/
+install/
+nul
+package/
+vsbuild/

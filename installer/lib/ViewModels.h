@@ -1,10 +1,7 @@
 ﻿#pragma once
 #include "../xml/ModuleConfiguration.h"
 
-
-template <typename T>
-using shared_ptr_list = std::vector<std::shared_ptr<T> >;
-
+template <typename T> using shared_ptr_list = std::vector<std::shared_ptr<T>>;
 
 /*
 --------------------------------------------------------------------------------
@@ -12,9 +9,15 @@ using shared_ptr_list = std::vector<std::shared_ptr<T> >;
 --------------------------------------------------------------------------------
 */
 class PluginViewModel {
-public:
+  public:
     PluginViewModel(const std::shared_ptr<Plugin>& plugin_, const bool selected, bool, const int index)
-        : ownIndex(index), selected(selected), enabled(true), manuallySet(false), plugin(plugin_) {}
+        : ownIndex(index)
+        , selected(selected)
+        , enabled(true)
+        , manuallySet(false)
+        , plugin(plugin_)
+    {
+    }
 
     void setSelected(const bool selected) { this->selected = selected; }
     void setEnabled(const bool enabled) { this->enabled = enabled; }
@@ -39,10 +42,10 @@ public:
     friend class FileInstaller;
     friend class ConditionTester;
 
-protected:
+  protected:
     [[nodiscard]] std::shared_ptr<Plugin> getPlugin() const { return plugin; }
 
-private:
+  private:
     int ownIndex;
     bool selected;
     bool enabled;
@@ -50,8 +53,8 @@ private:
     PluginTypeEnum currentPluginType = PluginTypeEnum::UNKNOWN;
     std::shared_ptr<Plugin> plugin;
 
-    int stepIndex{ -1 };
-    int groupIndex{ -1 };
+    int stepIndex { -1 };
+    int groupIndex { -1 };
 };
 
 /*
@@ -60,10 +63,15 @@ private:
 --------------------------------------------------------------------------------
 */
 class GroupViewModel {
-public:
+  public:
     GroupViewModel(const std::shared_ptr<Group>& group_, const shared_ptr_list<PluginViewModel>& plugins,
         const int index, const int stepIndex)
-        : plugins(plugins), group(group_), ownIndex(index), stepIndex(stepIndex) {}
+        : plugins(plugins)
+        , group(group_)
+        , ownIndex(index)
+        , stepIndex(stepIndex)
+    {
+    }
 
     void addPlugin(const std::shared_ptr<PluginViewModel>& plugin) { plugins.emplace_back(plugin); }
 
@@ -73,7 +81,7 @@ public:
     [[nodiscard]] int getOwnIndex() const { return ownIndex; }
     [[nodiscard]] int getStepIndex() const { return stepIndex; }
 
-private:
+  private:
     shared_ptr_list<PluginViewModel> plugins;
     std::shared_ptr<Group> group;
     int ownIndex;
@@ -86,10 +94,14 @@ private:
 --------------------------------------------------------------------------------
 */
 class StepViewModel {
-public:
+  public:
     StepViewModel(const std::shared_ptr<InstallStep>& installStep_, const shared_ptr_list<GroupViewModel>& groups,
         const int index)
-        : installStep(installStep_), groups(groups), ownIndex(index) {}
+        : installStep(installStep_)
+        , groups(groups)
+        , ownIndex(index)
+    {
+    }
 
     [[nodiscard]] CompositeDependency& getVisibilityConditions() const { return installStep->visible; }
     [[nodiscard]] std::string getName() const { return installStep->name; }
@@ -98,13 +110,12 @@ public:
     [[nodiscard]] bool getHasVisited() const { return visited; }
     void setVisited(const bool visited) { this->visited = visited; }
 
-private:
-    bool visited{ false };
+  private:
+    bool visited { false };
     std::shared_ptr<InstallStep> installStep;
     shared_ptr_list<GroupViewModel> groups;
     int ownIndex;
 };
-
 
 /*
 --------------------------------------------------------------------------------

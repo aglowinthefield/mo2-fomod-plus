@@ -40,8 +40,7 @@ PluginTypeEnum pluginTypeFromString(const std::string& typeStr)
     return PluginTypeEnum::Optional;
 }
 
-template <typename T>
-bool deserializeList(pugi::xml_node& node, const char* childName, std::vector<T>& list)
+template <typename T> bool deserializeList(pugi::xml_node& node, const char* childName, std::vector<T>& list)
 {
     for (pugi::xml_node childNode : node.children(childName)) {
         T item;
@@ -96,8 +95,10 @@ bool CompositeDependency::deserialize(pugi::xml_node& node)
     pugi::xml_node possibleNode = node;
 
     // If the dependencies are all right inside, just use the root node as the dependency base.
-    // This looks hacky but accommodates both _nested_ dependencies for plugins, and extremely simple ones for step visibility.
-    if (node.child("dependencies") && !node.child("fileDependency") && !node.child("flagDependency") &&!node.child("gameDependency")) {
+    // This looks hacky but accommodates both _nested_ dependencies for plugins, and extremely simple ones for step
+    // visibility.
+    if (node.child("dependencies") && !node.child("fileDependency") && !node.child("flagDependency")
+        && !node.child("gameDependency")) {
         possibleNode = node.child("dependencies");
     }
 
@@ -127,10 +128,7 @@ bool DependencyPattern::deserialize(pugi::xml_node& node)
     return true;
 }
 
-bool DependencyPatternList::deserialize(pugi::xml_node& node)
-{
-    return deserializeList(node, "pattern", patterns);
-}
+bool DependencyPatternList::deserialize(pugi::xml_node& node) { return deserializeList(node, "pattern", patterns); }
 
 bool DependencyPluginType::deserialize(pugi::xml_node& node)
 {
@@ -168,8 +166,7 @@ bool HeaderImage::deserialize(pugi::xml_node& node)
 bool FileList::deserialize(pugi::xml_node& node)
 {
     for (pugi::xml_node childNode : node.children()) {
-        if (std::string(childNode.name()) == "folder"
-            || std::string(childNode.name()) == "file") {
+        if (std::string(childNode.name()) == "folder" || std::string(childNode.name()) == "file") {
             File file;
             file.deserialize(childNode);
             files.emplace_back(file);
@@ -197,17 +194,14 @@ bool ConditionFlag::deserialize(pugi::xml_node& node)
     return true;
 }
 
-bool ConditionFlagList::deserialize(pugi::xml_node& node)
-{
-    return deserializeList(node, "flag", flags);
-}
+bool ConditionFlagList::deserialize(pugi::xml_node& node) { return deserializeList(node, "flag", flags); }
 
 bool File::deserialize(pugi::xml_node& node)
 {
-    source      = node.attribute("source").as_string();
+    source = node.attribute("source").as_string();
     // destination = node.attribute("destination").as_string();
-    priority    = node.attribute("priority").as_int();
-    isFolder    = strcmp(node.name(), "folder") == 0;
+    priority = node.attribute("priority").as_int();
+    isFolder = strcmp(node.name(), "folder") == 0;
     if (auto attr = node.attribute("destination"); attr) {
         destination = attr.as_string();
     } else {
@@ -215,7 +209,6 @@ bool File::deserialize(pugi::xml_node& node)
     }
     return true;
 }
-
 
 bool Plugin::deserialize(pugi::xml_node& node)
 {

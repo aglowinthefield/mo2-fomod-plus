@@ -5,8 +5,8 @@
 #include <vector>
 
 class FomodInfoFile {
-public:
-    bool deserialize(const QString &filePath);
+  public:
+    bool deserialize(const QString& filePath);
 
     [[nodiscard]] const std::string& getName() const { return name; }
     [[nodiscard]] const std::string& getAuthor() const { return author; }
@@ -15,7 +15,7 @@ public:
     [[nodiscard]] const std::string& getDescription() const { return description; }
     [[nodiscard]] const std::vector<std::string>& getGroups() const { return groups; }
 
-private:
+  private:
     std::string name;
     std::string author;
     std::string version;

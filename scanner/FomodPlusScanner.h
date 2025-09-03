@@ -8,12 +8,7 @@
 
 using namespace MOBase;
 
-enum ScanResult {
-    HAS_FOMOD,
-    NO_FOMOD,
-    NO_ARCHIVE
-};
-
+enum ScanResult { HAS_FOMOD, NO_FOMOD, NO_ARCHIVE };
 
 class FomodPlusScanner final : public IPluginTool {
     Q_OBJECT
@@ -22,7 +17,7 @@ class FomodPlusScanner final : public IPluginTool {
     Q_PLUGIN_METADATA(IID "io.clearing.FomodPlusScanner" FILE "fomodplusscanner.json")
 #endif
 
-public:
+  public:
     ~FomodPlusScanner() override
     {
         delete mDialog;
@@ -51,17 +46,16 @@ public:
 
     void display() const override;
 
-    int scanLoadOrder(const std::function<bool(IModInterface*, ScanResult result)> &callback) const;
+    int scanLoadOrder(const std::function<bool(IModInterface*, ScanResult result)>& callback) const;
 
     ScanResult openInstallationArchive(const IModInterface* mod) const;
 
-    static bool setFomodInfoForMod(IModInterface *mod, ScanResult result);
+    static bool setFomodInfoForMod(IModInterface* mod, ScanResult result);
 
-    static bool removeFomodInfoFromMod(IModInterface *mod, ScanResult);
+    static bool removeFomodInfoFromMod(IModInterface* mod, ScanResult);
 
-private:
-    QDialog* mDialog{ nullptr };
-    QProgressBar* mProgressBar{ nullptr };
-    IOrganizer* mOrganizer{ nullptr };
+  private:
+    QDialog* mDialog { nullptr };
+    QProgressBar* mProgressBar { nullptr };
+    IOrganizer* mOrganizer { nullptr };
 };
-

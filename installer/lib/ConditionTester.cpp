@@ -1,11 +1,9 @@
 ﻿#include "ConditionTester.h"
 
-#include "../ui/FomodViewModel.h"
-
 #include <uibase/iplugingame.h>
 #include <uibase/ipluginlist.h>
 
-std::string setToString(const std::set<int> &set)
+std::string setToString(const std::set<int>& set)
 {
     std::string str;
     for (const auto& i : set) {
@@ -15,8 +13,7 @@ std::string setToString(const std::set<int> &set)
 }
 
 bool ConditionTester::isStepVisible(const std::shared_ptr<FlagMap>& flags,
-    const CompositeDependency& compositeDependency,
-    const int stepIndex,
+    const CompositeDependency& compositeDependency, const int stepIndex,
     const std::vector<std::shared_ptr<StepViewModel>>& steps) const
 {
 
@@ -37,12 +34,12 @@ bool ConditionTester::isStepVisible(const std::shared_ptr<FlagMap>& flags,
         for (int i = stepIndex - 1; i >= 0; --i) {
             for (const auto& group : steps[i]->getGroups()) {
                 for (const auto& plugin : group->getPlugins()) {
-                    if (std::ranges::any_of(plugin->getPlugin()->conditionFlags.flags,
-                        [&flagDependency](const ConditionFlag& flag) {
-                            return flag.name == flagDependency.flag && flag.value == flagDependency.value;
-                        })) {
-                            stepsThatSetThisFlag.insert(i);
-                        }
+                    if (std::ranges::any_of(
+                            plugin->getPlugin()->conditionFlags.flags, [&flagDependency](const ConditionFlag& flag) {
+                                return flag.name == flagDependency.flag && flag.value == flagDependency.value;
+                            })) {
+                        stepsThatSetThisFlag.insert(i);
+                    }
                 }
             }
         }
@@ -55,11 +52,10 @@ bool ConditionTester::isStepVisible(const std::shared_ptr<FlagMap>& flags,
         log.logMessage(DEBUG, "Steps that set this flag: " + setToString(stepsThatSetThisFlag));
     }
     return anyVisible;
-
 }
 
-bool ConditionTester::testCompositeDependency(const std::shared_ptr<FlagMap>& flags,
-    const CompositeDependency& compositeDependency) const
+bool ConditionTester::testCompositeDependency(
+    const std::shared_ptr<FlagMap>& flags, const CompositeDependency& compositeDependency) const
 {
     const auto fileDependencies   = compositeDependency.fileDependencies;
     const auto flagDependencies   = compositeDependency.flagDependencies;
@@ -69,7 +65,8 @@ bool ConditionTester::testCompositeDependency(const std::shared_ptr<FlagMap>& fl
 
     // For the globalOperatorType
     // Evaluate all conditions and store the results in a vector<bool>, then return based on operator.
-    // These aren't expensive to calculate so rather than do some fancy logic to short-circuit, just calculate all of 'em.
+    // These aren't expensive to calculate so rather than do some fancy logic to short-circuit, just calculate all of
+    // 'em.
     std::vector<bool> results;
     for (const auto& fileDependency : fileDependencies) {
         results.emplace_back(testFileDependency(fileDependency));
@@ -89,7 +86,6 @@ bool ConditionTester::testCompositeDependency(const std::shared_ptr<FlagMap>& fl
     }
     return std::ranges::any_of(results, [](const bool result) { return result; });
 }
-
 
 bool ConditionTester::testFlagDependency(const std::shared_ptr<FlagMap>& flags, const FlagDependency& flagDependency)
 {
@@ -117,7 +113,7 @@ bool ConditionTester::testGameDependency(const GameDependency& gameDependency) c
 {
     const auto gameVersion = mOrganizer->managedGame()->gameVersion().toStdString();
     log.logMessage(DEBUG, "Comparing condition version " + gameDependency.version + " against " + gameVersion);
-    if ( gameDependency.version <= gameVersion) {
+    if (gameDependency.version <= gameVersion) {
         log.logMessage(DEBUG, "Version matches!");
     }
     return gameDependency.version <= gameVersion;
@@ -129,8 +125,8 @@ FileDependencyTypeEnum ConditionTester::getFileDependencyStateForPlugin(const st
         return it->second;
     }
 
-    const QFlags<MOBase::IPluginList::PluginState> pluginState = mOrganizer->pluginList()->state(
-        QString::fromStdString(pluginName));
+    const QFlags<MOBase::IPluginList::PluginState> pluginState
+        = mOrganizer->pluginList()->state(QString::fromStdString(pluginName));
 
     FileDependencyTypeEnum state;
 
@@ -148,8 +144,8 @@ FileDependencyTypeEnum ConditionTester::getFileDependencyStateForPlugin(const st
     return state;
 }
 
-PluginTypeEnum ConditionTester::getPluginTypeDescriptorState(const std::shared_ptr<Plugin>& plugin,
-    const std::shared_ptr<FlagMap>& flags) const
+PluginTypeEnum ConditionTester::getPluginTypeDescriptorState(
+    const std::shared_ptr<Plugin>& plugin, const std::shared_ptr<FlagMap>& flags) const
 {
     // NOTE: A plugin's ConditionFlags aren't the same thing as a step visibility one.
     // A plugin's ConditionFlags are toggled based on the selection state of the plugin

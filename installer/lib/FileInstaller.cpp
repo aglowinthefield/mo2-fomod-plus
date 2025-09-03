@@ -6,18 +6,18 @@
 
 using namespace MOBase;
 
-FileInstaller::FileInstaller(
-    IOrganizer* organizer,
-    QString fomodPath,
-    const std::shared_ptr<IFileTree>& fileTree,
-    std::unique_ptr<ModuleConfiguration> fomodFile,
-    const std::shared_ptr<FlagMap>& flagMap,
-    const std::vector<std::shared_ptr<StepViewModel> >& steps) : mOrganizer(organizer),
-                                                                 mFomodPath(std::move(fomodPath)),
-                                                                 mFileTree(fileTree),
-                                                                 mFomodFile(std::move(fomodFile)),
-                                                                 mFlagMap(flagMap),
-                                                                 mConditionTester(organizer), mSteps(steps) {}
+FileInstaller::FileInstaller(IOrganizer* organizer, QString fomodPath, const std::shared_ptr<IFileTree>& fileTree,
+    std::unique_ptr<ModuleConfiguration> fomodFile, const std::shared_ptr<FlagMap>& flagMap,
+    const std::vector<std::shared_ptr<StepViewModel>>& steps)
+    : mOrganizer(organizer)
+    , mFomodPath(std::move(fomodPath))
+    , mFileTree(fileTree)
+    , mFomodFile(std::move(fomodFile))
+    , mFlagMap(flagMap)
+    , mConditionTester(organizer)
+    , mSteps(steps)
+{
+}
 
 std::shared_ptr<IFileTree> FileInstaller::install() const
 {
@@ -37,9 +37,8 @@ std::shared_ptr<IFileTree> FileInstaller::install() const
             logMessage(ERR, "Could not find source: " + file.source);
             continue;
         }
-        const auto targetPath = file.destination.has_value()
-            ? QString::fromStdString(file.destination.value())
-            : QString::fromStdString(sourcePath);
+        const auto targetPath = file.destination.has_value() ? QString::fromStdString(file.destination.value())
+                                                             : QString::fromStdString(sourcePath);
 
         // If it's a folder, copy the contents of the folder, not the folder itself.
         if (sourceNode->isDir()) {
@@ -186,9 +185,7 @@ std::vector<File> FileInstaller::collectFilesToInstall() const
 
     // Files will all have a default priority of 0 if not specified, so the order should also be informed by the
     // order they appear within XML. That's why we put conditionalFileInstalls after.
-    std::ranges::sort(allFiles, [](const auto& a, const auto& b) {
-        return a.priority < b.priority;
-    });
+    std::ranges::sort(allFiles, [](const auto& a, const auto& b) { return a.priority < b.priority; });
 
     for (const auto& toInstall : allFiles) {
         logMessage(DEBUG, "File to install: " + toInstall.source);

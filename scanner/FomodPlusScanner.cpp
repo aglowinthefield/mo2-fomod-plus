@@ -1,10 +1,10 @@
 ﻿#include "FomodPlusScanner.h"
 
 #include <QDialog>
-#include <QPushButton>
-#include <QProgressBar>
-#include <QVBoxLayout>
 #include <QMessageBox>
+#include <QProgressBar>
+#include <QPushButton>
+#include <QVBoxLayout>
 #include <archive/archive.h>
 
 #include <QLabel>
@@ -24,10 +24,11 @@ bool FomodPlusScanner::init(IOrganizer* organizer)
 
     const auto layout = new QVBoxLayout(mDialog);
 
-    const QString description = tr("Greetings, traveler.\n"
-        "This tool will scan your load order for mods installed via FOMOD.\n"
-        "It will also fix up any erroneous FOMOD flags from previous versions of FOMOD Plus :) \n\n"
-        "Safe travels, and may your load order be free of conflicts.");
+    const QString description
+        = tr("Greetings, traveler.\n"
+             "This tool will scan your load order for mods installed via FOMOD.\n"
+             "It will also fix up any erroneous FOMOD flags from previous versions of FOMOD Plus :) \n\n"
+             "Safe travels, and may your load order be free of conflicts.");
 
     const auto descriptionLabel = new QLabel(description, mDialog);
     descriptionLabel->setWordWrap(true); // Enable word wrap for large text
@@ -79,10 +80,7 @@ void FomodPlusScanner::cleanup() const
     mProgressBar->setVisible(false);
 }
 
-void FomodPlusScanner::display() const
-{
-    mDialog->exec();
-}
+void FomodPlusScanner::display() const { mDialog->exec(); }
 
 int FomodPlusScanner::scanLoadOrder(const ScanCallbackFn& callback) const
 {
@@ -145,22 +143,21 @@ ScanResult FomodPlusScanner::openInstallationArchive(const IModInterface* mod) c
         return NO_ARCHIVE;
     }
 
-    const auto qualifiedInstallerPath = QDir(installationFilePath).isAbsolute()
-        ? installationFilePath
-        : downloadsDir + "/" + installationFilePath;
+    const auto qualifiedInstallerPath
+        = QDir(installationFilePath).isAbsolute() ? installationFilePath : downloadsDir + "/" + installationFilePath;
 
     const auto archive = CreateArchive();
 
     if (!archive->isValid()) {
-        std::cerr << "[" << mod->name().toStdString() << "] Failed to load the archive module: " << archive->
-            getLastError() << std::endl;
+        std::cerr << "[" << mod->name().toStdString()
+                  << "] Failed to load the archive module: " << archive->getLastError() << std::endl;
         return NO_ARCHIVE;
     }
 
     // Open the archive:
     if (!archive->open(qualifiedInstallerPath.toStdWString(), nullptr)) {
-        std::cerr << "[" << mod->name().toStdString() << "] Failed to open the archive [" << qualifiedInstallerPath.
-            toStdString() << "]: " << archive->getLastError() << std::endl;
+        std::cerr << "[" << mod->name().toStdString() << "] Failed to open the archive ["
+                  << qualifiedInstallerPath.toStdString() << "]: " << archive->getLastError() << std::endl;
         return NO_ARCHIVE;
     }
 

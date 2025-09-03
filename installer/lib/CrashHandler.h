@@ -5,11 +5,11 @@
 #endif
 
 class CrashHandler {
-public:
+  public:
     static void initialize();
     static void cleanup();
 
-private:
+  private:
 #ifdef _WIN32
     static LONG WINAPI unhandledExceptionFilter(EXCEPTION_POINTERS* exceptionInfo);
     static LONG WINAPI vectoredExceptionHandler(EXCEPTION_POINTERS* exceptionInfo);

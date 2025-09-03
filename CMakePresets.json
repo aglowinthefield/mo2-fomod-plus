@@ -2,6 +2,16 @@
   "version": 3,
   "configurePresets": [
     {
+      "name": "windows-base",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "D:/var/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "Qt6_DIR": "C:/Qt/6.7.3/msvc2022_64/lib/cmake/Qt6",
+        "CMAKE_PREFIX_PATH": "C:/Qt/6.7.3/msvc2022_64",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
       "name": "vs2022-windows",
       "generator": "Visual Studio 17 2022",
       "binaryDir": "${sourceDir}/vsbuild",
@@ -9,6 +19,16 @@
         "CMAKE_BUILD_TYPE": "RelWithDebInfo",
         "CMAKE_TOOLCHAIN_FILE": "D:/var/vcpkg/scripts/buildsystems/vcpkg.cmake",
         "Qt6_DIR": "C:/Qt/6.7.3/msvc2022_64/lib/cmake/Qt6"
+      }
+    },
+    {
+      "name": "ninja-msvc-relwithdebinfo",
+      "displayName": "Ninja (MSVC, RelWithDebInfo)",
+      "inherits": "windows-base",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/ninja-relwithdebinfo",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
       }
     }
   ]

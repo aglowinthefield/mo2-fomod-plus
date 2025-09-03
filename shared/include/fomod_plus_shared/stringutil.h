@@ -1,11 +1,10 @@
-﻿#ifndef STRINGCONSTANTS_H
-#define STRINGCONSTANTS_H
+﻿#pragma once
+
+#include <QString>
 #include <algorithm>
 #include <regex>
 #include <string>
 #include <vector>
-#include <QString>
-
 
 namespace StringConstants {
 
@@ -13,18 +12,18 @@ namespace Plugin {
     constexpr std::string_view NAME        = "FOMOD Plus";
     constexpr std::string_view AUTHOR      = "clearing";
     constexpr std::string_view DESCRIPTION = "Extends the capabilities of the FOMOD installer for advanced users.\n\n"
-        "Available colors (enter exactly): \n"
-        "'Light0'\t'Light1'\t'Light2'\t'Light3'\n"
-        "'Dark0'\t'Dark1'\t'Dark2'\t'Dark3'\n"
-        "'Red'\t'Red Bright'\n"
-        "'Green'\t'Green Bright'\n"
-        "'Yellow'\t'Yellow Bright'\n"
-        "'Blue'\t'Blue Bright'\n"
-        "'Purple'\t'Purple Bright'\n"
-        "'Aqua'\t'Aqua Bright'\n"
-        "'Orange'\t'Orange Bright'\n";
-    constexpr std::wstring_view W_NAME        = L"FOMOD Plus";
-    constexpr std::wstring_view W_AUTHOR      = L"clearing";
+                                             "Available colors (enter exactly): \n"
+                                             "'Light0'\t'Light1'\t'Light2'\t'Light3'\n"
+                                             "'Dark0'\t'Dark1'\t'Dark2'\t'Dark3'\n"
+                                             "'Red'\t'Red Bright'\n"
+                                             "'Green'\t'Green Bright'\n"
+                                             "'Yellow'\t'Yellow Bright'\n"
+                                             "'Blue'\t'Blue Bright'\n"
+                                             "'Purple'\t'Purple Bright'\n"
+                                             "'Aqua'\t'Aqua Bright'\n"
+                                             "'Orange'\t'Orange Bright'\n";
+    constexpr std::wstring_view W_NAME     = L"FOMOD Plus";
+    constexpr std::wstring_view W_AUTHOR   = L"clearing";
     constexpr std::wstring_view W_DESCRIPTION = L"Extends the capabilities of the FOMOD installer for advanced users.";
 }
 
@@ -47,17 +46,14 @@ namespace FomodFiles {
 // trim from start (in place)
 inline void ltrim(std::string& s)
 {
-    s.erase(s.begin(), std::ranges::find_if(s, [](const unsigned char ch) {
-        return !std::isspace(ch);
-    }));
+    s.erase(s.begin(), std::ranges::find_if(s, [](const unsigned char ch) { return !std::isspace(ch); }));
 }
 
 // trim from end (in place)
 inline void rtrim(std::string& s)
 {
-    s.erase(std::find_if(s.rbegin(), s.rend(), [](const unsigned char ch) {
-        return !std::isspace(ch);
-    }).base(), s.end());
+    s.erase(
+        std::find_if(s.rbegin(), s.rend(), [](const unsigned char ch) { return !std::isspace(ch); }).base(), s.end());
 }
 
 // trim from both ends (in place)
@@ -70,7 +66,9 @@ inline std::string& trim(std::string& s)
 
 inline void trim(const std::vector<std::string>& strings)
 {
-    for (auto s : strings) { trim(s); }
+    for (auto s : strings) {
+        trim(s);
+    }
 }
 
 inline std::wstring toLower(const std::wstring& str)
@@ -100,7 +98,8 @@ inline QString formatPluginDescription(const QString& text)
 {
     std::string formattedText = text.toStdString();
     // Replace URLs with <a href> tags
-    const std::regex urlRegex(R"((http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-]))");
+    const std::regex urlRegex(
+        R"((http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-]))");
     formattedText = std::regex_replace(formattedText, urlRegex, R"(<a href="$&">$&</a>)");
 
     // Replace line breaks
@@ -111,6 +110,3 @@ inline QString formatPluginDescription(const QString& text)
 
     return QString::fromStdString(formattedText);
 }
-
-
-#endif

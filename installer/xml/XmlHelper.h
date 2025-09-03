@@ -3,8 +3,9 @@
 #include "ModuleConfiguration.h"
 
 class XmlHelper {
-public:
-    static OrderTypeEnum getOrderType(const std::string& orderType, OrderTypeEnum defaultOrder = OrderTypeEnum::Explicit)
+  public:
+    static OrderTypeEnum getOrderType(
+        const std::string& orderType, OrderTypeEnum defaultOrder = OrderTypeEnum::Explicit)
     {
         if (orderType == "Explicit")
             return OrderTypeEnum::Explicit;

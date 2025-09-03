@@ -7,13 +7,13 @@
 #include <string>
 #include <unordered_map>
 
-using Flag = std::pair<std::string, std::string>;
+using Flag     = std::pair<std::string, std::string>;
 using FlagList = std::vector<Flag>;
 
 class FlagMap {
-public:
-
-    std::vector<std::shared_ptr<PluginViewModel>> getPluginsSettingFlag(const std::string& key, const std::string& value) const
+  public:
+    std::vector<std::shared_ptr<PluginViewModel>> getPluginsSettingFlag(
+        const std::string& key, const std::string& value) const
     {
         std::vector<std::shared_ptr<PluginViewModel>> result;
         for (const auto& [plugin, flags] : flags) {
@@ -29,8 +29,9 @@ public:
     /**
      *
      * @param key The flag key
-     * @return A list of flags currently set in this map with the given key. The list is ordered by step descending, then plugin ascending.
-     * So if steps 1, 2, and 3 set flag X in their first two plugins, it'll be ordered [3:1, 3:2, 2:1, 2:2, 1:2, 1:1]
+     * @return A list of flags currently set in this map with the given key. The list is ordered by step descending,
+     * then plugin ascending. So if steps 1, 2, and 3 set flag X in their first two plugins, it'll be ordered [3:1, 3:2,
+     * 2:1, 2:2, 1:2, 1:1]
      */
     [[nodiscard]] FlagList getFlagsByKey(const std::string& key) const
     {
@@ -97,17 +98,10 @@ public:
         return result;
     }
 
-    void clearAll()
-    {
-        flags.clear();
-    }
+    void clearAll() { flags.clear(); }
 
-    [[nodiscard]] size_t getFlagCount() const
-    {
-        return flags.size();
-    }
+    [[nodiscard]] size_t getFlagCount() const { return flags.size(); }
 
-
-private:
+  private:
     std::unordered_map<std::shared_ptr<PluginViewModel>, FlagList> flags;
 };
