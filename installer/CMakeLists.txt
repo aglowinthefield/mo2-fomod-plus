@@ -19,4 +19,15 @@ project(fomod_plus_installer)
 
 target_link_libraries(fomod_plus_installer PRIVATE pugixml nlohmann_json::nlohmann_json dbghelp)
 mo2_configure_plugin(fomod_plus_installer WARNINGS OFF PRIVATE_DEPENDS)
+
+# Ensure PDB is generated
+target_compile_options(fomod_plus_installer PRIVATE $<$<CONFIG:RelWithDebInfo>:/Zi>)
+target_link_options(fomod_plus_installer PRIVATE $<$<CONFIG:RelWithDebInfo>:/DEBUG>)
+
+# Install PDB alongside DLL
+install(FILES $<TARGET_PDB_FILE:fomod_plus_installer>
+        DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO}
+        CONFIGURATIONS RelWithDebInfo
+        OPTIONAL)
+
 mo2_install_target(fomod_plus_installer)

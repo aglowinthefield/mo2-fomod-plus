@@ -1,4 +1,4 @@
-﻿#ifndef FOMODINSTALLERWINDOW_H
+#ifndef FOMODINSTALLERWINDOW_H
 #define FOMODINSTALLERWINDOW_H
 
 #include <qboxlayout.h>

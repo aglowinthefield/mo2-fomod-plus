@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <imoinfo.h>
 #include <string>
@@ -99,6 +99,8 @@ public:
     bool isFirstVisibleStep() const;
 
     bool togglePlugin(const GroupRef, const PluginRef, bool selected) const;
+
+    bool ctrlTogglePlugin(const GroupRef, const PluginRef, bool selected) const;
 
     void setActivePlugin(const PluginRef plugin) const { mActivePlugin = plugin; }
 

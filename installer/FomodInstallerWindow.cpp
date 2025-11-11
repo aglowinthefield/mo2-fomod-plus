@@ -594,6 +594,10 @@ QCheckBox* FomodInstallerWindow::createPluginCheckBox(const std::shared_ptr<Plug
     checkBox->installEventFilter(hoverFilter);
     connect(hoverFilter, &HoverEventFilter::hovered, this, &FomodInstallerWindow::onPluginHovered);
 
+    // Install Ctrl+click event filter
+    auto* ctrlClickFilter = new CtrlClickEventFilter(plugin, group, this);
+    checkBox->installEventFilter(ctrlClickFilter);
+
     checkBox->setEnabled(plugin->isEnabled());
     checkBox->setChecked(plugin->isSelected());
     connect(checkBox, &QCheckBox::clicked, this, [this, plugin](const bool checked) {

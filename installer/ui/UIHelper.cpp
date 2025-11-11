@@ -2,6 +2,7 @@
 
 #include <qcoreevent.h>
 #include <QDir>
+#include <QMouseEvent>
 
 HoverEventFilter::HoverEventFilter(const std::shared_ptr<PluginViewModel>& plugin, QObject* parent)
     : QObject(parent), mPlugin(plugin) {}
@@ -11,6 +12,24 @@ bool HoverEventFilter::eventFilter(QObject* obj, QEvent* event)
     if (event->type() == QEvent::HoverEnter) {
         emit hovered(mPlugin);
         return true;
+    }
+    return QObject::eventFilter(obj, event);
+}
+
+CtrlClickEventFilter::CtrlClickEventFilter(const std::shared_ptr<PluginViewModel>& plugin,
+    const std::shared_ptr<GroupViewModel>& group, QObject* parent)
+    : QObject(parent), mPlugin(plugin), mGroup(group) {}
+
+bool CtrlClickEventFilter::eventFilter(QObject* obj, QEvent* event)
+{
+    if (event->type() == QEvent::MouseButtonPress) {
+        const QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+        if (mouseEvent->button() == Qt::LeftButton &&
+            mouseEvent->modifiers() & Qt::ControlModifier) {
+            // TODO: Add Ctrl+click handler logic here
+            std::cout << "Ctrl+click detected on plugin: " << mPlugin->getName() << " in group: " << mGroup->getName() << std::endl;
+            // For now, just fall through to default behavior
+        }
     }
     return QObject::eventFilter(obj, event);
 }

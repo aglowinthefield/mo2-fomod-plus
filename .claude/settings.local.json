@@ -7,7 +7,12 @@
       "Bash(cp:*)",
       "Bash(mkdir:*)",
       "Bash(\"/c/Program Files/JetBrains/CLion 2025.2/bin/cmake/win/x64/bin/cmake.exe\" --build vsbuild --config RelWithDebInfo)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(test:*)",
+      "Bash(rm:*)",
+      "Bash(cmake:*)",
+      "Read(//d/Modding/MO2/lib/**)",
+      "Read(//d/Modding/MO2/**)"
     ],
     "additionalDirectories": [
       "D:\\var",

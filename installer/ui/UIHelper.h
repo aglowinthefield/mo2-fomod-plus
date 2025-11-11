@@ -22,6 +22,25 @@ private:
     std::shared_ptr<PluginViewModel> mPlugin;
 };
 
+class CtrlClickEventFilter final : public QObject {
+    Q_OBJECT
+
+public:
+    explicit CtrlClickEventFilter(const std::shared_ptr<PluginViewModel>& plugin,
+        const std::shared_ptr<GroupViewModel>& group, QObject* parent = nullptr);
+
+signals:
+    void ctrlClicked(bool selected, const std::shared_ptr<GroupViewModel>& group,
+        const std::shared_ptr<PluginViewModel>& plugin);
+
+protected:
+    bool eventFilter(QObject* obj, QEvent* event) override;
+
+private:
+    std::shared_ptr<PluginViewModel> mPlugin;
+    std::shared_ptr<GroupViewModel> mGroup;
+};
+
 
 namespace UiConstants {
 constexpr int WINDOW_MIN_WIDTH  = 900;

@@ -56,12 +56,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="675"/>
+        <location filename="FomodInstallerWindow.cpp" line="679"/>
         <source>Hide Images</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="679"/>
+        <location filename="FomodInstallerWindow.cpp" line="683"/>
         <source>Show Images</source>
         <translation type="unfinished"></translation>
     </message>
