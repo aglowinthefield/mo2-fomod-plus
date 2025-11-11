@@ -5,3 +5,4 @@ install/
 .claude/
 package/
 nul
+.cache/
