@@ -102,18 +102,7 @@ public:
 
     bool ctrlTogglePlugin(const GroupRef, const PluginRef, bool selected) const;
 
-    void setActivePlugin(const PluginRef plugin) const
-    {
-        if (!plugin) {
-            logMessage(WARN, "setActivePlugin called with null plugin");
-            mActivePlugin = nullptr;
-            return;
-        }
-        logMessage(DEBUG,
-            "setActivePlugin: plugin='" + plugin->getName() + "' step=" + std::to_string(plugin->getStepIndex()) +
-                " group=" + std::to_string(plugin->getGroupIndex()));
-        mActivePlugin = plugin;
-    }
+    void setActivePlugin(const PluginRef plugin) const { mActivePlugin = plugin; }
 
     static void markManuallySet(PluginRef plugin);
 

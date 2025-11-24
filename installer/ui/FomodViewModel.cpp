@@ -555,21 +555,16 @@ std::string FomodViewModel::getDisplayImage() const
 std::shared_ptr<PluginViewModel> FomodViewModel::getFirstPluginForActiveStep() const
 {
     if (!mActiveStep) {
-        logMessage(WARN, "getFirstPluginForActiveStep called with no active step set");
         return nullptr;
     }
 
     const auto& groups = mActiveStep->getGroups();
     if (groups.empty()) {
-        logMessage(WARN, "getFirstPluginForActiveStep found no groups for active step "
-            + std::to_string(mActiveStep->getOwnIndex()));
         return nullptr;
     }
 
     const auto& plugins = groups.front()->getPlugins();
     if (plugins.empty()) {
-        logMessage(WARN, "getFirstPluginForActiveStep found no plugins in first group for step "
-            + std::to_string(mActiveStep->getOwnIndex()));
         return nullptr;
     }
 

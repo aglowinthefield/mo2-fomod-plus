@@ -2,7 +2,6 @@
 
 #include <format>
 
-#include "../lib/Logger.h"
 #include "XmlHelper.h"
 #include "XmlParseException.h"
 #include "stringutil.h"
@@ -230,10 +229,6 @@ bool Plugin::deserialize(pugi::xml_node& node)
         if (const char* rawDesc = descNode.text().as_string()) {
             description = rawDesc;
         }
-    } else {
-        Logger::getInstance().logMessage(DEBUG, "[XML] Plugin missing <description>, defaulting to empty: " +
-            std::string(node.attribute("name").as_string()));
-        description.clear();
     }
     description = trim(description); // Find a better way to do this eventually.
     image.deserialize(imageNode);
