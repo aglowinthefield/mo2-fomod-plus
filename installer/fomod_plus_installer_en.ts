@@ -65,5 +65,10 @@
         <source>Show Images</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="FomodInstallerWindow.cpp" line="706"/>
+        <source>Select a plugin to see its description.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 </TS>

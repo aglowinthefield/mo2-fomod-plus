@@ -18,9 +18,9 @@ public:
 
     void setSelected(const bool selected) { this->selected = selected; }
     void setEnabled(const bool enabled) { this->enabled = enabled; }
-    [[nodiscard]] std::string getName() const { return plugin->name; }
-    [[nodiscard]] std::string getDescription() const { return plugin->description; }
-    [[nodiscard]] std::string getImagePath() const { return plugin->image.path; }
+    [[nodiscard]] std::string getName() const { return plugin ? plugin->name : std::string(); }
+    [[nodiscard]] std::string getDescription() const { return plugin ? plugin->description : std::string(); }
+    [[nodiscard]] std::string getImagePath() const { return plugin ? plugin->image.path : std::string(); }
     [[nodiscard]] bool isSelected() const { return selected; }
     [[nodiscard]] bool isEnabled() const { return enabled; }
     [[nodiscard]] int getOwnIndex() const { return ownIndex; }
@@ -69,7 +69,7 @@ public:
 
     [[nodiscard]] std::string getName() const { return group->name; }
     [[nodiscard]] GroupTypeEnum getType() const { return group->type; }
-    [[nodiscard]] shared_ptr_list<PluginViewModel> getPlugins() const { return plugins; }
+    [[nodiscard]] const shared_ptr_list<PluginViewModel>& getPlugins() const { return plugins; }
     [[nodiscard]] int getOwnIndex() const { return ownIndex; }
     [[nodiscard]] int getStepIndex() const { return stepIndex; }
 

@@ -690,17 +690,56 @@ void FomodInstallerWindow::updateDisplayForActivePlugin() const
 {
     // Skip if no steps (legacy FOMOD)
     if (mViewModel->getSteps().empty()) {
+        logMessage(DEBUG, "[WINDOW] updateDisplayForActivePlugin: no steps (legacy fomod), skipping UI update");
         return;
     }
-    
-    const auto& plugin        = mViewModel->getActivePlugin();
-    const QString description = formatPluginDescription(QString::fromStdString(plugin->getDescription()));
+
+    logMessage(DEBUG,
+        "[WINDOW] updateDisplayForActivePlugin: entering; steps=" + std::to_string(mViewModel->getSteps().size()) +
+            " currentStep=" + std::to_string(mViewModel->getCurrentStepIndex()));
+
+    auto plugin = mViewModel->getActivePlugin();
+    if (!plugin) {
+        const auto activeStep = mViewModel->getActiveStep();
+        if (!activeStep || activeStep->getGroups().empty() || activeStep->getGroups().front()->getPlugins().empty()) {
+            logMessage(WARN, "No active plugin available to display", false);
+            mDescriptionBox->setText(tr("Select a plugin to see its description."));
+            mImageLabel->clear();
+            return;
+        }
+        // Fall back to the first plugin in the active step when no active plugin is set.
+        logMessage(INFO, "[WINDOW] updateDisplayForActivePlugin: active plugin missing, falling back to first plugin");
+        plugin = activeStep->getGroups().front()->getPlugins().front();
+        mViewModel->setActivePlugin(plugin);
+    }
+
+    const auto pluginName  = plugin->getName();
+    const auto desc        = plugin->getDescription();
+    const auto stepIndex   = plugin->getStepIndex();
+    const auto groupIndex  = plugin->getGroupIndex();
+    const auto descLength  = desc.size();
+    const bool descMissing = desc.empty();
+
+    logMessage(DEBUG,
+        "[WINDOW] updateDisplayForActivePlugin: plugin='" + pluginName + "' step=" + std::to_string(stepIndex) +
+            " group=" + std::to_string(groupIndex) + " descLen=" + std::to_string(descLength) +
+            (descMissing ? " (empty)" : ""));
+
+    const QString description = formatPluginDescription(QString::fromStdString(desc));
     mDescriptionBox->setText(description);
+
+    logMessage(DEBUG, "[WINDOW] updateDisplayForActivePlugin: description set; formatted length=" +
+        std::to_string(description.length()));
+
     const auto image     = mViewModel->getDisplayImage();
-    const auto imagePath = UIHelper::getFullImagePath(mFomodPath, QString::fromStdString(image));
     if (image.empty()) {
+        logMessage(DEBUG, "[WINDOW] updateDisplayForActivePlugin: no image to display");
+        mImageLabel->clear();
         return;
     }
+
+    logMessage(DEBUG, "[WINDOW] updateDisplayForActivePlugin: displaying image " + image);
+    const auto imagePath = UIHelper::getFullImagePath(mFomodPath, QString::fromStdString(image));
     mImageLabel->setScalableResource(imagePath);
 }
 

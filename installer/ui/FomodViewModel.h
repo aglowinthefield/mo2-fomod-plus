@@ -65,7 +65,7 @@ public:
 
     void selectFromJson(nlohmann::json json) const;
 
-    [[nodiscard]] const std::shared_ptr<PluginViewModel>& getFirstPluginForActiveStep() const;
+    [[nodiscard]] std::shared_ptr<PluginViewModel> getFirstPluginForActiveStep() const;
 
     // Steps
     [[nodiscard]] shared_ptr_list<StepViewModel> getSteps() const { return mSteps; }
@@ -102,7 +102,18 @@ public:
 
     bool ctrlTogglePlugin(const GroupRef, const PluginRef, bool selected) const;
 
-    void setActivePlugin(const PluginRef plugin) const { mActivePlugin = plugin; }
+    void setActivePlugin(const PluginRef plugin) const
+    {
+        if (!plugin) {
+            logMessage(WARN, "setActivePlugin called with null plugin");
+            mActivePlugin = nullptr;
+            return;
+        }
+        logMessage(DEBUG,
+            "setActivePlugin: plugin='" + plugin->getName() + "' step=" + std::to_string(plugin->getStepIndex()) +
+                " group=" + std::to_string(plugin->getGroupIndex()));
+        mActivePlugin = plugin;
+    }
 
     static void markManuallySet(PluginRef plugin);
 

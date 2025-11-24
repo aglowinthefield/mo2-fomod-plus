@@ -546,15 +546,34 @@ void FomodViewModel::preinstall(const std::shared_ptr<MOBase::IFileTree>& tree, 
 std::string FomodViewModel::getDisplayImage() const
 {
     // if the active plugin has an image, return it
-    if (!mActivePlugin->getImagePath().empty()) {
+    if (mActivePlugin && !mActivePlugin->getImagePath().empty()) {
         return mActivePlugin->getImagePath();
     }
     return mCurrentStepIndex == 0 ? mFomodFile->moduleImage.path : "";
 }
 
-PluginRef FomodViewModel::getFirstPluginForActiveStep() const
+std::shared_ptr<PluginViewModel> FomodViewModel::getFirstPluginForActiveStep() const
 {
-    return mActiveStep->getGroups().at(0)->getPlugins().at(0);
+    if (!mActiveStep) {
+        logMessage(WARN, "getFirstPluginForActiveStep called with no active step set");
+        return nullptr;
+    }
+
+    const auto& groups = mActiveStep->getGroups();
+    if (groups.empty()) {
+        logMessage(WARN, "getFirstPluginForActiveStep found no groups for active step "
+            + std::to_string(mActiveStep->getOwnIndex()));
+        return nullptr;
+    }
+
+    const auto& plugins = groups.front()->getPlugins();
+    if (plugins.empty()) {
+        logMessage(WARN, "getFirstPluginForActiveStep found no plugins in first group for step "
+            + std::to_string(mActiveStep->getOwnIndex()));
+        return nullptr;
+    }
+
+    return plugins.front();
 }
 #pragma endregion
 
@@ -629,7 +648,7 @@ void FomodViewModel::selectFromJson(nlohmann::json json) const
 
             for (const auto jsonPlugin : group["plugins"]) {
 
-                const auto allPlugins = currentGroup->getPlugins();
+                const auto& allPlugins = currentGroup->getPlugins();
                 const auto searchName = jsonPlugin.get<std::string>();
 
                 logMessage(DEBUG, "Looking for plugin " + searchName);
@@ -663,7 +682,7 @@ void FomodViewModel::selectFromJson(nlohmann::json json) const
             // Do the opposite of the above. For unchecked plugins, disable them.
             for (const auto jsonPlugin : group["deselected"]) {
 
-                const auto allPlugins = currentGroup->getPlugins();
+                const auto& allPlugins = currentGroup->getPlugins();
                 const auto searchName = jsonPlugin.get<std::string>();
 
                 logMessage(DEBUG, "Looking for plugin to disable: " + searchName);
