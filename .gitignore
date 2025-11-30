@@ -8,3 +8,4 @@ nul
 .cache/
 *.log
 vsbuild*/
+vcpkg_installed/
