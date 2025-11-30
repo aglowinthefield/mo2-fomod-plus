@@ -14,6 +14,17 @@ if (DEFINED ENV{VCPKG_ROOT})
     endif ()
 endif ()
 
+# Pick up manifest-mode installed packages if present.
+if (DEFINED VCPKG_INSTALLED_DIR)
+    list(APPEND CMAKE_PREFIX_PATH "${VCPKG_INSTALLED_DIR}/x64-windows/share")
+    if (NOT DEFINED 7zip_DIR AND EXISTS "${VCPKG_INSTALLED_DIR}/x64-windows/share/7zip")
+        set(7zip_DIR "${VCPKG_INSTALLED_DIR}/x64-windows/share/7zip")
+    endif ()
+    if (NOT DEFINED mo2-cmake_DIR AND EXISTS "${VCPKG_INSTALLED_DIR}/x64-windows/share/mo2-cmake")
+        set(mo2-cmake_DIR "${VCPKG_INSTALLED_DIR}/x64-windows/share/mo2-cmake")
+    endif ()
+endif ()
+
 if (DEFINED DEPENDENCIES_DIR)
     list(APPEND CMAKE_PREFIX_PATH
         ${DEPENDENCIES_DIR}/install/share
@@ -43,6 +54,19 @@ endif ()
 if (NOT DEFINED mo2-cmake_DIR AND EXISTS "${CMAKE_INSTALL_PREFIX}/share/mo2-cmake")
     set(mo2-cmake_DIR "${CMAKE_INSTALL_PREFIX}/share/mo2-cmake")
 endif ()
+
+# Fallback to local vcpkg_installed cache (e.g., manifest builds without a toolchain).
+set(_local_vcpkg_root "${CMAKE_CURRENT_LIST_DIR}/vcpkg_installed")
+if (EXISTS "${_local_vcpkg_root}/x64-windows/share")
+    list(APPEND CMAKE_PREFIX_PATH "${_local_vcpkg_root}/x64-windows/share")
+    if (NOT DEFINED 7zip_DIR AND EXISTS "${_local_vcpkg_root}/x64-windows/share/7zip")
+        set(7zip_DIR "${_local_vcpkg_root}/x64-windows/share/7zip")
+    endif ()
+    if (NOT DEFINED mo2-cmake_DIR AND EXISTS "${_local_vcpkg_root}/x64-windows/share/mo2-cmake")
+        set(mo2-cmake_DIR "${_local_vcpkg_root}/x64-windows/share/mo2-cmake")
+    endif ()
+endif ()
+unset(_local_vcpkg_root)
 
 set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/install")
 
