@@ -12,6 +12,27 @@
         "QT_ROOT": "C:/Qt/6.7.1/msvc2019_64",
         "PYTHON_ROOT": "D:/var/python-3.12.10"
       }
+    },
+    {
+      "name": "vs2022-windows-beta",
+      "generator": "Visual Studio 17 2022",
+      "binaryDir": "${sourceDir}/vsbuild-beta",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "DEPENDENCIES_DIR": "D:/Mod.Organizer-2.5.3beta2-src",
+        "BOOST_ROOT": "D:/var/boost_1_85_0/lib64-msvc-14.3",
+        "QT_ROOT": "C:/Qt/6.7.3/msvc2019_64",
+        "CMAKE_PREFIX_PATH": "C:/Qt/6.7.3/msvc2019_64;D:/var/vcpkg/packages/mo2-uibase_x64-windows/share;D:/var/vcpkg/packages/mo2-archive_x64-windows/share;D:/var/vcpkg/packages/7zip_x64-windows/share",
+        "PYTHON_ROOT": "D:/var/python-3.12.10",
+        "Qt6_DIR": "C:/Qt/6.7.3/msvc2019_64/lib/cmake/Qt6",
+        "Qt6Widgets_DIR": "C:/Qt/6.7.3/msvc2019_64/lib/cmake/Qt6Widgets",
+        "Qt6WidgetsTools_DIR": "C:/Qt/6.7.3/msvc2019_64/lib/cmake/Qt6WidgetsTools",
+        "Qt6CoreTools_DIR": "C:/Qt/6.7.3/msvc2019_64/lib/cmake/Qt6CoreTools",
+        "mo2-uibase_DIR": "D:/var/vcpkg/packages/mo2-uibase_x64-windows/share/mo2-uibase",
+        "mo2-archive_DIR": "D:/var/vcpkg/packages/mo2-archive_x64-windows/share/mo2-archive",
+        "7zip_DIR": "D:/var/vcpkg/packages/7zip_x64-windows/share/7zip",
+        "MO2_PLUGIN_TARGET_DIR": "D:/Modding/Mod.Organizer-2.5.3beta2/plugins"
+      }
     }
   ]
 }

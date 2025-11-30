@@ -8,6 +8,8 @@ target_include_directories(
         PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/../share
+        ${MO2_UIBASE_INCLUDE_DIRS}
+        ${MO2_ARCHIVE_INCLUDE_DIRS}
 )
 
 FetchContent_Declare(
@@ -24,7 +26,7 @@ FetchContent_MakeAvailable(pugixml json)
 set(project_type plugin)
 project(fomod_plus_installer)
 
-target_link_libraries(fomod_plus_installer PRIVATE pugixml nlohmann_json::nlohmann_json dbghelp)
+target_link_libraries(fomod_plus_installer PRIVATE mo2::uibase pugixml nlohmann_json::nlohmann_json dbghelp)
 mo2_configure_plugin(fomod_plus_installer WARNINGS OFF PRIVATE_DEPENDS)
 
 # Ensure PDB is generated

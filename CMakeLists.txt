@@ -5,7 +5,9 @@ set(CMAKE_DISABLE_FIND_PACKAGE_WrapVulkanHeaders ON CACHE BOOL "" FORCE)
 
 set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/install")
 
-set(MO2_PLUGIN_TARGET_DIR "D:/Modding/MO2/plugins")
+if (NOT DEFINED MO2_PLUGIN_TARGET_DIR)
+    set(MO2_PLUGIN_TARGET_DIR "D:/Modding/MO2/plugins")
+endif ()
 if (NOT DEFINED MO2_PLUGIN_TARGET_DIR AND DEFINED ENV{MO2_PLUGIN_TARGET_DIR})
     set(MO2_PLUGIN_TARGET_DIR $ENV{MO2_PLUGIN_TARGET_DIR})
 endif ()
@@ -24,8 +26,26 @@ else ()
     include(${CMAKE_CURRENT_LIST_DIR}/cmake_common/mo2.cmake)
 endif ()
 
+# Provide compatibility with newer MO2 cmake helpers that renamed install macro.
+if (NOT COMMAND mo2_install_target AND COMMAND mo2_install_plugin)
+    function(mo2_install_target target)
+        mo2_install_plugin(${target})
+    endfunction()
+endif ()
+
 project(fomod_plus)
 set(enable_warnings OFF)
+
+find_package(mo2-uibase CONFIG REQUIRED)
+find_package(mo2-archive CONFIG REQUIRED)
+get_target_property(MO2_UIBASE_INCLUDE_DIRS mo2::uibase INTERFACE_INCLUDE_DIRECTORIES)
+foreach(dir ${MO2_UIBASE_INCLUDE_DIRS})
+    list(APPEND MO2_UIBASE_INCLUDE_DIRS "${dir}/uibase" "${dir}/uibase/game_features")
+endforeach()
+get_target_property(MO2_ARCHIVE_INCLUDE_DIRS mo2::archive INTERFACE_INCLUDE_DIRECTORIES)
+foreach(dir ${MO2_ARCHIVE_INCLUDE_DIRS})
+    list(APPEND MO2_ARCHIVE_INCLUDE_DIRS "${dir}/archive")
+endforeach()
 
 add_subdirectory(installer)
 add_subdirectory(scanner)

@@ -14,6 +14,8 @@ target_include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/../share
         ${RESOURCE_DIR}
+        ${MO2_UIBASE_INCLUDE_DIRS}
+        ${MO2_ARCHIVE_INCLUDE_DIRS}
 )
 
 if (MSVC)
@@ -28,6 +30,7 @@ if (MSVC)
     )
 endif ()
 
+target_link_libraries(fomod_plus_scanner PRIVATE mo2::uibase mo2::archive)
 mo2_configure_plugin(fomod_plus_scanner WARNINGS OFF PRIVATE_DEPENDS archive)
 
 # Ensure PDB is generated
