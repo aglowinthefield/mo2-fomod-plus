@@ -9,7 +9,7 @@ on:
 
 env:
   BUILD_TYPE: RelWithDebInfo
-  SOURCE_ROOT: ${{ github.workspace }}
+  SOURCE_ROOT: ${{ github.workspace }}/build/mo2-fomod-plus
 
 jobs:
   build:
