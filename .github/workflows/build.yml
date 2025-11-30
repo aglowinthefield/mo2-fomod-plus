@@ -9,7 +9,7 @@ on:
 
 env:
   BUILD_TYPE: RelWithDebInfo
-  SOURCE_ROOT: ./build/modorganizer_super/${{ github.event.repository.name }}
+  SOURCE_ROOT: ${{ github.workspace }}
 
 jobs:
   build:
