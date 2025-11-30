@@ -21,9 +21,18 @@ jobs:
           mo2-owner: 'ModOrganizer2'
           mo2-branch: 'master'
           mo2-dependencies: uibase archive
+          mo2-skip-build: true
 
-      - name: Install
-        run: cmake --install ${{env.SOURCE_ROOT}}/vsbuild-vcpkg --config ${{env.BUILD_TYPE}} --prefix ${{env.SOURCE_ROOT}}/install
+      - name: Configure (vcpkg preset)
+        run: |
+          cmake --preset vs2022-windows-vcpkg
+        working-directory: ${{env.SOURCE_ROOT}}
+
+      - name: Build & Install
+        run: |
+          cmake --build vsbuild-vcpkg --config ${{env.BUILD_TYPE}} --target package
+          cmake --install vsbuild-vcpkg --config ${{env.BUILD_TYPE}} --prefix ${{env.SOURCE_ROOT}}/install
+        working-directory: ${{env.SOURCE_ROOT}}
 
       - name: Upload
         uses: actions/upload-artifact@v4
