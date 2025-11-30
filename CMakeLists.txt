@@ -6,23 +6,32 @@ set(CMAKE_DISABLE_FIND_PACKAGE_WrapVulkanHeaders ON CACHE BOOL "" FORCE)
 # Help CI/local builds find vcpkg-installed dependencies when VCPKG_ROOT is set.
 if (DEFINED ENV{VCPKG_ROOT})
     list(APPEND CMAKE_PREFIX_PATH "$ENV{VCPKG_ROOT}/installed/x64-windows/share")
-    set(_vcpkg_7zip "$ENV{VCPKG_ROOT}/installed/x64-windows/share/7zip")
-    if (NOT DEFINED 7zip_DIR AND EXISTS "${_vcpkg_7zip}")
-        set(7zip_DIR "${_vcpkg_7zip}")
-    endif ()
-    set(_vcpkg_mo2_cmake "$ENV{VCPKG_ROOT}/installed/x64-windows/share/mo2-cmake")
-    if (NOT DEFINED mo2-cmake_DIR AND EXISTS "${_vcpkg_mo2_cmake}")
-        set(mo2-cmake_DIR "${_vcpkg_mo2_cmake}")
-    endif ()
-    unset(_vcpkg_7zip)
-    unset(_vcpkg_mo2_cmake)
+    foreach(_7zip_hint
+            "$ENV{VCPKG_ROOT}/installed/x64-windows/share/7zip"
+            "$ENV{VCPKG_ROOT}/installed/x64-windows-static-md/share/7zip"
+            "$ENV{VCPKG_ROOT}/packages/7zip_x64-windows/share/7zip")
+        if (NOT DEFINED 7zip_DIR AND EXISTS "${_7zip_hint}")
+            set(7zip_DIR "${_7zip_hint}")
+        endif ()
+    endforeach()
+    foreach(_mo2_cmake_hint
+            "$ENV{VCPKG_ROOT}/installed/x64-windows/share/mo2-cmake"
+            "$ENV{VCPKG_ROOT}/packages/mo2-cmake_x64-windows/share/mo2-cmake")
+        if (NOT DEFINED mo2-cmake_DIR AND EXISTS "${_mo2_cmake_hint}")
+            set(mo2-cmake_DIR "${_mo2_cmake_hint}")
+        endif ()
+    endforeach()
 endif ()
 
 # Pick up manifest-mode installed packages if present.
 if (DEFINED VCPKG_INSTALLED_DIR)
     list(APPEND CMAKE_PREFIX_PATH "${VCPKG_INSTALLED_DIR}/x64-windows/share")
+    list(APPEND CMAKE_PREFIX_PATH "${VCPKG_INSTALLED_DIR}/x64-windows-static-md/share")
     if (NOT DEFINED 7zip_DIR AND EXISTS "${VCPKG_INSTALLED_DIR}/x64-windows/share/7zip")
         set(7zip_DIR "${VCPKG_INSTALLED_DIR}/x64-windows/share/7zip")
+    endif ()
+    if (NOT DEFINED 7zip_DIR AND EXISTS "${VCPKG_INSTALLED_DIR}/x64-windows-static-md/share/7zip")
+        set(7zip_DIR "${VCPKG_INSTALLED_DIR}/x64-windows-static-md/share/7zip")
     endif ()
     if (NOT DEFINED mo2-cmake_DIR AND EXISTS "${VCPKG_INSTALLED_DIR}/x64-windows/share/mo2-cmake")
         set(mo2-cmake_DIR "${VCPKG_INSTALLED_DIR}/x64-windows/share/mo2-cmake")
