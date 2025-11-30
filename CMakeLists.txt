@@ -11,6 +11,26 @@ if (DEFINED ENV{VCPKG_ROOT})
     endif ()
 endif ()
 
+if (DEFINED DEPENDENCIES_DIR)
+    list(APPEND CMAKE_PREFIX_PATH
+        ${DEPENDENCIES_DIR}/install/share
+        ${DEPENDENCIES_DIR}/install/lib/cmake)
+    if (NOT DEFINED 7zip_DIR)
+        if (EXISTS "${DEPENDENCIES_DIR}/install/share/7zip")
+            set(7zip_DIR "${DEPENDENCIES_DIR}/install/share/7zip")
+        elseif (EXISTS "${DEPENDENCIES_DIR}/install/lib/cmake/7zip")
+            set(7zip_DIR "${DEPENDENCIES_DIR}/install/lib/cmake/7zip")
+        endif ()
+    endif ()
+endif ()
+
+if (EXISTS "${CMAKE_INSTALL_PREFIX}/share")
+    list(APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX}/share)
+endif ()
+if (NOT DEFINED 7zip_DIR AND EXISTS "${CMAKE_INSTALL_PREFIX}/share/7zip")
+    set(7zip_DIR "${CMAKE_INSTALL_PREFIX}/share/7zip")
+endif ()
+
 set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/install")
 
 if (NOT DEFINED MO2_PLUGIN_TARGET_DIR)
