@@ -22,7 +22,17 @@ std::vector<MOBase::ModDataContent::Content> FomodDataContent::getAllContents() 
 std::vector<int> FomodDataContent::getContentsFor(const std::shared_ptr<const MOBase::IFileTree> fileTree) const
 {
     std::vector<int> contents;
-    if (modHasFomodContent(mOrganizer->modList()->getMod(fileTree->name()))) {
+    if (!mOrganizer || !fileTree) {
+        return contents;
+    }
+
+    const auto modList = mOrganizer->modList();
+    if (!modList) {
+        return contents;
+    }
+
+    const auto mod = modList->getMod(fileTree->name());
+    if (modHasFomodContent(mod)) {
        contents.emplace_back(FomodDataContentConstants::FOMOD_CONTENT_ID);
     }
     return contents;
@@ -30,6 +40,9 @@ std::vector<int> FomodDataContent::getContentsFor(const std::shared_ptr<const MO
 
 bool FomodDataContent::modHasFomodContent(const MOBase::IModInterface* mod)
 {
+    if (!mod) {
+        return false;
+    }
     const auto pluginName = QString::fromStdString(StringConstants::Plugin::NAME.data());
     const auto fomodMeta = mod->pluginSetting(pluginName, "fomod", 0);
     return fomodMeta != 0;

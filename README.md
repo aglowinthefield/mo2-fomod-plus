@@ -61,6 +61,23 @@ building super seamless:
 The project is divided into two targets, `fomod_plus_installer` and `fomod_plus_scanner`. Hopefully the 
 distinction is self-explanatory.
 
+### Using vcpkg
+This repo includes `vcpkg.json` + `vcpkg-configuration.json` pointing at the MO2 registry. With `VCPKG_ROOT`
+set and Qt installed locally (Qt is not pulled via vcpkg), you can configure using the vcpkg preset:
+
+```
+cmake --preset vs2022-windows-vcpkg
+cmake --build vsbuild-vcpkg --config RelWithDebInfo --target package
+```
+
+That preset expects the standard triplet `x64-windows` and uses the vcpkg toolchain at `%VCPKG_ROOT%`.
+It installs the built DLLs to `D:/Modding/Mod.Organizer-2.5.3beta2/plugins` and packages outputs under `package/`.
+
+### Presets
+- `vs2022-windows` — builds against an existing MO2 super checkout (set `DEPENDENCIES_DIR`) and installs to `D:/Modding/MO2/plugins`.
+- `vs2022-windows-beta` — targets the MO2 2.5.3 beta sources at `D:/Mod.Organizer-2.5.3beta2-src` and installs to `D:/Modding/Mod.Organizer-2.5.3beta2/plugins`.
+- `vs2022-windows-vcpkg` — fetches MO2 dependencies via vcpkg (MO2 registry), still requires Qt installed locally, installs to `D:/Modding/Mod.Organizer-2.5.3beta2/plugins`.
+
 <details>
   <summary>Technical Reasons</summary>
 

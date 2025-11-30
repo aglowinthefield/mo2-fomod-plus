@@ -151,7 +151,12 @@ std::pair<nlohmann::json, IModInterface*> FomodPlusInstaller::getExistingFomodJs
     };
 
     // Check exact match first
-    if (const auto exactMod = mOrganizer->modList()->getMod(modName)) {
+    const auto modList = mOrganizer->modList();
+    if (modList == nullptr) {
+        return {};
+    }
+
+    if (const auto exactMod = modList->getMod(modName)) {
         const auto fomodData    = exactMod->pluginSetting(name(), "fomod", 0);
         if (auto [valid, stepCount] = parseStepCount(fomodData); valid) {
             matches.push_back({
@@ -172,7 +177,7 @@ std::pair<nlohmann::json, IModInterface*> FomodPlusInstaller::getExistingFomodJs
 
     // Check all variants
     for (const auto& variant : modName.variants()) {
-        if (const auto variantMod = mOrganizer->modList()->getMod(variant)) {
+        if (const auto variantMod = modList->getMod(variant)) {
             const auto fomodData = variantMod->pluginSetting(name(), "fomod", 0);
             if (auto [valid, stepCount] = parseStepCount(fomodData); valid) {
                 matches.push_back({

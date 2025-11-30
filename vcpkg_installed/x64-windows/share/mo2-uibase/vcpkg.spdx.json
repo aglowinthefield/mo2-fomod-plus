@@ -1,0 +1,116 @@
+{
+  "$schema": "https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json",
+  "spdxVersion": "SPDX-2.2",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "documentNamespace": "https://spdx.org/spdxdocs/mo2-uibase-x64-windows-2.5.3-beta.2-0dbd0e11-6715-45b4-827f-01f09f055e8e",
+  "name": "mo2-uibase:x64-windows@2.5.3-beta.2 10d94e9d923d091f9d2c865b7e19b372bfa299528aa319bca28c3aa5af1a08aa",
+  "creationInfo": {
+    "creators": [
+      "Tool: vcpkg-2025-07-21-d4b65a2b83ae6c3526acd1c6f3b51aff2a884533"
+    ],
+    "created": "2025-11-30T18:25:54Z"
+  },
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "GENERATES",
+      "relatedSpdxElement": "SPDXRef-binary"
+    },
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-0"
+    },
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-1"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "GENERATED_FROM",
+      "relatedSpdxElement": "SPDXRef-port"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-0",
+      "relationshipType": "CONTAINED_BY",
+      "relatedSpdxElement": "SPDXRef-port"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-1",
+      "relationshipType": "CONTAINED_BY",
+      "relatedSpdxElement": "SPDXRef-port"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-1",
+      "relationshipType": "DEPENDENCY_MANIFEST_OF",
+      "relatedSpdxElement": "SPDXRef-port"
+    }
+  ],
+  "packages": [
+    {
+      "name": "mo2-uibase",
+      "SPDXID": "SPDXRef-port",
+      "versionInfo": "2.5.3-beta.2",
+      "downloadLocation": "git+https://github.com/ModOrganizer2/vcpkg-registry@b7340b201dcf87560c51691cbdb8aa2d82ee840e",
+      "homepage": "https://github.com/ModOrganizer2/modorganizer-uibase",
+      "licenseConcluded": "GPL-3.0",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "description": "C++ API for ModOrganizer2.",
+      "comment": "This is the port (recipe) consumed by vcpkg."
+    },
+    {
+      "name": "mo2-uibase:x64-windows",
+      "SPDXID": "SPDXRef-binary",
+      "versionInfo": "10d94e9d923d091f9d2c865b7e19b372bfa299528aa319bca28c3aa5af1a08aa",
+      "downloadLocation": "NONE",
+      "licenseConcluded": "GPL-3.0",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "This is a binary package built by vcpkg."
+    },
+    {
+      "SPDXID": "SPDXRef-resource-0",
+      "name": "uibase_2.5.3-beta.2.7z",
+      "packageFileName": "uibase_2.5.3-beta.2.7z",
+      "downloadLocation": "https://github.com/ModOrganizer2/modorganizer-uibase/releases/download/v2.5.3-beta.2/uibase_v2.5.3-beta.2.7z",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "checksums": [
+        {
+          "algorithm": "SHA512",
+          "checksumValue": "a42c1ed29bd5af93496873247a25f35f07c330d3ad1bfd46f1f34bfcbbc06606784d87d2e5c975226d9a129601a527a5f7e76ee770666ae8e8a683873805d232"
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "fileName": "./portfile.cmake",
+      "SPDXID": "SPDXRef-file-0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "fea1352b5ef914e107c7c048cfc17a53b44ddd102cfa6a8430781abda725f8ad"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./vcpkg.json",
+      "SPDXID": "SPDXRef-file-1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "74f1a36ffa9915fa38c0bd2364c36a55f5a00a3f32ec5d3e6e2b7ba510471eb0"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    }
+  ]
+}

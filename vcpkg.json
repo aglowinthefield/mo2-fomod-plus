@@ -1,0 +1,17 @@
+{
+  "name": "mo2-fomod-plus",
+  "version-string": "0.0.0",
+  "builtin-baseline": "294f76666c3000630d828703e675814c05a4fd43",
+  "dependencies": [
+    "7zip",
+    "mo2-cmake",
+    "mo2-archive",
+    "mo2-uibase"
+  ],
+  "overrides": [
+    {
+      "name": "mo2-uibase",
+      "version": "2.5.3-beta.2"
+    }
+  ]
+}

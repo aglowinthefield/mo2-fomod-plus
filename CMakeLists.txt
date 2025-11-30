@@ -22,8 +22,11 @@ endif ()
 
 if (DEFINED DEPENDENCIES_DIR)
     include(${DEPENDENCIES_DIR}/cmake_common/mo2.cmake)
-else ()
+    list(APPEND CMAKE_PREFIX_PATH ${DEPENDENCIES_DIR}/install)
+elseif (EXISTS ${CMAKE_CURRENT_LIST_DIR}/cmake_common/mo2.cmake)
     include(${CMAKE_CURRENT_LIST_DIR}/cmake_common/mo2.cmake)
+else ()
+    find_package(mo2-cmake CONFIG REQUIRED)
 endif ()
 
 # Provide compatibility with newer MO2 cmake helpers that renamed install macro.

@@ -1,0 +1,8 @@
+{
+  "https://github.com/Microsoft/vcpkg": {
+    "HEAD": "5bf0c55239da398b8c6f450818c9e28d36bf9966"
+  },
+  "https://github.com/ModOrganizer2/vcpkg-registry": {
+    "HEAD": "2bd6085d6b0cde1639de30489f577a50c05f963e"
+  }
+}
