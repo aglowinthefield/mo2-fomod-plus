@@ -6,3 +6,4 @@ install/
 package/
 nul
 .cache/
+*.log

@@ -66,7 +66,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="706"/>
+        <location filename="FomodInstallerWindow.cpp" line="700"/>
         <source>Select a plugin to see its description.</source>
         <translation type="unfinished"></translation>
     </message>

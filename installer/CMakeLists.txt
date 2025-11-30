@@ -10,7 +10,14 @@ target_include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/../share
 )
 
-FetchContent_Declare(pugixml GIT_REPOSITORY https://github.com/zeux/pugixml GIT_TAG v1.14)
+FetchContent_Declare(
+        pugixml
+        GIT_REPOSITORY https://github.com/zeux/pugixml
+        GIT_TAG v1.14
+        PATCH_COMMAND ${CMAKE_COMMAND}
+                -DPUGIXML_CMAKELISTS=<SOURCE_DIR>/CMakeLists.txt
+                -P ${CMAKE_CURRENT_LIST_DIR}/../cmake/patch_pugixml.cmake
+)
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
 FetchContent_MakeAvailable(pugixml json)
 

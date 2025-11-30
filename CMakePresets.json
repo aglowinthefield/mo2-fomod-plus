@@ -6,26 +6,11 @@
       "generator": "Visual Studio 17 2022",
       "binaryDir": "${sourceDir}/vsbuild",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": {
-          "type": "STRING",
-          "value": "RelWithDebInfo"
-        },
-        "DEPENDENCIES_DIR": {
-          "type": "PATH",
-          "value": "D:/var/modorganizer_super"
-        },
-        "BOOST_ROOT": {
-          "type": "PATH",
-          "value": "D:/var/boost_1_85_0/lib64-msvc-14.3"
-        },
-        "QT_ROOT": {
-          "type": "PATH",
-          "value": "C:/Qt/6.7.1/msvc2019_64"
-        },
-        "PYTHON_ROOT": {
-          "type": "PATH",
-          "value": "D:/var/python-3.12.10"
-        }
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "DEPENDENCIES_DIR": "D:/var/modorganizer_super",
+        "BOOST_ROOT": "D:/var/boost_1_85_0/lib64-msvc-14.3",
+        "QT_ROOT": "C:/Qt/6.7.1/msvc2019_64",
+        "PYTHON_ROOT": "D:/var/python-3.12.10"
       }
     }
   ]
