@@ -20,14 +20,15 @@ jobs:
         with:
           mo2-owner: 'ModOrganizer2'
           mo2-branch: 'master'
-          mo2-third-parties: 7z zlib
-          mo2-dependencies: uibase game_gamebryo archive 7z zlib lz4
+          mo2-dependencies: uibase archive
 
       - name: Install
-        run: cmake --install ${{env.SOURCE_ROOT}}/vsbuild --config ${{env.BUILD_TYPE}} --prefix ${{env.SOURCE_ROOT}}/install
+        run: cmake --install ${{env.SOURCE_ROOT}}/vsbuild-vcpkg --config ${{env.BUILD_TYPE}} --prefix ${{env.SOURCE_ROOT}}/install
 
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: mo2-fomod-plus
-          path: ${{env.SOURCE_ROOT}}/install/bin
+          path: |
+            ${{env.SOURCE_ROOT}}/package
+            ${{env.SOURCE_ROOT}}/install/bin
