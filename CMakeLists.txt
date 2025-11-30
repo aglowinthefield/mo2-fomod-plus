@@ -3,6 +3,14 @@ set(CMAKE_CXX_STANDARD 20)
 # Skip optional Vulkan wrapper lookups to avoid noisy Qt warnings when Vulkan SDK isn't present.
 set(CMAKE_DISABLE_FIND_PACKAGE_WrapVulkanHeaders ON CACHE BOOL "" FORCE)
 
+# Help CI/local builds find vcpkg-installed dependencies when VCPKG_ROOT is set.
+if (DEFINED ENV{VCPKG_ROOT})
+    list(APPEND CMAKE_PREFIX_PATH "$ENV{VCPKG_ROOT}/installed/x64-windows/share")
+    if (NOT DEFINED 7zip_DIR AND EXISTS "$ENV{VCPKG_ROOT}/installed/x64-windows/share/7zip")
+        set(7zip_DIR "$ENV{VCPKG_ROOT}/installed/x64-windows/share/7zip")
+    endif ()
+endif ()
+
 set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/install")
 
 if (NOT DEFINED MO2_PLUGIN_TARGET_DIR)
