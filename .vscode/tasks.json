@@ -2,12 +2,40 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Build Tests (Debug)",
+      "label": "Build (RelWithDebInfo)",
+      "type": "shell",
+      "command": "cmake",
+      "args": ["--build", "vsbuild", "--config", "RelWithDebInfo"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": "$msCompile",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Build (Debug)",
       "type": "shell",
       "command": "cmake",
       "args": ["--build", "vsbuild", "--config", "Debug"],
       "group": "build",
       "problemMatcher": "$msCompile",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Install to MO2",
+      "type": "shell",
+      "command": "cmake",
+      "args": ["--install", "vsbuild", "--config", "RelWithDebInfo"],
+      "group": "build",
+      "dependsOn": "Build (RelWithDebInfo)",
+      "problemMatcher": [],
       "presentation": {
         "reveal": "always",
         "panel": "shared"
@@ -22,8 +50,11 @@
         "-C", "Debug",
         "--output-on-failure"
       ],
-      "group": "test",
-      "dependsOn": "Build Tests (Debug)",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "dependsOn": "Build (Debug)",
       "problemMatcher": [],
       "presentation": {
         "reveal": "always",
@@ -42,14 +73,38 @@
         "-V"
       ],
       "group": "test",
-      "dependsOn": "Build Tests (Debug)",
+      "dependsOn": "Build (Debug)",
       "problemMatcher": [],
       "presentation": {
         "reveal": "always",
         "panel": "shared",
         "clear": true
       }
+    },
+    {
+      "label": "Package",
+      "type": "shell",
+      "command": "cmake",
+      "args": ["--build", "vsbuild", "--config", "RelWithDebInfo", "--target", "package"],
+      "group": "build",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Tail Plugin Logs",
+      "type": "shell",
+      "command": "Get-Content",
+      "args": ["-Path", "D:/Modding/MO2/logs/fomodplus.log", "-Wait", "-Tail", "50"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "isBackground": true
     }
   ]
 }
-

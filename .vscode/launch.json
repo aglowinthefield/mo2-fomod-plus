@@ -1,0 +1,45 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug MO2 (with plugin)",
+      "type": "lldb",
+      "request": "launch",
+      "program": "D:/Modding/MO2/ModOrganizer.exe",
+      "args": [],
+      "stopOnEntry": false,
+      "cwd": "D:/Modding/MO2",
+      "terminal": "console",
+      "preLaunchTask": "Install to MO2",
+      "initCommands": [
+        "settings set target.preload-symbols false",
+        "settings set symbols.enable-external-lookup false"
+      ]
+    },
+    {
+      "name": "Debug MO2 (no build)",
+      "type": "lldb",
+      "request": "launch",
+      "program": "D:/Modding/MO2/ModOrganizer.exe",
+      "args": [],
+      "stopOnEntry": false,
+      "cwd": "D:/Modding/MO2",
+      "terminal": "console",
+      "initCommands": [
+        "settings set target.preload-symbols false",
+        "settings set symbols.enable-external-lookup false"
+      ]
+    },
+    {
+      "name": "Attach to MO2",
+      "type": "lldb",
+      "request": "attach",
+      "program": "D:/Modding/MO2/ModOrganizer.exe",
+      "initCommands": [
+        "settings set target.preload-symbols false",
+        "settings set symbols.enable-external-lookup false"
+      ]
+    }
+  ]
+}
+

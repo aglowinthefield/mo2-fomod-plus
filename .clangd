@@ -1,8 +1,10 @@
 CompileFlags:
   Add:
+    - "-ID:/var/mo2-fomod-plus/installer"
+    - "-ID:/var/mo2-fomod-plus/scanner"
+    - "-ID:/var/mo2-fomod-plus/share"
     - "-ID:/var/mo2-fomod-plus/vsbuild/_deps/pugixml-src/src"
     - "-ID:/var/mo2-fomod-plus/vsbuild/_deps/json-src/include"
-    - "-ID:/var/mo2-fomod-plus/share"
     - "-ID:/var/vcpkg/packages/mo2-uibase_x64-windows/include"
     - "-ID:/var/vcpkg/packages/mo2-uibase_x64-windows/include/uibase"
     - "-ID:/var/vcpkg/packages/mo2-uibase_x64-windows/include/uibase/game_features"
