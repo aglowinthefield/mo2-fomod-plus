@@ -1,0 +1,55 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Tests (Debug)",
+      "type": "shell",
+      "command": "cmake",
+      "args": ["--build", "vsbuild", "--config", "Debug"],
+      "group": "build",
+      "problemMatcher": "$msCompile",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Run Tests",
+      "type": "shell",
+      "command": "ctest",
+      "args": [
+        "--test-dir", "vsbuild/tests",
+        "-C", "Debug",
+        "--output-on-failure"
+      ],
+      "group": "test",
+      "dependsOn": "Build Tests (Debug)",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "Run Tests (verbose)",
+      "type": "shell",
+      "command": "ctest",
+      "args": [
+        "--test-dir", "vsbuild/tests",
+        "-C", "Debug",
+        "--output-on-failure",
+        "-V"
+      ],
+      "group": "test",
+      "dependsOn": "Build Tests (Debug)",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    }
+  ]
+}
+

@@ -24,10 +24,10 @@ jobs:
           mo2-skip-build: true
 
       - name: Configure (vcpkg preset)
-        run: |
-          cmake --preset vs2022-windows-vcpkg ^
-            -DCMAKE_PREFIX_PATH="${{ github.workspace }}/install/lib/cmake;${{ github.workspace }}/install/share" ^
-            -Dmo2-cmake_DIR="${{ github.workspace }}/install/lib/cmake/mo2-cmake"
+        run: >
+          cmake --preset vs2022-windows-vcpkg
+          -DCMAKE_PREFIX_PATH="${{ github.workspace }}/install/lib/cmake;${{ github.workspace }}/install/share"
+          -Dmo2-cmake_DIR="${{ github.workspace }}/install/lib/cmake/mo2-cmake"
         working-directory: ${{env.SOURCE_ROOT}}
 
       - name: Build & Install

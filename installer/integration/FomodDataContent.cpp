@@ -15,6 +15,7 @@ std::vector<MOBase::ModDataContent::Content> FomodDataContent::getAllContents() 
     static const std::vector<Content> contents = {
         {FomodDataContentConstants::FOMOD_CONTENT_ID, "FOMOD", ":/fomod/hat", false}
     };
+
     return contents;
 }
 

@@ -1,0 +1,14 @@
+CompileFlags:
+  Add:
+    - "-ID:/var/mo2-fomod-plus/vsbuild/_deps/pugixml-src/src"
+    - "-ID:/var/mo2-fomod-plus/vsbuild/_deps/json-src/include"
+    - "-ID:/var/mo2-fomod-plus/share"
+    - "-ID:/var/vcpkg/packages/mo2-uibase_x64-windows/include"
+    - "-ID:/var/vcpkg/packages/mo2-uibase_x64-windows/include/uibase"
+    - "-ID:/var/vcpkg/packages/mo2-uibase_x64-windows/include/uibase/game_features"
+    - "-IC:/Qt/6.7.3/msvc2022_64/include"
+    - "-IC:/Qt/6.7.3/msvc2022_64/include/QtCore"
+    - "-IC:/Qt/6.7.3/msvc2022_64/include/QtGui"
+    - "-IC:/Qt/6.7.3/msvc2022_64/include/QtWidgets"
+    - "-std=c++20"
+

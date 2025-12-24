@@ -71,7 +71,7 @@ public:
 
     std::string getQualifiedFilePath(const std::string& treePath) const;
 
-    static std::vector<std::string> collectPositiveFileNamesFromDependencyPatterns(const std::vector<DependencyPattern> &patterns);
+    std::vector<std::string> collectPositiveFileNamesFromDependencyPatterns(const std::vector<DependencyPattern> &patterns);
 
     void addFiles(std::vector<File>& main, std::vector<File> toAdd) const;
 
