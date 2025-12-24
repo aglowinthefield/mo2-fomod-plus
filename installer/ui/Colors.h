@@ -119,11 +119,11 @@ inline QString getStyle(const QString& colorName, const ColorApplication applica
         { "Orange Bright", Colors::OrangeBright }
     };
 
-    if (auto it = colorValues.find(colorName); it != colorValues.end()) {
+    if (const auto it = colorValues.find(colorName); it != colorValues.end()) {
         return generateStyle(it->second, application, opacity, borderWidth);
     }
 
-    return QString();
+    return {};
 }
 
 // For backward compatibility

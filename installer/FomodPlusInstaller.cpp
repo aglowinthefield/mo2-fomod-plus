@@ -289,6 +289,7 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
     auto fomodViewModel = FomodViewModel::create(mOrganizer, std::move(moduleConfigFile), std::move(infoFile));
     const auto window   = std::make_shared<FomodInstallerWindow>(this, modName, tree, mFomodPath, fomodViewModel, json);
 
+    // ReSharper disable once CppTooWideScopeInitStatement
     const QDialog::DialogCode result = showInstallerWindow(window);
     if (result == QDialog::Accepted) {
         // modname was updated in window
@@ -404,6 +405,7 @@ void FomodPlusInstaller::onInstallationEnd(const EInstallResult result, IModInte
 // Borrowed from https://github.com/ModOrganizer2/modorganizer-installer_fomod/blob/master/src/installerfomod.cpp
 std::shared_ptr<const IFileTree> FomodPlusInstaller::findFomodDirectory(const std::shared_ptr<const IFileTree>& tree)
 {
+    // ReSharper disable once CppTooWideScopeInitStatement
     const auto entry = tree->find(StringConstants::FomodFiles::FOMOD_DIR.data(), FileTreeEntry::DIRECTORY);
 
     if (entry != nullptr) {

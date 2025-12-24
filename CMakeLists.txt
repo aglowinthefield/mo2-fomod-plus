@@ -115,18 +115,13 @@ if (_fomod_plus_uses_local_mo2_cmake AND NOT COMMAND mo2_find_libraries
     include(${_fomod_plus_mo2_helper_dir}/mo2_targets.cmake)
 endif ()
 
-# Provide compatibility with newer MO2 cmake helpers that renamed install macro.
-if (NOT COMMAND mo2_install_target AND COMMAND mo2_install_plugin)
-    function(mo2_install_target target)
-        mo2_install_plugin(${target})
-    endfunction()
-endif ()
-
 project(fomod_plus)
 set(enable_warnings OFF)
 
-if (NOT _fomod_plus_uses_local_mo2_cmake)
-    find_package(mo2-cmake CONFIG REQUIRED)
+# If vcpkg package directories are explicitly provided, use find_package regardless
+# of whether local helpers were found (they don't have mo2_find_libraries).
+if (NOT _fomod_plus_uses_local_mo2_cmake OR DEFINED mo2-uibase_DIR OR DEFINED mo2-archive_DIR)
+    find_package(mo2-cmake CONFIG QUIET)
     find_package(mo2-uibase CONFIG REQUIRED)
     find_package(mo2-archive CONFIG REQUIRED)
 elseif (COMMAND mo2_find_libraries)
@@ -135,6 +130,14 @@ else ()
     message(FATAL_ERROR "Local Mod Organizer helpers were found but mo2_find_libraries() is unavailable. "
         "Ensure ${_fomod_plus_mo2_helper_dir} contains an up-to-date mo2_targets.cmake.")
 endif ()
+
+# Provide compatibility with newer MO2 cmake helpers that renamed install macro.
+if (NOT COMMAND mo2_install_target AND COMMAND mo2_install_plugin)
+    function(mo2_install_target target)
+        mo2_install_plugin(${target})
+    endfunction()
+endif ()
+
 get_target_property(MO2_UIBASE_INCLUDE_DIRS mo2::uibase INTERFACE_INCLUDE_DIRECTORIES)
 foreach(dir ${MO2_UIBASE_INCLUDE_DIRS})
     list(APPEND MO2_UIBASE_INCLUDE_DIRS "${dir}/uibase" "${dir}/uibase/game_features")

@@ -13,12 +13,12 @@ using FlagList = std::vector<Flag>;
 class FlagMap {
 public:
 
-    std::vector<std::shared_ptr<PluginViewModel>> getPluginsSettingFlag(const std::string& key, const std::string& value) const
+    [[nodiscard]] std::vector<std::shared_ptr<PluginViewModel>> getPluginsSettingFlag(const std::string& key, const std::string& value) const
     {
         std::vector<std::shared_ptr<PluginViewModel>> result;
-        for (const auto& [plugin, flags] : flags) {
-            for (const auto& flag : flags) {
-                if (toLower(flag.first) == toLower(key) && flag.second == value) {
+        for (const auto& [plugin, theseFlags] : flags) {
+            for (const auto& [fst, snd] : theseFlags) {
+                if (toLower(fst) == toLower(key) && snd == value) {
                     result.emplace_back(plugin);
                 }
             }
@@ -86,9 +86,9 @@ public:
         auto result = std::string();
         result += "FlagMap:\n";
 
-        for (const auto& [plugin, flags] : flags) {
+        for (const auto& [plugin, theseFlags] : flags) {
             result += plugin->getName() + " [";
-            for (const auto& [fst, snd] : flags) {
+            for (const auto& [fst, snd] : theseFlags) {
                 result += fst + ": " + snd + ", ";
             }
             result.erase(result.size() - 2);
