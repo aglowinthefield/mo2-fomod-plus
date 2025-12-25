@@ -32,9 +32,6 @@ namespace FomodFiles {
     constexpr std::string_view FOMOD_DIR        = "fomod";
     constexpr std::string_view INFO_XML         = "info.xml";
     constexpr std::string_view MODULE_CONFIG    = "ModuleConfig.xml";
-    constexpr std::wstring_view W_FOMOD_DIR     = L"fomod";
-    constexpr std::wstring_view W_INFO_XML      = L"info.xml";
-    constexpr std::wstring_view W_MODULE_CONFIG = L"ModuleConfig.xml";
 
     constexpr std::string_view TYPE_REQUIRED        = "Required";
     constexpr std::string_view TYPE_OPTIONAL        = "Optional";
@@ -42,6 +39,12 @@ namespace FomodFiles {
     constexpr std::string_view TYPE_NOT_USABLE      = "NotUsable";
     constexpr std::string_view TYPE_COULD_BE_USABLE = "CouldBeUsable";
 }
+}
+
+// Convert narrow string_view to wstring (for ASCII strings only)
+inline std::wstring toWide(std::string_view sv)
+{
+    return std::wstring(sv.begin(), sv.end());
 }
 
 // trim from start (in place)

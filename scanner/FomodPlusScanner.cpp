@@ -105,10 +105,10 @@ bool hasFomodFiles(const std::vector<FileData*>& files)
     bool hasInfoXml   = false;
 
     for (const auto* file : files) {
-        if (endsWithCaseInsensitive(file->getArchiveFilePath(), StringConstants::FomodFiles::W_MODULE_CONFIG.data())) {
+        if (endsWithCaseInsensitive(file->getArchiveFilePath(), toWide(StringConstants::FomodFiles::MODULE_CONFIG))) {
             hasModuleXml = true;
         }
-        if (endsWithCaseInsensitive(file->getArchiveFilePath(), StringConstants::FomodFiles::W_INFO_XML.data())) {
+        if (endsWithCaseInsensitive(file->getArchiveFilePath(), toWide(StringConstants::FomodFiles::INFO_XML))) {
             hasInfoXml = true;
         }
     }
