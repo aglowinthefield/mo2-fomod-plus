@@ -65,6 +65,8 @@ public:
 
     void selectFromJson(nlohmann::json json) const;
 
+    void resetToDefaults();
+
     [[nodiscard]] std::shared_ptr<PluginViewModel> getFirstPluginForActiveStep() const;
 
     // Steps

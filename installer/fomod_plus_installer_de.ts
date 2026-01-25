@@ -45,7 +45,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="360"/>
+        <location filename="FomodInstallerWindow.cpp" line="359"/>
+        <source>Reset Choices</source>
+        <translation>Optionen Zur&uuml;cksetzen</translation>
+    </message>
+    <message>
+        <location filename="FomodInstallerWindow.cpp" line="361"/>
         <location filename="FomodInstallerWindow.cpp" line="586"/>
         <source>Bilder Ausblenden</source>
         <translation type="unfinished"></translation>

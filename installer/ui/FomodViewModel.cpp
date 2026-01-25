@@ -1,4 +1,4 @@
-﻿#include "FomodViewModel.h"
+#include "FomodViewModel.h"
 #include "xml/ModuleConfiguration.h"
 #include "lib/Logger.h"
 
@@ -612,6 +612,42 @@ std::string FomodViewModel::toString() const
     return viewModel;
 }
 
+
+void FomodViewModel::resetToDefaults()
+{
+    logMessage(INFO, "Resetting all choices to author defaults");
+
+    // Clear all flags first
+    mFlags->clearAll();
+
+    // Reset all plugins to deselected and clear visited states
+    for (const auto& step : mSteps) {
+        step->setVisited(false);
+        for (const auto& group : step->getGroups()) {
+            for (const auto& plugin : group->getPlugins()) {
+                plugin->setSelected(false);
+                plugin->setEnabled(true);
+                plugin->manuallySet = false;
+                plugin->setCurrentPluginType(PluginTypeEnum::UNKNOWN);
+            }
+        }
+    }
+
+    // Re-run the initial constraint enforcement to restore author defaults
+    processPluginConditions(-1);
+    enforceGroupConstraints();
+    updateVisibleSteps();
+
+    // Reset to first step
+    mCurrentStepIndex = mVisibleStepIndices.empty() ? 0 : mVisibleStepIndices.front();
+    mActiveStep       = mSteps.empty() ? nullptr : mSteps.at(mCurrentStepIndex);
+    mActivePlugin     = getFirstPluginForActiveStep();
+    if (mActiveStep) {
+        mActiveStep->setVisited(true);
+    }
+
+    logMessage(DEBUG, "Reset complete. Current state:\n" + toString());
+}
 
 void FomodViewModel::selectFromJson(nlohmann::json json) const
 {

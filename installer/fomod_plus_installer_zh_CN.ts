@@ -45,7 +45,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="360"/>
+        <location filename="FomodInstallerWindow.cpp" line="359"/>
+        <source>Reset Choices</source>
+        <translation>重置选择</translation>
+    </message>
+    <message>
+        <location filename="FomodInstallerWindow.cpp" line="361"/>
         <location filename="FomodInstallerWindow.cpp" line="586"/>
         <source>隐藏图片</source>
         <translation type="unfinished"></translation>

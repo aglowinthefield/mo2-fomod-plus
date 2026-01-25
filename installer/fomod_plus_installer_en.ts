@@ -11,7 +11,7 @@
     </message>
     <message>
         <location filename="FomodInstallerWindow.cpp" line="244"/>
-        <location filename="FomodInstallerWindow.cpp" line="421"/>
+        <location filename="FomodInstallerWindow.cpp" line="423"/>
         <source>Next</source>
         <translation type="unfinished"></translation>
     </message>
@@ -46,27 +46,32 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="420"/>
-        <source>Back</source>
+        <location filename="FomodInstallerWindow.cpp" line="413"/>
+        <source>Reset Choices</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="FomodInstallerWindow.cpp" line="422"/>
+        <source>Back</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="FomodInstallerWindow.cpp" line="424"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="679"/>
+        <location filename="FomodInstallerWindow.cpp" line="682"/>
         <source>Hide Images</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="683"/>
+        <location filename="FomodInstallerWindow.cpp" line="686"/>
         <source>Show Images</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="700"/>
+        <location filename="FomodInstallerWindow.cpp" line="703"/>
         <source>Select a plugin to see its description.</source>
         <translation type="unfinished"></translation>
     </message>

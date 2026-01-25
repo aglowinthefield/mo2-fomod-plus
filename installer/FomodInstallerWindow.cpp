@@ -1,4 +1,4 @@
-﻿#include "FomodInstallerWindow.h"
+#include "FomodInstallerWindow.h"
 
 #include "ui/FomodImageViewer.h"
 
@@ -410,9 +410,11 @@ QWidget* FomodInstallerWindow::createBottomRow()
     // Manual on far left
     mManualButton         = UIHelper::createButton(tr("Manual"), bottomRow);
     mSelectPreviousButton = UIHelper::createButton(tr("Restore Previous Choices"), bottomRow);
+    mResetChoicesButton   = UIHelper::createButton(tr("Reset Choices"), bottomRow);
 
     layout->addWidget(mManualButton);
     layout->addWidget(mSelectPreviousButton);
+    layout->addWidget(mResetChoicesButton);
 
     // Space to push remaining buttons right
     layout->addStretch();
@@ -429,6 +431,7 @@ QWidget* FomodInstallerWindow::createBottomRow()
     connect(mBackButton, SIGNAL(clicked()), this, SLOT(onBackClicked()));
     connect(mCancelButton, SIGNAL(clicked()), this, SLOT(onCancelClicked()));
     connect(mSelectPreviousButton, SIGNAL(clicked()), this, SLOT(onSelectPreviousClicked()));
+    connect(mResetChoicesButton, SIGNAL(clicked()), this, SLOT(onResetChoicesClicked()));
     // connect(mHideImagesButton, SIGNAL(clicked()), this, SLOT(toggleImagesShown()));
 
     layout->addWidget(mBackButton);
@@ -810,6 +813,23 @@ void FomodInstallerWindow::selectPreviouslySelectedOptions() const
         logMessage(ERR, std::string("Error selecting previously selected options: ") + e.what(), true);
     }
     updateCheckboxStates();
+}
+
+void FomodInstallerWindow::onResetChoicesClicked()
+{
+    logMessage(INFO, "Resetting choices to author defaults", true);
+    try {
+        mViewModel->resetToDefaults();
+    } catch (Exception& e) {
+        logMessage(ERR, std::string("Error resetting choices: ") + e.what(), true);
+        return;
+    }
+
+    // Reset the UI to show the first step
+    mInstallStepStack->setCurrentIndex(mViewModel->getCurrentStepIndex());
+    updateCheckboxStates();
+    updateButtons();
+    updateDisplayForActivePlugin();
 }
 
 QString FomodInstallerWindow::getColorStyle(const UiColors::ColorApplication color_application) const

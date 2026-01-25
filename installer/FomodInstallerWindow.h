@@ -86,6 +86,8 @@ private slots:
 
     void onSelectPreviousClicked() const { this->selectPreviouslySelectedOptions(); }
 
+    void onResetChoicesClicked();
+
     void onBackClicked() const;
 
     void onCancelClicked()
@@ -126,6 +128,7 @@ private:
     QPushButton* mCancelButton{};
     QPushButton* mManualButton{};
     QPushButton* mSelectPreviousButton{};
+    QPushButton* mResetChoicesButton{};
     QPushButton* mHideImagesButton{};
 
     // Widgets
