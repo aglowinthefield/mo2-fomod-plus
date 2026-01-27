@@ -24,6 +24,41 @@
 - Classes use PascalCase (`FomodInstallerWindow`), member functions and locals use lowerCamelCase; prefer descriptive names over abbreviations.
 - Keep UI strings in translation files; place shared helpers in `share/` to avoid duplication.
 
+### Header File Patterns
+- Use `#pragma once` for include guards (preferred over `#ifndef` guards)
+- Member variables use `m` prefix: `mOrganizer`, `mFomodPath`, `mViewModel`
+- Use `[[nodiscard]]` attribute on getters and pure functions
+- Organize includes: local project includes first, then library includes, then Qt includes
+
+### Pragma Regions (.cpp files)
+Use `#pragma region` to organize implementation files into logical sections. Common regions:
+- `Initialization` - Constructor, init(), setup functions
+- `Settings` - Configuration getters/setters
+- `Helpers` - Private utility functions
+- `ViewModel Lifecycle` - State management
+- `Traversal Functions` - Iteration logic
+- `Initializers` - Object creation
+- `Group Constraints` / `Plugin Constraints` / `Step Constraints` - Validation logic
+- `Navigation/UI` - User interaction handlers
+- `Utility` - toString(), logging, misc
+
+Example:
+```cpp
+#pragma region Initialization
+bool MyClass::init(IOrganizer* organizer) { ... }
+#pragma endregion
+
+#pragma region Settings
+bool MyClass::shouldDoThing() const { ... }
+#pragma endregion
+```
+
+### Other Conventions
+- Use `using namespace MOBase;` and `using namespace std;` at file scope in implementation files
+- Prefer `std::shared_ptr` for objects shared across components, `std::unique_ptr` for owned objects
+- Use `final` on classes not intended for inheritance
+- Use modern C++ features: `std::ranges`, `std::optional`, structured bindings, `[[maybe_unused]]`
+
 ## Testing Guidelines
 - GoogleTest is fetched in `tests/CMakeLists.txt`; add new suites as `tests/test_<area>.cpp` or under `tests/moduleconf/`.
 - Favor small, fixture-backed tests that use existing XML samples; when adding data files, keep them minimal to reduce repo bloat.

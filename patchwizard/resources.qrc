@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/fomod">
+        <file alias="hat">resources/fomod_icon.png</file>
+        <file alias="infoscroll">resources/infoscroll.png</file>
+    </qresource>
+</RCC>

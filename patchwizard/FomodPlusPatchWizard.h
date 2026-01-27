@@ -37,9 +37,13 @@ public:
 
 private:
     Logger& log = Logger::getInstance();
-    QDialog* mDialog { nullptr };
+    QDialog* mDialog{ nullptr };
     IOrganizer* mOrganizer{ nullptr };
     std::unique_ptr<PatchFinder> mPatchFinder{ nullptr };
+    std::vector<AvailablePatch> mAvailablePatches;
+
+    void setupEmptyState() const;
+    void setupPatchList() const;
 
     void logMessage(const LogLevel level, const std::string& message) const
     {

@@ -9,3 +9,5 @@ nul
 *.log
 vsbuild*/
 vcpkg_installed/
+CLAUDE.md
+AGENTS.md
