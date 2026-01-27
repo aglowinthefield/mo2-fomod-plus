@@ -1,6 +1,8 @@
 ﻿#ifndef FOMODPLUSSCANNER_H
 #define FOMODPLUSSCANNER_H
 
+#include "archiveparser.h"
+
 #include <iplugin.h>
 #include <iplugintool.h>
 
@@ -8,13 +10,6 @@
 #include <QProgressBar>
 
 using namespace MOBase;
-
-enum ScanResult {
-    HAS_FOMOD,
-    NO_FOMOD,
-    NO_ARCHIVE
-};
-
 
 class FomodPlusScanner final : public IPluginTool {
     Q_OBJECT
@@ -40,7 +35,7 @@ public:
     [[nodiscard]] QString name() const override { return "FOMOD Scanner"; } // This should not be translated
     [[nodiscard]] QString author() const override { return "clearing"; }
     [[nodiscard]] QString description() const override { return tr("Scans modlist for files installed via FOMOD"); }
-    [[nodiscard]] VersionInfo version() const override { return VersionInfo(1, 0, 0, VersionInfo::RELEASE_FINAL); }
+    [[nodiscard]] VersionInfo version() const override { return {1, 0, 0, VersionInfo::RELEASE_FINAL}; }
 
     [[nodiscard]] QList<PluginSetting> settings() const override { return {}; }
 

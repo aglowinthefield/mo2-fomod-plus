@@ -1,5 +1,8 @@
 ﻿#include "FomodPlusScanner.h"
 
+#include "archiveparser.h"
+#include "FomodDbEntry.h"
+
 #include <QDialog>
 #include <QPushButton>
 #include <QProgressBar>
@@ -90,8 +93,7 @@ int FomodPlusScanner::scanLoadOrder(const ScanCallbackFn& callback) const
     int modified = 0;
     for (const auto& modName : mOrganizer->modList()->allMods()) {
         const auto mod          = mOrganizer->modList()->getMod(modName);
-        const ScanResult result = openInstallationArchive(mod);
-        if (callback(mod, result)) {
+        if (const ScanResult result = openInstallationArchive(mod); callback(mod, result)) {
             modified++;
         }
         mProgressBar->setValue(++progress);
@@ -99,93 +101,21 @@ int FomodPlusScanner::scanLoadOrder(const ScanCallbackFn& callback) const
     return modified;
 }
 
-bool hasFomodFiles(const std::vector<FileData*>& files)
-{
-    bool hasModuleXml = false;
-    bool hasInfoXml   = false;
-
-    for (const auto* file : files) {
-        if (endsWithCaseInsensitive(file->getArchiveFilePath(), toWide(StringConstants::FomodFiles::MODULE_CONFIG))) {
-            hasModuleXml = true;
-        }
-        if (endsWithCaseInsensitive(file->getArchiveFilePath(), toWide(StringConstants::FomodFiles::INFO_XML))) {
-            hasInfoXml = true;
-        }
-    }
-    return hasModuleXml && hasInfoXml;
-}
-
-std::ostream& operator<<(std::ostream& os, const Archive::Error& error)
-{
-    switch (error) {
-    case Archive::Error::ERROR_NONE:
-        os << "No error";
-        break;
-    case Archive::Error::ERROR_ARCHIVE_NOT_FOUND:
-        os << "File not found";
-        break;
-    case Archive::Error::ERROR_FAILED_TO_OPEN_ARCHIVE:
-        os << "Failed to open file";
-        break;
-    case Archive::Error::ERROR_INVALID_ARCHIVE_FORMAT:
-        os << "Invalid archive format";
-        break;
-    default:
-        os << "Unknown error??";
-    }
-    return os;
-}
-
 ScanResult FomodPlusScanner::openInstallationArchive(const IModInterface* mod) const
 {
     const auto downloadsDir         = mOrganizer->downloadsPath();
     const auto installationFilePath = mod->installationFile();
-
-    if (installationFilePath.isEmpty()) {
-        return NO_ARCHIVE;
-    }
-
-    const auto qualifiedInstallerPath = QDir(installationFilePath).isAbsolute()
-        ? installationFilePath
-        : downloadsDir + "/" + installationFilePath;
-
-    const auto archive = CreateArchive();
-
-    if (!archive->isValid()) {
-        std::cerr << "[" << mod->name().toStdString() << "] Failed to load the archive module: " << archive->
-            getLastError() << std::endl;
-        return NO_ARCHIVE;
-    }
-
-    // Open the archive:
-    if (!archive->open(qualifiedInstallerPath.toStdWString(), nullptr)) {
-        std::cerr << "[" << mod->name().toStdString() << "] Failed to open the archive [" << qualifiedInstallerPath.
-            toStdString() << "]: " << archive->getLastError() << std::endl;
-        return NO_ARCHIVE;
-    }
-
-    // Mark all files for extraction to their path in the archive:
-    ScanResult result;
-    if (hasFomodFiles(archive->getFileList())) {
-        std::cout << "Found FOMOD files in " << qualifiedInstallerPath.toStdString() << std::endl;
-        result = HAS_FOMOD;
-    } else {
-        result = NO_FOMOD;
-    }
-
-    // Explicitly close archive to free resources
-    archive->close();
-    return result;
+    return ArchiveParser::scanForFomodFiles(downloadsDir, installationFilePath, mod->name());
 }
 
-bool FomodPlusScanner::setFomodInfoForMod(IModInterface* mod, ScanResult result)
+bool FomodPlusScanner::setFomodInfoForMod(IModInterface* mod, const ScanResult result)
 {
     const auto pluginName = "FOMOD Plus";
     const auto setting    = mod->pluginSetting(pluginName, "fomod", 0);
-    if (setting == 0 && HAS_FOMOD == result) {
+    if (setting == 0 && ScanResult::HAS_FOMOD == result) {
         return mod->setPluginSetting(pluginName, "fomod", "{}");
     }
-    if (setting != 0 && NO_FOMOD == result) {
+    if (setting != 0 && ScanResult::NO_FOMOD == result) {
         return mod->setPluginSetting(pluginName, "fomod", 0);
     }
     return false;
@@ -193,8 +123,6 @@ bool FomodPlusScanner::setFomodInfoForMod(IModInterface* mod, ScanResult result)
 
 bool FomodPlusScanner::removeFomodInfoFromMod(IModInterface* mod, ScanResult)
 {
-    const auto pluginName = QString::fromStdString("FOMOD Plus"); // TODO: can this be read from shared constants?
-    // const auto settings = mod->clearPluginSettings(pluginName);
-    // TODO Determine why this above doesnt work
+    const auto pluginName = QString::fromStdString("FOMOD Plus");
     return mod->setPluginSetting(pluginName, "fomod", 0);
 }

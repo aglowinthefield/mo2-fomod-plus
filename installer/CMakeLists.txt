@@ -6,10 +6,10 @@ set_property(TARGET fomod_plus_installer PROPERTY CXX_STANDARD 20)
 target_include_directories(
         fomod_plus_installer
         PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/../share
         ${MO2_UIBASE_INCLUDE_DIRS}
         ${MO2_ARCHIVE_INCLUDE_DIRS}
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 FetchContent_Declare(
@@ -20,6 +20,10 @@ FetchContent_Declare(
                 -DPUGIXML_CMAKELISTS=<SOURCE_DIR>/CMakeLists.txt
                 -P ${CMAKE_CURRENT_LIST_DIR}/../cmake/patch_pugixml.cmake
 )
+
+file(GLOB SHARE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../share/**/*.cpp")
+target_sources(fomod_plus_installer PRIVATE ${SHARE_SOURCES})
+
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
 FetchContent_MakeAvailable(pugixml json)
 

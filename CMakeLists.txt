@@ -148,6 +148,7 @@ foreach(dir ${MO2_ARCHIVE_INCLUDE_DIRS})
 endforeach()
 
 add_subdirectory(installer)
+add_subdirectory(patchwizard)
 add_subdirectory(scanner)
 add_subdirectory(tests)
 

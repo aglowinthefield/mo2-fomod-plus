@@ -4,9 +4,7 @@
 
 #include "FlagMap.h"
 #include "Logger.h"
-#include "../xml/ModuleConfiguration.h"
-
-#include <complex.h>
+#include "xml/ModuleConfiguration.h"
 
 class CompositeDependency;
 class StepViewModel;

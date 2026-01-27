@@ -21,12 +21,24 @@
 
 using namespace Qt::Literals::StringLiterals;
 
+/*
+--------------------------------------------------------------------------------
+                              Init
+--------------------------------------------------------------------------------
+*/
+#pragma region Initialization
+
 bool FomodPlusInstaller::init(IOrganizer* organizer)
 {
     CrashHandler::initialize();
     mOrganizer = organizer;
     mFomodContent = make_shared<FomodDataContent>(organizer);
     log.setLogFilePath(QDir::currentPath().toStdString() + "/logs/fomodplus.log");
+    std::cout << "QDir::currentPath(): " << QDir::currentPath().toStdString() << std::endl;
+    std::cout << "mOrganizer->basePath() : " << mOrganizer->basePath().toStdString() << std::endl;
+
+    // REMEMBER: This mFomodDB persists beyond the scope of an individual install. Do not do anything nasty to it.
+    mFomodDb = std::make_unique<FomodDB>(mOrganizer->basePath().toStdString());
     setupUiInjection();
     return true;
 }
@@ -54,6 +66,14 @@ void FomodPlusInstaller::toggleFeature(const bool enabled) const
     mOrganizer->refresh();
 }
 
+#pragma endregion
+
+/*
+--------------------------------------------------------------------------------
+                              Settings
+--------------------------------------------------------------------------------
+*/
+#pragma region Settings
 bool FomodPlusInstaller::shouldFallbackToLegacyInstaller() const
 {
     return mOrganizer->pluginSetting(name(), "fallback_to_legacy").value<bool>();
@@ -79,6 +99,11 @@ bool FomodPlusInstaller::shouldAutoRestoreChoices() const
     return mOrganizer->pluginSetting(name(), "always_restore_choices").value<bool>();
 }
 
+bool FomodPlusInstaller::isWizardIntegrated() const
+{
+    return mOrganizer->pluginSetting(name(), "wizard_integration").value<bool>();
+}
+
 void FomodPlusInstaller::toggleShouldShowImages() const
 {
     const bool showImages = shouldShowImages();
@@ -100,6 +125,21 @@ std::vector<std::shared_ptr<const IPluginRequirement> > FomodPlusInstaller::requ
       u"Skyrim VR"_s, u"Fallout 4 VR"_s, u"Starfield"_s }) };
 }
 
+QList<PluginSetting> FomodPlusInstaller::settings() const
+{
+    return {
+        { u"fallback_to_legacy"_s, u"When hitting cancel, fall back to the legacy FOMOD installer."_s, false },
+        { u"always_restore_choices"_s, u"Restore previous choices without clicking the magic button"_s, false },
+        { u"show_images"_s, u"Show image previews and the image carousel in installer windows."_s, true },
+        { u"color_theme"_s, u"Select the color theme for the installer"_s, QString("Blue") }, // Default color name
+        { u"show_notifications"_s, u"Show the notifications panel"_s, false }, //WIP
+        { u"wizard_integration"_s, u"Integrate the installer with patch wizard."_s, true }, //WIP
+        { u"show_fomod_filter"_s, u"Show the filter in the sidebar (may break other content filters)"_s, true }
+    };
+}
+
+#pragma endregion
+
 bool FomodPlusInstaller::isArchiveSupported(std::shared_ptr<const IFileTree> tree) const
 {
     tree = findFomodDirectory(tree);
@@ -109,17 +149,6 @@ bool FomodPlusInstaller::isArchiveSupported(std::shared_ptr<const IFileTree> tre
     return false;
 }
 
-QList<PluginSetting> FomodPlusInstaller::settings() const
-{
-    return {
-        { u"fallback_to_legacy"_s, u"When hitting cancel, fall back to the legacy FOMOD installer."_s, false },
-        { u"always_restore_choices"_s, u"Restore previous choices without clicking the magic button"_s, true },
-        { u"show_images"_s, u"Show image previews and the image carousel in installer windows."_s, true },
-        { u"color_theme"_s, u"Select the color theme for the installer"_s, QString("Blue") }, // Default color name
-        { u"show_notifications"_s, u"Show the notifications panel"_s, false },
-        { u"show_fomod_filter"_s, u"Show the filter in the sidebar (may break other content filters)"_s, true }
-    };
-}
 
 std::pair<nlohmann::json, IModInterface*> FomodPlusInstaller::getExistingFomodJson(const GuessedValue<QString>& modName,
     const int& nexusId,
@@ -265,7 +294,6 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
     std::shared_ptr<IFileTree>& tree, QString& version,
     int& nexusID)
 {
-
     clearPriorInstallData();
 
     logMessage(INFO, std::format("FomodPlusInstaller::install - modName: {}, version: {}, nexusID: {}",
@@ -275,7 +303,15 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
         ));
     logMessage(INFO, std::format("FomodPlusInstaller::install - tree size: {}", tree->size()));
 
-    auto [infoFile, moduleConfigFile] = parseFomodFiles(tree);
+    auto [infoFile, moduleConfigFile, filePaths] = parseFomodFiles(tree);
+    std::vector<QString> pluginPaths = {};
+    for (const auto& filePath : filePaths) {
+        if (isPluginFile(filePath)) {
+            pluginPaths.emplace_back(filePath);
+        }
+    }
+
+    const auto dbEntry = mFomodDb->getEntryFromFomod(moduleConfigFile.get(), pluginPaths, nexusID);
 
     if (infoFile == nullptr || moduleConfigFile == nullptr) {
         return RESULT_FAILED;
@@ -297,6 +333,14 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
         const std::shared_ptr<IFileTree> installTree = window->getFileInstaller()->install();
         tree = installTree;
         mFomodJson = std::make_shared<nlohmann::json>(window->getFileInstaller()->generateFomodJson());
+
+        try {
+            mFomodDb->addEntry(dbEntry);
+            mFomodDb->saveToFile();
+        } catch ([[maybe_unused]] Exception& e) {
+            logMessage(ERR, "Failed to add FomodDB entries.");
+            logMessage(ERR, e.what());
+        }
         return RESULT_SUCCESS;
     }
     if (window->isManualInstall()) {
@@ -314,13 +358,14 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(GuessedValue<QStrin
  * @param tree
  * @return
  */
-std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> > FomodPlusInstaller::parseFomodFiles(
-    const std::shared_ptr<IFileTree>& tree)
+ParsedFilesTuple FomodPlusInstaller::parseFomodFiles(const std::shared_ptr<IFileTree>& tree)
 {
+    const auto emptyResult = std::make_tuple(nullptr, nullptr, QStringList());
+
     const auto fomodDir = findFomodDirectory(tree);
     if (fomodDir == nullptr) {
         logMessage(ERR, "FomodPlusInstaller::install - fomod directory not found");
-        return { nullptr, nullptr };
+        return emptyResult;
     }
 
     // This is a strange place to set this value but okay for now.
@@ -341,12 +386,13 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> >
         toExtract.push_back(moduleConfig);
     } else {
         logMessage(ERR, "FomodPlusInstaller::install - error parsing moduleConfig.xml: Not Present");
-        return { nullptr, nullptr };
+        return emptyResult;
     }
     if (infoXML) {
         toExtract.push_back(infoXML);
     }
     appendImageFiles(toExtract, tree);
+    appendPluginFiles(toExtract, tree); // For patch wizard data collection
     const auto paths = manager()->extractFiles(toExtract);
 
     auto moduleConfiguration = std::make_unique<ModuleConfiguration>();
@@ -354,7 +400,7 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> >
         moduleConfiguration->deserialize(paths.at(0));
     } catch (XmlParseException& e) {
         logMessage(ERR, std::format("FomodPlusInstaller::install - error parsing moduleConfig.xml: {}", e.what()));
-        return { nullptr, nullptr };
+        return emptyResult;
     }
 
     auto infoFile = std::make_unique<FomodInfoFile>();
@@ -366,7 +412,7 @@ std::pair<std::unique_ptr<FomodInfoFile>, std::unique_ptr<ModuleConfiguration> >
         }
     }
 
-    return { std::move(infoFile), std::move(moduleConfiguration) };
+    return std::make_tuple(std::move(infoFile), std::move(moduleConfiguration), paths);
 }
 
 // Taken from https://github.com/ModOrganizer2/modorganizer-installer_fomod/blob/master/src/installerfomod.cpp#L123
@@ -383,6 +429,21 @@ void FomodPlusInstaller::appendImageFiles(vector<shared_ptr<const FileTreeEntry>
     }
 }
 
+void FomodPlusInstaller::appendPluginFiles(vector<shared_ptr<const FileTreeEntry> >& entries,
+    const shared_ptr<const IFileTree>& tree)
+{
+    // Don't bother with this stuff if the user doesn't care about the wizard.
+    // It may slightly bloat the temp file directory if not needed.
+    if (isWizardIntegrated()) {
+        for (auto entry : *tree) {
+            if (entry->isDir()) {
+                appendPluginFiles(entries, entry->astree());
+            } else if (isPluginFile(entry->suffix())) {
+                entries.push_back(entry);
+            }
+        }
+    }
+}
 
 void FomodPlusInstaller::onInstallationStart(QString const& archive, const bool reinstallation,
     IModInterface* currentMod)

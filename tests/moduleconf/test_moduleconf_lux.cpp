@@ -2,7 +2,7 @@
 #include <QString>
 #include <pugixml.hpp>
 #include <filesystem>
-#include "../../installer/xml/ModuleConfiguration.h"
+#include "xml/ModuleConfiguration.h"
 
 class ModuleConfigurationTest_Lux : public testing::Test {
 protected:
