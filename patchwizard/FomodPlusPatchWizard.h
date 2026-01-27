@@ -44,6 +44,7 @@ private:
 
     void setupEmptyState() const;
     void setupPatchList() const;
+    void onRescanClicked();
 
     void logMessage(const LogLevel level, const std::string& message) const
     {

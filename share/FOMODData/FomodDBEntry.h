@@ -23,11 +23,36 @@ in the FOMOD with their respective masters.
                 "Lux.esp"
             ],
             "step": "Page One",
-            "group": "Group One"
+            "group": "Group One",
+            "selectionState": "Available"
         }
     ]
 }
 */
+
+enum class SelectionState {
+  Unknown,     // Not yet matched to choices
+  Selected,    // User selected this option
+  Deselected,  // User manually deselected
+  Available    // Present but user didn't interact (or choices not recorded)
+};
+
+inline std::string selectionStateToString(SelectionState state) {
+  switch (state) {
+    case SelectionState::Unknown: return "Unknown";
+    case SelectionState::Selected: return "Selected";
+    case SelectionState::Deselected: return "Deselected";
+    case SelectionState::Available: return "Available";
+    default: return "Unknown";
+  }
+}
+
+inline SelectionState stringToSelectionState(const std::string& str) {
+  if (str == "Selected") return SelectionState::Selected;
+  if (str == "Deselected") return SelectionState::Deselected;
+  if (str == "Available") return SelectionState::Available;
+  return SelectionState::Unknown;
+}
 
 struct FomodOption {
   std::string name;
@@ -35,9 +60,12 @@ struct FomodOption {
   std::vector<std::string> masters;
   std::string step;
   std::string group;
+  SelectionState selectionState = SelectionState::Unknown;
 
-  FomodOption(std::string n, std::string fn, std::vector<std::string> m, std::string s, std::string g)
-  : name(std::move(n)), fileName(std::move(fn)), masters(std::move(m)), step(std::move(s)), group(std::move(g)) {}
+  FomodOption(std::string n, std::string fn, std::vector<std::string> m, std::string s, std::string g,
+              SelectionState state = SelectionState::Unknown)
+  : name(std::move(n)), fileName(std::move(fn)), masters(std::move(m)), step(std::move(s)), group(std::move(g)),
+    selectionState(state) {}
 };
 
 class FomodDbEntry {
@@ -47,12 +75,17 @@ public:
     displayName = json["displayName"];
     for (auto &option: json["options"]) {
       // create an option from this object
+      SelectionState state = SelectionState::Unknown;
+      if (option.contains("selectionState")) {
+        state = stringToSelectionState(option["selectionState"]);
+      }
       FomodOption fomodOption(
         option["name"],
         option["fileName"],
         option["masters"],
         option["step"],
-        option["group"]
+        option["group"],
+        state
       );
       options.push_back(fomodOption);
     }
@@ -65,7 +98,8 @@ public:
 
   [[nodiscard]] int getModId() const { return modId; }
   [[nodiscard]] std::string getDisplayName() const { return displayName; }
-  [[nodiscard]] const std::vector<FomodOption>& getOptions() { return options; }
+  [[nodiscard]] const std::vector<FomodOption>& getOptions() const { return options; }
+  [[nodiscard]] std::vector<FomodOption>& getOptionsMutable() { return options; }
 
   [[nodiscard]] nlohmann::json toJson() const {
     nlohmann::json result;
@@ -73,13 +107,14 @@ public:
     result["displayName"] = displayName;
 
     nlohmann::json optionsArray = nlohmann::json::array();
-    for (const auto &[name, fileName, masters, step, group]: options) {
+    for (const auto &[name, fileName, masters, step, group, selectionState]: options) {
       nlohmann::json optionJson;
       optionJson["name"] = name;
       optionJson["fileName"] = fileName;
       optionJson["masters"] = masters;
       optionJson["step"] = step;
       optionJson["group"] = group;
+      optionJson["selectionState"] = selectionStateToString(selectionState);
       optionsArray.push_back(optionJson);
     }
 

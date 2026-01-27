@@ -18,8 +18,14 @@ target_include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/../share
         ${CMAKE_CURRENT_SOURCE_DIR}/../share/FOMODData
+        ${CMAKE_CURRENT_SOURCE_DIR}/../share/xml
+        ${MO2_ARCHIVE_INCLUDE_DIRS}
         ${RESOURCE_DIR}
 )
+
+# Include shared sources for XML parsing
+file(GLOB SHARE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../share/**/*.cpp")
+target_sources(fomod_plus_patch_wizard PRIVATE ${SHARE_SOURCES})
 
 if (MSVC)
     target_compile_options(

@@ -37,6 +37,11 @@ namespace StringConstants
         constexpr std::string_view INFO_XML = "info.xml";
         constexpr std::string_view MODULE_CONFIG = "ModuleConfig.xml";
 
+        // Wide string versions for archive API
+        constexpr std::wstring_view W_FOMOD_DIR = L"fomod";
+        constexpr std::wstring_view W_INFO_XML = L"fomod/info.xml";
+        constexpr std::wstring_view W_MODULE_CONFIG = L"fomod/ModuleConfig.xml";
+
         constexpr std::string_view TYPE_REQUIRED = "Required";
         constexpr std::string_view TYPE_OPTIONAL = "Optional";
         constexpr std::string_view TYPE_RECOMMENDED = "Recommended";

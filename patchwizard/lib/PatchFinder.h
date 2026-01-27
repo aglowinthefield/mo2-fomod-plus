@@ -13,6 +13,7 @@ struct AvailablePatch {
     std::string patch_for_mod;
     bool installed = false;
     bool hidden    = false;
+    bool userDeselected = false;  // True if user explicitly chose not to install
 };
 
 class PatchFinder {
