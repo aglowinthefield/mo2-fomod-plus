@@ -1,13 +1,13 @@
 ﻿#include "FomodPlusScanner.h"
 
-#include "archiveparser.h"
 #include "FomodDbEntry.h"
+#include "archiveparser.h"
 
 #include <QDialog>
-#include <QPushButton>
-#include <QProgressBar>
-#include <QVBoxLayout>
 #include <QMessageBox>
+#include <QProgressBar>
+#include <QPushButton>
+#include <QVBoxLayout>
 #include <archive.h>
 
 #include <QLabel>
@@ -27,10 +27,11 @@ bool FomodPlusScanner::init(IOrganizer* organizer)
 
     const auto layout = new QVBoxLayout(mDialog);
 
-    const QString description = tr("Greetings, traveler.\n"
-        "This tool will scan your load order for mods installed via FOMOD.\n"
-        "It will also fix up any erroneous FOMOD flags from previous versions of FOMOD Plus :) \n\n"
-        "Safe travels, and may your load order be free of conflicts.");
+    const QString description
+        = tr("Greetings, traveler.\n"
+             "This tool will scan your load order for mods installed via FOMOD.\n"
+             "It will also fix up any erroneous FOMOD flags from previous versions of FOMOD Plus :) \n\n"
+             "Safe travels, and may your load order be free of conflicts.");
 
     const auto descriptionLabel = new QLabel(description, mDialog);
     descriptionLabel->setWordWrap(true); // Enable word wrap for large text
@@ -82,17 +83,14 @@ void FomodPlusScanner::cleanup() const
     mProgressBar->setVisible(false);
 }
 
-void FomodPlusScanner::display() const
-{
-    mDialog->exec();
-}
+void FomodPlusScanner::display() const { mDialog->exec(); }
 
 int FomodPlusScanner::scanLoadOrder(const ScanCallbackFn& callback) const
 {
     int progress = 0;
     int modified = 0;
     for (const auto& modName : mOrganizer->modList()->allMods()) {
-        const auto mod          = mOrganizer->modList()->getMod(modName);
+        const auto mod = mOrganizer->modList()->getMod(modName);
         if (const ScanResult result = openInstallationArchive(mod); callback(mod, result)) {
             modified++;
         }

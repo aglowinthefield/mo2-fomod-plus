@@ -18,7 +18,7 @@
 bool FomodPlusPatchWizard::init(IOrganizer* organizer)
 {
     mOrganizer = organizer;
-    mDialog = new QDialog();
+    mDialog    = new QDialog();
     mDialog->setWindowTitle(tr("Patch Wizard"));
     mDialog->setMinimumSize(400, 200);
     log.setLogFilePath(QDir::currentPath().toStdString() + "/logs/fomodplus-patchwizard.log");
@@ -71,10 +71,9 @@ void FomodPlusPatchWizard::setupEmptyState() const
     auto* imageLabel = new QLabel(contentWidget);
     imageLabel->setPixmap(QPixmap(":/fomod/infoscroll").scaled(64, 64, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
-    auto* textLabel = new QLabel(
-        tr("Nothing of interest yet. The wizard gets wiser as you\ninstall FOMODs, so check back later!"),
-        contentWidget
-    );
+    auto* textLabel
+        = new QLabel(tr("Nothing of interest yet. The wizard gets wiser as you\ninstall FOMODs, so check back later!"),
+            contentWidget);
     textLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 
     contentLayout->addWidget(imageLabel);
@@ -85,21 +84,17 @@ void FomodPlusPatchWizard::setupEmptyState() const
     auto* rescanButton = new QPushButton(tr("Rescan Load Order"), mDialog);
     // Use const_cast since setupEmptyState is const but onRescanClicked modifies state
     connect(rescanButton, &QPushButton::clicked, const_cast<FomodPlusPatchWizard*>(this),
-            &FomodPlusPatchWizard::onRescanClicked);
+        &FomodPlusPatchWizard::onRescanClicked);
     mainLayout->addWidget(rescanButton, 0, Qt::AlignCenter);
 }
 
 void FomodPlusPatchWizard::onRescanClicked()
 {
-    const auto confirmResult = QMessageBox::question(
-        mDialog,
-        tr("Rescan Load Order"),
+    const auto confirmResult = QMessageBox::question(mDialog, tr("Rescan Load Order"),
         tr("Rescanning will populate as many existing choices and options as we can, "
            "but if some downloads are deleted it may be missing things! "
            "It may take a few minutes depending on the size of your load order and all that."),
-        QMessageBox::Ok | QMessageBox::Cancel,
-        QMessageBox::Cancel
-    );
+        QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
 
     if (confirmResult != QMessageBox::Ok) {
         return;
@@ -132,22 +127,19 @@ void FomodPlusPatchWizard::onRescanClicked()
 
     if (cancelled) {
         QMessageBox::information(
-            mDialog,
-            tr("Rescan Cancelled"),
-            tr("The rescan was cancelled. Partial results may have been saved.")
-        );
+            mDialog, tr("Rescan Cancelled"), tr("The rescan was cancelled. Partial results may have been saved."));
         logMessage(INFO, "Rescan cancelled by user");
     } else {
         // Show result summary
         QString summary = tr("Rescan complete!\n\n"
-                            "FOMODs scanned: %1\n"
-                            "Skipped (no options): %2\n"
-                            "Missing archives: %3\n"
-                            "Parse errors: %4")
-            .arg(result.successfullyScanned)
-            .arg(result.skippedNoOptions)
-            .arg(result.missingArchives)
-            .arg(result.parseErrors);
+                             "FOMODs scanned: %1\n"
+                             "Skipped (no options): %2\n"
+                             "Missing archives: %3\n"
+                             "Parse errors: %4")
+                              .arg(result.successfullyScanned)
+                              .arg(result.skippedNoOptions)
+                              .arg(result.missingArchives)
+                              .arg(result.parseErrors);
 
         if (!result.failedMods.empty() && result.failedMods.size() <= 10) {
             summary += tr("\n\nIssues:");
@@ -163,10 +155,11 @@ void FomodPlusPatchWizard::onRescanClicked()
 
         QMessageBox::information(mDialog, tr("Rescan Complete"), summary);
 
-        logMessage(INFO, "Rescan complete: " + std::to_string(result.successfullyScanned) + " scanned, " +
-                        std::to_string(result.skippedNoOptions) + " skipped (no options), " +
-                        std::to_string(result.missingArchives) + " missing archives, " +
-                        std::to_string(result.parseErrors) + " parse errors");
+        logMessage(INFO,
+            "Rescan complete: " + std::to_string(result.successfullyScanned) + " scanned, "
+                + std::to_string(result.skippedNoOptions) + " skipped (no options), "
+                + std::to_string(result.missingArchives) + " missing archives, " + std::to_string(result.parseErrors)
+                + " parse errors");
     }
 
     // Refresh available patches
@@ -194,14 +187,14 @@ void FomodPlusPatchWizard::setupPatchList() const
 
     auto* rescanButton = new QPushButton(tr("Rescan"), mDialog);
     connect(rescanButton, &QPushButton::clicked, const_cast<FomodPlusPatchWizard*>(this),
-            &FomodPlusPatchWizard::onRescanClicked);
+        &FomodPlusPatchWizard::onRescanClicked);
     topBar->addWidget(rescanButton);
 
     mainLayout->addLayout(topBar);
 
     // Tree widget for displaying fomod data
     auto* treeWidget = new QTreeWidget(mDialog);
-    treeWidget->setHeaderLabels({tr("Name"), tr("Status"), tr("Plugin File")});
+    treeWidget->setHeaderLabels({ tr("Name"), tr("Status"), tr("Plugin File") });
     treeWidget->setAlternatingRowColors(true);
     treeWidget->setRootIsDecorated(true);
     treeWidget->header()->setSectionResizeMode(0, QHeaderView::Stretch);
@@ -214,20 +207,16 @@ void FomodPlusPatchWizard::setupPatchList() const
     mainLayout->addWidget(treeWidget);
 
     // Connect search box to filter
-    connect(searchBox, &QLineEdit::textChanged, [treeWidget, this](const QString& text) {
-        populateTree(treeWidget, text);
-    });
+    connect(searchBox, &QLineEdit::textChanged,
+        [treeWidget, this](const QString& text) { populateTree(treeWidget, text); });
 
     // Stats label at the bottom
     const auto& entries = mPatchFinder->mFomodDb->getEntries();
-    int totalOptions = 0;
+    int totalOptions    = 0;
     for (const auto& entry : entries) {
         totalOptions += static_cast<int>(entry->getOptions().size());
     }
-    auto* statsLabel = new QLabel(
-        tr("%1 mods, %2 options tracked").arg(entries.size()).arg(totalOptions),
-        mDialog
-    );
+    auto* statsLabel = new QLabel(tr("%1 mods, %2 options tracked").arg(entries.size()).arg(totalOptions), mDialog);
     statsLabel->setAlignment(Qt::AlignRight);
     mainLayout->addWidget(statsLabel);
 }
@@ -236,21 +225,20 @@ void FomodPlusPatchWizard::populateTree(QTreeWidget* tree, const QString& filter
 {
     tree->clear();
 
-    const auto& entries = mPatchFinder->mFomodDb->getEntries();
+    const auto& entries       = mPatchFinder->mFomodDb->getEntries();
     const QString lowerFilter = filter.toLower();
 
     for (const auto& entry : entries) {
         // Check if any option matches the filter (if filter is set)
-        bool modMatches = filter.isEmpty() ||
-                         QString::fromStdString(entry->getDisplayName()).toLower().contains(lowerFilter);
+        bool modMatches
+            = filter.isEmpty() || QString::fromStdString(entry->getDisplayName()).toLower().contains(lowerFilter);
 
         QList<const FomodOption*> matchingOptions;
         for (const auto& option : entry->getOptions()) {
-            bool optionMatches = filter.isEmpty() ||
-                QString::fromStdString(option.name).toLower().contains(lowerFilter) ||
-                QString::fromStdString(option.fileName).toLower().contains(lowerFilter) ||
-                QString::fromStdString(option.step).toLower().contains(lowerFilter) ||
-                QString::fromStdString(option.group).toLower().contains(lowerFilter);
+            bool optionMatches = filter.isEmpty() || QString::fromStdString(option.name).toLower().contains(lowerFilter)
+                || QString::fromStdString(option.fileName).toLower().contains(lowerFilter)
+                || QString::fromStdString(option.step).toLower().contains(lowerFilter)
+                || QString::fromStdString(option.group).toLower().contains(lowerFilter);
 
             // Also search in masters
             if (!optionMatches) {
@@ -275,7 +263,7 @@ void FomodPlusPatchWizard::populateTree(QTreeWidget* tree, const QString& filter
         // Create mod item
         auto* modItem = new QTreeWidgetItem(tree);
         modItem->setText(0, QString::fromStdString(entry->getDisplayName()));
-        modItem->setExpanded(!filter.isEmpty());  // Expand when searching
+        modItem->setExpanded(!filter.isEmpty()); // Expand when searching
 
         // Group options by step and group
         std::map<std::string, std::map<std::string, std::vector<const FomodOption*>>> grouped;
@@ -308,21 +296,21 @@ void FomodPlusPatchWizard::populateTree(QTreeWidget* tree, const QString& filter
                     // Status column
                     QString status;
                     switch (option->selectionState) {
-                        case SelectionState::Selected:
-                            status = tr("Selected");
-                            optionItem->setForeground(1, QBrush(Qt::darkGreen));
-                            break;
-                        case SelectionState::Deselected:
-                            status = tr("Deselected");
-                            optionItem->setForeground(1, QBrush(Qt::darkRed));
-                            break;
-                        case SelectionState::Available:
-                            status = tr("Available");
-                            optionItem->setForeground(1, QBrush(Qt::darkGray));
-                            break;
-                        default:
-                            status = tr("Unknown");
-                            break;
+                    case SelectionState::Selected:
+                        status = tr("Selected");
+                        optionItem->setForeground(1, QBrush(Qt::darkGreen));
+                        break;
+                    case SelectionState::Deselected:
+                        status = tr("Deselected");
+                        optionItem->setForeground(1, QBrush(Qt::darkRed));
+                        break;
+                    case SelectionState::Available:
+                        status = tr("Available");
+                        optionItem->setForeground(1, QBrush(Qt::darkGray));
+                        break;
+                    default:
+                        status = tr("Unknown");
+                        break;
                     }
                     optionItem->setText(1, status);
 
@@ -335,7 +323,8 @@ void FomodPlusPatchWizard::populateTree(QTreeWidget* tree, const QString& filter
                     if (!option->masters.empty()) {
                         QString mastersStr = tr("Masters: ");
                         for (size_t i = 0; i < option->masters.size(); ++i) {
-                            if (i > 0) mastersStr += ", ";
+                            if (i > 0)
+                                mastersStr += ", ";
                             mastersStr += QString::fromStdString(option->masters[i]);
                         }
                         optionItem->setToolTip(0, mastersStr);

@@ -31,15 +31,15 @@ constexpr int PREVIEW_IMAGE_HEIGHT = 90;
 |      |      |      |                                     |
 +------+------+------+-------------------------------------+
 */
-constexpr auto BUTTON_STYLE =
-    "font-size: 16px; font-weight: bold; color: white; background-color: black; padding: 5px; border-radius: 1px solid black;";
+constexpr auto BUTTON_STYLE = "font-size: 16px; font-weight: bold; color: white; background-color: black; padding: "
+                              "5px; border-radius: 1px solid black;";
 
-FomodImageViewer::FomodImageViewer(QWidget* parent,
-    const QString& fomodPath,
-    const std::shared_ptr<StepViewModel>& activeStep,
-    const std::shared_ptr<PluginViewModel>& activePlugin) : QDialog(parent), mFomodPath(fomodPath),
-                                                            mActiveStep(activeStep),
-                                                            mActivePlugin(activePlugin)
+FomodImageViewer::FomodImageViewer(QWidget* parent, const QString& fomodPath,
+    const std::shared_ptr<StepViewModel>& activeStep, const std::shared_ptr<PluginViewModel>& activePlugin)
+    : QDialog(parent)
+    , mFomodPath(fomodPath)
+    , mActiveStep(activeStep)
+    , mActivePlugin(activePlugin)
 {
 
     setWindowFlags(Qt::FramelessWindowHint | Qt::Window);
@@ -78,8 +78,8 @@ void FomodImageViewer::collectImages()
             if (pluginViewModel->getImagePath().empty()) {
                 continue;
             }
-            QString imagePath = UIHelper::getFullImagePath(mFomodPath,
-                QString::fromStdString(pluginViewModel->getImagePath()));
+            QString imagePath
+                = UIHelper::getFullImagePath(mFomodPath, QString::fromStdString(pluginViewModel->getImagePath()));
             mLabelsAndImages.emplace_back(QString::fromStdString(pluginViewModel->getName()), imagePath);
 
             if (pluginViewModel == mActivePlugin) {
@@ -143,9 +143,7 @@ QScrollArea* FomodImageViewer::createPreviewImages(QWidget* parent)
         imageLabel->setAlignment(Qt::AlignCenter);
         imageLabel->setFixedSize(PREVIEW_IMAGE_WIDTH, PREVIEW_IMAGE_HEIGHT);
         imageLabel->setFocusPolicy(Qt::NoFocus);
-        connect(imageLabel, &ScaleLabel::clicked, this, [this, i] {
-            select(i);
-        });
+        connect(imageLabel, &ScaleLabel::clicked, this, [this, i] { select(i); });
         layout->addWidget(imageLabel);
         mImagePanes.emplace_back(imageLabel);
 
@@ -153,9 +151,9 @@ QScrollArea* FomodImageViewer::createPreviewImages(QWidget* parent)
         const auto imagePath = mLabelsAndImages[i].second;
 
         QThreadPool::globalInstance()->start([imageLabel, imagePath]() {
-            QMetaObject::invokeMethod(imageLabel, [imageLabel, imagePath]() {
-                imageLabel->setScalableResource(imagePath);
-            }, Qt::QueuedConnection);
+            QMetaObject::invokeMethod(
+                imageLabel, [imageLabel, imagePath]() { imageLabel->setScalableResource(imagePath); },
+                Qt::QueuedConnection);
         });
     }
 
@@ -184,8 +182,7 @@ QPushButton* FomodImageViewer::createForwardButton(QWidget* parent) const
 {
     const auto forwardButton = new QPushButton(parent);
     forwardButton->setText(">");
-    forwardButton->
-        setStyleSheet(BUTTON_STYLE);
+    forwardButton->setStyleSheet(BUTTON_STYLE);
     connect(forwardButton, &QPushButton::clicked, this, &FomodImageViewer::goForward);
     return forwardButton;
 }

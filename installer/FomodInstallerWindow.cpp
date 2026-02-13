@@ -26,40 +26,36 @@
 #include <unordered_set>
 
 /**
- * 
- * @param installer 
- * @param modName 
+ *
+ * @param installer
+ * @param modName
  * @param tree
  * @param fomodPath
  * @param viewModel
  * @param fomodJson
  * @param parent
  */
-FomodInstallerWindow::FomodInstallerWindow(
-    FomodPlusInstaller* installer,
-    GuessedValue<QString>& modName,
-    const std::shared_ptr<IFileTree>& tree,
-    QString fomodPath,
-    const std::shared_ptr<FomodViewModel>& viewModel,
-    const nlohmann::json& fomodJson,
-    QWidget* parent): QDialog(parent),
-                      mInstaller(installer),
-                      mFomodPath(std::move(fomodPath)),
-                      mModName(modName),
-                      mTree(tree),
-                      mViewModel(viewModel),
-                      mFomodJson(fomodJson)
+FomodInstallerWindow::FomodInstallerWindow(FomodPlusInstaller* installer, GuessedValue<QString>& modName,
+    const std::shared_ptr<IFileTree>& tree, QString fomodPath, const std::shared_ptr<FomodViewModel>& viewModel,
+    const nlohmann::json& fomodJson, QWidget* parent)
+    : QDialog(parent)
+    , mInstaller(installer)
+    , mFomodPath(std::move(fomodPath))
+    , mModName(modName)
+    , mTree(tree)
+    , mViewModel(viewModel)
+    , mFomodJson(fomodJson)
 {
     setupUi();
 
     mInstallStepStack = new QStackedWidget(this);
-    
+
     // Handle legacy FOMODs with no steps
     if (mViewModel->getSteps().empty()) {
         // Create a simple "Install" widget for legacy FOMODs
         auto* legacyWidget = new QWidget(this);
-        auto* layout = new QVBoxLayout(legacyWidget);
-        auto* label = new QLabel("This mod will install all files automatically.", legacyWidget);
+        auto* layout       = new QVBoxLayout(legacyWidget);
+        auto* label        = new QLabel("This mod will install all files automatically.", legacyWidget);
         layout->addWidget(label);
         mInstallStepStack->addWidget(legacyWidget);
     } else {
@@ -73,7 +69,7 @@ FomodInstallerWindow::FomodInstallerWindow(
 
     updateButtons();
     restoreGeometryAndState();
-    
+
     if (!mViewModel->getSteps().empty()) {
         populatePluginMap();
         if (mInstaller->shouldAutoRestoreChoices()) {
@@ -142,7 +138,7 @@ void FomodInstallerWindow::onNextClicked()
         onInstallClicked();
         return;
     }
-    
+
     if (!mViewModel->isLastVisibleStep()) {
         mViewModel->stepForward();
         mInstallStepStack->setCurrentIndex(mViewModel->getCurrentStepIndex());
@@ -161,17 +157,17 @@ void FomodInstallerWindow::updateCheckboxStates() const
             const auto widgetType = pluginData.uiElement->metaObject()->className();
             if (objectName != nullptr) {
                 logMessage(DEBUG,
-                    "Updating " + objectName.toStdString() + " to state: " + (pluginData.plugin->isSelected()
-                        ? "TRUE"
-                        : "FALSE") + " because " + widgetType +
-                    " selection state is " + (pluginData.uiElement->isChecked() ? "TRUE" : "FALSE"));
+                    "Updating " + objectName.toStdString()
+                        + " to state: " + (pluginData.plugin->isSelected() ? "TRUE" : "FALSE") + " because "
+                        + widgetType + " selection state is " + (pluginData.uiElement->isChecked() ? "TRUE" : "FALSE"));
             }
             pluginData.uiElement->setChecked(pluginData.plugin->isSelected());
         }
 
         if (pluginData.plugin->isEnabled() != pluginData.uiElement->isEnabled()) {
-            logMessage(DEBUG, "[WINDOW] Changing enabled state of  element " + objectName.toStdString() + " to " +
-                (pluginData.plugin->isEnabled() ? "TRUE" : "FALSE"));
+            logMessage(DEBUG,
+                "[WINDOW] Changing enabled state of  element " + objectName.toStdString() + " to "
+                    + (pluginData.plugin->isEnabled() ? "TRUE" : "FALSE"));
             pluginData.uiElement->setEnabled(pluginData.plugin->isEnabled());
         }
     }
@@ -181,8 +177,8 @@ void FomodInstallerWindow::onPluginToggled(const bool selected, const std::share
     const std::shared_ptr<PluginViewModel>& plugin) const
 {
     logMessage(INFO,
-        "onPluginToggled called with " + plugin->getName() + " in " + group->getName() + ": " +
-        std::to_string(selected));
+        "onPluginToggled called with " + plugin->getName() + " in " + group->getName() + ": "
+            + std::to_string(selected));
     if (mViewModel->togglePlugin(group, plugin, selected)) {
         updateCheckboxStates();
     }
@@ -231,7 +227,7 @@ void FomodInstallerWindow::updateButtons() const
         mNextInstallButton->setText(tr("Install"));
         return;
     }
-    
+
     if (mViewModel->isFirstVisibleStep()) {
         mBackButton->setEnabled(false);
     } else {
@@ -471,8 +467,8 @@ QSplitter* FomodInstallerWindow::createLeftPane()
         if (!mImageLabel->hasResource()) {
             return;
         }
-        const auto viewer = new FomodImageViewer(this, mFomodPath, mViewModel->getActiveStep(),
-            mViewModel->getActivePlugin());
+        const auto viewer
+            = new FomodImageViewer(this, mFomodPath, mViewModel->getActiveStep(), mViewModel->getActivePlugin());
         viewer->showMaximized();
     });
 
@@ -547,26 +543,24 @@ QWidget* FomodInstallerWindow::renderGroup(const std::shared_ptr<GroupViewModel>
     case SelectAtMostOne:
         renderSelectExactlyOne(groupBox, groupBoxLayout, group);
         break;
-    default: ;
+    default:;
     }
 
     groupBox->setLayout(groupBoxLayout);
     return groupBox;
 }
 
-QString FomodInstallerWindow::createObjectName(const std::shared_ptr<PluginViewModel>& plugin,
-    const std::shared_ptr<GroupViewModel>& group)
+QString FomodInstallerWindow::createObjectName(
+    const std::shared_ptr<PluginViewModel>& plugin, const std::shared_ptr<GroupViewModel>& group)
 {
-    const std::string objectName = std::format("[{}:{}] {}-{}",
-        group->getStepIndex(), group->getOwnIndex(),
-        group->getName(), plugin->getName());
+    const std::string objectName = std::format(
+        "[{}:{}] {}-{}", group->getStepIndex(), group->getOwnIndex(), group->getName(), plugin->getName());
 
     return QString::fromStdString(objectName);
 }
 
-QRadioButton* FomodInstallerWindow::createPluginRadioButton(const std::shared_ptr<PluginViewModel>& plugin,
-    const std::shared_ptr<GroupViewModel>& group,
-    QWidget* parent)
+QRadioButton* FomodInstallerWindow::createPluginRadioButton(
+    const std::shared_ptr<PluginViewModel>& plugin, const std::shared_ptr<GroupViewModel>& group, QWidget* parent)
 {
     auto* radioButton = new QRadioButton(QString::fromStdString(plugin->getName()), parent);
     radioButton->setObjectName(createObjectName(plugin, group));
@@ -576,8 +570,8 @@ QRadioButton* FomodInstallerWindow::createPluginRadioButton(const std::shared_pt
 
     connect(radioButton, &QRadioButton::toggled, this, [this, radioButton, group, plugin](const bool checked) {
         logMessage(INFO,
-            "Received toggled signal for radio: " + plugin->getName() + ": " + (checked ? "TRUE" : "FALSE") +
-            " Radio is now: " + (radioButton->isChecked() ? "TRUE" : "FALSE"));
+            "Received toggled signal for radio: " + plugin->getName() + ": " + (checked ? "TRUE" : "FALSE")
+                + " Radio is now: " + (radioButton->isChecked() ? "TRUE" : "FALSE"));
         onPluginToggled(checked, group, plugin);
     });
 
@@ -586,8 +580,8 @@ QRadioButton* FomodInstallerWindow::createPluginRadioButton(const std::shared_pt
     return radioButton;
 }
 
-QCheckBox* FomodInstallerWindow::createPluginCheckBox(const std::shared_ptr<PluginViewModel>& plugin,
-    const std::shared_ptr<GroupViewModel>& group, QWidget* parent)
+QCheckBox* FomodInstallerWindow::createPluginCheckBox(
+    const std::shared_ptr<PluginViewModel>& plugin, const std::shared_ptr<GroupViewModel>& group, QWidget* parent)
 {
     auto* checkBox = new QCheckBox(QString::fromStdString(plugin->getName()), parent);
     checkBox->setObjectName(createObjectName(plugin, group));
@@ -612,15 +606,15 @@ QCheckBox* FomodInstallerWindow::createPluginCheckBox(const std::shared_ptr<Plug
     });
     connect(checkBox, &QCheckBox::toggled, this, [this, checkBox, group, plugin](const bool checked) {
         logMessage(INFO,
-            "Received toggled signal for checkbox: " + plugin->getName() + ": " + (checked ? "true" : "false") +
-            " Checkbox was previously " + (checkBox->isChecked() ? "true" : "false"));
+            "Received toggled signal for checkbox: " + plugin->getName() + ": " + (checked ? "true" : "false")
+                + " Checkbox was previously " + (checkBox->isChecked() ? "true" : "false"));
         onPluginToggled(checked, group, plugin);
     });
     return checkBox;
 }
 
-void FomodInstallerWindow::renderSelectExactlyOne(QWidget* parent, QLayout* parentLayout,
-    const std::shared_ptr<GroupViewModel>& group)
+void FomodInstallerWindow::renderSelectExactlyOne(
+    QWidget* parent, QLayout* parentLayout, const std::shared_ptr<GroupViewModel>& group)
 {
     // This is for parity with the legacy installer. Both styles are functionally equivalent
     // for a group size of 1, but they chose checkbox.
@@ -631,8 +625,8 @@ void FomodInstallerWindow::renderSelectExactlyOne(QWidget* parent, QLayout* pare
     }
 }
 
-void FomodInstallerWindow::renderCheckboxGroup(QWidget* parent, QLayout* parentLayout,
-    const std::shared_ptr<GroupViewModel>& group)
+void FomodInstallerWindow::renderCheckboxGroup(
+    QWidget* parent, QLayout* parentLayout, const std::shared_ptr<GroupViewModel>& group)
 {
     for (const auto& plugin : group->getPlugins()) {
         auto* checkbox = createPluginCheckBox(plugin, group, parent);
@@ -640,8 +634,8 @@ void FomodInstallerWindow::renderCheckboxGroup(QWidget* parent, QLayout* parentL
     }
 }
 
-QButtonGroup* FomodInstallerWindow::renderRadioGroup(QWidget* parent, QLayout* parentLayout,
-    const std::shared_ptr<GroupViewModel>& group)
+QButtonGroup* FomodInstallerWindow::renderRadioGroup(
+    QWidget* parent, QLayout* parentLayout, const std::shared_ptr<GroupViewModel>& group)
 {
     auto* buttonGroup = new QButtonGroup(parent);
     buttonGroup->setExclusive(true); // Ensure only one button can be selected
@@ -660,9 +654,9 @@ void FomodInstallerWindow::addNotification(const QString& message, const LogLeve
         return;
     }
 
-    const QString timestamp    = QDateTime::currentDateTime().toString("hh:mm:ss");
-    const QString formattedMsg = QString("<span>[%2] [%3] %4</span>")
-        .arg(timestamp).arg(logLevelToString(level)).arg(message);
+    const QString timestamp = QDateTime::currentDateTime().toString("hh:mm:ss");
+    const QString formattedMsg
+        = QString("<span>[%2] [%3] %4</span>").arg(timestamp).arg(logLevelToString(level)).arg(message);
 
     mNotificationsPanel->append(formattedMsg);
 
@@ -686,7 +680,6 @@ void FomodInstallerWindow::toggleImagesShown() const
         mHideImagesButton->setText(tr("Show Images"));
     }
 }
-
 
 // Updates the image and description field for a given plugin. Also use this on initialization of those widgets.
 void FomodInstallerWindow::updateDisplayForActivePlugin() const
@@ -712,7 +705,7 @@ void FomodInstallerWindow::updateDisplayForActivePlugin() const
     const QString description = formatPluginDescription(QString::fromStdString(plugin->getDescription()));
     mDescriptionBox->setText(description);
 
-    const auto image     = mViewModel->getDisplayImage();
+    const auto image = mViewModel->getDisplayImage();
     if (image.empty()) {
         mImageLabel->clear();
         return;
@@ -727,8 +720,8 @@ void FomodInstallerWindow::updateDisplayForActivePlugin() const
  * @param pluginSelector For now either 'plugins', or 'deselected'. The key of the member of 'groups' to iterate over.
  * @param fn The callback for each plugin in the chosen group member.
  */
-void FomodInstallerWindow::applyFnFromJson(const std::string& pluginSelector,
-    const std::function<void(QAbstractButton*)>& fn)
+void FomodInstallerWindow::applyFnFromJson(
+    const std::string& pluginSelector, const std::function<void(QAbstractButton*)>& fn)
 {
     if (mFomodJson.empty()) {
         return;
@@ -751,8 +744,8 @@ void FomodInstallerWindow::applyFnFromJson(const std::string& pluginSelector,
             for (int pluginIndex = 0; pluginIndex < group[pluginSelector].size(); ++pluginIndex) {
                 const auto& plugin = group[pluginSelector][pluginIndex];
 
-                std::string name = std::format("[{}:{}] {}-{}",
-                    stepIndex, groupIndex, group["name"].get<std::string>(), plugin.get<std::string>());
+                std::string name = std::format("[{}:{}] {}-{}", stepIndex, groupIndex, group["name"].get<std::string>(),
+                    plugin.get<std::string>());
                 selectedPlugins.push_back(name);
             }
         }

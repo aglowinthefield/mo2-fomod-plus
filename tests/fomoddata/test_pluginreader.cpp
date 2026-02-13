@@ -1,35 +1,29 @@
 ﻿#include "FOMODData/PluginReader.h"
-#include <gtest/gtest.h>
 #include <algorithm>
 #include <filesystem>
+#include <gtest/gtest.h>
 
-TEST(PluginReaderTest, ReadMasters) {
+TEST(PluginReaderTest, ReadMasters)
+{
     // Path to the test ESP
     std::string testEspPath = (std::filesystem::path(TEST_DATA_DIR) / "Lux - JK's The Hag's Cure patch.esp").string();
 
     // Verify the file exists
-    ASSERT_TRUE(std::filesystem::exists(testEspPath))
-        << "Test file not found: " << testEspPath;
+    ASSERT_TRUE(std::filesystem::exists(testEspPath)) << "Test file not found: " << testEspPath;
 
     // Verify it's a valid plugin
-    ASSERT_TRUE(PluginReader::isValidPlugin(testEspPath))
-        << "Test file is not a valid plugin: " << testEspPath;
+    ASSERT_TRUE(PluginReader::isValidPlugin(testEspPath)) << "Test file is not a valid plugin: " << testEspPath;
 
     // Read masters
     std::vector<std::string> masters = PluginReader::readMasters(testEspPath);
 
     // Expected masters
-    std::vector<std::string> expectedMasters = {
-        "Skyrim.esm",
-        "JK's The Hag's Cure.esp",
-        "Lux - Resources.esp",
-        "Lux.esp"
-    };
+    std::vector<std::string> expectedMasters
+        = { "Skyrim.esm", "JK's The Hag's Cure.esp", "Lux - Resources.esp", "Lux.esp" };
 
     // Verify we got the right number of masters
     ASSERT_EQ(masters.size(), expectedMasters.size())
-        << "Incorrect number of masters. Expected " << expectedMasters.size()
-        << " but got " << masters.size();
+        << "Incorrect number of masters. Expected " << expectedMasters.size() << " but got " << masters.size();
 
     // Verify each master is present
     for (const auto& expectedMaster : expectedMasters) {
@@ -39,13 +33,13 @@ TEST(PluginReaderTest, ReadMasters) {
 
     // Verify masters are in the correct order
     for (size_t i = 0; i < expectedMasters.size(); i++) {
-        EXPECT_EQ(masters[i], expectedMasters[i])
-            << "Master at position " << i << " doesn't match expected value. "
-            << "Expected: " << expectedMasters[i] << ", Got: " << masters[i];
+        EXPECT_EQ(masters[i], expectedMasters[i]) << "Master at position " << i << " doesn't match expected value. "
+                                                  << "Expected: " << expectedMasters[i] << ", Got: " << masters[i];
     }
 }
 
-TEST(PluginReaderTest, InvalidPlugin) {
+TEST(PluginReaderTest, InvalidPlugin)
+{
     // Test with non-existent file
     EXPECT_FALSE(PluginReader::isValidPlugin("non_existent_file.esp"));
 

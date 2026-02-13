@@ -1,6 +1,6 @@
 ﻿#include "stringutil.h"
-#include <gtest/gtest.h>
 #include <QString>
+#include <gtest/gtest.h>
 
 TEST(StringUtil, Trim_Copy)
 {
@@ -35,9 +35,9 @@ TEST(StringUtilTests, FormatPluginDescription_UrlAndLineBreaks)
 TEST(StringUtilTests, FormatPluginDescription_MultipleUrls)
 {
     QString input    = "First link: https://example.com\nSecond link: http://test.com";
-    QString expected =
-        "First link: <a href=\"https://example.com\">https://example.com</a><br>Second link: <a href=\"http://test.com\">http://test.com</a>";
-    QString result = formatPluginDescription(input);
+    QString expected = "First link: <a href=\"https://example.com\">https://example.com</a><br>Second link: <a "
+                       "href=\"http://test.com\">http://test.com</a>";
+    QString result   = formatPluginDescription(input);
     EXPECT_EQ(result, expected);
 }
 
@@ -51,11 +51,12 @@ TEST(StringUtilTests, FormatPluginDescription_NoUrlsOrLineBreaks)
 
 TEST(StringUtilTests, FormatPluginDescription_SpecialCharacters)
 {
-    QString input =
-        "Patch for https://www.afkmods.com/index.php?/files/file/2006-provincial-courier-service/ provided.";
-    QString expected =
-        "Patch for <a href=\"https://www.afkmods.com/index.php?/files/file/2006-provincial-courier-service/\">https://www.afkmods.com/index.php?/files/file/2006-provincial-courier-service/</a> provided.";
-    QString result = formatPluginDescription(input);
+    QString input
+        = "Patch for https://www.afkmods.com/index.php?/files/file/2006-provincial-courier-service/ provided.";
+    QString expected = "Patch for <a "
+                       "href=\"https://www.afkmods.com/index.php?/files/file/2006-provincial-courier-service/\">https:/"
+                       "/www.afkmods.com/index.php?/files/file/2006-provincial-courier-service/</a> provided.";
+    QString result   = formatPluginDescription(input);
 
     EXPECT_EQ(result, expected);
 }
@@ -63,7 +64,9 @@ TEST(StringUtilTests, FormatPluginDescription_SpecialCharacters)
 TEST(StringUtilTests, FormatPluginDescription_UrlWithSpecialCharacters)
 {
     QString input    = "Check this link: https://example.com/path?query=param&other=param#fragment";
-    QString expected = "Check this link: <a href=\"https://example.com/path?query=param&other=param#fragment\">https://example.com/path?query=param&other=param#fragment</a>";
+    QString expected = "Check this link: <a "
+                       "href=\"https://example.com/path?query=param&other=param#fragment\">https://example.com/"
+                       "path?query=param&other=param#fragment</a>";
     QString result   = formatPluginDescription(input);
     EXPECT_EQ(result, expected);
 }

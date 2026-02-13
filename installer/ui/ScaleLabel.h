@@ -5,12 +5,12 @@
 #include <QMouseEvent>
 #include <QMovie>
 
-
 class ScaleLabel final : public QLabel {
     Q_OBJECT
 
-public:
-    explicit ScaleLabel(QWidget* parent = nullptr) : QLabel(parent)
+  public:
+    explicit ScaleLabel(QWidget* parent = nullptr)
+        : QLabel(parent)
     {
         setCursor(Qt::PointingHandCursor);
     }
@@ -19,10 +19,10 @@ public:
     void setStatic(bool isStatic);
     [[nodiscard]] bool hasResource() const { return mHasResource; }
 
-signals:
+  signals:
     void clicked();
 
-protected:
+  protected:
     void mousePressEvent(QMouseEvent* event) override
     {
         if (event->button() == Qt::LeftButton) {
@@ -34,7 +34,7 @@ protected:
     void resizeEvent(QResizeEvent* event) override;
     void showEvent(QShowEvent* event) override;
 
-private:
+  private:
     void setScalableMovie(const QString& path);
     void setScalableImage(const QString& path);
 

@@ -1,10 +1,10 @@
-﻿#include <gtest/gtest.h>
-#include "xml/ModuleConfiguration.h"
-#include <filesystem>
+﻿#include "xml/ModuleConfiguration.h"
 #include <QString>
+#include <filesystem>
+#include <gtest/gtest.h>
 
 class ModuleConfigurationTest_Xavbio : public ::testing::Test {
-protected:
+  protected:
     ModuleConfiguration moduleConfig;
 
     void SetUp() override
@@ -14,10 +14,7 @@ protected:
     }
 };
 
-TEST_F(ModuleConfigurationTest_Xavbio, ModuleName)
-{
-    EXPECT_EQ(moduleConfig.moduleName, "xavbio's meshes for 3BA");
-}
+TEST_F(ModuleConfigurationTest_Xavbio, ModuleName) { EXPECT_EQ(moduleConfig.moduleName, "xavbio's meshes for 3BA"); }
 
 TEST_F(ModuleConfigurationTest_Xavbio, InstallStepsCount)
 {
@@ -77,14 +74,18 @@ TEST_F(ModuleConfigurationTest_Xavbio, SecondStepVisibleFlag)
 
 TEST_F(ModuleConfigurationTest_Xavbio, ConditionFlag)
 {
-    const auto flags = moduleConfig.installSteps.installSteps[0].optionalFileGroups.groups[0].plugins.plugins[0].conditionFlags.flags;
+    const auto flags = moduleConfig.installSteps.installSteps[0]
+                           .optionalFileGroups.groups[0]
+                           .plugins.plugins[0]
+                           .conditionFlags.flags;
     EXPECT_EQ(flags[0].name, "1");
     EXPECT_EQ(flags[0].value, "On");
 }
 
 TEST_F(ModuleConfigurationTest_Xavbio, Folders)
 {
-    const auto file = moduleConfig.installSteps.installSteps[1].optionalFileGroups.groups[0].plugins.plugins[0].files.files[0];
+    const auto file
+        = moduleConfig.installSteps.installSteps[1].optionalFileGroups.groups[0].plugins.plugins[0].files.files[0];
     EXPECT_EQ(file.source, "1. Ancient Nord Armor\\CalienteTools");
     EXPECT_EQ(file.destination, "CalienteTools");
     EXPECT_EQ(file.priority, 0);

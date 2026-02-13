@@ -6,15 +6,15 @@
 
 #include <iplugingame.h>
 
-FomodDataContent::FomodDataContent(MOBase::IOrganizer* organizer) : mOrganizer(organizer)
+FomodDataContent::FomodDataContent(MOBase::IOrganizer* organizer)
+    : mOrganizer(organizer)
 {
 }
 
 std::vector<MOBase::ModDataContent::Content> FomodDataContent::getAllContents() const
 {
-    static const std::vector<Content> contents = {
-        {FomodDataContentConstants::FOMOD_CONTENT_ID, "FOMOD", ":/fomod/hat", false}
-    };
+    static const std::vector<Content> contents
+        = { { FomodDataContentConstants::FOMOD_CONTENT_ID, "FOMOD", ":/fomod/hat", false } };
 
     return contents;
 }
@@ -34,7 +34,7 @@ std::vector<int> FomodDataContent::getContentsFor(const std::shared_ptr<const MO
 
     const auto mod = modList->getMod(fileTree->name());
     if (modHasFomodContent(mod)) {
-       contents.emplace_back(FomodDataContentConstants::FOMOD_CONTENT_ID);
+        contents.emplace_back(FomodDataContentConstants::FOMOD_CONTENT_ID);
     }
     return contents;
 }
@@ -45,6 +45,6 @@ bool FomodDataContent::modHasFomodContent(const MOBase::IModInterface* mod)
         return false;
     }
     const auto pluginName = QString::fromStdString(StringConstants::Plugin::NAME.data());
-    const auto fomodMeta = mod->pluginSetting(pluginName, "fomod", 0);
+    const auto fomodMeta  = mod->pluginSetting(pluginName, "fomod", 0);
     return fomodMeta != 0;
 }

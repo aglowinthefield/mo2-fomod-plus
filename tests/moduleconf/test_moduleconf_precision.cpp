@@ -1,23 +1,21 @@
-﻿#include <gtest/gtest.h>
-#include "xml/ModuleConfiguration.h"
-#include <filesystem>
+﻿#include "xml/ModuleConfiguration.h"
 #include <QString>
+#include <filesystem>
+#include <gtest/gtest.h>
 
 class ModuleConfPrecision : public ::testing::Test {
-protected:
+  protected:
     ModuleConfiguration moduleConfig;
 
     void SetUp() override
     {
-        const std::string filePath = (std::filesystem::path(__FILE__).parent_path() / "test_moduleconf_precision.xml").string();
+        const std::string filePath
+            = (std::filesystem::path(__FILE__).parent_path() / "test_moduleconf_precision.xml").string();
         moduleConfig.deserialize(QString::fromStdString(filePath));
     }
 };
 
-TEST_F(ModuleConfPrecision, ModuleName)
-{
-    EXPECT_EQ(moduleConfig.moduleName, "Precision");
-}
+TEST_F(ModuleConfPrecision, ModuleName) { EXPECT_EQ(moduleConfig.moduleName, "Precision"); }
 
 TEST_F(ModuleConfPrecision, RequiredInstallFiles)
 {
@@ -31,13 +29,7 @@ TEST_F(ModuleConfPrecision, RequiredInstallFiles)
 
 TEST_F(ModuleConfPrecision, PatternDependencies)
 {
-    const auto tkDodge = moduleConfig
-        .installSteps
-        .installSteps[0]
-        .optionalFileGroups
-        .groups[0]
-        .plugins
-        .plugins[0];
+    const auto tkDodge = moduleConfig.installSteps.installSteps[0].optionalFileGroups.groups[0].plugins.plugins[0];
 
     const auto typeDescriptor = tkDodge.typeDescriptor;
     EXPECT_EQ(typeDescriptor.dependencyType.defaultType, PluginTypeEnum::NotUsable);

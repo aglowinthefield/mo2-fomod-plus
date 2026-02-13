@@ -1,22 +1,16 @@
 ﻿#pragma once
 
+#include <cstdint>
 #include <fstream>
 #include <string>
-#include <vector>
-#include <cstdint>
 #include <unordered_set>
+#include <vector>
 
-static const std::unordered_set<std::string> VANILLA_MASTERS = {
-    "Skyrim.esm",
-    "Update.esm",
-    "Dawnguard.esm",
-    "HearthFires.esm",
-    "Dragonborn.esm"
-};
+static const std::unordered_set<std::string> VANILLA_MASTERS
+    = { "Skyrim.esm", "Update.esm", "Dawnguard.esm", "HearthFires.esm", "Dragonborn.esm" };
 
 class PluginReader {
-public:
-
+  public:
     /**
      * Reads the master files from a Bethesda plugin file (ESP/ESM/ESL)
      * @param filePath Path to the plugin file
@@ -44,11 +38,11 @@ public:
         file.read(reinterpret_cast<char*>(&recordSize), 4);
 
         constexpr uint32_t skipSize = sizeof(uint32_t) // flags
-        + sizeof(uint32_t) // formId
-        + sizeof(uint16_t) // timestamp
-        + sizeof(uint16_t) // version control
-        + sizeof(uint16_t) // internal version
-        + sizeof(uint16_t); // unknown
+            + sizeof(uint32_t) // formId
+            + sizeof(uint16_t) // timestamp
+            + sizeof(uint16_t) // version control
+            + sizeof(uint16_t) // internal version
+            + sizeof(uint16_t); // unknown
 
         // Skip header flags, formID, etc. (total 8 bytes)
         file.seekg(skipSize, std::ios::cur);

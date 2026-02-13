@@ -1,24 +1,21 @@
-#include <gtest/gtest.h>
 #include "xml/ModuleConfiguration.h"
 #include <QString>
 #include <filesystem>
+#include <gtest/gtest.h>
 
 class MCBos : public testing::Test {
-protected:
+  protected:
     ModuleConfiguration moduleConfig;
 
     void SetUp() override
     {
-        const std::string filePath = (std::filesystem::path(__FILE__).parent_path() / "test_moduleconf_bos.xml").
-            string();
+        const std::string filePath
+            = (std::filesystem::path(__FILE__).parent_path() / "test_moduleconf_bos.xml").string();
         moduleConfig.deserialize(QString::fromStdString(filePath));
     }
 };
 
-TEST_F(MCBos, Deserializes)
-{
-    EXPECT_EQ(moduleConfig.moduleName, "Base Object Swapper");
-}
+TEST_F(MCBos, Deserializes) { EXPECT_EQ(moduleConfig.moduleName, "Base Object Swapper"); }
 
 TEST_F(MCBos, VersionDependency)
 {
@@ -34,5 +31,4 @@ TEST_F(MCBos, VersionDependency)
 
     const auto firstGameDep = dependencies.front().dependencies.gameDependencies.front();
     EXPECT_EQ(firstGameDep.version, "1.6.1130.0");
-
 }

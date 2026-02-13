@@ -5,9 +5,8 @@
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
 
-
 class FomodDBTest : public ::testing::Test {
-protected:
+  protected:
     std::string tempDir;
     std::string dbPath;
 
@@ -49,15 +48,13 @@ TEST_F(FomodDBTest, UpsertReplacesExistingEntry)
     constexpr int modId = 12345;
 
     // Initial entry with modId 12345
-    std::vector<FomodOption> options1 = {
-        FomodOption("Option 1", "plugin1.esp", { "master1.esm" }, "Step 1", "Group 1")
-    };
+    std::vector<FomodOption> options1
+        = { FomodOption("Option 1", "plugin1.esp", { "master1.esm" }, "Step 1", "Group 1") };
     auto entry1 = std::make_unique<FomodDbEntry>(modId, "Original Name", options1);
 
     // Updated entry with the same modId but different data
-    std::vector<FomodOption> options2 = {
-        FomodOption("Option 2", "plugin2.esp", { "master2.esm" }, "Step 2", "Group 2")
-    };
+    std::vector<FomodOption> options2
+        = { FomodOption("Option 2", "plugin2.esp", { "master2.esm" }, "Step 2", "Group 2") };
     auto entry2 = std::make_unique<FomodDbEntry>(modId, "Updated Name", options2);
 
     // Act
@@ -87,15 +84,13 @@ TEST_F(FomodDBTest, AddEntryWithoutUpsertDoesNotReplace)
     constexpr int modId = 12345;
 
     // Initial entry with modId 12345
-    std::vector<FomodOption> options1 = {
-        FomodOption("Option 1", "plugin1.esp", { "master1.esm" }, "Step 1", "Group 1")
-    };
+    std::vector<FomodOption> options1
+        = { FomodOption("Option 1", "plugin1.esp", { "master1.esm" }, "Step 1", "Group 1") };
     auto entry1 = std::make_unique<FomodDbEntry>(modId, "Original Name", options1);
 
     // Another entry with the same modId
-    std::vector<FomodOption> options2 = {
-        FomodOption("Option 2", "plugin2.esp", { "master2.esm" }, "Step 2", "Group 2")
-    };
+    std::vector<FomodOption> options2
+        = { FomodOption("Option 2", "plugin2.esp", { "master2.esm" }, "Step 2", "Group 2") };
     auto entry2 = std::make_unique<FomodDbEntry>(modId, "New Entry", options2);
 
     // Act
@@ -112,16 +107,14 @@ TEST_F(FomodDBTest, ToJsonSerializesAllEntries)
     FomodDB db(tempDir, "test.db");
 
     // Create first entry
-    std::vector<FomodOption> options1 = {
-        FomodOption("Option 1", "plugin1.esp", { "master1.esm" }, "Step 1", "Group 1")
-    };
+    std::vector<FomodOption> options1
+        = { FomodOption("Option 1", "plugin1.esp", { "master1.esm" }, "Step 1", "Group 1") };
     auto entry1 = std::make_unique<FomodDbEntry>(12345, "First Mod", options1);
 
     // Create second entry
-    std::vector<FomodOption> options2 = {
-        FomodOption("Option A", "pluginA.esp", { "masterA.esm" }, "Step A", "Group A"),
-        FomodOption("Option B", "pluginB.esp", { "masterB.esm" }, "Step B", "Group B")
-    };
+    std::vector<FomodOption> options2
+        = { FomodOption("Option A", "pluginA.esp", { "masterA.esm" }, "Step A", "Group A"),
+              FomodOption("Option B", "pluginB.esp", { "masterB.esm" }, "Step B", "Group B") };
     auto entry2 = std::make_unique<FomodDbEntry>(67890, "Second Mod", options2);
 
     // Add entries to DB

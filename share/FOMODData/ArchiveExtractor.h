@@ -18,7 +18,7 @@ struct ExtractionResult {
     QString moduleConfigPath;
     std::vector<QString> pluginPaths;
     QString errorMessage;
-    std::unique_ptr<QTemporaryDir> tempDir;  // Owns the temp directory lifetime
+    std::unique_ptr<QTemporaryDir> tempDir; // Owns the temp directory lifetime
 };
 
 /**
@@ -26,7 +26,7 @@ struct ExtractionResult {
  * Used by the Patch Wizard's rescan functionality.
  */
 class ArchiveExtractor {
-public:
+  public:
     using ProgressCallback = std::function<void(const QString& fileName)>;
 
     /**
@@ -36,8 +36,7 @@ public:
      * @return ExtractionResult containing paths to extracted files
      */
     static ExtractionResult extractFomodData(
-        const QString& archiveFilePath,
-        const ProgressCallback& progressCallback = nullptr)
+        const QString& archiveFilePath, const ProgressCallback& progressCallback = nullptr)
     {
         ExtractionResult result;
         result.tempDir = std::make_unique<QTemporaryDir>();
@@ -54,8 +53,8 @@ public:
         }
 
         if (!archive->open(archiveFilePath.toStdWString(), nullptr)) {
-            result.errorMessage = QString("Failed to open archive (error %1)")
-                .arg(static_cast<int>(archive->getLastError()));
+            result.errorMessage
+                = QString("Failed to open archive (error %1)").arg(static_cast<int>(archive->getLastError()));
             return result;
         }
 
@@ -67,8 +66,8 @@ public:
             const auto entryPath = QString::fromStdWString(fileData->getArchiveFilePath());
 
             // Check for ModuleConfig.xml
-            if (entryPath.toLower().endsWith("fomod/moduleconfig.xml") ||
-                entryPath.toLower().endsWith("fomod\\moduleconfig.xml")) {
+            if (entryPath.toLower().endsWith("fomod/moduleconfig.xml")
+                || entryPath.toLower().endsWith("fomod\\moduleconfig.xml")) {
                 moduleConfigInArchive = entryPath;
                 // Set output path relative to output directory for extract()
                 fileData->addOutputFilePath(L"ModuleConfig.xml");
@@ -78,7 +77,7 @@ public:
             else if (isPluginFile(entryPath)) {
                 // Use full archive path to preserve uniqueness (different options may have same-named plugins)
                 auto relativePath = QString("plugins/") + entryPath;
-                relativePath.replace('\\', '/');  // Normalize path separators
+                relativePath.replace('\\', '/'); // Normalize path separators
                 fileData->addOutputFilePath(relativePath.toStdWString());
                 result.pluginPaths.push_back(result.tempDir->filePath(relativePath));
             }
@@ -93,23 +92,19 @@ public:
         QDir(result.tempDir->path()).mkpath("plugins");
 
         // Extract the files
-        Archive::FileChangeCallback fileChangeCallback = [&progressCallback](
-            Archive::FileChangeType, const std::wstring& fileName) {
-            if (progressCallback) {
-                progressCallback(QString::fromStdWString(fileName));
-            }
-        };
+        Archive::FileChangeCallback fileChangeCallback
+            = [&progressCallback](Archive::FileChangeType, const std::wstring& fileName) {
+                  if (progressCallback) {
+                      progressCallback(QString::fromStdWString(fileName));
+                  }
+              };
 
-        Archive::ErrorCallback errorCallback = [&result](const std::wstring& error) {
-            result.errorMessage = QString::fromStdWString(error);
-        };
+        Archive::ErrorCallback errorCallback
+            = [&result](const std::wstring& error) { result.errorMessage = QString::fromStdWString(error); };
 
-        const bool extractSuccess = archive->extract(
-            result.tempDir->path().toStdWString(),
-            Archive::ProgressCallback{},  // progress callback
-            fileChangeCallback,
-            errorCallback
-        );
+        const bool extractSuccess
+            = archive->extract(result.tempDir->path().toStdWString(), Archive::ProgressCallback {}, // progress callback
+                fileChangeCallback, errorCallback);
 
         if (!extractSuccess) {
             if (result.errorMessage.isEmpty()) {
@@ -151,8 +146,8 @@ public:
 
         for (const auto* fileData : archive->getFileList()) {
             const auto path = QString::fromStdWString(fileData->getArchiveFilePath());
-            if (path.toLower().endsWith("fomod/moduleconfig.xml") ||
-                path.toLower().endsWith("fomod\\moduleconfig.xml")) {
+            if (path.toLower().endsWith("fomod/moduleconfig.xml")
+                || path.toLower().endsWith("fomod\\moduleconfig.xml")) {
                 return true;
             }
         }

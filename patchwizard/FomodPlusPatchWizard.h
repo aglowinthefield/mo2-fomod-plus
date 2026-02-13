@@ -16,14 +16,17 @@ class FomodPlusPatchWizard final : public IPluginTool {
     Q_PLUGIN_METADATA(IID "io.clearing.FomodPlusPatchWizard" FILE "fomodpluspatchwizard.json")
 #endif
 
-public:
+  public:
     bool init(IOrganizer* organizer) override;
 
     [[nodiscard]] QString name() const override { return tr("Patch Wizard"); };
 
     [[nodiscard]] QString author() const override { return "clearing"; };
 
-    [[nodiscard]] QString description() const override { return tr("Find missing patches from FOMODs in your load order."); };
+    [[nodiscard]] QString description() const override
+    {
+        return tr("Find missing patches from FOMODs in your load order.");
+    };
 
     [[nodiscard]] VersionInfo version() const override { return { 1, 0, 0, VersionInfo::RELEASE_BETA }; };
 
@@ -31,17 +34,20 @@ public:
 
     [[nodiscard]] QString displayName() const override { return tr("Patch Wizard"); };
 
-    [[nodiscard]] QString tooltip() const override { return tr("Find missing patches from FOMODs in your load order."); };
+    [[nodiscard]] QString tooltip() const override
+    {
+        return tr("Find missing patches from FOMODs in your load order.");
+    };
 
     [[nodiscard]] QIcon icon() const override { return QIcon(":/fomod/hat"); }
 
     void display() const override;
 
-private:
+  private:
     Logger& log = Logger::getInstance();
-    QDialog* mDialog{ nullptr };
-    IOrganizer* mOrganizer{ nullptr };
-    std::unique_ptr<PatchFinder> mPatchFinder{ nullptr };
+    QDialog* mDialog { nullptr };
+    IOrganizer* mOrganizer { nullptr };
+    std::unique_ptr<PatchFinder> mPatchFinder { nullptr };
     std::vector<AvailablePatch> mAvailablePatches;
 
     void setupEmptyState() const;
@@ -53,5 +59,4 @@ private:
     {
         log.logMessage(level, "[PATCHFINDER] " + message);
     }
-
 };

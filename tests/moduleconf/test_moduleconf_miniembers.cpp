@@ -1,16 +1,16 @@
-﻿#include <gtest/gtest.h>
-#include "xml/ModuleConfiguration.h"
+﻿#include "xml/ModuleConfiguration.h"
 #include <QString>
 #include <filesystem>
+#include <gtest/gtest.h>
 
 class MCEmbersMini : public testing::Test {
-protected:
+  protected:
     ModuleConfiguration moduleConfig;
 
     void SetUp() override
     {
-        const std::string filePath = (std::filesystem::path(__FILE__).parent_path() / "test_moduleconf_miniembers.xml").
-            string();
+        const std::string filePath
+            = (std::filesystem::path(__FILE__).parent_path() / "test_moduleconf_miniembers.xml").string();
         moduleConfig.deserialize(QString::fromStdString(filePath));
     }
 };
@@ -26,5 +26,4 @@ TEST_F(MCEmbersMini, NestedDependencies)
 
     const auto nestedDep = deps.dependencies.nestedDependencies[0];
     EXPECT_EQ(2, nestedDep.flagDependencies.size());
-
 }

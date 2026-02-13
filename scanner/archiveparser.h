@@ -53,16 +53,12 @@ inline bool hasFomodFiles(const std::vector<FileData*>& files)
  *     the installer.
  */
 
-enum class ScanResult {
-    HAS_FOMOD,
-    NO_FOMOD,
-    NO_ARCHIVE
-};
+enum class ScanResult { HAS_FOMOD, NO_FOMOD, NO_ARCHIVE };
 
 class ArchiveParser {
-public:
-    static ScanResult scanForFomodFiles(const QString& downloadsPath, const QString& installationFilePath,
-        const QString& modName)
+  public:
+    static ScanResult scanForFomodFiles(
+        const QString& downloadsPath, const QString& installationFilePath, const QString& modName)
     {
         if (installationFilePath.isEmpty()) {
             return ScanResult::NO_ARCHIVE;
@@ -89,10 +85,10 @@ public:
         return ScanResult::NO_FOMOD;
     }
 
-private:
+  private:
     static void logErrorForMod(const QString& modName, const QString& message, const std::unique_ptr<Archive>& archive)
     {
-        std::cerr << "[" << modName.toStdString() << "] " << message.toStdString() << " (" << archive->getLastError() <<
-            ")" << std::endl;
+        std::cerr << "[" << modName.toStdString() << "] " << message.toStdString() << " (" << archive->getLastError()
+                  << ")" << std::endl;
     }
 };

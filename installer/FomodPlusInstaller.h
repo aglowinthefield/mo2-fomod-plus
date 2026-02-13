@@ -6,15 +6,15 @@
 #include <iplugininstaller.h>
 #include <iplugininstallersimple.h>
 
-#include <nlohmann/json.hpp>
 #include "FomodInstallerWindow.h"
 #include "lib/Logger.h"
 #include "xml/FomodInfoFile.h"
 #include "xml/ModuleConfiguration.h"
+#include <nlohmann/json.hpp>
 
+#include <FOMODData/FomodDb.h>
 #include <QDialog>
 #include <integration/FomodDataContent.h>
-#include <FOMODData/FomodDb.h>
 
 class FomodInstallerWindow;
 
@@ -28,7 +28,7 @@ class FomodPlusInstaller final : public IPluginInstallerSimple {
     Q_INTERFACES(MOBase::IPlugin MOBase::IPluginInstaller)
     Q_PLUGIN_METADATA(IID "io.clearing.FomodPlus" FILE "fomodplus.json")
 
-public:
+  public:
     bool init(IOrganizer* organizer) override;
 
     // constant values
@@ -37,12 +37,9 @@ public:
     [[nodiscard]] QString description() const override { return StringConstants::Plugin::DESCRIPTION.data(); }
     [[nodiscard]] VersionInfo version() const override { return { 1, 0, 0, VersionInfo::RELEASE_FINAL }; }
 
-    [[nodiscard]] unsigned int priority() const override
-    {
-        return 999; /* Above installer_fomod's highest priority. */
-    }
+    [[nodiscard]] unsigned int priority() const override { return 999; /* Above installer_fomod's highest priority. */ }
 
-    [[nodiscard]] std::vector<std::shared_ptr<const IPluginRequirement> > requirements() const override;
+    [[nodiscard]] std::vector<std::shared_ptr<const IPluginRequirement>> requirements() const override;
 
     [[nodiscard]] bool isManualInstaller() const override { return false; }
 
@@ -50,13 +47,13 @@ public:
 
     [[nodiscard]] QList<PluginSetting> settings() const override;
 
-    std::pair<nlohmann::json, IModInterface*> getExistingFomodJson(const GuessedValue<QString>& modName,
-        const int& nexusId, const int& stepsInCurrentFomod) const;
+    std::pair<nlohmann::json, IModInterface*> getExistingFomodJson(
+        const GuessedValue<QString>& modName, const int& nexusId, const int& stepsInCurrentFomod) const;
 
     void clearPriorInstallData();
 
-    EInstallResult install(GuessedValue<QString>& modName, std::shared_ptr<IFileTree>& tree, QString& version,
-        int& nexusID) override;
+    EInstallResult install(
+        GuessedValue<QString>& modName, std::shared_ptr<IFileTree>& tree, QString& version, int& nexusID) override;
 
     void onInstallationStart(QString const& archive, bool reinstallation, IModInterface* currentMod) override;
 
@@ -75,33 +72,33 @@ public:
 
     QString getSelectedColor() const;
 
-private:
+  private:
     Logger& log            = Logger::getInstance();
     IOrganizer* mOrganizer = nullptr;
-    QString mFomodPath{};
-    std::shared_ptr<nlohmann::json> mFomodJson{ nullptr };
-    bool mInstallerUsed{ false };
-    std::shared_ptr<FomodDataContent> mFomodContent{ nullptr };
+    QString mFomodPath {};
+    std::shared_ptr<nlohmann::json> mFomodJson { nullptr };
+    bool mInstallerUsed { false };
+    std::shared_ptr<FomodDataContent> mFomodContent { nullptr };
     std::unique_ptr<FomodDB> mFomodDb;
 
     /**
-   * @brief Retrieve the tree entry corresponding to the fomod directory.
-   *
-   * @param tree Tree to look-up the directory in.
-   *
-   * @return the entry corresponding to the fomod directory in the tree, or a null
-   * pointer if the entry was not found.
-   */
+     * @brief Retrieve the tree entry corresponding to the fomod directory.
+     *
+     * @param tree Tree to look-up the directory in.
+     *
+     * @return the entry corresponding to the fomod directory in the tree, or a null
+     * pointer if the entry was not found.
+     */
     [[nodiscard]] static shared_ptr<const IFileTree> findFomodDirectory(const shared_ptr<const IFileTree>& tree);
 
     [[nodiscard]] static QDialog::DialogCode showInstallerWindow(const shared_ptr<FomodInstallerWindow>& window);
 
     [[nodiscard]] ParsedFilesTuple parseFomodFiles(const shared_ptr<IFileTree>& tree);
 
-    static void appendImageFiles(vector<shared_ptr<const FileTreeEntry> >& entries,
-        const shared_ptr<const IFileTree>& tree);
+    static void appendImageFiles(
+        vector<shared_ptr<const FileTreeEntry>>& entries, const shared_ptr<const IFileTree>& tree);
 
-    void appendPluginFiles(vector<shared_ptr<const FileTreeEntry> >& entries, const shared_ptr<const IFileTree>& tree);
+    void appendPluginFiles(vector<shared_ptr<const FileTreeEntry>>& entries, const shared_ptr<const IFileTree>& tree);
 
     void setupUiInjection() const;
     void toggleFeature(bool enabled) const;

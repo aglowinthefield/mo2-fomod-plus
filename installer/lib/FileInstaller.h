@@ -8,7 +8,6 @@
 #include "Logger.h"
 #include "xml/ModuleConfiguration.h"
 
-
 /* This is what legacy fomodInstaller does:
         modName.update(dialog.getName(), GUESS_USER);
         return dialog.updateTree(tree);
@@ -26,19 +25,15 @@
 using namespace MOBase;
 
 using FileGlobalIndex = int;
-using FileDescriptor = std::pair<File, FileGlobalIndex>;
+using FileDescriptor  = std::pair<File, FileGlobalIndex>;
 
 class StepViewModel;
 
 class FileInstaller {
-public:
-    FileInstaller(
-        IOrganizer* organizer,
-        QString fomodPath,
-        const std::shared_ptr<IFileTree>& fileTree,
-        std::unique_ptr<ModuleConfiguration> fomodFile,
-        const std::shared_ptr<FlagMap>& flagMap,
-        const std::vector<std::shared_ptr<StepViewModel> >& steps);
+  public:
+    FileInstaller(IOrganizer* organizer, QString fomodPath, const std::shared_ptr<IFileTree>& fileTree,
+        std::unique_ptr<ModuleConfiguration> fomodFile, const std::shared_ptr<FlagMap>& flagMap,
+        const std::vector<std::shared_ptr<StepViewModel>>& steps);
 
     std::shared_ptr<IFileTree> install() const;
 
@@ -71,11 +66,12 @@ public:
 
     std::string getQualifiedFilePath(const std::string& treePath) const;
 
-    std::vector<std::string> collectPositiveFileNamesFromDependencyPatterns(const std::vector<DependencyPattern> &patterns);
+    std::vector<std::string> collectPositiveFileNamesFromDependencyPatterns(
+        const std::vector<DependencyPattern>& patterns);
 
     void addFiles(std::vector<File>& main, std::vector<File> toAdd) const;
 
-private:
+  private:
     IOrganizer* mOrganizer;
     Logger& log = Logger::getInstance();
     QString mFomodPath;
@@ -83,7 +79,7 @@ private:
     std::unique_ptr<ModuleConfiguration> mFomodFile;
     std::shared_ptr<FlagMap> mFlagMap;
     ConditionTester mConditionTester;
-    std::vector<std::shared_ptr<StepViewModel> > mSteps; // TODO: Maybe this is nasty. Idk.
+    std::vector<std::shared_ptr<StepViewModel>> mSteps; // TODO: Maybe this is nasty. Idk.
 
     std::vector<File> collectFilesToInstall() const;
 

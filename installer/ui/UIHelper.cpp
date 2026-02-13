@@ -1,11 +1,14 @@
 ﻿#include "UIHelper.h"
 
-#include <qcoreevent.h>
 #include <QDir>
 #include <QMouseEvent>
+#include <qcoreevent.h>
 
 HoverEventFilter::HoverEventFilter(const std::shared_ptr<PluginViewModel>& plugin, QObject* parent)
-    : QObject(parent), mPlugin(plugin) {}
+    : QObject(parent)
+    , mPlugin(plugin)
+{
+}
 
 bool HoverEventFilter::eventFilter(QObject* obj, QEvent* event)
 {
@@ -16,18 +19,22 @@ bool HoverEventFilter::eventFilter(QObject* obj, QEvent* event)
     return QObject::eventFilter(obj, event);
 }
 
-CtrlClickEventFilter::CtrlClickEventFilter(const std::shared_ptr<PluginViewModel>& plugin,
-    const std::shared_ptr<GroupViewModel>& group, QObject* parent)
-    : QObject(parent), mPlugin(plugin), mGroup(group) {}
+CtrlClickEventFilter::CtrlClickEventFilter(
+    const std::shared_ptr<PluginViewModel>& plugin, const std::shared_ptr<GroupViewModel>& group, QObject* parent)
+    : QObject(parent)
+    , mPlugin(plugin)
+    , mGroup(group)
+{
+}
 
 bool CtrlClickEventFilter::eventFilter(QObject* obj, QEvent* event)
 {
     if (event->type() == QEvent::MouseButtonPress) {
         const QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
-        if (mouseEvent->button() == Qt::LeftButton &&
-            mouseEvent->modifiers() & Qt::ControlModifier) {
+        if (mouseEvent->button() == Qt::LeftButton && mouseEvent->modifiers() & Qt::ControlModifier) {
             // TODO: Add Ctrl+click handler logic here
-            std::cout << "Ctrl+click detected on plugin: " << mPlugin->getName() << " in group: " << mGroup->getName() << std::endl;
+            std::cout << "Ctrl+click detected on plugin: " << mPlugin->getName() << " in group: " << mGroup->getName()
+                      << std::endl;
             // For now, just fall through to default behavior
         }
     }

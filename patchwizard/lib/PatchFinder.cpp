@@ -28,23 +28,19 @@ std::vector<AvailablePatch> PatchFinder::getAvailablePatchesForMod(const MOBase:
             // Technically without this check, we're doing a lookup for the entire modlist, which actually
             // kinda works, but isn't the intention of this function. Might want to consider reworking
             // it to map to mod names with one pass of the DB instead of a DB pass per mod.
-            if (!std::ranges::any_of(option.masters, [&mod](const std::string& master) {
-                return master == mod->name().toStdString();
-            })) {
+            if (!std::ranges::any_of(option.masters,
+                    [&mod](const std::string& master) { return master == mod->name().toStdString(); })) {
                 continue;
             }
 
             // If we have all of this patch's masters in our modlist, and it's not installed, add it to the results.
-            if (std::ranges::all_of(option.masters, [this](const std::string& master) {
-                return m_installedPluginsCacheSet.contains(master);
-            })) {
-                AvailablePatch patch{
-                    option,
-                    entry->getDisplayName(),
-                    mod->name().toStdString(),
-                    false,  // not installed
-                    false,  // not hidden
-                    option.selectionState == SelectionState::Deselected  // userDeselected
+            if (std::ranges::all_of(option.masters,
+                    [this](const std::string& master) { return m_installedPluginsCacheSet.contains(master); })) {
+                AvailablePatch patch {
+                    option, entry->getDisplayName(), mod->name().toStdString(),
+                    false, // not installed
+                    false, // not hidden
+                    option.selectionState == SelectionState::Deselected // userDeselected
                 };
                 available_patches.push_back(patch);
             }

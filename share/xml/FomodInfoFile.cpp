@@ -35,5 +35,4 @@ bool FomodInfoFile::deserialize(const QString& filePath)
     }
 
     return true;
-
 }

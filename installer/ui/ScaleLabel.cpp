@@ -6,9 +6,8 @@
 static bool isResourceMovie(const QString& path)
 {
     const auto formats = QMovie::supportedFormats();
-    return std::ranges::any_of(formats, [&path](const QByteArray& format) {
-        return path.endsWith("." + QString::fromUtf8(format));
-    });
+    return std::ranges::any_of(
+        formats, [&path](const QByteArray& format) { return path.endsWith("." + QString::fromUtf8(format)); });
 }
 
 void ScaleLabel::setScalableResource(const QString& path)
@@ -51,8 +50,8 @@ void ScaleLabel::setScalableMovie(const QString& path)
 {
     const auto m = new QMovie(path);
     if (!m->isValid()) {
-        qWarning(">%s< is an invalid movie. Reason: %s", qUtf8Printable(path),
-            m->lastErrorString().toStdString().c_str());
+        qWarning(
+            ">%s< is an invalid movie. Reason: %s", qUtf8Printable(path), m->lastErrorString().toStdString().c_str());
         delete m;
         return;
     }

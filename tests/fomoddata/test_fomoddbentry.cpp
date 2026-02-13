@@ -4,13 +4,13 @@
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
 
-TEST(FomodDbEntryTest, ParseFomodDbEntry) {
+TEST(FomodDbEntryTest, ParseFomodDbEntry)
+{
     // Path to the test JSON file
     std::string jsonPath = (std::filesystem::path(TEST_DATA_DIR) / "test-entry.json").string();
 
     // Check if the file exists
-    ASSERT_TRUE(std::filesystem::exists(jsonPath))
-        << "Test JSON file not found: " << jsonPath;
+    ASSERT_TRUE(std::filesystem::exists(jsonPath)) << "Test JSON file not found: " << jsonPath;
 
     // Read the JSON file
     std::ifstream file(jsonPath);
@@ -18,7 +18,6 @@ TEST(FomodDbEntryTest, ParseFomodDbEntry) {
 
     // Parse the JSON content
     nlohmann::json jsonFile = nlohmann::json::parse(file);
-
 
     // Parse the JSON object
     FomodDbEntry fomodDbEntry(jsonFile);
@@ -52,19 +51,14 @@ TEST(FomodDbEntryTest, ParseFomodDbEntry) {
     EXPECT_EQ(fomodDbEntry.getOptions()[0].group, "Group One");
 }
 
-TEST(FomodDbEntryTest, ToJsonSerializesCorrectly) {
+TEST(FomodDbEntryTest, ToJsonSerializesCorrectly)
+{
     // Create a FomodOption
-    std::vector<std::string> masters = {
-        "Skyrim.esm",
-        "JK's The Hag's Cure.esp",
-        "Lux - Resources.esp",
-        "Lux.esp"
-    };
-    FomodOption option("JK's The Hag's Cure", "Lux - JK's The Hag's Cure patch.esp",
-                        masters, "Step One", "Group One");
+    std::vector<std::string> masters = { "Skyrim.esm", "JK's The Hag's Cure.esp", "Lux - Resources.esp", "Lux.esp" };
+    FomodOption option("JK's The Hag's Cure", "Lux - JK's The Hag's Cure patch.esp", masters, "Step One", "Group One");
 
     // Create a vector of options
-    std::vector<FomodOption> options = {option};
+    std::vector<FomodOption> options = { option };
 
     // Create a FomodDbEntry
     FomodDbEntry entry(12345, "Lux (Patch Hub)", options);

@@ -18,7 +18,7 @@ class FomodPlusScanner final : public IPluginTool {
     Q_PLUGIN_METADATA(IID "io.clearing.FomodPlusScanner" FILE "fomodplusscanner.json")
 #endif
 
-public:
+  public:
     ~FomodPlusScanner() override
     {
         delete mDialog;
@@ -35,7 +35,7 @@ public:
     [[nodiscard]] QString name() const override { return "FOMOD Scanner"; } // This should not be translated
     [[nodiscard]] QString author() const override { return "clearing"; }
     [[nodiscard]] QString description() const override { return tr("Scans modlist for files installed via FOMOD"); }
-    [[nodiscard]] VersionInfo version() const override { return {1, 0, 0, VersionInfo::RELEASE_FINAL}; }
+    [[nodiscard]] VersionInfo version() const override { return { 1, 0, 0, VersionInfo::RELEASE_FINAL }; }
 
     [[nodiscard]] QList<PluginSetting> settings() const override { return {}; }
 
@@ -47,18 +47,18 @@ public:
 
     void display() const override;
 
-    int scanLoadOrder(const std::function<bool(IModInterface*, ScanResult result)> &callback) const;
+    int scanLoadOrder(const std::function<bool(IModInterface*, ScanResult result)>& callback) const;
 
     ScanResult openInstallationArchive(const IModInterface* mod) const;
 
-    static bool setFomodInfoForMod(IModInterface *mod, ScanResult result);
+    static bool setFomodInfoForMod(IModInterface* mod, ScanResult result);
 
-    static bool removeFomodInfoFromMod(IModInterface *mod, ScanResult);
+    static bool removeFomodInfoFromMod(IModInterface* mod, ScanResult);
 
-private:
-    QDialog* mDialog{ nullptr };
-    QProgressBar* mProgressBar{ nullptr };
-    IOrganizer* mOrganizer{ nullptr };
+  private:
+    QDialog* mDialog { nullptr };
+    QProgressBar* mProgressBar { nullptr };
+    IOrganizer* mOrganizer { nullptr };
 };
 
-#endif  // FOMODPLUSSCANNER_H
+#endif // FOMODPLUSSCANNER_H

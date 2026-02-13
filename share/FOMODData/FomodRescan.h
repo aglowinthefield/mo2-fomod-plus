@@ -13,12 +13,12 @@
 #include <nlohmann/json.hpp>
 
 struct RescanResult {
-    int totalModsProcessed = 0;
+    int totalModsProcessed  = 0;
     int successfullyScanned = 0;
-    int skippedNoOptions = 0;   // FOMODs with no installSteps/options
-    int missingArchives = 0;
-    int parseErrors = 0;
-    std::vector<std::string> failedMods;  // Only actual failures, not skipped mods
+    int skippedNoOptions    = 0; // FOMODs with no installSteps/options
+    int missingArchives     = 0;
+    int parseErrors         = 0;
+    std::vector<std::string> failedMods; // Only actual failures, not skipped mods
 };
 
 /**
@@ -26,11 +26,14 @@ struct RescanResult {
  * Used when fomod.db is missing or needs to be regenerated from existing installations.
  */
 class FomodRescan {
-public:
+  public:
     using ProgressCallback = std::function<void(int current, int total, const QString& modName)>;
 
     FomodRescan(MOBase::IOrganizer* organizer, FomodDB* db)
-        : mOrganizer(organizer), mFomodDb(db) {}
+        : mOrganizer(organizer)
+        , mFomodDb(db)
+    {
+    }
 
     /**
      * Scan all mods that have stored FOMOD Plus choices and repopulate the database.
@@ -70,21 +73,21 @@ public:
 
             const auto [outcome, errorDetail] = processMod(mod, mastersCache);
             switch (outcome) {
-                case ScanOutcome::Success:
-                    result.successfullyScanned++;
-                    break;
-                case ScanOutcome::MissingArchive:
-                    result.missingArchives++;
-                    result.failedMods.push_back(mod->name().toStdString() + " (missing archive)");
-                    break;
-                case ScanOutcome::ParseError:
-                    result.parseErrors++;
-                    result.failedMods.push_back(mod->name().toStdString() + " (parse error: " + errorDetail + ")");
-                    break;
-                case ScanOutcome::NoOptions:
-                    // Not a failure - FOMOD has no installSteps/options to track
-                    result.skippedNoOptions++;
-                    break;
+            case ScanOutcome::Success:
+                result.successfullyScanned++;
+                break;
+            case ScanOutcome::MissingArchive:
+                result.missingArchives++;
+                result.failedMods.push_back(mod->name().toStdString() + " (missing archive)");
+                break;
+            case ScanOutcome::ParseError:
+                result.parseErrors++;
+                result.failedMods.push_back(mod->name().toStdString() + " (parse error: " + errorDetail + ")");
+                break;
+            case ScanOutcome::NoOptions:
+                // Not a failure - FOMOD has no installSteps/options to track
+                result.skippedNoOptions++;
+                break;
             }
         }
 
@@ -97,7 +100,7 @@ public:
         return result;
     }
 
-private:
+  private:
     MOBase::IOrganizer* mOrganizer;
     FomodDB* mFomodDb;
 
@@ -105,7 +108,7 @@ private:
         Success,
         MissingArchive,
         ParseError,
-        NoOptions  // FOMOD exists but has no installSteps/options to track
+        NoOptions // FOMOD exists but has no installSteps/options to track
     };
 
     /**
@@ -113,8 +116,7 @@ private:
      */
     bool hasStoredChoices(MOBase::IModInterface* mod) const
     {
-        const auto fomodData = mod->pluginSetting(
-            StringConstants::Plugin::NAME.data(), "fomod", 0);
+        const auto fomodData = mod->pluginSetting(StringConstants::Plugin::NAME.data(), "fomod", 0);
 
         if (!fomodData.isValid() || fomodData.isNull()) {
             return false;
@@ -134,8 +136,7 @@ private:
      */
     nlohmann::json getStoredChoices(MOBase::IModInterface* mod) const
     {
-        const auto fomodData = mod->pluginSetting(
-            StringConstants::Plugin::NAME.data(), "fomod", 0);
+        const auto fomodData = mod->pluginSetting(StringConstants::Plugin::NAME.data(), "fomod", 0);
 
         try {
             return nlohmann::json::parse(fomodData.toString().toStdString());
@@ -155,50 +156,44 @@ private:
         // Get the archive path
         const auto installationFile = mod->installationFile();
         if (installationFile.isEmpty()) {
-            return {ScanOutcome::MissingArchive, ""};
+            return { ScanOutcome::MissingArchive, "" };
         }
 
         const auto downloadsPath = mOrganizer->downloadsPath();
-        const auto archivePath = QDir(installationFile).isAbsolute()
-            ? installationFile
-            : downloadsPath + "/" + installationFile;
+        const auto archivePath
+            = QDir(installationFile).isAbsolute() ? installationFile : downloadsPath + "/" + installationFile;
 
         if (!QFile::exists(archivePath)) {
-            return {ScanOutcome::MissingArchive, ""};
+            return { ScanOutcome::MissingArchive, "" };
         }
 
         // Extract FOMOD data from archive
         auto extractionResult = ArchiveExtractor::extractFomodData(archivePath);
         if (!extractionResult.success) {
-            return {ScanOutcome::ParseError, "extraction: " + extractionResult.errorMessage.toStdString()};
+            return { ScanOutcome::ParseError, "extraction: " + extractionResult.errorMessage.toStdString() };
         }
 
         // Parse ModuleConfiguration
         auto moduleConfig = std::make_unique<ModuleConfiguration>();
         try {
             if (!moduleConfig->deserialize(extractionResult.moduleConfigPath)) {
-                return {ScanOutcome::ParseError, "XML deserialization failed"};
+                return { ScanOutcome::ParseError, "XML deserialization failed" };
             }
         } catch (const std::exception& e) {
-            return {ScanOutcome::ParseError, std::string("XML exception: ") + e.what()};
+            return { ScanOutcome::ParseError, std::string("XML exception: ") + e.what() };
         } catch (...) {
-            return {ScanOutcome::ParseError, "unknown XML exception"};
+            return { ScanOutcome::ParseError, "unknown XML exception" };
         }
 
         // Get the mod's Nexus ID
         const int modId = mod->nexusId();
 
         // Create FomodDbEntry using existing logic (with masters cache for performance)
-        auto entry = FomodDB::getEntryFromFomod(
-            moduleConfig.get(),
-            extractionResult.pluginPaths,
-            modId,
-            &cache
-        );
+        auto entry = FomodDB::getEntryFromFomod(moduleConfig.get(), extractionResult.pluginPaths, modId, &cache);
 
         if (!entry || entry->getOptions().empty()) {
             // Not a failure - FOMOD exists but has no installSteps/options to track
-            return {ScanOutcome::NoOptions, ""};
+            return { ScanOutcome::NoOptions, "" };
         }
 
         // Apply selection states from stored choices
@@ -208,7 +203,7 @@ private:
         // Add to database (upsert)
         mFomodDb->addEntry(entry, true);
 
-        return {ScanOutcome::Success, ""};
+        return { ScanOutcome::Success, "" };
     }
 
     /**
@@ -238,25 +233,27 @@ private:
 
         // Build a lookup map for quick matching: stepName/groupName/pluginName -> state
         struct PluginState {
-            bool selected = false;
+            bool selected   = false;
             bool deselected = false;
         };
         std::map<std::string, PluginState> stateMap;
 
         for (const auto& step : choices["steps"]) {
-            if (!step.contains("name") || !step.contains("groups")) continue;
+            if (!step.contains("name") || !step.contains("groups"))
+                continue;
             const std::string stepName = step["name"];
 
             for (const auto& group : step["groups"]) {
-                if (!group.contains("name")) continue;
+                if (!group.contains("name"))
+                    continue;
                 const std::string groupName = group["name"];
 
                 // Process selected plugins
                 if (group.contains("plugins") && group["plugins"].is_array()) {
                     for (const auto& plugin : group["plugins"]) {
                         const std::string pluginName = plugin;
-                        const auto key = stepName + "/" + groupName + "/" + pluginName;
-                        stateMap[key].selected = true;
+                        const auto key               = stepName + "/" + groupName + "/" + pluginName;
+                        stateMap[key].selected       = true;
                     }
                 }
 
@@ -264,8 +261,8 @@ private:
                 if (group.contains("deselected") && group["deselected"].is_array()) {
                     for (const auto& plugin : group["deselected"]) {
                         const std::string pluginName = plugin;
-                        const auto key = stepName + "/" + groupName + "/" + pluginName;
-                        stateMap[key].deselected = true;
+                        const auto key               = stepName + "/" + groupName + "/" + pluginName;
+                        stateMap[key].deselected     = true;
                     }
                 }
             }
