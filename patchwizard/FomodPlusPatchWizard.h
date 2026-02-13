@@ -5,6 +5,8 @@
 #include <iplugintool.h>
 #include <qtmetamacros.h>
 
+class QTreeWidget;
+
 using namespace MOBase;
 
 class FomodPlusPatchWizard final : public IPluginTool {
@@ -45,6 +47,7 @@ private:
     void setupEmptyState() const;
     void setupPatchList() const;
     void onRescanClicked();
+    void populateTree(QTreeWidget* tree, const QString& filter) const;
 
     void logMessage(const LogLevel level, const std::string& message) const
     {

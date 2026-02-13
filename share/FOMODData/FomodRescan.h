@@ -15,9 +15,10 @@
 struct RescanResult {
     int totalModsProcessed = 0;
     int successfullyScanned = 0;
+    int skippedNoOptions = 0;   // FOMODs with no installSteps/options
     int missingArchives = 0;
     int parseErrors = 0;
-    std::vector<std::string> failedMods;
+    std::vector<std::string> failedMods;  // Only actual failures, not skipped mods
 };
 
 /**
@@ -56,6 +57,9 @@ public:
 
         result.totalModsProcessed = static_cast<int>(modsWithChoices.size());
 
+        // Masters cache - avoids re-reading the same plugin files (e.g., Lux.esp) across archives
+        MastersCache mastersCache;
+
         // Second pass: process each mod
         int current = 0;
         for (auto* mod : modsWithChoices) {
@@ -64,8 +68,8 @@ public:
                 progressCallback(current, result.totalModsProcessed, mod->name());
             }
 
-            const auto scanResult = processMod(mod);
-            switch (scanResult) {
+            const auto [outcome, errorDetail] = processMod(mod, mastersCache);
+            switch (outcome) {
                 case ScanOutcome::Success:
                     result.successfullyScanned++;
                     break;
@@ -75,16 +79,20 @@ public:
                     break;
                 case ScanOutcome::ParseError:
                     result.parseErrors++;
-                    result.failedMods.push_back(mod->name().toStdString() + " (parse error)");
+                    result.failedMods.push_back(mod->name().toStdString() + " (parse error: " + errorDetail + ")");
                     break;
-                case ScanOutcome::NoFomod:
-                    result.failedMods.push_back(mod->name().toStdString() + " (no FOMOD)");
+                case ScanOutcome::NoOptions:
+                    // Not a failure - FOMOD has no installSteps/options to track
+                    result.skippedNoOptions++;
                     break;
             }
         }
 
         // Save the database
         mFomodDb->saveToFile();
+
+        // Log cache effectiveness
+        std::cout << "[FomodRescan] Masters cache: " << mastersCache.size() << " unique plugins cached" << std::endl;
 
         return result;
     }
@@ -97,7 +105,7 @@ private:
         Success,
         MissingArchive,
         ParseError,
-        NoFomod
+        NoOptions  // FOMOD exists but has no installSteps/options to track
     };
 
     /**
@@ -136,15 +144,18 @@ private:
         }
     }
 
+    using ProcessResult = std::pair<ScanOutcome, std::string>;
+
     /**
      * Process a single mod: extract archive, parse FOMOD, create DB entry with selection states.
+     * Returns outcome and optional error detail string.
      */
-    ScanOutcome processMod(MOBase::IModInterface* mod)
+    ProcessResult processMod(MOBase::IModInterface* mod, MastersCache& cache)
     {
         // Get the archive path
         const auto installationFile = mod->installationFile();
         if (installationFile.isEmpty()) {
-            return ScanOutcome::MissingArchive;
+            return {ScanOutcome::MissingArchive, ""};
         }
 
         const auto downloadsPath = mOrganizer->downloadsPath();
@@ -153,37 +164,41 @@ private:
             : downloadsPath + "/" + installationFile;
 
         if (!QFile::exists(archivePath)) {
-            return ScanOutcome::MissingArchive;
+            return {ScanOutcome::MissingArchive, ""};
         }
 
         // Extract FOMOD data from archive
         auto extractionResult = ArchiveExtractor::extractFomodData(archivePath);
         if (!extractionResult.success) {
-            return ScanOutcome::ParseError;
+            return {ScanOutcome::ParseError, "extraction: " + extractionResult.errorMessage.toStdString()};
         }
 
         // Parse ModuleConfiguration
         auto moduleConfig = std::make_unique<ModuleConfiguration>();
         try {
             if (!moduleConfig->deserialize(extractionResult.moduleConfigPath)) {
-                return ScanOutcome::ParseError;
+                return {ScanOutcome::ParseError, "XML deserialization failed"};
             }
+        } catch (const std::exception& e) {
+            return {ScanOutcome::ParseError, std::string("XML exception: ") + e.what()};
         } catch (...) {
-            return ScanOutcome::ParseError;
+            return {ScanOutcome::ParseError, "unknown XML exception"};
         }
 
         // Get the mod's Nexus ID
         const int modId = mod->nexusId();
 
-        // Create FomodDbEntry using existing logic
+        // Create FomodDbEntry using existing logic (with masters cache for performance)
         auto entry = FomodDB::getEntryFromFomod(
             moduleConfig.get(),
             extractionResult.pluginPaths,
-            modId
+            modId,
+            &cache
         );
 
         if (!entry || entry->getOptions().empty()) {
-            return ScanOutcome::NoFomod;
+            // Not a failure - FOMOD exists but has no installSteps/options to track
+            return {ScanOutcome::NoOptions, ""};
         }
 
         // Apply selection states from stored choices
@@ -193,7 +208,7 @@ private:
         // Add to database (upsert)
         mFomodDb->addEntry(entry, true);
 
-        return ScanOutcome::Success;
+        return {ScanOutcome::Success, ""};
     }
 
     /**

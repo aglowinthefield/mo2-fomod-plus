@@ -1,7 +1,10 @@
 ﻿#pragma once
 
 #include <fstream>
+#include <unordered_map>
 #include <stringutil.h>
+
+#include <QFileInfo>
 
 #include "FomodDBEntry.h"
 
@@ -10,8 +13,9 @@
 #include "PluginReader.h"
 
 using FOMODDBEntries = std::vector<std::shared_ptr<FomodDbEntry> >;
+using MastersCache = std::unordered_map<std::string, std::vector<std::string>>;  // filename -> masters
 
-constexpr std::string FOMOD_DB_FILE = "fomod.db";
+constexpr const char* FOMOD_DB_FILE = "fomod.db";
 
 class FomodDB {
 public:
@@ -27,37 +31,64 @@ public:
 
   // TODO: Also pull from non install steps (requiredInstallFiles or whatever, and optional);
   static std::shared_ptr<FomodDbEntry> getEntryFromFomod(ModuleConfiguration *fomod, std::vector<QString> pluginPaths,
-                                                  int modId) {
+                                                  int modId, MastersCache* cache = nullptr) {
     std::vector<FomodOption> options;
     for (const auto &installStep: fomod->installSteps.installSteps) {
       for (const auto &group: installStep.optionalFileGroups.groups) {
         for (const auto &plugin: group.plugins.plugins) {
-          // Create a DB entry for the given plugin if it has an ESP
-          std::cout << "\nPlugin: " << plugin.name << std::endl;
+          // Create a DB entry for every FOMOD option (not just those with plugins)
+          // This allows searching/browsing all options, with master-matching for patches
 
-          for (auto file: plugin.files.files) {
+          std::string pluginFileName;
+          std::vector<std::string> masters;
+
+          // Look for plugin files (.esp/.esm/.esl) to extract masters for patch matching
+          for (const auto& file: plugin.files.files) {
             if (file.isFolder || !isPluginFile(file.source)) {
               continue;
             }
 
-            // Find the path in pluginPaths that ends with this path
-            // PluginPaths is gathered from the archive contents.
-            auto it = std::ranges::find_if(pluginPaths, [&file](const QString &path) {
-              return path.endsWith(file.source.c_str());
+            // Normalize the source path for comparison (handle both / and \)
+            QString normalizedSource = QString::fromStdString(file.source).replace('\\', '/');
+
+            // Find the extracted path that ends with this file
+            auto it = std::ranges::find_if(pluginPaths, [&normalizedSource](const QString &path) {
+              QString normalizedPath = path;
+              normalizedPath.replace('\\', '/');
+              return normalizedPath.endsWith(normalizedSource);
             });
             if (it == pluginPaths.end()) {
               continue;
             }
-            const auto &pluginPath = *it;
-            const auto masters = PluginReader::readMasters(pluginPath.toStdString(), true);
-            options.emplace_back(
-              plugin.name,
-              file.source,
-              masters,
-              installStep.name,
-              group.name
-            );
+
+            // Found a plugin file - read its masters (using cache if available)
+            pluginFileName = file.source;
+            const auto justFileName = QFileInfo(QString::fromStdString(file.source)).fileName().toStdString();
+
+            if (cache) {
+              auto cacheIt = cache->find(justFileName);
+              if (cacheIt != cache->end()) {
+                // Cache hit - use cached masters
+                masters = cacheIt->second;
+              } else {
+                // Cache miss - read and cache
+                masters = PluginReader::readMasters(it->toStdString(), true);
+                (*cache)[justFileName] = masters;
+              }
+            } else {
+              masters = PluginReader::readMasters(it->toStdString(), true);
+            }
+            break; // Use first plugin file found
           }
+
+          // Always create an option entry, even if no plugin files
+          options.emplace_back(
+            plugin.name,
+            pluginFileName,  // May be empty if no plugin files
+            masters,         // May be empty if no plugin files
+            installStep.name,
+            group.name
+          );
         }
       }
     }

@@ -74,10 +74,11 @@ public:
                 fileData->addOutputFilePath(L"ModuleConfig.xml");
                 result.moduleConfigPath = result.tempDir->filePath("ModuleConfig.xml");
             }
-            // Check for plugin files
+            // Check for plugin files - preserve full path to avoid collisions
             else if (isPluginFile(entryPath)) {
-                const auto fileName = QFileInfo(entryPath).fileName();
-                const auto relativePath = QString("plugins/") + fileName;
+                // Use full archive path to preserve uniqueness (different options may have same-named plugins)
+                auto relativePath = QString("plugins/") + entryPath;
+                relativePath.replace('\\', '/');  // Normalize path separators
                 fileData->addOutputFilePath(relativePath.toStdWString());
                 result.pluginPaths.push_back(result.tempDir->filePath(relativePath));
             }

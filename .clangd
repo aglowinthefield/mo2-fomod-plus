@@ -14,3 +14,7 @@ CompileFlags:
     - "-IC:/Qt/6.7.3/msvc2022_64/include/QtWidgets"
     - "-std=c++20"
 
+Diagnostics:
+  Suppress:
+    - "constexpr_var_init"  # False positive with nlohmann/json on MSVC
+
