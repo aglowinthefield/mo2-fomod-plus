@@ -132,7 +132,7 @@ QList<PluginSetting> FomodPlusInstaller::settings() const
         { u"show_images"_s, u"Show image previews and the image carousel in installer windows."_s, true },
         { u"color_theme"_s, u"Select the color theme for the installer"_s, QString("Blue") }, // Default color name
         { u"show_notifications"_s, u"Show the notifications panel"_s, false }, // WIP
-        { u"wizard_integration"_s, u"Integrate the installer with patch wizard."_s, true }, // WIP
+        { u"wizard_integration"_s, u"Integrate the installer with patch finder."_s, true }, // WIP
         { u"show_fomod_filter"_s, u"Show the filter in the sidebar (may break other content filters)"_s, true } };
 }
 
@@ -357,7 +357,7 @@ ParsedFilesTuple FomodPlusInstaller::parseFomodFiles(const std::shared_ptr<IFile
         toExtract.push_back(infoXML);
     }
     appendImageFiles(toExtract, tree);
-    appendPluginFiles(toExtract, tree); // For patch wizard data collection
+    appendPluginFiles(toExtract, tree); // For patch finder data collection
     const auto paths = manager()->extractFiles(toExtract);
 
     auto moduleConfiguration = std::make_unique<ModuleConfiguration>();

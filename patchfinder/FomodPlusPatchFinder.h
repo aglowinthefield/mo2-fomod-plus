@@ -9,17 +9,17 @@ class QTreeWidget;
 
 using namespace MOBase;
 
-class FomodPlusPatchWizard final : public IPluginTool {
+class FomodPlusPatchFinder final : public IPluginTool {
     Q_OBJECT
     Q_INTERFACES(MOBase::IPlugin MOBase::IPluginTool)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-    Q_PLUGIN_METADATA(IID "io.clearing.FomodPlusPatchWizard" FILE "fomodpluspatchwizard.json")
+    Q_PLUGIN_METADATA(IID "io.clearing.FomodPlusPatchFinder" FILE "fomodpluspatchfinder.json")
 #endif
 
   public:
     bool init(IOrganizer* organizer) override;
 
-    [[nodiscard]] QString name() const override { return tr("Patch Wizard"); };
+    [[nodiscard]] QString name() const override { return tr("Patch Finder"); };
 
     [[nodiscard]] QString author() const override { return "clearing"; };
 
@@ -32,7 +32,7 @@ class FomodPlusPatchWizard final : public IPluginTool {
 
     [[nodiscard]] QList<PluginSetting> settings() const override { return {}; };
 
-    [[nodiscard]] QString displayName() const override { return tr("Patch Wizard"); };
+    [[nodiscard]] QString displayName() const override { return tr("Patch Finder"); };
 
     [[nodiscard]] QString tooltip() const override
     {

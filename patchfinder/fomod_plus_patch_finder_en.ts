@@ -2,58 +2,58 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US">
 <context>
-    <name>FomodPlusPatchWizard</name>
+    <name>FomodPlusPatchFinder</name>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="22"/>
-        <location filename="FomodPlusPatchWizard.h" line="22"/>
-        <location filename="FomodPlusPatchWizard.h" line="32"/>
-        <source>Patch Wizard</source>
+        <location filename="FomodPlusPatchFinder.cpp" line="22"/>
+        <location filename="FomodPlusPatchFinder.h" line="22"/>
+        <location filename="FomodPlusPatchFinder.h" line="35"/>
+        <source>Patch Finder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="75"/>
-        <source>Nothing of interest yet. The wizard gets wiser as you
+        <location filename="FomodPlusPatchFinder.cpp" line="75"/>
+        <source>Nothing of interest yet. The finder learns more as you
 install FOMODs, so check back later!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="85"/>
-        <location filename="FomodPlusPatchWizard.cpp" line="96"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="84"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="93"/>
         <source>Rescan Load Order</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="97"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="94"/>
         <source>Rescanning will populate as many existing choices and options as we can, but if some downloads are deleted it may be missing things! It may take a few minutes depending on the size of your load order and all that.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="111"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="106"/>
         <source>Scanning mods...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="111"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="106"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="127"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="122"/>
         <source>Scanning: %1 (%2/%3)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="136"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="130"/>
         <source>Rescan Cancelled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="137"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="130"/>
         <source>The rescan was cancelled. Partial results may have been saved.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="142"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="134"/>
         <source>Rescan complete!
 
 FOMODs scanned: %1
@@ -69,14 +69,14 @@ Parse errors: %4</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="153"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="145"/>
         <source>
 
 Issues:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="158"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="150"/>
         <source>
 
 %1 mods had issues (see log for details)</source>
@@ -86,68 +86,68 @@ Issues:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="164"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="156"/>
         <source>Rescan Complete</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="191"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="184"/>
         <source>Search options...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="195"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="188"/>
         <source>Rescan</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="204"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="197"/>
         <source>Name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="204"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="197"/>
         <source>Status</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="204"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="197"/>
         <source>Plugin File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="228"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="219"/>
         <source>%1 mods, %2 options tracked</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="312"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="300"/>
         <source>Selected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="316"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="304"/>
         <source>Deselected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="320"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="308"/>
         <source>Available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="324"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="312"/>
         <source>Unknown</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.cpp" line="336"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="324"/>
         <source>Masters: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchWizard.h" line="26"/>
-        <location filename="FomodPlusPatchWizard.h" line="34"/>
+        <location filename="FomodPlusPatchFinder.h" line="28"/>
+        <location filename="FomodPlusPatchFinder.h" line="39"/>
         <source>Find missing patches from FOMODs in your load order.</source>
         <translation type="unfinished"></translation>
     </message>

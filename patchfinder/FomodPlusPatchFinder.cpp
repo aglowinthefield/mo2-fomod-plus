@@ -1,4 +1,4 @@
-﻿#include "FomodPlusPatchWizard.h"
+﻿#include "FomodPlusPatchFinder.h"
 
 #include <QApplication>
 #include <QDialog>
@@ -15,13 +15,13 @@
 #include "lib/PatchFinder.h"
 #include <FomodRescan.h>
 
-bool FomodPlusPatchWizard::init(IOrganizer* organizer)
+bool FomodPlusPatchFinder::init(IOrganizer* organizer)
 {
     mOrganizer = organizer;
     mDialog    = new QDialog();
-    mDialog->setWindowTitle(tr("Patch Wizard"));
+    mDialog->setWindowTitle(tr("Patch Finder"));
     mDialog->setMinimumSize(400, 200);
-    log.setLogFilePath(QDir::currentPath().toStdString() + "/logs/fomodplus-patchwizard.log");
+    log.setLogFilePath(QDir::currentPath().toStdString() + "/logs/fomodplus-patchfinder.log");
 
     mOrganizer->onUserInterfaceInitialized([this](QMainWindow*) {
         logMessage(DEBUG, "patches populated.");
@@ -34,7 +34,7 @@ bool FomodPlusPatchWizard::init(IOrganizer* organizer)
     return true;
 }
 
-void FomodPlusPatchWizard::display() const
+void FomodPlusPatchFinder::display() const
 {
     // Clear any existing layout
     if (mDialog->layout() != nullptr) {
@@ -58,7 +58,7 @@ void FomodPlusPatchWizard::display() const
     mDialog->exec();
 }
 
-void FomodPlusPatchWizard::setupEmptyState() const
+void FomodPlusPatchFinder::setupEmptyState() const
 {
     auto* mainLayout = new QVBoxLayout(mDialog);
     mainLayout->setAlignment(Qt::AlignCenter);
@@ -72,7 +72,7 @@ void FomodPlusPatchWizard::setupEmptyState() const
     imageLabel->setPixmap(QPixmap(":/fomod/infoscroll").scaled(64, 64, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
     auto* textLabel
-        = new QLabel(tr("Nothing of interest yet. The wizard gets wiser as you\ninstall FOMODs, so check back later!"),
+        = new QLabel(tr("Nothing of interest yet. The finder learns more as you\ninstall FOMODs, so check back later!"),
             contentWidget);
     textLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 
@@ -83,12 +83,12 @@ void FomodPlusPatchWizard::setupEmptyState() const
 
     auto* rescanButton = new QPushButton(tr("Rescan Load Order"), mDialog);
     // Use const_cast since setupEmptyState is const but onRescanClicked modifies state
-    connect(rescanButton, &QPushButton::clicked, const_cast<FomodPlusPatchWizard*>(this),
-        &FomodPlusPatchWizard::onRescanClicked);
+    connect(rescanButton, &QPushButton::clicked, const_cast<FomodPlusPatchFinder*>(this),
+        &FomodPlusPatchFinder::onRescanClicked);
     mainLayout->addWidget(rescanButton, 0, Qt::AlignCenter);
 }
 
-void FomodPlusPatchWizard::onRescanClicked()
+void FomodPlusPatchFinder::onRescanClicked()
 {
     const auto confirmResult = QMessageBox::question(mDialog, tr("Rescan Load Order"),
         tr("Rescanning will populate as many existing choices and options as we can, "
@@ -171,7 +171,7 @@ void FomodPlusPatchWizard::onRescanClicked()
     display();
 }
 
-void FomodPlusPatchWizard::setupPatchList() const
+void FomodPlusPatchFinder::setupPatchList() const
 {
     mDialog->setMinimumSize(800, 600);
 
@@ -186,8 +186,8 @@ void FomodPlusPatchWizard::setupPatchList() const
     topBar->addWidget(searchBox, 1);
 
     auto* rescanButton = new QPushButton(tr("Rescan"), mDialog);
-    connect(rescanButton, &QPushButton::clicked, const_cast<FomodPlusPatchWizard*>(this),
-        &FomodPlusPatchWizard::onRescanClicked);
+    connect(rescanButton, &QPushButton::clicked, const_cast<FomodPlusPatchFinder*>(this),
+        &FomodPlusPatchFinder::onRescanClicked);
     topBar->addWidget(rescanButton);
 
     mainLayout->addLayout(topBar);
@@ -221,7 +221,7 @@ void FomodPlusPatchWizard::setupPatchList() const
     mainLayout->addWidget(statsLabel);
 }
 
-void FomodPlusPatchWizard::populateTree(QTreeWidget* tree, const QString& filter) const
+void FomodPlusPatchFinder::populateTree(QTreeWidget* tree, const QString& filter) const
 {
     tree->clear();
 

@@ -148,7 +148,7 @@ foreach(dir ${MO2_ARCHIVE_INCLUDE_DIRS})
 endforeach()
 
 add_subdirectory(installer)
-add_subdirectory(patchwizard)
+add_subdirectory(patchfinder)
 add_subdirectory(scanner)
 add_subdirectory(tests)
 
@@ -165,7 +165,7 @@ add_custom_target(package
         "$<TARGET_FILE:fomod_plus_scanner>"
         "${CMAKE_CURRENT_LIST_DIR}/package/plugins/"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "$<TARGET_FILE:fomod_plus_patch_wizard>"
+        "$<TARGET_FILE:fomod_plus_patch_finder>"
         "${CMAKE_CURRENT_LIST_DIR}/package/plugins/"
 
     # Copy all .qm files using CMake script
@@ -173,6 +173,6 @@ add_custom_target(package
         -DDEST_DIR="${CMAKE_CURRENT_LIST_DIR}/package/translations"
         -P "${CMAKE_CURRENT_LIST_DIR}/copy_translations.cmake"
 
-    DEPENDS fomod_plus_installer fomod_plus_scanner fomod_plus_patch_wizard
+    DEPENDS fomod_plus_installer fomod_plus_scanner fomod_plus_patch_finder
     COMMENT "Packaging FOMOD Plus plugin for distribution"
 )

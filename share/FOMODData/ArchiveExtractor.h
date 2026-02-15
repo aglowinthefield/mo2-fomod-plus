@@ -23,7 +23,7 @@ struct ExtractionResult {
 
 /**
  * Utility class to extract FOMOD data from archives without being in an installer context.
- * Used by the Patch Wizard's rescan functionality.
+ * Used by the Patch Finder's rescan functionality.
  */
 class ArchiveExtractor {
   public:

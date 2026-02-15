@@ -17,7 +17,7 @@ struct AvailablePatch {
 };
 
 class PatchFinder {
-    friend class FomodPlusPatchWizard;
+    friend class FomodPlusPatchFinder;
 
   public:
     explicit PatchFinder(MOBase::IOrganizer* m_organizer)
