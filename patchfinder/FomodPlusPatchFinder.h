@@ -2,6 +2,7 @@
 #include "../installer/lib/Logger.h"
 #include "lib/PatchFinder.h"
 
+#include <QSet>
 #include <iplugintool.h>
 #include <qtmetamacros.h>
 
@@ -53,7 +54,8 @@ class FomodPlusPatchFinder final : public IPluginTool {
     void setupEmptyState() const;
     void setupPatchList() const;
     void onRescanClicked();
-    void populateTree(QTreeWidget* tree, const QString& filter) const;
+    void populateTree(QTreeWidget* tree, const QString& filter,
+                      const QSet<SelectionState>& visibleStates) const;
 
     void logMessage(const LogLevel level, const std::string& message) const
     {

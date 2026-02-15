@@ -1,6 +1,7 @@
 ﻿#include "FomodPlusPatchFinder.h"
 
 #include <QApplication>
+#include <QCheckBox>
 #include <QDialog>
 #include <QHBoxLayout>
 #include <QHeaderView>
@@ -192,6 +193,27 @@ void FomodPlusPatchFinder::setupPatchList() const
 
     mainLayout->addLayout(topBar);
 
+    // Status filter checkboxes
+    auto* filterBar = new QHBoxLayout();
+
+    auto* selectedCb   = new QCheckBox(tr("Selected"), mDialog);
+    auto* deselectedCb = new QCheckBox(tr("Deselected"), mDialog);
+    auto* availableCb  = new QCheckBox(tr("Available"), mDialog);
+    auto* unknownCb    = new QCheckBox(tr("Unknown"), mDialog);
+
+    selectedCb->setChecked(true);
+    deselectedCb->setChecked(true);
+    availableCb->setChecked(true);
+    unknownCb->setChecked(true);
+
+    filterBar->addWidget(selectedCb);
+    filterBar->addWidget(deselectedCb);
+    filterBar->addWidget(availableCb);
+    filterBar->addWidget(unknownCb);
+    filterBar->addStretch();
+
+    mainLayout->addLayout(filterBar);
+
     // Tree widget for displaying fomod data
     auto* treeWidget = new QTreeWidget(mDialog);
     treeWidget->setHeaderLabels({ tr("Name"), tr("Status"), tr("Plugin File") });
@@ -201,14 +223,31 @@ void FomodPlusPatchFinder::setupPatchList() const
     treeWidget->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
     treeWidget->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
 
+    // Shared refresh lambda
+    auto refreshTree = [treeWidget, searchBox, selectedCb, deselectedCb, availableCb, unknownCb, this]() {
+        QSet<SelectionState> visibleStates;
+        if (selectedCb->isChecked())
+            visibleStates.insert(SelectionState::Selected);
+        if (deselectedCb->isChecked())
+            visibleStates.insert(SelectionState::Deselected);
+        if (availableCb->isChecked())
+            visibleStates.insert(SelectionState::Available);
+        if (unknownCb->isChecked())
+            visibleStates.insert(SelectionState::Unknown);
+        populateTree(treeWidget, searchBox->text(), visibleStates);
+    };
+
     // Populate tree from fomod.db
-    populateTree(treeWidget, "");
+    refreshTree();
 
     mainLayout->addWidget(treeWidget);
 
-    // Connect search box to filter
-    connect(searchBox, &QLineEdit::textChanged,
-        [treeWidget, this](const QString& text) { populateTree(treeWidget, text); });
+    // Connect search box and checkboxes to refresh
+    connect(searchBox, &QLineEdit::textChanged, refreshTree);
+    connect(selectedCb, &QCheckBox::toggled, refreshTree);
+    connect(deselectedCb, &QCheckBox::toggled, refreshTree);
+    connect(availableCb, &QCheckBox::toggled, refreshTree);
+    connect(unknownCb, &QCheckBox::toggled, refreshTree);
 
     // Stats label at the bottom
     const auto& entries = mPatchFinder->mFomodDb->getEntries();
@@ -221,7 +260,8 @@ void FomodPlusPatchFinder::setupPatchList() const
     mainLayout->addWidget(statsLabel);
 }
 
-void FomodPlusPatchFinder::populateTree(QTreeWidget* tree, const QString& filter) const
+void FomodPlusPatchFinder::populateTree(QTreeWidget* tree, const QString& filter,
+    const QSet<SelectionState>& visibleStates) const
 {
     tree->clear();
 
@@ -235,6 +275,9 @@ void FomodPlusPatchFinder::populateTree(QTreeWidget* tree, const QString& filter
 
         QList<const FomodOption*> matchingOptions;
         for (const auto& option : entry->getOptions()) {
+            if (!visibleStates.contains(option.selectionState))
+                continue;
+
             bool optionMatches = filter.isEmpty() || QString::fromStdString(option.name).toLower().contains(lowerFilter)
                 || QString::fromStdString(option.fileName).toLower().contains(lowerFilter)
                 || QString::fromStdString(option.step).toLower().contains(lowerFilter)
@@ -260,16 +303,13 @@ void FomodPlusPatchFinder::populateTree(QTreeWidget* tree, const QString& filter
             continue;
         }
 
-        // Create mod item
-        auto* modItem = new QTreeWidgetItem(tree);
-        modItem->setText(0, QString::fromStdString(entry->getDisplayName()));
-        modItem->setExpanded(!filter.isEmpty()); // Expand when searching
-
         // Group options by step and group
         std::map<std::string, std::map<std::string, std::vector<const FomodOption*>>> grouped;
 
         if (filter.isEmpty()) {
             for (const auto& option : entry->getOptions()) {
+                if (!visibleStates.contains(option.selectionState))
+                    continue;
                 grouped[option.step][option.group].push_back(&option);
             }
         } else {
@@ -277,6 +317,15 @@ void FomodPlusPatchFinder::populateTree(QTreeWidget* tree, const QString& filter
                 grouped[option->step][option->group].push_back(option);
             }
         }
+
+        // Skip mod if no options remain after filtering
+        if (grouped.empty())
+            continue;
+
+        // Create mod item
+        auto* modItem = new QTreeWidgetItem(tree);
+        modItem->setText(0, QString::fromStdString(entry->getDisplayName()));
+        modItem->setExpanded(!filter.isEmpty()); // Expand when searching
 
         // Build tree structure: Mod -> Step -> Group -> Option
         for (const auto& [stepName, groups] : grouped) {
