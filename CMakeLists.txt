@@ -154,7 +154,7 @@ if (FOMOD_PLUS_BUILD_PATCHFINDER)
     add_subdirectory(patchfinder)
 endif ()
 add_subdirectory(scanner)
-add_subdirectory(tests)
+add_subdirectory(tests EXCLUDE_FROM_ALL)
 
 # Package target to create plugin distribution
 set(_package_depends fomod_plus_installer fomod_plus_scanner)
