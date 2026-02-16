@@ -1,5 +1,6 @@
 ﻿#include "ConditionTester.h"
 
+#include "stringutil.h"
 #include "ui/FomodViewModel.h"
 
 #include <iplugingame.h>
@@ -107,7 +108,7 @@ bool ConditionTester::testFlagDependency(const std::shared_ptr<FlagMap>& flags, 
 bool ConditionTester::testFileDependency(const FileDependency& fileDependency) const
 {
     const std::string& pluginName = fileDependency.file;
-    const auto pluginState        = getFileDependencyStateForPlugin(pluginName);
+    const auto pluginState        = getFileDependencyState(pluginName);
     return pluginState == fileDependency.state;
 }
 
@@ -121,28 +122,35 @@ bool ConditionTester::testGameDependency(const GameDependency& gameDependency) c
     return gameDependency.version <= gameVersion;
 }
 
-FileDependencyTypeEnum ConditionTester::getFileDependencyStateForPlugin(const std::string& pluginName) const
+FileDependencyTypeEnum ConditionTester::getFileDependencyState(const std::string& fileName) const
 {
-    if (const auto it = pluginStateCache.find(pluginName); it != pluginStateCache.end()) {
+    if (const auto it = fileDependencyCache.find(fileName); it != fileDependencyCache.end()) {
         return it->second;
     }
 
-    const QFlags<MOBase::IPluginList::PluginState> pluginState
-        = mOrganizer->pluginList()->state(QString::fromStdString(pluginName));
-
     FileDependencyTypeEnum state;
 
-    if (pluginState == MOBase::IPluginList::STATE_MISSING) {
-        state = FileDependencyTypeEnum::Missing;
-    } else if (pluginState == MOBase::IPluginList::STATE_INACTIVE) {
-        state = FileDependencyTypeEnum::Inactive;
-    } else if (pluginState == MOBase::IPluginList::STATE_ACTIVE) {
-        state = FileDependencyTypeEnum::Active;
+    if (!isPluginFile(fileName)) {
+        // Non-plugin files: check virtual filesystem
+        const auto resolved = mOrganizer->resolvePath(QString::fromStdString(fileName));
+        state = resolved.isEmpty() ? FileDependencyTypeEnum::Missing : FileDependencyTypeEnum::Active;
     } else {
-        state = FileDependencyTypeEnum::UNKNOWN_STATE;
+        // Plugin files: check plugin list for Active/Inactive/Missing
+        const QFlags<MOBase::IPluginList::PluginState> pluginState
+            = mOrganizer->pluginList()->state(QString::fromStdString(fileName));
+
+        if (pluginState == MOBase::IPluginList::STATE_MISSING) {
+            state = FileDependencyTypeEnum::Missing;
+        } else if (pluginState == MOBase::IPluginList::STATE_INACTIVE) {
+            state = FileDependencyTypeEnum::Inactive;
+        } else if (pluginState == MOBase::IPluginList::STATE_ACTIVE) {
+            state = FileDependencyTypeEnum::Active;
+        } else {
+            state = FileDependencyTypeEnum::UNKNOWN_STATE;
+        }
     }
 
-    pluginStateCache[pluginName] = state;
+    fileDependencyCache[fileName] = state;
     return state;
 }
 
