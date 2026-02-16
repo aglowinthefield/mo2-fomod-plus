@@ -34,10 +34,10 @@ class ConditionTester {
 
     friend class FomodViewModel;
 
-    [[nodiscard]] FileDependencyTypeEnum getFileDependencyStateForPlugin(const std::string& pluginName) const;
+    [[nodiscard]] FileDependencyTypeEnum getFileDependencyState(const std::string& fileName) const;
 
     PluginTypeEnum getPluginTypeDescriptorState(
         const std::shared_ptr<Plugin>& plugin, const std::shared_ptr<FlagMap>& flags) const;
 
-    mutable std::unordered_map<std::string, FileDependencyTypeEnum> pluginStateCache;
+    mutable std::unordered_map<std::string, FileDependencyTypeEnum> fileDependencyCache;
 };
