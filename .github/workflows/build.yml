@@ -28,6 +28,7 @@ jobs:
           cmake --preset vs2022-windows-vcpkg
           -DCMAKE_PREFIX_PATH="${{ github.workspace }}/install/lib/cmake;${{ github.workspace }}/install/share"
           -Dmo2-cmake_DIR="${{ github.workspace }}/install/lib/cmake/mo2-cmake"
+          -DFOMOD_PLUS_BUILD_PATCHFINDER=OFF
         working-directory: ${{env.SOURCE_ROOT}}
 
       - name: Build & Install

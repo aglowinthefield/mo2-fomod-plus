@@ -147,32 +147,46 @@ foreach(dir ${MO2_ARCHIVE_INCLUDE_DIRS})
     list(APPEND MO2_ARCHIVE_INCLUDE_DIRS "${dir}/archive")
 endforeach()
 
+option(FOMOD_PLUS_BUILD_PATCHFINDER "Build the Patch Finder plugin (beta)" ON)
+
 add_subdirectory(installer)
-add_subdirectory(patchfinder)
+if (FOMOD_PLUS_BUILD_PATCHFINDER)
+    add_subdirectory(patchfinder)
+endif ()
 add_subdirectory(scanner)
 add_subdirectory(tests)
 
 # Package target to create plugin distribution
-add_custom_target(package
-    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_LIST_DIR}/package/plugins"
-    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_LIST_DIR}/package/translations"
-    
-    # Copy DLLs
+set(_package_depends fomod_plus_installer fomod_plus_scanner)
+set(_package_copy_commands
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "$<TARGET_FILE:fomod_plus_installer>"
         "${CMAKE_CURRENT_LIST_DIR}/package/plugins/"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "$<TARGET_FILE:fomod_plus_scanner>"
         "${CMAKE_CURRENT_LIST_DIR}/package/plugins/"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "$<TARGET_FILE:fomod_plus_patch_finder>"
-        "${CMAKE_CURRENT_LIST_DIR}/package/plugins/"
+)
+if (FOMOD_PLUS_BUILD_PATCHFINDER)
+    list(APPEND _package_depends fomod_plus_patch_finder)
+    list(APPEND _package_copy_commands
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_FILE:fomod_plus_patch_finder>"
+            "${CMAKE_CURRENT_LIST_DIR}/package/plugins/"
+    )
+endif ()
+
+add_custom_target(package
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_LIST_DIR}/package/plugins"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_LIST_DIR}/package/translations"
+
+    # Copy DLLs
+    ${_package_copy_commands}
 
     # Copy all .qm files using CMake script
     COMMAND ${CMAKE_COMMAND} -DSOURCE_DIR="${CMAKE_CURRENT_BINARY_DIR}"
         -DDEST_DIR="${CMAKE_CURRENT_LIST_DIR}/package/translations"
         -P "${CMAKE_CURRENT_LIST_DIR}/copy_translations.cmake"
 
-    DEPENDS fomod_plus_installer fomod_plus_scanner fomod_plus_patch_finder
+    DEPENDS ${_package_depends}
     COMMENT "Packaging FOMOD Plus plugin for distribution"
 )
