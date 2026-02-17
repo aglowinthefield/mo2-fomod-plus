@@ -187,6 +187,8 @@ class FomodInstallerWindow final : public QDialog {
     QButtonGroup* renderRadioGroup(
         QWidget* parent, QLayout* parentLayout, const std::shared_ptr<GroupViewModel>& group);
 
+    void updateCouldBeUsableIndicator(QAbstractButton* button, const std::shared_ptr<PluginViewModel>& plugin) const;
+
     void addNotification(const QString& message, LogLevel level) const;
 
     void logMessage(const LogLevel level, const std::string& message, const bool asNotification = true) const

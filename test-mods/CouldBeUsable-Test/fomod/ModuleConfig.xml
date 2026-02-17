@@ -1,0 +1,214 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://qconsulting.ca/fo3/ModConfig5.0.xsd">
+    <moduleName>CouldBeUsable Test Mod</moduleName>
+
+    <installSteps order="Explicit">
+
+        <!-- Step 1: Static type descriptors (baseline) -->
+        <installStep name="Static Types">
+            <optionalFileGroups order="Explicit">
+                <group name="Pick One (ExactlyOne)" type="SelectExactlyOne">
+                    <plugins order="Explicit">
+                        <plugin name="Required Option">
+                            <description>This option is Required - it will be pre-selected and you cannot deselect it.</description>
+                            <typeDescriptor>
+                                <type name="Required"/>
+                            </typeDescriptor>
+                            <files>
+                                <file source="required.txt" destination="required.txt"/>
+                            </files>
+                        </plugin>
+                        <plugin name="Recommended Option">
+                            <description>This option is Recommended - it will be pre-selected but you can deselect it.</description>
+                            <typeDescriptor>
+                                <type name="Recommended"/>
+                            </typeDescriptor>
+                            <files>
+                                <file source="recommended.txt" destination="recommended.txt"/>
+                            </files>
+                        </plugin>
+                        <plugin name="Optional Option">
+                            <description>This option is Optional - it will not be pre-selected.</description>
+                            <typeDescriptor>
+                                <type name="Optional"/>
+                            </typeDescriptor>
+                            <files>
+                                <file source="optional.txt" destination="optional.txt"/>
+                            </files>
+                        </plugin>
+                        <plugin name="NotUsable Option">
+                            <description>This option is NotUsable - it should be greyed out.</description>
+                            <typeDescriptor>
+                                <type name="NotUsable"/>
+                            </typeDescriptor>
+                            <files>
+                                <file source="notusable.txt" destination="notusable.txt"/>
+                            </files>
+                        </plugin>
+                        <plugin name="CouldBeUsable Option (Static)">
+                            <description>This option is statically set to CouldBeUsable. It should show a warning icon.</description>
+                            <typeDescriptor>
+                                <type name="CouldBeUsable"/>
+                            </typeDescriptor>
+                            <files>
+                                <file source="couldbeusable-static.txt" destination="couldbeusable-static.txt"/>
+                            </files>
+                        </plugin>
+                    </plugins>
+                </group>
+            </optionalFileGroups>
+        </installStep>
+
+        <!-- Step 2: CouldBeUsable with SelectAny group -->
+        <installStep name="CouldBeUsable - SelectAny">
+            <optionalFileGroups order="Explicit">
+                <group name="Pick Any (CouldBeUsable variants)" type="SelectAny">
+                    <plugins order="Explicit">
+                        <plugin name="CouldBeUsable Checkbox A">
+                            <description>A CouldBeUsable option in a SelectAny group. Should show warning icon and be selectable.</description>
+                            <typeDescriptor>
+                                <type name="CouldBeUsable"/>
+                            </typeDescriptor>
+                            <files>
+                                <file source="cbu-a.txt" destination="cbu-a.txt"/>
+                            </files>
+                        </plugin>
+                        <plugin name="CouldBeUsable Checkbox B">
+                            <description>Another CouldBeUsable option. Both can be selected at once.</description>
+                            <typeDescriptor>
+                                <type name="CouldBeUsable"/>
+                            </typeDescriptor>
+                            <files>
+                                <file source="cbu-b.txt" destination="cbu-b.txt"/>
+                            </files>
+                        </plugin>
+                        <plugin name="Normal Optional Checkbox">
+                            <description>A normal Optional option for comparison - no warning icon expected.</description>
+                            <typeDescriptor>
+                                <type name="Optional"/>
+                            </typeDescriptor>
+                            <files>
+                                <file source="normal-opt.txt" destination="normal-opt.txt"/>
+                            </files>
+                        </plugin>
+                    </plugins>
+                </group>
+            </optionalFileGroups>
+        </installStep>
+
+        <!-- Step 3: Conditional CouldBeUsable via dependencyType with flag -->
+        <installStep name="Set a Flag">
+            <optionalFileGroups order="Explicit">
+                <group name="Enable the flag?" type="SelectAny">
+                    <plugins order="Explicit">
+                        <plugin name="Enable Compatibility Flag">
+                            <description>Selecting this sets a flag. On the next step, one option will change from CouldBeUsable to Recommended.</description>
+                            <typeDescriptor>
+                                <type name="Optional"/>
+                            </typeDescriptor>
+                            <conditionFlags>
+                                <flag name="compat_enabled">On</flag>
+                            </conditionFlags>
+                            <files/>
+                        </plugin>
+                    </plugins>
+                </group>
+            </optionalFileGroups>
+        </installStep>
+
+        <installStep name="Conditional CouldBeUsable">
+            <optionalFileGroups order="Explicit">
+                <group name="Conditional Type (flag-based)" type="SelectAny">
+                    <plugins order="Explicit">
+                        <plugin name="Conditional Plugin">
+                            <description>If the flag was set in the previous step, this becomes Recommended. Otherwise it stays CouldBeUsable (with warning icon).</description>
+                            <typeDescriptor>
+                                <dependencyType>
+                                    <defaultType name="CouldBeUsable"/>
+                                    <patterns>
+                                        <pattern>
+                                            <dependencies operator="And">
+                                                <flagDependency flag="compat_enabled" value="On"/>
+                                            </dependencies>
+                                            <type name="Recommended"/>
+                                        </pattern>
+                                    </patterns>
+                                </dependencyType>
+                            </typeDescriptor>
+                            <files>
+                                <file source="conditional.txt" destination="conditional.txt"/>
+                            </files>
+                        </plugin>
+                        <plugin name="Always CouldBeUsable (conditional default only)">
+                            <description>This plugin uses dependencyType but no pattern matches, so it always stays at its default: CouldBeUsable.</description>
+                            <typeDescriptor>
+                                <dependencyType>
+                                    <defaultType name="CouldBeUsable"/>
+                                    <patterns>
+                                        <pattern>
+                                            <dependencies operator="And">
+                                                <flagDependency flag="nonexistent_flag" value="On"/>
+                                            </dependencies>
+                                            <type name="Required"/>
+                                        </pattern>
+                                    </patterns>
+                                </dependencyType>
+                            </typeDescriptor>
+                            <files>
+                                <file source="always-cbu.txt" destination="always-cbu.txt"/>
+                            </files>
+                        </plugin>
+                        <plugin name="Reference: Always Optional">
+                            <description>A plain Optional plugin for visual comparison.</description>
+                            <typeDescriptor>
+                                <type name="Optional"/>
+                            </typeDescriptor>
+                            <files>
+                                <file source="ref-optional.txt" destination="ref-optional.txt"/>
+                            </files>
+                        </plugin>
+                    </plugins>
+                </group>
+            </optionalFileGroups>
+        </installStep>
+
+        <!-- Step 5: CouldBeUsable based on file dependency -->
+        <installStep name="File-Based CouldBeUsable">
+            <optionalFileGroups order="Explicit">
+                <group name="File Dependency Test" type="SelectExactlyOne">
+                    <plugins order="Explicit">
+                        <plugin name="Needs SkyUI (file dep)">
+                            <description>CouldBeUsable by default. Becomes Recommended if SkyUI_SE.bsa is detected (unlikely in test). Tests file-based dependencyType.</description>
+                            <typeDescriptor>
+                                <dependencyType>
+                                    <defaultType name="CouldBeUsable"/>
+                                    <patterns>
+                                        <pattern>
+                                            <dependencies operator="And">
+                                                <fileDependency file="SkyUI_SE.bsa" state="Active"/>
+                                            </dependencies>
+                                            <type name="Recommended"/>
+                                        </pattern>
+                                    </patterns>
+                                </dependencyType>
+                            </typeDescriptor>
+                            <files>
+                                <file source="skyui-patch.txt" destination="skyui-patch.txt"/>
+                            </files>
+                        </plugin>
+                        <plugin name="No Dependencies">
+                            <description>A plain Optional plugin with no dependency conditions.</description>
+                            <typeDescriptor>
+                                <type name="Optional"/>
+                            </typeDescriptor>
+                            <files>
+                                <file source="no-dep.txt" destination="no-dep.txt"/>
+                            </files>
+                        </plugin>
+                    </plugins>
+                </group>
+            </optionalFileGroups>
+        </installStep>
+
+    </installSteps>
+</config>
