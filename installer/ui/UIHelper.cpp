@@ -1,7 +1,12 @@
 ﻿#include "UIHelper.h"
 
+#include <QApplication>
+#include <QClipboard>
+#include <QDesktopServices>
 #include <QDir>
+#include <QMenu>
 #include <QMouseEvent>
+#include <QUrl>
 #include <qcoreevent.h>
 
 HoverEventFilter::HoverEventFilter(const std::shared_ptr<PluginViewModel>& plugin, QObject* parent)
@@ -37,6 +42,66 @@ bool CtrlClickEventFilter::eventFilter(QObject* obj, QEvent* event)
                       << std::endl;
             // For now, just fall through to default behavior
         }
+    }
+    return QObject::eventFilter(obj, event);
+}
+
+ContextMenuEventFilter::ContextMenuEventFilter(const std::shared_ptr<PluginViewModel>& plugin,
+    const std::shared_ptr<GroupViewModel>& group, const std::shared_ptr<StepViewModel>& step,
+    const QString& nexusGameName, QObject* parent)
+    : QObject(parent)
+    , mPlugin(plugin)
+    , mGroup(group)
+    , mStep(step)
+    , mNexusGameName(nexusGameName)
+{
+}
+
+bool ContextMenuEventFilter::eventFilter(QObject* obj, QEvent* event)
+{
+    if (event->type() == QEvent::ContextMenu) {
+        auto* widget = qobject_cast<QWidget*>(obj);
+        if (!widget) {
+            return QObject::eventFilter(obj, event);
+        }
+
+        QMenu menu(widget);
+
+        const auto pluginName = QString::fromStdString(mPlugin->getName());
+        const auto description = QString::fromStdString(mPlugin->getDescription());
+        const auto groupName = QString::fromStdString(mGroup->getName());
+        const auto stepName = QString::fromStdString(mStep->getName());
+
+        menu.addAction("Copy Option Name", [pluginName]() {
+            QApplication::clipboard()->setText(pluginName);
+        });
+
+        menu.addAction("Copy Description", [description]() {
+            QApplication::clipboard()->setText(description);
+        });
+
+        menu.addAction("Copy Group Name", [groupName]() {
+            QApplication::clipboard()->setText(groupName);
+        });
+
+        menu.addAction("Copy Step Name", [stepName]() {
+            QApplication::clipboard()->setText(stepName);
+        });
+
+        if (!mNexusGameName.isEmpty()) {
+            menu.addSeparator();
+            menu.addAction("Search on Nexus", [this, pluginName]() {
+                auto keyword = QString::fromUtf8(QUrl::toPercentEncoding(pluginName));
+                keyword.replace("%20", "+");
+                const auto url = QString("https://www.nexusmods.com/games/%1/mods?keyword=%2&sort=endorsements")
+                                     .arg(mNexusGameName, keyword);
+                Logger::getInstance().logMessage(INFO, "[ContextMenu] Opening Nexus URL: " + url.toStdString());
+                QDesktopServices::openUrl(QUrl(url));
+            });
+        }
+
+        menu.exec(QCursor::pos());
+        return true;
     }
     return QObject::eventFilter(obj, event);
 }

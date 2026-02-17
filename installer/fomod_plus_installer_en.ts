@@ -4,79 +4,79 @@
 <context>
     <name>FomodInstallerWindow</name>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="230"/>
-        <location filename="FomodInstallerWindow.cpp" line="241"/>
+        <location filename="FomodInstallerWindow.cpp" line="231"/>
+        <location filename="FomodInstallerWindow.cpp" line="242"/>
         <source>Install</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="243"/>
-        <location filename="FomodInstallerWindow.cpp" line="422"/>
+        <location filename="FomodInstallerWindow.cpp" line="244"/>
+        <location filename="FomodInstallerWindow.cpp" line="423"/>
         <source>Next</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="341"/>
+        <location filename="FomodInstallerWindow.cpp" line="342"/>
         <source>Name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="342"/>
+        <location filename="FomodInstallerWindow.cpp" line="343"/>
         <source>Author:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="343"/>
+        <location filename="FomodInstallerWindow.cpp" line="344"/>
         <source>Version:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="344"/>
+        <location filename="FomodInstallerWindow.cpp" line="345"/>
         <source>Website:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="410"/>
+        <location filename="FomodInstallerWindow.cpp" line="411"/>
         <source>Manual</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="411"/>
+        <location filename="FomodInstallerWindow.cpp" line="412"/>
         <source>Restore Previous Choices</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="412"/>
+        <location filename="FomodInstallerWindow.cpp" line="413"/>
         <source>Reset Choices</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="421"/>
+        <location filename="FomodInstallerWindow.cpp" line="422"/>
         <source>Back</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="423"/>
+        <location filename="FomodInstallerWindow.cpp" line="424"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="660"/>
+        <location filename="FomodInstallerWindow.cpp" line="672"/>
         <source>This option may not be fully compatible with your current setup.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="702"/>
+        <location filename="FomodInstallerWindow.cpp" line="714"/>
         <source>Hide Images</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="706"/>
+        <location filename="FomodInstallerWindow.cpp" line="718"/>
         <source>Show Images</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodInstallerWindow.cpp" line="722"/>
+        <location filename="FomodInstallerWindow.cpp" line="734"/>
         <source>Select a plugin to see its description.</source>
         <translation type="unfinished"></translation>
     </message>

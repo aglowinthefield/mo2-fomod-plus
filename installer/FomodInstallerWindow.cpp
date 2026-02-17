@@ -46,6 +46,7 @@ FomodInstallerWindow::FomodInstallerWindow(FomodPlusInstaller* installer, Guesse
     , mTree(tree)
     , mViewModel(viewModel)
     , mFomodJson(fomodJson)
+    , mNexusGameName(installer->getNexusGameName())
 {
     setupUi();
 
@@ -519,7 +520,7 @@ QWidget* FomodInstallerWindow::createStepWidget(const std::shared_ptr<StepViewMo
     auto* scrollAreaLayout       = new QVBoxLayout(scrollAreaContent);
 
     for (const auto& group : installStep->getGroups()) {
-        const auto groupSection = renderGroup(group);
+        const auto groupSection = renderGroup(group, installStep);
         scrollAreaLayout->addWidget(groupSection);
     }
 
@@ -531,7 +532,8 @@ QWidget* FomodInstallerWindow::createStepWidget(const std::shared_ptr<StepViewMo
     return stepBox;
 }
 
-QWidget* FomodInstallerWindow::renderGroup(const std::shared_ptr<GroupViewModel>& group)
+QWidget* FomodInstallerWindow::renderGroup(
+    const std::shared_ptr<GroupViewModel>& group, const std::shared_ptr<StepViewModel>& step)
 {
     const auto groupBox       = new QGroupBox(QString::fromStdString(group->getName()), this);
     const auto groupBoxLayout = new QVBoxLayout(groupBox);
@@ -540,11 +542,11 @@ QWidget* FomodInstallerWindow::renderGroup(const std::shared_ptr<GroupViewModel>
     case SelectAtLeastOne:
     case SelectAny:
     case SelectAll:
-        renderCheckboxGroup(groupBox, groupBoxLayout, group);
+        renderCheckboxGroup(groupBox, groupBoxLayout, group, step);
         break;
     case SelectExactlyOne:
     case SelectAtMostOne:
-        renderSelectExactlyOne(groupBox, groupBoxLayout, group);
+        renderSelectExactlyOne(groupBox, groupBoxLayout, group, step);
         break;
     default:;
     }
@@ -562,14 +564,17 @@ QString FomodInstallerWindow::createObjectName(
     return QString::fromStdString(objectName);
 }
 
-QRadioButton* FomodInstallerWindow::createPluginRadioButton(
-    const std::shared_ptr<PluginViewModel>& plugin, const std::shared_ptr<GroupViewModel>& group, QWidget* parent)
+QRadioButton* FomodInstallerWindow::createPluginRadioButton(const std::shared_ptr<PluginViewModel>& plugin,
+    const std::shared_ptr<GroupViewModel>& group, const std::shared_ptr<StepViewModel>& step, QWidget* parent)
 {
     auto* radioButton = new QRadioButton(QString::fromStdString(plugin->getName()), parent);
     radioButton->setObjectName(createObjectName(plugin, group));
     auto* hoverFilter = new HoverEventFilter(plugin, this);
     radioButton->installEventFilter(hoverFilter);
     connect(hoverFilter, &HoverEventFilter::hovered, this, &FomodInstallerWindow::onPluginHovered);
+
+    auto* contextFilter = new ContextMenuEventFilter(plugin, group, step, mNexusGameName, this);
+    radioButton->installEventFilter(contextFilter);
 
     connect(radioButton, &QRadioButton::toggled, this, [this, radioButton, group, plugin](const bool checked) {
         logMessage(INFO,
@@ -584,8 +589,8 @@ QRadioButton* FomodInstallerWindow::createPluginRadioButton(
     return radioButton;
 }
 
-QCheckBox* FomodInstallerWindow::createPluginCheckBox(
-    const std::shared_ptr<PluginViewModel>& plugin, const std::shared_ptr<GroupViewModel>& group, QWidget* parent)
+QCheckBox* FomodInstallerWindow::createPluginCheckBox(const std::shared_ptr<PluginViewModel>& plugin,
+    const std::shared_ptr<GroupViewModel>& group, const std::shared_ptr<StepViewModel>& step, QWidget* parent)
 {
     auto* checkBox = new QCheckBox(QString::fromStdString(plugin->getName()), parent);
     checkBox->setObjectName(createObjectName(plugin, group));
@@ -598,6 +603,10 @@ QCheckBox* FomodInstallerWindow::createPluginCheckBox(
     // Install Ctrl+click event filter
     auto* ctrlClickFilter = new CtrlClickEventFilter(plugin, group, this);
     checkBox->installEventFilter(ctrlClickFilter);
+
+    // Install context menu event filter
+    auto* contextFilter = new ContextMenuEventFilter(plugin, group, step, mNexusGameName, this);
+    checkBox->installEventFilter(contextFilter);
 
     checkBox->setEnabled(plugin->isEnabled());
     checkBox->setChecked(plugin->isSelected());
@@ -619,34 +628,37 @@ QCheckBox* FomodInstallerWindow::createPluginCheckBox(
 }
 
 void FomodInstallerWindow::renderSelectExactlyOne(
-    QWidget* parent, QLayout* parentLayout, const std::shared_ptr<GroupViewModel>& group)
+    QWidget* parent, QLayout* parentLayout, const std::shared_ptr<GroupViewModel>& group,
+    const std::shared_ptr<StepViewModel>& step)
 {
     // This is for parity with the legacy installer. Both styles are functionally equivalent
     // for a group size of 1, but they chose checkbox.
     if (group->getPlugins().size() == 1) {
-        renderCheckboxGroup(parent, parentLayout, group);
+        renderCheckboxGroup(parent, parentLayout, group, step);
     } else {
-        renderRadioGroup(parent, parentLayout, group);
+        renderRadioGroup(parent, parentLayout, group, step);
     }
 }
 
 void FomodInstallerWindow::renderCheckboxGroup(
-    QWidget* parent, QLayout* parentLayout, const std::shared_ptr<GroupViewModel>& group)
+    QWidget* parent, QLayout* parentLayout, const std::shared_ptr<GroupViewModel>& group,
+    const std::shared_ptr<StepViewModel>& step)
 {
     for (const auto& plugin : group->getPlugins()) {
-        auto* checkbox = createPluginCheckBox(plugin, group, parent);
+        auto* checkbox = createPluginCheckBox(plugin, group, step, parent);
         parentLayout->addWidget(checkbox);
     }
 }
 
 QButtonGroup* FomodInstallerWindow::renderRadioGroup(
-    QWidget* parent, QLayout* parentLayout, const std::shared_ptr<GroupViewModel>& group)
+    QWidget* parent, QLayout* parentLayout, const std::shared_ptr<GroupViewModel>& group,
+    const std::shared_ptr<StepViewModel>& step)
 {
     auto* buttonGroup = new QButtonGroup(parent);
     buttonGroup->setExclusive(true); // Ensure only one button can be selected
 
     for (const auto& plugin : group->getPlugins()) {
-        auto* radioButton = createPluginRadioButton(plugin, group, parent);
+        auto* radioButton = createPluginRadioButton(plugin, group, step, parent);
         buttonGroup->addButton(radioButton);
         parentLayout->addWidget(radioButton);
     }

@@ -72,6 +72,8 @@ class FomodPlusInstaller final : public IPluginInstallerSimple {
 
     QString getSelectedColor() const;
 
+    [[nodiscard]] QString getNexusGameName() const;
+
   private:
     Logger& log            = Logger::getInstance();
     IOrganizer* mOrganizer = nullptr;
