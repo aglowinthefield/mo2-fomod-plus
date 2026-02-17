@@ -210,5 +210,63 @@
             </optionalFileGroups>
         </installStep>
 
+        <!-- Step 6: Context Menu Test -->
+        <installStep name="Context Menu &amp; Copy Test">
+            <optionalFileGroups order="Explicit">
+                <group name="Special Characters Group (A &amp; B)" type="SelectAny">
+                    <plugins order="Explicit">
+                        <plugin name="Simple Name">
+                            <description>A plain description with no special characters.</description>
+                            <typeDescriptor>
+                                <type name="Optional"/>
+                            </typeDescriptor>
+                            <files/>
+                        </plugin>
+                        <plugin name="Name With &amp; Ampersand">
+                            <description>This plugin name contains an ampersand. Nexus search should encode it properly.</description>
+                            <typeDescriptor>
+                                <type name="Optional"/>
+                            </typeDescriptor>
+                            <files/>
+                        </plugin>
+                        <plugin name="Cleaned No Logo">
+                            <description>Multi-word name. Nexus search should join words with + signs.</description>
+                            <typeDescriptor>
+                                <type name="Optional"/>
+                            </typeDescriptor>
+                            <files/>
+                        </plugin>
+                        <plugin name="Has #Hash and ?Question">
+                            <description>Name with # and ? characters that could break URL query strings if not encoded.</description>
+                            <typeDescriptor>
+                                <type name="Optional"/>
+                            </typeDescriptor>
+                            <files/>
+                        </plugin>
+                    </plugins>
+                </group>
+                <group name="Description Copy Test" type="SelectAny">
+                    <plugins order="Explicit">
+                        <plugin name="HTML Description Plugin">
+                            <description>&lt;b&gt;Bold text&lt;/b&gt; and &lt;i&gt;italic text&lt;/i&gt; and a &lt;a href="https://example.com"&gt;link&lt;/a&gt;. Copy should get the raw text.</description>
+                            <typeDescriptor>
+                                <type name="Optional"/>
+                            </typeDescriptor>
+                            <files/>
+                        </plugin>
+                        <plugin name="Multiline Description">
+                            <description>Line one.
+Line two.
+Line three with special chars: &amp; &lt; &gt; "quotes"</description>
+                            <typeDescriptor>
+                                <type name="Optional"/>
+                            </typeDescriptor>
+                            <files/>
+                        </plugin>
+                    </plugins>
+                </group>
+            </optionalFileGroups>
+        </installStep>
+
     </installSteps>
 </config>

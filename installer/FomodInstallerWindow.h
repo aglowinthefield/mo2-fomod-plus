@@ -111,6 +111,7 @@ class FomodInstallerWindow final : public QDialog {
     // Meta
     bool mIsManualInstall {};
     nlohmann::json mFomodJson;
+    QString mNexusGameName;
 
     // Buttons
     QPushButton* mNextInstallButton {};
@@ -169,23 +170,26 @@ class FomodInstallerWindow final : public QDialog {
 
     [[nodiscard]] QWidget* createStepWidget(const std::shared_ptr<StepViewModel>& installStep);
 
-    [[nodiscard]] QWidget* renderGroup(const std::shared_ptr<GroupViewModel>& group);
+    [[nodiscard]] QWidget* renderGroup(
+        const std::shared_ptr<GroupViewModel>& group, const std::shared_ptr<StepViewModel>& step);
 
     static QString createObjectName(
         const std::shared_ptr<PluginViewModel>& plugin, const std::shared_ptr<GroupViewModel>& group);
 
-    QRadioButton* createPluginRadioButton(
-        const std::shared_ptr<PluginViewModel>& plugin, const std::shared_ptr<GroupViewModel>& group, QWidget* parent);
+    QRadioButton* createPluginRadioButton(const std::shared_ptr<PluginViewModel>& plugin,
+        const std::shared_ptr<GroupViewModel>& group, const std::shared_ptr<StepViewModel>& step, QWidget* parent);
 
-    QCheckBox* createPluginCheckBox(
-        const std::shared_ptr<PluginViewModel>& plugin, const std::shared_ptr<GroupViewModel>& group, QWidget* parent);
+    QCheckBox* createPluginCheckBox(const std::shared_ptr<PluginViewModel>& plugin,
+        const std::shared_ptr<GroupViewModel>& group, const std::shared_ptr<StepViewModel>& step, QWidget* parent);
 
-    void renderSelectExactlyOne(QWidget* parent, QLayout* parentLayout, const std::shared_ptr<GroupViewModel>& group);
+    void renderSelectExactlyOne(QWidget* parent, QLayout* parentLayout,
+        const std::shared_ptr<GroupViewModel>& group, const std::shared_ptr<StepViewModel>& step);
 
-    void renderCheckboxGroup(QWidget* parent, QLayout* parentLayout, const std::shared_ptr<GroupViewModel>& group);
+    void renderCheckboxGroup(QWidget* parent, QLayout* parentLayout,
+        const std::shared_ptr<GroupViewModel>& group, const std::shared_ptr<StepViewModel>& step);
 
-    QButtonGroup* renderRadioGroup(
-        QWidget* parent, QLayout* parentLayout, const std::shared_ptr<GroupViewModel>& group);
+    QButtonGroup* renderRadioGroup(QWidget* parent, QLayout* parentLayout,
+        const std::shared_ptr<GroupViewModel>& group, const std::shared_ptr<StepViewModel>& step);
 
     void updateCouldBeUsableIndicator(QAbstractButton* button, const std::shared_ptr<PluginViewModel>& plugin) const;
 

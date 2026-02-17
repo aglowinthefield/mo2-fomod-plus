@@ -118,6 +118,11 @@ QString FomodPlusInstaller::getSelectedColor() const
     return it != UiColors::colorStyles.end() ? it->first : "Blue";
 }
 
+QString FomodPlusInstaller::getNexusGameName() const
+{
+    return mOrganizer->managedGame()->gameNexusName();
+}
+
 std::vector<std::shared_ptr<const IPluginRequirement>> FomodPlusInstaller::requirements() const
 {
     return { Requirements::gameDependency({ u"Morrowind"_s, u"Oblivion"_s, u"Fallout 3"_s, u"New Vegas"_s, u"Skyrim"_s,

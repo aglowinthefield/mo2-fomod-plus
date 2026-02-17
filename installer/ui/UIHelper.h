@@ -41,6 +41,24 @@ class CtrlClickEventFilter final : public QObject {
     std::shared_ptr<GroupViewModel> mGroup;
 };
 
+class ContextMenuEventFilter final : public QObject {
+    Q_OBJECT
+
+  public:
+    explicit ContextMenuEventFilter(const std::shared_ptr<PluginViewModel>& plugin,
+        const std::shared_ptr<GroupViewModel>& group, const std::shared_ptr<StepViewModel>& step,
+        const QString& nexusGameName, QObject* parent = nullptr);
+
+  protected:
+    bool eventFilter(QObject* obj, QEvent* event) override;
+
+  private:
+    std::shared_ptr<PluginViewModel> mPlugin;
+    std::shared_ptr<GroupViewModel> mGroup;
+    std::shared_ptr<StepViewModel> mStep;
+    QString mNexusGameName;
+};
+
 namespace UiConstants {
 constexpr int WINDOW_MIN_WIDTH  = 900;
 constexpr int WINDOW_MIN_HEIGHT = 600;
