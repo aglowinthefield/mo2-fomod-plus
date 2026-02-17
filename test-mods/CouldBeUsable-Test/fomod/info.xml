@@ -1,0 +1,6 @@
+<fomod>
+    <Name>CouldBeUsable Test Mod</Name>
+    <Author>Test</Author>
+    <Version>1.0</Version>
+    <Description>A test FOMOD to exercise all plugin type descriptors, especially CouldBeUsable.</Description>
+</fomod>

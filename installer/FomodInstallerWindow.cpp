@@ -16,6 +16,7 @@
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QSettings>
+#include <QStyle>
 #include <QSizePolicy>
 #include <QSplitter>
 #include <QVBoxLayout>
@@ -170,6 +171,8 @@ void FomodInstallerWindow::updateCheckboxStates() const
                     + (pluginData.plugin->isEnabled() ? "TRUE" : "FALSE"));
             pluginData.uiElement->setEnabled(pluginData.plugin->isEnabled());
         }
+
+        updateCouldBeUsableIndicator(pluginData.uiElement, pluginData.plugin);
     }
 }
 
@@ -577,6 +580,7 @@ QRadioButton* FomodInstallerWindow::createPluginRadioButton(
 
     radioButton->setEnabled(plugin->isEnabled());
     radioButton->setChecked(plugin->isSelected());
+    updateCouldBeUsableIndicator(radioButton, plugin);
     return radioButton;
 }
 
@@ -610,6 +614,7 @@ QCheckBox* FomodInstallerWindow::createPluginCheckBox(
                 + " Checkbox was previously " + (checkBox->isChecked() ? "true" : "false"));
         onPluginToggled(checked, group, plugin);
     });
+    updateCouldBeUsableIndicator(checkBox, plugin);
     return checkBox;
 }
 
@@ -646,6 +651,27 @@ QButtonGroup* FomodInstallerWindow::renderRadioGroup(
         parentLayout->addWidget(radioButton);
     }
     return buttonGroup;
+}
+
+void FomodInstallerWindow::updateCouldBeUsableIndicator(
+    QAbstractButton* button, const std::shared_ptr<PluginViewModel>& plugin) const
+{
+    static const QString couldBeUsableTooltip
+        = tr("This option may not be fully compatible with your current setup.");
+
+    if (plugin->getCurrentPluginType() == PluginTypeEnum::CouldBeUsable) {
+        const auto warningIcon = button->style()->standardIcon(QStyle::SP_MessageBoxWarning);
+        button->setIcon(warningIcon);
+        button->setIconSize(QSize(16, 16));
+        button->setToolTip(couldBeUsableTooltip);
+    } else {
+        if (!button->icon().isNull()) {
+            button->setIcon(QIcon());
+        }
+        if (button->toolTip() == couldBeUsableTooltip) {
+            button->setToolTip(QString());
+        }
+    }
 }
 
 void FomodInstallerWindow::addNotification(const QString& message, const LogLevel level) const
