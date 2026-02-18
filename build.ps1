@@ -1,7 +1,8 @@
 param(
     [string]$Preset = "vs2022-windows",
     [string]$Config = "RelWithDebInfo",
-    [switch]$Configure
+    [switch]$Configure,
+    [switch]$NoPatchFinder
 )
 
 $ErrorActionPreference = "Stop"
@@ -27,7 +28,9 @@ if ($Configure -or !(Test-Path "$PSScriptRoot/$buildDir")) {
 
 # Build
 Write-Host "Building ($Config)..." -ForegroundColor Cyan
-cmake --build "$PSScriptRoot/$buildDir" --config $Config --target fomod_plus_installer fomod_plus_scanner fomod_plus_patch_finder
+$targets = @("fomod_plus_installer", "fomod_plus_scanner")
+if (-not $NoPatchFinder) { $targets += "fomod_plus_patch_finder" }
+cmake --build "$PSScriptRoot/$buildDir" --config $Config --target $targets
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 # Copy .qm files to MO2 translations dir
