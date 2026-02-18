@@ -5,6 +5,8 @@ on:
     branches: [ main ]
   pull_request:
     types: [ opened, synchronize, reopened ]
+  release:
+    types: [ published ]
   workflow_dispatch:
 
 env:
@@ -44,3 +46,14 @@ jobs:
           path: |
             ${{env.SOURCE_ROOT}}/package
             ${{env.SOURCE_ROOT}}/install/bin
+
+      - name: Create release archive
+        if: github.event_name == 'release'
+        run: 7z a mo2-fomod-plus-${{ github.event.release.tag_name }}.7z ./plugins ./translations
+        working-directory: ${{env.SOURCE_ROOT}}/package
+
+      - name: Upload release asset
+        if: github.event_name == 'release'
+        run: gh release upload ${{ github.event.release.tag_name }} ${{env.SOURCE_ROOT}}/package/mo2-fomod-plus-${{ github.event.release.tag_name }}.7z --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}
