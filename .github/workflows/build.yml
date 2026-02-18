@@ -12,6 +12,7 @@ on:
 env:
   BUILD_TYPE: RelWithDebInfo
   SOURCE_ROOT: ${{ github.workspace }}/build/mo2-fomod-plus
+  VCPKG_ROOT: C:\vcpkg
   VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
 
 permissions:
