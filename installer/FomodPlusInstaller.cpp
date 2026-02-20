@@ -293,6 +293,13 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(
         return RESULT_FAILED;
     }
 
+    // If MO2 didn't provide a version (e.g. manual download), use the version from info.xml
+    if (version.isEmpty() && !infoFile->getVersion().empty()) {
+        version = QString::fromStdString(infoFile->getVersion());
+        logMessage(INFO,
+            std::format("FomodPlusInstaller::install - version from info.xml: {}", version.toStdString()));
+    }
+
     // create ui & pass xml classes to ui
     auto [json, matchMod]
         = getExistingFomodJson(modName, nexusID, static_cast<int>(moduleConfigFile->installSteps.installSteps.size()));
