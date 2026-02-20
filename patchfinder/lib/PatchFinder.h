@@ -29,6 +29,7 @@ class PatchFinder {
 
     std::vector<AvailablePatch> getAvailablePatchesForMod(const MOBase::IModInterface* mod);
     std::vector<AvailablePatch> getAvailablePatchesForModList();
+    bool isSuggested(const FomodOption& option) const;
 
   protected:
     void populateInstalledPlugins();

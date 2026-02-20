@@ -101,51 +101,57 @@ Issues:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchFinder.cpp" line="219"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="203"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="365"/>
+        <source>Suggested</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="FomodPlusPatchFinder.cpp" line="222"/>
         <source>Name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchFinder.cpp" line="219"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="222"/>
         <source>Status</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchFinder.cpp" line="219"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="222"/>
         <source>Plugin File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchFinder.cpp" line="258"/>
-        <source>%1 mods, %2 options tracked</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="FomodPlusPatchFinder.cpp" line="199"/>
-        <location filename="FomodPlusPatchFinder.cpp" line="349"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="370"/>
         <source>Selected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="FomodPlusPatchFinder.cpp" line="200"/>
-        <location filename="FomodPlusPatchFinder.cpp" line="353"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="374"/>
         <source>Deselected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="FomodPlusPatchFinder.cpp" line="201"/>
-        <location filename="FomodPlusPatchFinder.cpp" line="357"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="378"/>
         <source>Available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="FomodPlusPatchFinder.cpp" line="202"/>
-        <location filename="FomodPlusPatchFinder.cpp" line="361"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="382"/>
         <source>Unknown</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusPatchFinder.cpp" line="373"/>
+        <location filename="FomodPlusPatchFinder.cpp" line="269"/>
+        <source>%1 mods, %2 options tracked, %3 suggested</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="FomodPlusPatchFinder.cpp" line="395"/>
         <source>Masters: </source>
         <translation type="unfinished"></translation>
     </message>

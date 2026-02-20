@@ -55,7 +55,8 @@ class FomodPlusPatchFinder final : public IPluginTool {
     void setupPatchList() const;
     void onRescanClicked();
     void populateTree(QTreeWidget* tree, const QString& filter,
-                      const QSet<SelectionState>& visibleStates) const;
+                      const QSet<SelectionState>& visibleStates,
+                      bool showSuggested = false) const;
 
     void logMessage(const LogLevel level, const std::string& message) const
     {

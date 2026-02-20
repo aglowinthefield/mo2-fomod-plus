@@ -66,6 +66,27 @@ std::vector<AvailablePatch> PatchFinder::getAvailablePatchesForModList()
     return available_patches;
 }
 
+bool PatchFinder::isSuggested(const FomodOption& option) const
+{
+    if (option.fileName.empty())
+        return false;
+
+    if (option.selectionState != SelectionState::Available
+        && option.selectionState != SelectionState::Unknown)
+        return false;
+
+    const auto fileName = option.fileName.substr(option.fileName.find_last_of("/\\") + 1);
+
+    if (m_installedPluginsCacheSet.contains(fileName))
+        return false;
+
+    if (option.masters.empty())
+        return false;
+
+    return std::ranges::all_of(option.masters,
+        [this](const std::string& master) { return m_installedPluginsCacheSet.contains(master); });
+}
+
 void PatchFinder::populateInstalledPlugins()
 {
     for (const auto& modName : m_organizer->modList()->allMods()) {

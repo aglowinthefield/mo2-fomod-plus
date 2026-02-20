@@ -200,16 +200,19 @@ void FomodPlusPatchFinder::setupPatchList() const
     auto* deselectedCb = new QCheckBox(tr("Deselected"), mDialog);
     auto* availableCb  = new QCheckBox(tr("Available"), mDialog);
     auto* unknownCb    = new QCheckBox(tr("Unknown"), mDialog);
+    auto* suggestedCb  = new QCheckBox(tr("Suggested"), mDialog);
 
     selectedCb->setChecked(true);
     deselectedCb->setChecked(true);
     availableCb->setChecked(true);
     unknownCb->setChecked(true);
+    suggestedCb->setChecked(false);
 
     filterBar->addWidget(selectedCb);
     filterBar->addWidget(deselectedCb);
     filterBar->addWidget(availableCb);
     filterBar->addWidget(unknownCb);
+    filterBar->addWidget(suggestedCb);
     filterBar->addStretch();
 
     mainLayout->addLayout(filterBar);
@@ -224,7 +227,8 @@ void FomodPlusPatchFinder::setupPatchList() const
     treeWidget->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
 
     // Shared refresh lambda
-    auto refreshTree = [treeWidget, searchBox, selectedCb, deselectedCb, availableCb, unknownCb, this]() {
+    auto refreshTree = [treeWidget, searchBox, selectedCb, deselectedCb, availableCb, unknownCb,
+                            suggestedCb, this]() {
         QSet<SelectionState> visibleStates;
         if (selectedCb->isChecked())
             visibleStates.insert(SelectionState::Selected);
@@ -234,7 +238,7 @@ void FomodPlusPatchFinder::setupPatchList() const
             visibleStates.insert(SelectionState::Available);
         if (unknownCb->isChecked())
             visibleStates.insert(SelectionState::Unknown);
-        populateTree(treeWidget, searchBox->text(), visibleStates);
+        populateTree(treeWidget, searchBox->text(), visibleStates, suggestedCb->isChecked());
     };
 
     // Populate tree from fomod.db
@@ -248,25 +252,34 @@ void FomodPlusPatchFinder::setupPatchList() const
     connect(deselectedCb, &QCheckBox::toggled, refreshTree);
     connect(availableCb, &QCheckBox::toggled, refreshTree);
     connect(unknownCb, &QCheckBox::toggled, refreshTree);
+    connect(suggestedCb, &QCheckBox::toggled, refreshTree);
 
     // Stats label at the bottom
     const auto& entries = mPatchFinder->mFomodDb->getEntries();
     int totalOptions    = 0;
+    int suggestedCount  = 0;
     for (const auto& entry : entries) {
         totalOptions += static_cast<int>(entry->getOptions().size());
+        for (const auto& option : entry->getOptions()) {
+            if (mPatchFinder->isSuggested(option))
+                ++suggestedCount;
+        }
     }
-    auto* statsLabel = new QLabel(tr("%1 mods, %2 options tracked").arg(entries.size()).arg(totalOptions), mDialog);
+    auto* statsLabel = new QLabel(
+        tr("%1 mods, %2 options tracked, %3 suggested").arg(entries.size()).arg(totalOptions).arg(suggestedCount),
+        mDialog);
     statsLabel->setAlignment(Qt::AlignRight);
     mainLayout->addWidget(statsLabel);
 }
 
 void FomodPlusPatchFinder::populateTree(QTreeWidget* tree, const QString& filter,
-    const QSet<SelectionState>& visibleStates) const
+    const QSet<SelectionState>& visibleStates, const bool showSuggested) const
 {
     tree->clear();
 
     const auto& entries       = mPatchFinder->mFomodDb->getEntries();
     const QString lowerFilter = filter.toLower();
+    QSet<const FomodOption*> suggestedOptions;
 
     for (const auto& entry : entries) {
         // Check if any option matches the filter (if filter is set)
@@ -275,7 +288,11 @@ void FomodPlusPatchFinder::populateTree(QTreeWidget* tree, const QString& filter
 
         QList<const FomodOption*> matchingOptions;
         for (const auto& option : entry->getOptions()) {
-            if (!visibleStates.contains(option.selectionState))
+            const bool stateVisible = visibleStates.contains(option.selectionState);
+            const bool suggested    = showSuggested && mPatchFinder->isSuggested(option);
+            if (suggested)
+                suggestedOptions.insert(&option);
+            if (!stateVisible && !suggested)
                 continue;
 
             bool optionMatches = filter.isEmpty() || QString::fromStdString(option.name).toLower().contains(lowerFilter)
@@ -308,7 +325,7 @@ void FomodPlusPatchFinder::populateTree(QTreeWidget* tree, const QString& filter
 
         if (filter.isEmpty()) {
             for (const auto& option : entry->getOptions()) {
-                if (!visibleStates.contains(option.selectionState))
+                if (!visibleStates.contains(option.selectionState) && !suggestedOptions.contains(&option))
                     continue;
                 grouped[option.step][option.group].push_back(&option);
             }
@@ -344,22 +361,27 @@ void FomodPlusPatchFinder::populateTree(QTreeWidget* tree, const QString& filter
 
                     // Status column
                     QString status;
-                    switch (option->selectionState) {
-                    case SelectionState::Selected:
-                        status = tr("Selected");
-                        optionItem->setForeground(1, QBrush(Qt::darkGreen));
-                        break;
-                    case SelectionState::Deselected:
-                        status = tr("Deselected");
-                        optionItem->setForeground(1, QBrush(Qt::darkRed));
-                        break;
-                    case SelectionState::Available:
-                        status = tr("Available");
-                        optionItem->setForeground(1, QBrush(Qt::darkGray));
-                        break;
-                    default:
-                        status = tr("Unknown");
-                        break;
+                    if (suggestedOptions.contains(option)) {
+                        status = tr("Suggested");
+                        optionItem->setForeground(1, QBrush(Qt::darkCyan));
+                    } else {
+                        switch (option->selectionState) {
+                        case SelectionState::Selected:
+                            status = tr("Selected");
+                            optionItem->setForeground(1, QBrush(Qt::darkGreen));
+                            break;
+                        case SelectionState::Deselected:
+                            status = tr("Deselected");
+                            optionItem->setForeground(1, QBrush(Qt::darkRed));
+                            break;
+                        case SelectionState::Available:
+                            status = tr("Available");
+                            optionItem->setForeground(1, QBrush(Qt::darkGray));
+                            break;
+                        default:
+                            status = tr("Unknown");
+                            break;
+                        }
                     }
                     optionItem->setText(1, status);
 
