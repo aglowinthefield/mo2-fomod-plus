@@ -319,6 +319,7 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(
         mFomodJson = std::make_shared<nlohmann::json>(window->getFileInstaller()->generateFomodJson());
 
         try {
+            dbEntry->applySelections(*mFomodJson);
             mFomodDb->addEntry(dbEntry);
             mFomodDb->saveToFile();
         } catch ([[maybe_unused]] Exception& e) {

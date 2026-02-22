@@ -1,20 +1,27 @@
-﻿#include "FomodPlusPatchFinder.h"
+#include "FomodPlusPatchFinder.h"
 
 #include <QApplication>
-#include <QCheckBox>
 #include <QDialog>
+#include <QDir>
+#include <QFile>
+#include <QFrame>
 #include <QHBoxLayout>
-#include <QHeaderView>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMenu>
 #include <QMessageBox>
 #include <QProgressDialog>
 #include <QPushButton>
+#include <QGroupBox>
+#include <QHeaderView>
+#include <QScrollArea>
 #include <QTreeWidget>
 #include <QVBoxLayout>
 
 #include "lib/PatchFinder.h"
 #include <FomodRescan.h>
+
+// ── Init & Display ──────────────────────────────────────────────────────────
 
 bool FomodPlusPatchFinder::init(IOrganizer* organizer)
 {
@@ -29,6 +36,7 @@ bool FomodPlusPatchFinder::init(IOrganizer* organizer)
         mPatchFinder = std::make_unique<PatchFinder>(mOrganizer);
         mPatchFinder->populateInstalledPlugins();
         mAvailablePatches = mPatchFinder->getAvailablePatchesForModList();
+        loadDismissed();
         logMessage(DEBUG, "Available Patches: " + std::to_string(mAvailablePatches.size()));
     });
 
@@ -59,6 +67,8 @@ void FomodPlusPatchFinder::display() const
     mDialog->exec();
 }
 
+// ── Empty State ─────────────────────────────────────────────────────────────
+
 void FomodPlusPatchFinder::setupEmptyState() const
 {
     auto* mainLayout = new QVBoxLayout(mDialog);
@@ -83,11 +93,512 @@ void FomodPlusPatchFinder::setupEmptyState() const
     mainLayout->addWidget(contentWidget);
 
     auto* rescanButton = new QPushButton(tr("Rescan Load Order"), mDialog);
-    // Use const_cast since setupEmptyState is const but onRescanClicked modifies state
     connect(rescanButton, &QPushButton::clicked, const_cast<FomodPlusPatchFinder*>(this),
         &FomodPlusPatchFinder::onRescanClicked);
     mainLayout->addWidget(rescanButton, 0, Qt::AlignCenter);
 }
+
+// ── Main Patch List View ────────────────────────────────────────────────────
+
+void FomodPlusPatchFinder::setupPatchList() const
+{
+    mDialog->setMinimumSize(800, 600);
+
+    auto* mainLayout = new QVBoxLayout(mDialog);
+
+    // Top bar with search and rescan button
+    auto* topBar = new QHBoxLayout();
+
+    auto* searchBox = new QLineEdit(mDialog);
+    searchBox->setPlaceholderText(tr("Search patches..."));
+    searchBox->setClearButtonEnabled(true);
+    topBar->addWidget(searchBox, 1);
+
+    auto* rescanButton = new QPushButton(tr("Rescan"), mDialog);
+    connect(rescanButton, &QPushButton::clicked, const_cast<FomodPlusPatchFinder*>(this),
+        &FomodPlusPatchFinder::onRescanClicked);
+    topBar->addWidget(rescanButton);
+
+    mainLayout->addLayout(topBar);
+
+    // Scroll area for the suggested patches list
+    auto* scrollArea = new QScrollArea(mDialog);
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setFrameShape(QFrame::NoFrame);
+
+    auto* scrollContent = new QWidget();
+    scrollContent->setObjectName("suggestedContent");
+    auto* scrollLayout = new QVBoxLayout(scrollContent);
+    scrollLayout->setAlignment(Qt::AlignTop);
+
+    scrollArea->setWidget(scrollContent);
+    mainLayout->addWidget(scrollArea, 1);
+
+    // Populate the suggested list
+    populateSuggested(scrollContent, {});
+
+    // ── Browse All Section (collapsible) ────────────────────────────────────
+    auto* browseGroup = new QGroupBox(tr("Browse all tracked options"), mDialog);
+    browseGroup->setCheckable(true);
+    browseGroup->setChecked(false);
+
+    auto* browseLayout = new QVBoxLayout(browseGroup);
+
+    auto* browseTree = new QTreeWidget(browseGroup);
+    browseTree->setHeaderLabels({ tr("Name"), tr("Status"), tr("Plugin File") });
+    browseTree->setAlternatingRowColors(true);
+    browseTree->setRootIsDecorated(true);
+    browseTree->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    browseTree->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    browseTree->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+    browseTree->setVisible(false); // Hidden until expanded
+
+    browseLayout->addWidget(browseTree);
+    mainLayout->addWidget(browseGroup);
+
+    // Toggle browse tree visibility and populate on first expand
+    connect(browseGroup, &QGroupBox::toggled, [browseTree, this](bool checked) {
+        browseTree->setVisible(checked);
+        if (checked && browseTree->topLevelItemCount() == 0) {
+            populateBrowseTree(browseTree, {});
+        }
+    });
+
+    // Connect search to rebuild both views
+    connect(searchBox, &QLineEdit::textChanged, [scrollContent, browseTree, browseGroup, this](const QString& text) {
+        populateSuggested(scrollContent, text);
+        if (browseGroup->isChecked()) {
+            populateBrowseTree(browseTree, text);
+        }
+    });
+
+    // Stats label at the bottom
+    const auto& entries = mPatchFinder->mFomodDb->getEntries();
+    int suggestedCount  = 0;
+    int modCount        = 0;
+    for (const auto& entry : entries) {
+        bool modHasSuggested = false;
+        for (const auto& option : entry->getOptions()) {
+            const auto& dismissKey = option.fileName.empty() ? option.name : option.fileName;
+            if (mPatchFinder->isSuggested(option) && !isDismissed(entry->getModId(), dismissKey)) {
+                ++suggestedCount;
+                modHasSuggested = true;
+            }
+        }
+        if (modHasSuggested)
+            ++modCount;
+    }
+    auto* statsLabel
+        = new QLabel(tr("%1 suggested patches across %2 mods").arg(suggestedCount).arg(modCount), mDialog);
+    statsLabel->setAlignment(Qt::AlignRight);
+    mainLayout->addWidget(statsLabel);
+}
+
+// ── Populate Suggested Patches ──────────────────────────────────────────────
+
+void FomodPlusPatchFinder::populateSuggested(QWidget* container, const QString& filter) const
+{
+    // Clear existing content
+    auto* layout = container->layout();
+    if (layout != nullptr) {
+        QLayoutItem* item;
+        while ((item = layout->takeAt(0)) != nullptr) {
+            delete item->widget();
+            delete item;
+        }
+    }
+
+    const auto& entries       = mPatchFinder->mFomodDb->getEntries();
+    const QString lowerFilter = filter.toLower();
+    int totalSuggested        = 0;
+
+    for (const auto& entry : entries) {
+        // Collect suggested, non-dismissed options for this mod
+        std::vector<const FomodOption*> suggestedOptions;
+
+        for (const auto& option : entry->getOptions()) {
+            if (!mPatchFinder->isSuggested(option))
+                continue;
+            const auto& optionDismissKey = option.fileName.empty() ? option.name : option.fileName;
+            if (isDismissed(entry->getModId(), optionDismissKey))
+                continue;
+
+            // Apply search filter
+            if (!filter.isEmpty()) {
+                bool matches = QString::fromStdString(option.name).toLower().contains(lowerFilter)
+                    || QString::fromStdString(option.fileName).toLower().contains(lowerFilter)
+                    || QString::fromStdString(entry->getDisplayName()).toLower().contains(lowerFilter);
+
+                if (!matches) {
+                    for (const auto& master : option.masters) {
+                        if (QString::fromStdString(master).toLower().contains(lowerFilter)) {
+                            matches = true;
+                            break;
+                        }
+                    }
+                }
+                if (!matches)
+                    continue;
+            }
+
+            suggestedOptions.push_back(&option);
+        }
+
+        if (suggestedOptions.empty())
+            continue;
+
+        totalSuggested += static_cast<int>(suggestedOptions.size());
+
+        // ── Mod Group Frame ─────────────────────────────────────────────
+        auto* groupFrame = new QFrame(container);
+        groupFrame->setFrameShape(QFrame::StyledPanel);
+        groupFrame->setFrameShadow(QFrame::Raised);
+        auto* groupLayout = new QVBoxLayout(groupFrame);
+        groupLayout->setContentsMargins(8, 6, 8, 6);
+        groupLayout->setSpacing(4);
+
+        // Header row: mod name + reinstall button
+        auto* headerRow    = new QHBoxLayout();
+        auto* modNameLabel = new QLabel(QString::fromStdString(entry->getDisplayName()), groupFrame);
+        auto font          = modNameLabel->font();
+        font.setBold(true);
+        modNameLabel->setFont(font);
+        headerRow->addWidget(modNameLabel);
+
+        headerRow->addStretch();
+
+        auto* reinstallButton = new QPushButton(tr("Reinstall Mod"), groupFrame);
+        reinstallButton->setFixedHeight(24);
+        const auto* entryPtr = entry.get();
+        connect(reinstallButton, &QPushButton::clicked, [this, entryPtr]() {
+            const_cast<FomodPlusPatchFinder*>(this)->onReinstallClicked(entryPtr);
+        });
+        headerRow->addWidget(reinstallButton);
+
+        groupLayout->addLayout(headerRow);
+
+        // Separator line under header
+        auto* separator = new QFrame(groupFrame);
+        separator->setFrameShape(QFrame::HLine);
+        separator->setFrameShadow(QFrame::Sunken);
+        groupLayout->addWidget(separator);
+
+        // ── Option Rows ─────────────────────────────────────────────────
+        for (const auto* option : suggestedOptions) {
+            auto* optionWidget = new QWidget(groupFrame);
+            auto* optionLayout = new QVBoxLayout(optionWidget);
+            optionLayout->setContentsMargins(16, 2, 4, 2);
+            optionLayout->setSpacing(0);
+
+            // Option name as primary label
+            auto* nameLabel = new QLabel(QString::fromStdString(option->name), optionWidget);
+            optionLayout->addWidget(nameLabel);
+
+            // Plugin filename as subtitle
+            if (!option->fileName.empty()) {
+                auto* fileNameLabel = new QLabel(QString::fromStdString(option->fileName), optionWidget);
+                auto fileFont       = fileNameLabel->font();
+                fileFont.setPointSizeF(fileFont.pointSizeF() * 0.85);
+                fileNameLabel->setFont(fileFont);
+                fileNameLabel->setStyleSheet("color: gray;");
+                optionLayout->addWidget(fileNameLabel);
+            }
+
+            // Masters in smaller, dimmer text
+            if (!option->masters.empty()) {
+                QString mastersStr;
+                for (size_t i = 0; i < option->masters.size(); ++i) {
+                    if (i > 0)
+                        mastersStr += ", ";
+                    mastersStr += QString::fromStdString(option->masters[i]);
+                }
+                auto* mastersLabel = new QLabel(tr("Masters: %1").arg(mastersStr), optionWidget);
+                auto mastersFont   = mastersLabel->font();
+                mastersFont.setPointSizeF(mastersFont.pointSizeF() * 0.85);
+                mastersLabel->setFont(mastersFont);
+                mastersLabel->setStyleSheet("color: gray;");
+                optionLayout->addWidget(mastersLabel);
+            }
+
+            // Enable right-click context menu for dismiss
+            optionWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+            const int modId            = entry->getModId();
+            const std::string fileName = option->fileName.empty() ? option->name : option->fileName;
+            connect(optionWidget, &QWidget::customContextMenuRequested,
+                [this, modId, fileName, optionWidget](const QPoint& pos) {
+                    QMenu menu;
+                    auto* dismissAction = menu.addAction(tr("Dismiss"));
+                    if (menu.exec(optionWidget->mapToGlobal(pos)) == dismissAction) {
+                        const_cast<FomodPlusPatchFinder*>(this)->onDismissClicked(modId, fileName);
+                    }
+                });
+
+            groupLayout->addWidget(optionWidget);
+        }
+
+        layout->addWidget(groupFrame);
+    }
+
+    // Empty state when nothing is suggested
+    if (totalSuggested == 0) {
+        auto* emptyLabel = new QLabel(
+            filter.isEmpty()
+                ? tr("No suggested patches found. All your patches are installed,\nor run Rescan to check for new ones.")
+                : tr("No patches match your search."),
+            container);
+        emptyLabel->setAlignment(Qt::AlignCenter);
+        emptyLabel->setStyleSheet("color: gray; padding: 40px;");
+        layout->addWidget(emptyLabel);
+    }
+}
+
+// ── Browse All Tree ─────────────────────────────────────────────────────────
+
+void FomodPlusPatchFinder::populateBrowseTree(QTreeWidget* tree, const QString& filter) const
+{
+    tree->clear();
+
+    const auto& entries       = mPatchFinder->mFomodDb->getEntries();
+    const QString lowerFilter = filter.toLower();
+
+    for (const auto& entry : entries) {
+        // Collect matching options (flat — no step/group nesting)
+        std::vector<const FomodOption*> matchingOptions;
+        for (const auto& option : entry->getOptions()) {
+            if (!filter.isEmpty()) {
+                bool matches = QString::fromStdString(option.name).toLower().contains(lowerFilter)
+                    || QString::fromStdString(option.fileName).toLower().contains(lowerFilter)
+                    || QString::fromStdString(entry->getDisplayName()).toLower().contains(lowerFilter);
+
+                if (!matches) {
+                    for (const auto& master : option.masters) {
+                        if (QString::fromStdString(master).toLower().contains(lowerFilter)) {
+                            matches = true;
+                            break;
+                        }
+                    }
+                }
+                if (!matches)
+                    continue;
+            }
+            matchingOptions.push_back(&option);
+        }
+
+        if (matchingOptions.empty())
+            continue;
+
+        // Mod-level item
+        auto* modItem = new QTreeWidgetItem(tree);
+        modItem->setText(0, QString::fromStdString(entry->getDisplayName()));
+        modItem->setExpanded(!filter.isEmpty());
+
+        // Option items (flat — 2 levels total)
+        for (const auto* option : matchingOptions) {
+            auto* optionItem = new QTreeWidgetItem(modItem);
+            optionItem->setText(0, QString::fromStdString(option->name));
+
+            // Status column
+            QString status;
+            const bool suggested = mPatchFinder->isSuggested(*option);
+            if (suggested) {
+                status = tr("Suggested");
+                optionItem->setForeground(1, QBrush(Qt::darkCyan));
+            } else {
+                switch (option->selectionState) {
+                case SelectionState::Selected:
+                    status = tr("Selected");
+                    optionItem->setForeground(1, QBrush(Qt::darkGreen));
+                    break;
+                case SelectionState::Deselected:
+                    status = tr("Deselected");
+                    optionItem->setForeground(1, QBrush(Qt::darkRed));
+                    break;
+                case SelectionState::Available:
+                    status = tr("Available");
+                    optionItem->setForeground(1, QBrush(Qt::darkGray));
+                    break;
+                default:
+                    status = tr("Unknown");
+                    break;
+                }
+            }
+            optionItem->setText(1, status);
+
+            // Plugin file column
+            if (!option->fileName.empty()) {
+                optionItem->setText(2, QString::fromStdString(option->fileName));
+            }
+
+            // Tooltip with step/group and masters
+            QStringList tooltipParts;
+            if (!option->step.empty() || !option->group.empty()) {
+                tooltipParts << QString::fromStdString(option->step + " > " + option->group);
+            }
+            if (!option->masters.empty()) {
+                QString mastersStr = tr("Masters: ");
+                for (size_t i = 0; i < option->masters.size(); ++i) {
+                    if (i > 0)
+                        mastersStr += ", ";
+                    mastersStr += QString::fromStdString(option->masters[i]);
+                }
+                tooltipParts << mastersStr;
+            }
+            if (!tooltipParts.isEmpty()) {
+                const auto tooltip = tooltipParts.join("\n");
+                optionItem->setToolTip(0, tooltip);
+                optionItem->setToolTip(2, tooltip);
+            }
+        }
+    }
+}
+
+// ── Reinstall Action ────────────────────────────────────────────────────────
+
+void FomodPlusPatchFinder::onReinstallClicked(const FomodDbEntry* entry)
+{
+    logMessage(DEBUG, "Reinstall requested for: " + entry->getDisplayName());
+
+    // Look up the mod by Nexus mod ID first, fall back to display name
+    MOBase::IModInterface* targetMod = nullptr;
+    const int targetModId            = entry->getModId();
+
+    for (const auto& modName : mOrganizer->modList()->allMods()) {
+        auto* mod = mOrganizer->modList()->getMod(modName);
+        if (mod == nullptr)
+            continue;
+
+        if (targetModId > 0 && mod->nexusId() == targetModId) {
+            targetMod = mod;
+            break;
+        }
+    }
+
+    // Fall back to display name matching
+    if (targetMod == nullptr) {
+        const auto displayName = QString::fromStdString(entry->getDisplayName());
+        for (const auto& modName : mOrganizer->modList()->allMods()) {
+            auto* mod = mOrganizer->modList()->getMod(modName);
+            if (mod != nullptr && mod->name() == displayName) {
+                targetMod = mod;
+                break;
+            }
+        }
+    }
+
+    if (targetMod == nullptr) {
+        QMessageBox::warning(mDialog, tr("Mod Not Found"),
+            tr("Could not find \"%1\" in your mod list.").arg(QString::fromStdString(entry->getDisplayName())));
+        return;
+    }
+
+    // Get the archive path
+    const auto installationFile = targetMod->installationFile();
+    if (installationFile.isEmpty()) {
+        QMessageBox::warning(mDialog, tr("Archive Not Found"),
+            tr("No archive file is associated with \"%1\".\nThe download may have been deleted.")
+                .arg(QString::fromStdString(entry->getDisplayName())));
+        return;
+    }
+
+    // Resolve relative paths against downloads directory
+    const auto archivePath = QDir(installationFile).isAbsolute()
+        ? installationFile
+        : mOrganizer->downloadsPath() + "/" + installationFile;
+
+    if (!QFile::exists(archivePath)) {
+        QMessageBox::warning(mDialog, tr("Archive Not Found"),
+            tr("Archive file not found:\n%1\n\nRe-download from Nexus to reinstall.").arg(archivePath));
+        return;
+    }
+
+    logMessage(INFO, "Triggering reinstall from: " + archivePath.toStdString());
+
+    // Close the Patch Finder dialog before triggering install
+    // (the FOMOD installer will open its own dialog)
+    mDialog->accept();
+
+    // Trigger the installer — MO2 will route this through our FOMOD Plus installer
+    mOrganizer->installMod(archivePath);
+
+    // Refresh data after reinstall
+    mPatchFinder->populateInstalledPlugins();
+    mAvailablePatches = mPatchFinder->getAvailablePatchesForModList();
+}
+
+// ── Dismiss ─────────────────────────────────────────────────────────────────
+
+void FomodPlusPatchFinder::onDismissClicked(const int modId, const std::string& fileName)
+{
+    const auto key = makeDismissKey(modId, fileName);
+    mDismissedPatches.insert(key);
+    saveDismissed();
+    logMessage(DEBUG, "Dismissed patch: " + key);
+
+    // Refresh the UI in place by re-calling display()
+    display();
+}
+
+std::string FomodPlusPatchFinder::getDismissedFilePath() const
+{
+    return (std::filesystem::path(mOrganizer->basePath().toStdString()) / "fomod-dismissed.json").string();
+}
+
+void FomodPlusPatchFinder::loadDismissed()
+{
+    mDismissedPatches.clear();
+    const auto path = getDismissedFilePath();
+
+    if (!std::filesystem::exists(path))
+        return;
+
+    try {
+        std::ifstream file(path);
+        if (!file.is_open())
+            return;
+
+        auto json = nlohmann::json::parse(file);
+        if (!json.is_array())
+            return;
+
+        for (const auto& item : json) {
+            if (item.is_string()) {
+                mDismissedPatches.insert(item.get<std::string>());
+            }
+        }
+        logMessage(DEBUG, "Loaded " + std::to_string(mDismissedPatches.size()) + " dismissed patches");
+    } catch ([[maybe_unused]] const std::exception& e) {
+        logMessage(INFO, "Failed to load dismissed patches file");
+    }
+}
+
+void FomodPlusPatchFinder::saveDismissed() const
+{
+    try {
+        nlohmann::json json = nlohmann::json::array();
+        for (const auto& key : mDismissedPatches) {
+            json.push_back(key);
+        }
+
+        std::ofstream file(getDismissedFilePath());
+        if (file.is_open()) {
+            file << json.dump(2);
+        }
+    } catch ([[maybe_unused]] const std::exception& e) {
+        logMessage(INFO, "Failed to save dismissed patches file");
+    }
+}
+
+bool FomodPlusPatchFinder::isDismissed(const int modId, const std::string& fileName) const
+{
+    return mDismissedPatches.contains(makeDismissKey(modId, fileName));
+}
+
+std::string FomodPlusPatchFinder::makeDismissKey(const int modId, const std::string& fileName)
+{
+    return std::to_string(modId) + ":" + fileName;
+}
+
+// ── Rescan ──────────────────────────────────────────────────────────────────
 
 void FomodPlusPatchFinder::onRescanClicked()
 {
@@ -170,239 +681,4 @@ void FomodPlusPatchFinder::onRescanClicked()
 
     // Refresh the UI
     display();
-}
-
-void FomodPlusPatchFinder::setupPatchList() const
-{
-    mDialog->setMinimumSize(800, 600);
-
-    auto* mainLayout = new QVBoxLayout(mDialog);
-
-    // Top bar with search and rescan button
-    auto* topBar = new QHBoxLayout();
-
-    auto* searchBox = new QLineEdit(mDialog);
-    searchBox->setPlaceholderText(tr("Search options..."));
-    searchBox->setClearButtonEnabled(true);
-    topBar->addWidget(searchBox, 1);
-
-    auto* rescanButton = new QPushButton(tr("Rescan"), mDialog);
-    connect(rescanButton, &QPushButton::clicked, const_cast<FomodPlusPatchFinder*>(this),
-        &FomodPlusPatchFinder::onRescanClicked);
-    topBar->addWidget(rescanButton);
-
-    mainLayout->addLayout(topBar);
-
-    // Status filter checkboxes
-    auto* filterBar = new QHBoxLayout();
-
-    auto* selectedCb   = new QCheckBox(tr("Selected"), mDialog);
-    auto* deselectedCb = new QCheckBox(tr("Deselected"), mDialog);
-    auto* availableCb  = new QCheckBox(tr("Available"), mDialog);
-    auto* unknownCb    = new QCheckBox(tr("Unknown"), mDialog);
-    auto* suggestedCb  = new QCheckBox(tr("Suggested"), mDialog);
-
-    selectedCb->setChecked(true);
-    deselectedCb->setChecked(true);
-    availableCb->setChecked(true);
-    unknownCb->setChecked(true);
-    suggestedCb->setChecked(false);
-
-    filterBar->addWidget(selectedCb);
-    filterBar->addWidget(deselectedCb);
-    filterBar->addWidget(availableCb);
-    filterBar->addWidget(unknownCb);
-    filterBar->addWidget(suggestedCb);
-    filterBar->addStretch();
-
-    mainLayout->addLayout(filterBar);
-
-    // Tree widget for displaying fomod data
-    auto* treeWidget = new QTreeWidget(mDialog);
-    treeWidget->setHeaderLabels({ tr("Name"), tr("Status"), tr("Plugin File") });
-    treeWidget->setAlternatingRowColors(true);
-    treeWidget->setRootIsDecorated(true);
-    treeWidget->header()->setSectionResizeMode(0, QHeaderView::Stretch);
-    treeWidget->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-    treeWidget->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
-
-    // Shared refresh lambda
-    auto refreshTree = [treeWidget, searchBox, selectedCb, deselectedCb, availableCb, unknownCb,
-                            suggestedCb, this]() {
-        QSet<SelectionState> visibleStates;
-        if (selectedCb->isChecked())
-            visibleStates.insert(SelectionState::Selected);
-        if (deselectedCb->isChecked())
-            visibleStates.insert(SelectionState::Deselected);
-        if (availableCb->isChecked())
-            visibleStates.insert(SelectionState::Available);
-        if (unknownCb->isChecked())
-            visibleStates.insert(SelectionState::Unknown);
-        populateTree(treeWidget, searchBox->text(), visibleStates, suggestedCb->isChecked());
-    };
-
-    // Populate tree from fomod.db
-    refreshTree();
-
-    mainLayout->addWidget(treeWidget);
-
-    // Connect search box and checkboxes to refresh
-    connect(searchBox, &QLineEdit::textChanged, refreshTree);
-    connect(selectedCb, &QCheckBox::toggled, refreshTree);
-    connect(deselectedCb, &QCheckBox::toggled, refreshTree);
-    connect(availableCb, &QCheckBox::toggled, refreshTree);
-    connect(unknownCb, &QCheckBox::toggled, refreshTree);
-    connect(suggestedCb, &QCheckBox::toggled, refreshTree);
-
-    // Stats label at the bottom
-    const auto& entries = mPatchFinder->mFomodDb->getEntries();
-    int totalOptions    = 0;
-    int suggestedCount  = 0;
-    for (const auto& entry : entries) {
-        totalOptions += static_cast<int>(entry->getOptions().size());
-        for (const auto& option : entry->getOptions()) {
-            if (mPatchFinder->isSuggested(option))
-                ++suggestedCount;
-        }
-    }
-    auto* statsLabel = new QLabel(
-        tr("%1 mods, %2 options tracked, %3 suggested").arg(entries.size()).arg(totalOptions).arg(suggestedCount),
-        mDialog);
-    statsLabel->setAlignment(Qt::AlignRight);
-    mainLayout->addWidget(statsLabel);
-}
-
-void FomodPlusPatchFinder::populateTree(QTreeWidget* tree, const QString& filter,
-    const QSet<SelectionState>& visibleStates, const bool showSuggested) const
-{
-    tree->clear();
-
-    const auto& entries       = mPatchFinder->mFomodDb->getEntries();
-    const QString lowerFilter = filter.toLower();
-    QSet<const FomodOption*> suggestedOptions;
-
-    for (const auto& entry : entries) {
-        // Check if any option matches the filter (if filter is set)
-        bool modMatches
-            = filter.isEmpty() || QString::fromStdString(entry->getDisplayName()).toLower().contains(lowerFilter);
-
-        QList<const FomodOption*> matchingOptions;
-        for (const auto& option : entry->getOptions()) {
-            const bool stateVisible = visibleStates.contains(option.selectionState);
-            const bool suggested    = showSuggested && mPatchFinder->isSuggested(option);
-            if (suggested)
-                suggestedOptions.insert(&option);
-            if (!stateVisible && !suggested)
-                continue;
-
-            bool optionMatches = filter.isEmpty() || QString::fromStdString(option.name).toLower().contains(lowerFilter)
-                || QString::fromStdString(option.fileName).toLower().contains(lowerFilter)
-                || QString::fromStdString(option.step).toLower().contains(lowerFilter)
-                || QString::fromStdString(option.group).toLower().contains(lowerFilter);
-
-            // Also search in masters
-            if (!optionMatches) {
-                for (const auto& master : option.masters) {
-                    if (QString::fromStdString(master).toLower().contains(lowerFilter)) {
-                        optionMatches = true;
-                        break;
-                    }
-                }
-            }
-
-            if (optionMatches) {
-                matchingOptions.append(&option);
-            }
-        }
-
-        // Skip this mod if nothing matches
-        if (!modMatches && matchingOptions.isEmpty()) {
-            continue;
-        }
-
-        // Group options by step and group
-        std::map<std::string, std::map<std::string, std::vector<const FomodOption*>>> grouped;
-
-        if (filter.isEmpty()) {
-            for (const auto& option : entry->getOptions()) {
-                if (!visibleStates.contains(option.selectionState) && !suggestedOptions.contains(&option))
-                    continue;
-                grouped[option.step][option.group].push_back(&option);
-            }
-        } else {
-            for (const auto* option : matchingOptions) {
-                grouped[option->step][option->group].push_back(option);
-            }
-        }
-
-        // Skip mod if no options remain after filtering
-        if (grouped.empty())
-            continue;
-
-        // Create mod item
-        auto* modItem = new QTreeWidgetItem(tree);
-        modItem->setText(0, QString::fromStdString(entry->getDisplayName()));
-        modItem->setExpanded(!filter.isEmpty()); // Expand when searching
-
-        // Build tree structure: Mod -> Step -> Group -> Option
-        for (const auto& [stepName, groups] : grouped) {
-            auto* stepItem = new QTreeWidgetItem(modItem);
-            stepItem->setText(0, QString::fromStdString(stepName));
-            stepItem->setExpanded(!filter.isEmpty());
-
-            for (const auto& [groupName, options] : groups) {
-                auto* groupItem = new QTreeWidgetItem(stepItem);
-                groupItem->setText(0, QString::fromStdString(groupName));
-                groupItem->setExpanded(!filter.isEmpty());
-
-                for (const auto* option : options) {
-                    auto* optionItem = new QTreeWidgetItem(groupItem);
-                    optionItem->setText(0, QString::fromStdString(option->name));
-
-                    // Status column
-                    QString status;
-                    if (suggestedOptions.contains(option)) {
-                        status = tr("Suggested");
-                        optionItem->setForeground(1, QBrush(Qt::darkCyan));
-                    } else {
-                        switch (option->selectionState) {
-                        case SelectionState::Selected:
-                            status = tr("Selected");
-                            optionItem->setForeground(1, QBrush(Qt::darkGreen));
-                            break;
-                        case SelectionState::Deselected:
-                            status = tr("Deselected");
-                            optionItem->setForeground(1, QBrush(Qt::darkRed));
-                            break;
-                        case SelectionState::Available:
-                            status = tr("Available");
-                            optionItem->setForeground(1, QBrush(Qt::darkGray));
-                            break;
-                        default:
-                            status = tr("Unknown");
-                            break;
-                        }
-                    }
-                    optionItem->setText(1, status);
-
-                    // Plugin file column
-                    if (!option->fileName.empty()) {
-                        optionItem->setText(2, QString::fromStdString(option->fileName));
-                    }
-
-                    // Tooltip with masters
-                    if (!option->masters.empty()) {
-                        QString mastersStr = tr("Masters: ");
-                        for (size_t i = 0; i < option->masters.size(); ++i) {
-                            if (i > 0)
-                                mastersStr += ", ";
-                            mastersStr += QString::fromStdString(option->masters[i]);
-                        }
-                        optionItem->setToolTip(0, mastersStr);
-                        optionItem->setToolTip(2, mastersStr);
-                    }
-                }
-            }
-        }
-    }
 }

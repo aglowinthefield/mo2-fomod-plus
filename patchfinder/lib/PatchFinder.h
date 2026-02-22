@@ -2,10 +2,12 @@
 
 #include "../../installer/lib/Logger.h"
 
+#include <ConditionEvaluator.h>
 #include <FomodDb.h>
 #include <ifiletree.h>
 #include <imodinterface.h>
 #include <imoinfo.h>
+#include <ipluginlist.h>
 
 struct AvailablePatch {
     FomodOption fomod_option;
@@ -42,6 +44,7 @@ class PatchFinder {
     // Map of { pluginPtr: [1.esp, 2.esp, 3.esp] }
     std::unordered_map<const MOBase::IModInterface*, std::vector<std::string>> m_installedPlugins;
     std::unordered_set<std::string> m_installedPluginsCacheSet;
+    PluginStateResolver mPluginStateResolver;
 
     void logMessage(const LogLevel level, const std::string& message) const
     {

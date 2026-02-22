@@ -84,11 +84,14 @@ class FomodDB {
                         break; // Use first plugin file found
                     }
 
+                    // Extract TypeDescriptor patterns for condition-based suggestion
+                    auto typePatterns = extractTypePatterns(plugin);
+
                     // Always create an option entry, even if no plugin files
                     options.emplace_back(plugin.name,
                         pluginFileName, // May be empty if no plugin files
                         masters, // May be empty if no plugin files
-                        installStep.name, group.name);
+                        installStep.name, group.name, SelectionState::Unknown, std::move(typePatterns));
                 }
             }
         }
@@ -142,6 +145,94 @@ class FomodDB {
   private:
     FOMODDBEntries entries;
     std::string dbFilePath;
+
+    static std::string pluginTypeToString(PluginTypeEnum type)
+    {
+        switch (type) {
+        case PluginTypeEnum::Recommended:
+            return "Recommended";
+        case PluginTypeEnum::Required:
+            return "Required";
+        case PluginTypeEnum::Optional:
+            return "Optional";
+        case PluginTypeEnum::NotUsable:
+            return "NotUsable";
+        case PluginTypeEnum::CouldBeUsable:
+            return "CouldBeUsable";
+        default:
+            return "Optional";
+        }
+    }
+
+    static std::string fileDependencyStateToString(FileDependencyTypeEnum state)
+    {
+        switch (state) {
+        case FileDependencyTypeEnum::Active:
+            return "Active";
+        case FileDependencyTypeEnum::Inactive:
+            return "Inactive";
+        case FileDependencyTypeEnum::Missing:
+            return "Missing";
+        default:
+            return "Missing";
+        }
+    }
+
+    static StoredDependencies convertCompositeDependency(const CompositeDependency& cd)
+    {
+        StoredDependencies deps;
+        deps.operatorType = (cd.operatorType == OperatorTypeEnum::OR) ? "Or" : "And";
+
+        for (const auto& fd : cd.fileDependencies) {
+            deps.fileDependencies.push_back({ fd.file, fileDependencyStateToString(fd.state) });
+        }
+
+        for (const auto& fd : cd.flagDependencies) {
+            deps.flagDependencies.push_back({ fd.flag, fd.value });
+        }
+
+        for (const auto& nd : cd.nestedDependencies) {
+            deps.nestedDependencies.push_back(convertCompositeDependency(nd));
+        }
+
+        return deps;
+    }
+
+    static std::vector<StoredTypePattern> extractTypePatterns(const Plugin& plugin)
+    {
+        std::vector<StoredTypePattern> patterns;
+
+        // Extract dependency patterns from TypeDescriptor
+        for (const auto& pattern : plugin.typeDescriptor.dependencyType.patterns.patterns) {
+            StoredTypePattern stored;
+            stored.type         = pluginTypeToString(pattern.type);
+            stored.dependencies = convertCompositeDependency(pattern.dependencies);
+            patterns.push_back(std::move(stored));
+        }
+
+        // If no dependency patterns exist but the static type is Recommended/Required,
+        // store it as a pattern with empty dependencies (always-true)
+        if (patterns.empty() && plugin.typeDescriptor.type != PluginTypeEnum::Optional
+            && plugin.typeDescriptor.type != PluginTypeEnum::UNKNOWN) {
+            StoredTypePattern fallback;
+            fallback.type                 = pluginTypeToString(plugin.typeDescriptor.type);
+            fallback.dependencies.operatorType = "And";
+            patterns.push_back(std::move(fallback));
+        }
+
+        // Also check dependencyType.defaultType as a fallback
+        if (patterns.empty() && plugin.typeDescriptor.dependencyType.defaultType.has_value()) {
+            auto defaultType = plugin.typeDescriptor.dependencyType.defaultType.value();
+            if (defaultType != PluginTypeEnum::Optional && defaultType != PluginTypeEnum::UNKNOWN) {
+                StoredTypePattern fallback;
+                fallback.type                 = pluginTypeToString(defaultType);
+                fallback.dependencies.operatorType = "And";
+                patterns.push_back(std::move(fallback));
+            }
+        }
+
+        return patterns;
+    }
 
     void loadFromFile()
     {

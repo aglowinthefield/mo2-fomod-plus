@@ -198,7 +198,7 @@ class FomodRescan {
 
         // Apply selection states from stored choices
         const auto choices = getStoredChoices(mod);
-        applySelectionsToEntry(*entry, choices);
+        entry->applySelections(choices);
 
         // Add to database (upsert)
         mFomodDb->addEntry(entry, true);
@@ -206,84 +206,4 @@ class FomodRescan {
         return { ScanOutcome::Success, "" };
     }
 
-    /**
-     * Apply user selection states to a FomodDbEntry based on stored choices JSON.
-     *
-     * Choices JSON format:
-     * {
-     *   "steps": [{
-     *     "name": "Step Name",
-     *     "groups": [{
-     *       "name": "Group Name",
-     *       "plugins": ["Selected Plugin 1"],
-     *       "deselected": ["Manually Deselected Plugin"]
-     *     }]
-     *   }]
-     * }
-     */
-    void applySelectionsToEntry(FomodDbEntry& entry, const nlohmann::json& choices)
-    {
-        if (!choices.contains("steps") || !choices["steps"].is_array()) {
-            // No choices data - mark all as Available
-            for (auto& option : entry.getOptionsMutable()) {
-                option.selectionState = SelectionState::Available;
-            }
-            return;
-        }
-
-        // Build a lookup map for quick matching: stepName/groupName/pluginName -> state
-        struct PluginState {
-            bool selected   = false;
-            bool deselected = false;
-        };
-        std::map<std::string, PluginState> stateMap;
-
-        for (const auto& step : choices["steps"]) {
-            if (!step.contains("name") || !step.contains("groups"))
-                continue;
-            const std::string stepName = step["name"];
-
-            for (const auto& group : step["groups"]) {
-                if (!group.contains("name"))
-                    continue;
-                const std::string groupName = group["name"];
-
-                // Process selected plugins
-                if (group.contains("plugins") && group["plugins"].is_array()) {
-                    for (const auto& plugin : group["plugins"]) {
-                        const std::string pluginName = plugin;
-                        const auto key               = stepName + "/" + groupName + "/" + pluginName;
-                        stateMap[key].selected       = true;
-                    }
-                }
-
-                // Process deselected plugins
-                if (group.contains("deselected") && group["deselected"].is_array()) {
-                    for (const auto& plugin : group["deselected"]) {
-                        const std::string pluginName = plugin;
-                        const auto key               = stepName + "/" + groupName + "/" + pluginName;
-                        stateMap[key].deselected     = true;
-                    }
-                }
-            }
-        }
-
-        // Apply states to options
-        for (auto& option : entry.getOptionsMutable()) {
-            const auto key = option.step + "/" + option.group + "/" + option.name;
-
-            if (auto it = stateMap.find(key); it != stateMap.end()) {
-                if (it->second.selected) {
-                    option.selectionState = SelectionState::Selected;
-                } else if (it->second.deselected) {
-                    option.selectionState = SelectionState::Deselected;
-                } else {
-                    option.selectionState = SelectionState::Available;
-                }
-            } else {
-                // Plugin not found in choices - mark as Available
-                option.selectionState = SelectionState::Available;
-            }
-        }
-    }
 };

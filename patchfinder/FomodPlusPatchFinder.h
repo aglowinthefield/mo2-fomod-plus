@@ -1,10 +1,13 @@
-﻿#pragma once
+#pragma once
 #include "../installer/lib/Logger.h"
 #include "lib/PatchFinder.h"
 
 #include <QSet>
 #include <iplugintool.h>
 #include <qtmetamacros.h>
+
+#include <nlohmann/json.hpp>
+#include <unordered_set>
 
 class QTreeWidget;
 
@@ -51,12 +54,23 @@ class FomodPlusPatchFinder final : public IPluginTool {
     std::unique_ptr<PatchFinder> mPatchFinder { nullptr };
     std::vector<AvailablePatch> mAvailablePatches;
 
+    // Dismissed patches storage
+    std::unordered_set<std::string> mDismissedPatches;
+
     void setupEmptyState() const;
     void setupPatchList() const;
     void onRescanClicked();
-    void populateTree(QTreeWidget* tree, const QString& filter,
-                      const QSet<SelectionState>& visibleStates,
-                      bool showSuggested = false) const;
+    void populateSuggested(QWidget* container, const QString& filter) const;
+    void populateBrowseTree(QTreeWidget* tree, const QString& filter) const;
+    void onReinstallClicked(const FomodDbEntry* entry);
+    void onDismissClicked(int modId, const std::string& fileName);
+
+    // Dismiss persistence
+    [[nodiscard]] std::string getDismissedFilePath() const;
+    void loadDismissed();
+    void saveDismissed() const;
+    [[nodiscard]] bool isDismissed(int modId, const std::string& fileName) const;
+    [[nodiscard]] static std::string makeDismissKey(int modId, const std::string& fileName);
 
     void logMessage(const LogLevel level, const std::string& message) const
     {
