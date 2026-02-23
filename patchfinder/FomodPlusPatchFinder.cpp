@@ -520,7 +520,9 @@ void FomodPlusPatchFinder::onReinstallClicked(const FomodDbEntry* entry)
     // Trigger the installer — MO2 will route this through our FOMOD Plus installer
     mOrganizer->installMod(archivePath);
 
-    // Refresh data after reinstall
+    // Refresh data after reinstall — reload the DB from disk since the
+    // installer wrote updated selection states to a separate FomodDB instance
+    mPatchFinder->mFomodDb->reload();
     mPatchFinder->populateInstalledPlugins();
     mAvailablePatches = mPatchFinder->getAvailablePatchesForModList();
 }

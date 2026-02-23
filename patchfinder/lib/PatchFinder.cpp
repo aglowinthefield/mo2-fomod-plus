@@ -131,6 +131,9 @@ bool PatchFinder::isSuggested(const FomodOption& option) const
 
 void PatchFinder::populateInstalledPlugins()
 {
+    m_installedPlugins.clear();
+    m_installedPluginsCacheSet.clear();
+
     for (const auto& modName : m_organizer->modList()->allMods()) {
         const auto mod      = m_organizer->modList()->getMod(modName);
         const auto mod_tree = mod->fileTree();

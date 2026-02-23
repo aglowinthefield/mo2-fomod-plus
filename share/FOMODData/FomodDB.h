@@ -116,6 +116,8 @@ class FomodDB {
 
     [[nodiscard]] const FOMODDBEntries& getEntries() { return entries; }
 
+    void reload() { loadFromFile(); }
+
     void saveToFile() const
     {
         try {
