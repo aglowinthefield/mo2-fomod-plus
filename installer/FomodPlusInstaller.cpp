@@ -259,6 +259,7 @@ void FomodPlusInstaller::clearPriorInstallData()
     mInstallerUsed = false;
     mFomodJson     = nullptr;
     mFomodPath     = "";
+    mUrl           = "";
 }
 
 /**
@@ -293,11 +294,23 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(
         return RESULT_FAILED;
     }
 
-    // If MO2 didn't provide a version (e.g. manual download), use the version from info.xml
+    // If MO2 didn't provide metadata (e.g. manual download), use values from info.xml
     if (version.isEmpty() && !infoFile->getVersion().empty()) {
         version = QString::fromStdString(infoFile->getVersion());
         logMessage(INFO,
             std::format("FomodPlusInstaller::install - version from info.xml: {}", version.toStdString()));
+    }
+
+    if (!infoFile->getName().empty()) {
+        modName.update(QString::fromStdString(infoFile->getName()), GUESS_META);
+        logMessage(INFO,
+            std::format("FomodPlusInstaller::install - name from info.xml: {}", infoFile->getName()));
+    }
+
+    if (!infoFile->getWebsite().empty()) {
+        mUrl = QString::fromStdString(infoFile->getWebsite());
+        logMessage(INFO,
+            std::format("FomodPlusInstaller::install - website from info.xml: {}", infoFile->getWebsite()));
     }
 
     // create ui & pass xml classes to ui
@@ -436,6 +449,12 @@ void FomodPlusInstaller::onInstallationEnd(const EInstallResult result, IModInte
     // Update the meta.ini file with the fomod information
     if (mFomodJson != nullptr && result == RESULT_SUCCESS && newMod != nullptr && mInstallerUsed) {
         newMod->setPluginSetting(this->name(), "fomod", mFomodJson->dump().c_str());
+
+        // Apply website URL from info.xml if the mod doesn't already have one
+        if (newMod->url().isEmpty() && !mUrl.isEmpty()) {
+            newMod->setUrl(mUrl);
+        }
+
         mOrganizer->refresh();
     }
     clearPriorInstallData();
