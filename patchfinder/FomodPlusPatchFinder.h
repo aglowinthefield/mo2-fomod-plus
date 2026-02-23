@@ -51,8 +51,8 @@ class FomodPlusPatchFinder final : public IPluginTool {
     Logger& log = Logger::getInstance();
     QDialog* mDialog { nullptr };
     IOrganizer* mOrganizer { nullptr };
-    std::unique_ptr<PatchFinder> mPatchFinder { nullptr };
-    std::vector<AvailablePatch> mAvailablePatches;
+    mutable std::unique_ptr<PatchFinder> mPatchFinder { nullptr };
+    mutable std::vector<AvailablePatch> mAvailablePatches;
 
     // Dismissed patches storage
     std::unordered_set<std::string> mDismissedPatches;

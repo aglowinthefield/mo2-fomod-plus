@@ -60,8 +60,8 @@ inline bool evaluateDependencies(const StoredDependencies& deps, const PluginSta
 
 // First-match semantics: returns the type of the first pattern whose conditions pass.
 // Returns empty string if no pattern matches.
-// Empty dependencies (no file deps, no nested deps) always evaluate to true —
-// this allows static type fallbacks (e.g., unconditionally Recommended) to match.
+// Patterns without file or nested dependencies (static fallbacks, flag-only) are
+// skipped since they can't be evaluated against the load order.
 inline std::string resolveMatchingType(
     const std::vector<StoredTypePattern>& patterns, const PluginStateResolver& resolver)
 {
@@ -70,13 +70,11 @@ inline std::string resolveMatchingType(
             || !pattern.dependencies.nestedDependencies.empty();
 
         if (!hasEvaluableConditions) {
-            // No evaluable conditions — but also check if there are flag-only conditions.
-            // If there are ONLY flag deps, skip this pattern (non-evaluable).
-            // If there are NO conditions at all, this is a static fallback — always matches.
-            if (!pattern.dependencies.flagDependencies.empty()) {
-                continue; // Flag-only pattern, can't evaluate
-            }
-            return pattern.type; // Empty dependencies = always true (static type fallback)
+            // No file or nested dependencies — skip this pattern.
+            // Static type fallbacks (empty deps) and flag-only patterns are not
+            // evaluable in the Patch Finder context since they don't reference
+            // any external files we can check against the load order.
+            continue;
         }
 
         if (evaluateDependencies(pattern.dependencies, resolver)) {
