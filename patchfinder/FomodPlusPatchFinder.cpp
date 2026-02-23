@@ -55,6 +55,12 @@ void FomodPlusPatchFinder::display() const
         delete mDialog->layout();
     }
 
+    // Reload the database and plugin list so we pick up any changes
+    // made by the installer since the last time the dialog was opened
+    mPatchFinder->mFomodDb->reload();
+    mPatchFinder->populateInstalledPlugins();
+    mAvailablePatches = mPatchFinder->getAvailablePatchesForModList();
+
     // Check if we have any fomod.db entries
     const bool hasEntries = !mPatchFinder->mFomodDb->getEntries().empty();
 
