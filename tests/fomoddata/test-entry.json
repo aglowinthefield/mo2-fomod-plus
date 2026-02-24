@@ -1,4 +1,4 @@
-﻿{
+{
   "modId": 12345,
   "displayName": "Lux (Patch Hub)",
   "options": [
@@ -12,7 +12,19 @@
         "Lux.esp"
       ],
       "step": "Step One",
-      "group": "Group One"
+      "group": "Group One",
+      "typePatterns": [
+        {
+          "type": "Recommended",
+          "dependencies": {
+            "operator": "Or",
+            "fileDependencies": [
+              { "file": "TKDodge.esp", "state": "Active" },
+              { "file": "UltimateCombat.esp", "state": "Active" }
+            ]
+          }
+        }
+      ]
     }
   ]
 }

@@ -78,6 +78,7 @@ class FomodPlusInstaller final : public IPluginInstallerSimple {
     Logger& log            = Logger::getInstance();
     IOrganizer* mOrganizer = nullptr;
     QString mFomodPath {};
+    QString mUrl {};
     std::shared_ptr<nlohmann::json> mFomodJson { nullptr };
     bool mInstallerUsed { false };
     std::shared_ptr<FomodDataContent> mFomodContent { nullptr };
