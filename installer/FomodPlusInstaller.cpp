@@ -133,7 +133,7 @@ std::vector<std::shared_ptr<const IPluginRequirement>> FomodPlusInstaller::requi
 QList<PluginSetting> FomodPlusInstaller::settings() const
 {
     return { { u"fallback_to_legacy"_s, u"When hitting cancel, fall back to the legacy FOMOD installer."_s, false },
-        { u"always_restore_choices"_s, u"Restore previous choices without clicking the magic button"_s, false },
+        { u"always_restore_choices"_s, u"Restore previous choices without clicking the magic button"_s, true },
         { u"show_images"_s, u"Show image previews and the image carousel in installer windows."_s, true },
         { u"color_theme"_s, u"Select the color theme for the installer"_s, QString("Blue") }, // Default color name
         { u"show_notifications"_s, u"Show the notifications panel"_s, false }, // WIP
@@ -301,12 +301,6 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(
             std::format("FomodPlusInstaller::install - version from info.xml: {}", version.toStdString()));
     }
 
-    if (!infoFile->getName().empty()) {
-        modName.update(QString::fromStdString(infoFile->getName()), GUESS_META);
-        logMessage(INFO,
-            std::format("FomodPlusInstaller::install - name from info.xml: {}", infoFile->getName()));
-    }
-
     if (!infoFile->getWebsite().empty()) {
         mUrl = QString::fromStdString(infoFile->getWebsite());
         logMessage(INFO,
@@ -314,10 +308,17 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(
     }
 
     // create ui & pass xml classes to ui
+    // Note: modName.update with info.xml name happens AFTER the lookup to avoid
+    // matching the wrong mod when the info.xml name differs from the archive filename.
     auto [json, matchMod]
         = getExistingFomodJson(modName, nexusID, static_cast<int>(moduleConfigFile->installSteps.installSteps.size()));
     if (matchMod != nullptr) {
         modName.update(matchMod->name(), GUESS_USER);
+    }
+    if (!infoFile->getName().empty()) {
+        modName.update(QString::fromStdString(infoFile->getName()), GUESS_FALLBACK);
+        logMessage(INFO,
+            std::format("FomodPlusInstaller::install - name from info.xml: {}", infoFile->getName()));
     }
     auto fomodViewModel = FomodViewModel::create(mOrganizer, std::move(moduleConfigFile), std::move(infoFile));
     const auto window   = std::make_shared<FomodInstallerWindow>(this, modName, tree, mFomodPath, fomodViewModel, json);
