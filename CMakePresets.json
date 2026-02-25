@@ -1,10 +1,10 @@
-﻿{
+{
   "version": 3,
   "configurePresets": [
     {
-      "name": "vs2022-windows",
-      "generator": "Visual Studio 17 2022",
-      "binaryDir": "${sourceDir}/vsbuild",
+      "name": "default",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "RelWithDebInfo",
         "DEPENDENCIES_DIR": "D:/var/modorganizer_super",
@@ -14,9 +14,9 @@
       }
     },
     {
-      "name": "vs2022-windows-beta",
-      "generator": "Visual Studio 17 2022",
-      "binaryDir": "${sourceDir}/vsbuild-beta",
+      "name": "beta",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-beta",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "RelWithDebInfo",
         "DEPENDENCIES_DIR": "D:/Mod.Organizer-2.5.3beta2-src",
@@ -35,9 +35,9 @@
       }
     },
     {
-      "name": "vs2022-windows-vcpkg",
-      "generator": "Visual Studio 17 2022",
-      "binaryDir": "${sourceDir}/vsbuild-vcpkg",
+      "name": "vcpkg",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-vcpkg",
       "environment": {
         "VCPKG_MANIFEST_MODE": "ON",
         "VCPKG_FEATURE_FLAGS": "manifests,registries"

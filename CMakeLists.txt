@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.30)
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Skip optional Vulkan wrapper lookups to avoid noisy Qt warnings when Vulkan SDK isn't present.
 set(CMAKE_DISABLE_FIND_PACKAGE_WrapVulkanHeaders ON CACHE BOOL "" FORCE)
 

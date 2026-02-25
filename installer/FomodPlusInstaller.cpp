@@ -118,10 +118,7 @@ QString FomodPlusInstaller::getSelectedColor() const
     return it != UiColors::colorStyles.end() ? it->first : "Blue";
 }
 
-QString FomodPlusInstaller::getNexusGameName() const
-{
-    return mOrganizer->managedGame()->gameNexusName();
-}
+QString FomodPlusInstaller::getNexusGameName() const { return mOrganizer->managedGame()->gameNexusName(); }
 
 std::vector<std::shared_ptr<const IPluginRequirement>> FomodPlusInstaller::requirements() const
 {
@@ -297,14 +294,13 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(
     // If MO2 didn't provide metadata (e.g. manual download), use values from info.xml
     if (version.isEmpty() && !infoFile->getVersion().empty()) {
         version = QString::fromStdString(infoFile->getVersion());
-        logMessage(INFO,
-            std::format("FomodPlusInstaller::install - version from info.xml: {}", version.toStdString()));
+        logMessage(INFO, std::format("FomodPlusInstaller::install - version from info.xml: {}", version.toStdString()));
     }
 
     if (!infoFile->getWebsite().empty()) {
         mUrl = QString::fromStdString(infoFile->getWebsite());
-        logMessage(INFO,
-            std::format("FomodPlusInstaller::install - website from info.xml: {}", infoFile->getWebsite()));
+        logMessage(
+            INFO, std::format("FomodPlusInstaller::install - website from info.xml: {}", infoFile->getWebsite()));
     }
 
     // create ui & pass xml classes to ui
@@ -317,8 +313,7 @@ IPluginInstaller::EInstallResult FomodPlusInstaller::install(
     }
     if (!infoFile->getName().empty()) {
         modName.update(QString::fromStdString(infoFile->getName()), GUESS_FALLBACK);
-        logMessage(INFO,
-            std::format("FomodPlusInstaller::install - name from info.xml: {}", infoFile->getName()));
+        logMessage(INFO, std::format("FomodPlusInstaller::install - name from info.xml: {}", infoFile->getName()));
     }
     auto fomodViewModel = FomodViewModel::create(mOrganizer, std::move(moduleConfigFile), std::move(infoFile));
     const auto window   = std::make_shared<FomodInstallerWindow>(this, modName, tree, mFomodPath, fomodViewModel, json);
