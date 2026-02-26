@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "stringutil.h"
+#include "scanner_rules.h"
 
 #include <QDir>
 #include <QString>
@@ -30,30 +30,13 @@ inline std::ostream& operator<<(std::ostream& os, const Archive::Error& error)
 
 inline bool hasFomodFiles(const std::vector<FileData*>& files)
 {
-    bool hasModuleXml = false;
-    bool hasInfoXml   = false;
-
+    std::vector<std::wstring> paths;
+    paths.reserve(files.size());
     for (const auto* file : files) {
-        if (endsWithCaseInsensitive(file->getArchiveFilePath(), StringConstants::FomodFiles::W_MODULE_CONFIG.data())) {
-            hasModuleXml = true;
-        }
-        if (endsWithCaseInsensitive(file->getArchiveFilePath(), StringConstants::FomodFiles::W_INFO_XML.data())) {
-            hasInfoXml = true;
-        }
+        paths.emplace_back(file->getArchiveFilePath());
     }
-    return hasModuleXml;
+    return hasFomodFilePaths(paths);
 }
-
-/* This class can do the following:
- * 1.) Detects if an archive has FOMOD files in it (without extracting)
- *      - This is used by the FOMOD scanner to set content flags
- *
- * 2.) It may support extracting ESPs and FOMODs, but this might be better served
- *     by a separate class. Maybe it could return a ModuleConfiguration to use like
- *     the installer.
- */
-
-enum class ScanResult { HAS_FOMOD, NO_FOMOD, NO_ARCHIVE };
 
 class ArchiveParser {
   public:

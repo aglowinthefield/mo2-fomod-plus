@@ -110,15 +110,15 @@ bool FomodPlusScanner::setFomodInfoForMod(IModInterface* mod, const ScanResult r
 {
     const auto pluginName = "FOMOD Plus";
     const auto setting    = mod->pluginSetting(pluginName, "fomod", 0);
-    if (setting == 0 && ScanResult::HAS_FOMOD == result) {
+    const auto action     = determineSettingAction(setting, result);
+
+    switch (action) {
+    case SettingAction::SetFlag:
         return mod->setPluginSetting(pluginName, "fomod", "{}");
-    }
-    if (setting != 0 && ScanResult::NO_FOMOD == result) {
-        // Only clear if the existing setting is a bare flag ("{}") set by a previous scan.
-        // Never clear rich JSON data written by the installer — those are user choices.
-        if (setting.toString() == "{}") {
-            return mod->setPluginSetting(pluginName, "fomod", 0);
-        }
+    case SettingAction::ClearFlag:
+        return mod->setPluginSetting(pluginName, "fomod", 0);
+    case SettingAction::NoChange:
+        return false;
     }
     return false;
 }

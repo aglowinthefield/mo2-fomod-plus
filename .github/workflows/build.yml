@@ -19,6 +19,26 @@ permissions:
   contents: write
 
 jobs:
+  test:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.7.*'
+          cache: true
+
+      - name: Configure tests
+        run: cmake -B tests/build -S tests -G Ninja
+
+      - name: Build tests
+        run: cmake --build tests/build
+
+      - name: Run tests
+        run: tests/build/runTests.exe
+
   build:
     runs-on: windows-2022
     steps:
