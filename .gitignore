@@ -15,3 +15,4 @@ mo2-fomod-plus.7z
 docs/
 tests/build
 build/
+compile_commands.json
