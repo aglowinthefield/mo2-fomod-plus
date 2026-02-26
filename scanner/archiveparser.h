@@ -41,7 +41,7 @@ inline bool hasFomodFiles(const std::vector<FileData*>& files)
             hasInfoXml = true;
         }
     }
-    return hasModuleXml && hasInfoXml;
+    return hasModuleXml;
 }
 
 /* This class can do the following:
