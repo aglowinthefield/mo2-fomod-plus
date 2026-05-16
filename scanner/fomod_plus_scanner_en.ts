@@ -29,17 +29,17 @@ Safe travels, and may your load order be free of conflicts.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusScanner.cpp" line="75"/>
+        <location filename="FomodPlusScanner.cpp" line="78"/>
         <source>Scan Complete</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusScanner.cpp" line="76"/>
+        <location filename="FomodPlusScanner.cpp" line="79"/>
         <source>The load order scan is complete. Updated filter info for </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="FomodPlusScanner.cpp" line="76"/>
+        <location filename="FomodPlusScanner.cpp" line="79"/>
         <source> mods.</source>
         <translation type="unfinished"></translation>
     </message>

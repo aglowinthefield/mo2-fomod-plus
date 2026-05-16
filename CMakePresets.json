@@ -47,9 +47,10 @@
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
         "VCPKG_TARGET_TRIPLET": "x64-windows",
         "VCPKG_MANIFEST_DIR": "${sourceDir}",
-        "CMAKE_PREFIX_PATH": "${sourceDir}/vcpkg_installed/x64-windows/share;C:/Qt/6.7.3/msvc2019_64",
-        "Qt6_DIR": "C:/Qt/6.7.3/msvc2019_64/lib/cmake/Qt6",
-        "MO2_PLUGIN_TARGET_DIR": "D:/Modding/Mod.Organizer-2.5.3beta2/plugins"
+        "VCPKG_APPLOCAL_DEPS": "OFF",
+        "CMAKE_PREFIX_PATH": "${sourceDir}/vcpkg_installed/x64-windows/share;C:/Qt/6.11.0/msvc2022_64",
+        "Qt6_DIR": "C:/Qt/6.11.0/msvc2022_64/lib/cmake/Qt6",
+        "MO2_PLUGIN_TARGET_DIR": "C:/Twisted Skyrim/plugins"
       }
     }
   ]
