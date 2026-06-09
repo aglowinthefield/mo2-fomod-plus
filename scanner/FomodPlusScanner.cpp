@@ -44,7 +44,7 @@ bool FomodPlusScanner::init(IOrganizer* organizer)
     movie->start();
 
     mProgressBar = new QProgressBar(mDialog);
-    mProgressBar->setRange(0, mOrganizer->modList()->allMods().size());
+    mProgressBar->setRange(0, 100); // Updated to actual mod count when scan starts
     mProgressBar->setVisible(false);
 
     const auto scanButton   = new QPushButton(tr("Scan"), mDialog);
@@ -69,6 +69,9 @@ bool FomodPlusScanner::init(IOrganizer* organizer)
 
 void FomodPlusScanner::onScanClicked() const
 {
+    if (mOrganizer->modList()) {
+        mProgressBar->setRange(0, static_cast<int>(mOrganizer->modList()->allMods().size()));
+    }
     mProgressBar->setVisible(true);
     const int added = scanLoadOrder(setFomodInfoForMod);
     mDialog->accept();
