@@ -19,6 +19,7 @@ target_include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/../share
         ${CMAKE_CURRENT_SOURCE_DIR}/../share/FOMODData
         ${CMAKE_CURRENT_SOURCE_DIR}/../share/xml
+        ${MO2_UIBASE_INCLUDE_DIRS}
         ${MO2_ARCHIVE_INCLUDE_DIRS}
         ${RESOURCE_DIR}
 )
@@ -39,6 +40,6 @@ if (MSVC)
     )
 endif ()
 
-target_link_libraries(fomod_plus_patch_finder PRIVATE pugixml nlohmann_json::nlohmann_json)
+target_link_libraries(fomod_plus_patch_finder PRIVATE mo2::uibase mo2::archive pugixml nlohmann_json::nlohmann_json)
 mo2_configure_plugin(fomod_plus_patch_finder WARNINGS OFF PRIVATE_DEPENDS archive)
 mo2_install_target(fomod_plus_patch_finder)
