@@ -15,4 +15,7 @@ mo2-fomod-plus.7z
 docs/
 tests/build
 build/
+build-*/
+dist/
+CMakeUserPresets.json
 compile_commands.json
