@@ -59,8 +59,13 @@ uibase/archive from pinned refs. The "beta11"/"beta12" labels are approximated
 with the closest official `modorganizer-uibase` tags (none are published under
 those names):
 
-| Artifact | uibase ref       | cmake_common ref | Qt     |
-|----------|------------------|------------------|--------|
-| 2.5.2    | `v2.5.2`         | `v0.1.7`         | 6.7.3  |
-| beta11   | `v2.5.3-beta.2`  | `v2.5.3-beta.2`  | 6.11.0 |
-| beta12   | `v2.6.0-dev.5`   | `v2.6.0-dev.1`   | 6.11.1 |
+| Artifact | uibase ref       | cmake_common ref | Qt     | Status        |
+|----------|------------------|------------------|--------|---------------|
+| beta11   | `v2.5.3-beta.2`  | `v2.5.3-beta.2`  | 6.11.0 | green         |
+| beta12   | `v2.6.0-dev.5`   | `v2.6.0-dev.1`   | 6.11.1 | green         |
+| 2.5.2    | `v2.5.2`         | `2_5_x` branch   | 6.7.3  | best-effort   |
+
+2.5.2 predates the standalone CMake/vcpkg build (old "umbrella" era: needs
+Boost via `BOOST_ROOT` + spdlog via classic vcpkg, and the modern
+`build-with-mob-action` doesn't fit it either — `2_5_x` has no `CMakePresets`).
+Its job is marked `continue-on-error` so it never blocks the modern artifacts.

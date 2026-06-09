@@ -19,6 +19,9 @@ permissions:
 jobs:
   build:
     runs-on: windows-2022
+    # 2.5.2 is the old umbrella era (needs Boost/spdlog, no presets); allow it to
+    # fail without blocking the modern (beta11/beta12) artifacts.
+    continue-on-error: ${{ matrix.name == '2.5.2' }}
     strategy:
       fail-fast: false
       matrix:
@@ -105,6 +108,19 @@ jobs:
         run: |
           "QT_ROOT=${{ github.workspace }}/Qt/${{ matrix.qt }}/${{ matrix.qt_dir }}" | Out-File -FilePath $env:GITHUB_ENV -Append
           "VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Provide Boost + spdlog (2.5.2 umbrella build)
+        if: matrix.name == '2.5.2'
+        shell: pwsh
+        run: |
+          # uibase 2_5_x uses the old umbrella build: Boost via BOOST_ROOT and
+          # spdlog via classic vcpkg (the v2.5.2 tag has no vcpkg manifest).
+          $boost = (Get-ChildItem Env: | Where-Object { $_.Name -match '^BOOST_ROOT_\d' } |
+            Sort-Object Name -Descending | Select-Object -First 1).Value
+          if (-not $boost) { throw "No preinstalled Boost found on the runner" }
+          Write-Output "Using BOOST_ROOT=$boost"
+          "BOOST_ROOT=$boost" | Out-File -FilePath $env:GITHUB_ENV -Append
+          & "$env:VCPKG_ROOT/vcpkg.exe" install "spdlog:x64-windows"
 
       - name: Build uibase + archive from source
         shell: pwsh
