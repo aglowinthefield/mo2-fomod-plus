@@ -59,13 +59,19 @@ uibase/archive from pinned refs. The "beta11"/"beta12" labels are approximated
 with the closest official `modorganizer-uibase` tags (none are published under
 those names):
 
-| Artifact | uibase ref       | cmake_common ref | Qt     | Status        |
-|----------|------------------|------------------|--------|---------------|
-| beta11   | `v2.5.3-beta.2`  | `v2.5.3-beta.2`  | 6.11.0 | green         |
-| beta12   | `v2.6.0-dev.5`   | `v2.6.0-dev.1`   | 6.11.1 | green         |
-| 2.5.2    | `v2.5.2`         | `2_5_x` branch   | 6.7.3  | best-effort   |
+| Artifact | uibase ref       | cmake_common ref | Qt     |
+|----------|------------------|------------------|--------|
+| beta11   | `v2.5.3-beta.2`  | `v2.5.3-beta.2`  | 6.11.0 |
+| beta12   | `v2.6.0-dev.5`   | `v2.6.0-dev.1`   | 6.11.1 |
 
-2.5.2 predates the standalone CMake/vcpkg build (old "umbrella" era: needs
-Boost via `BOOST_ROOT` + spdlog via classic vcpkg, and the modern
-`build-with-mob-action` doesn't fit it either — `2_5_x` has no `CMakePresets`).
-Its job is marked `continue-on-error` so it never blocks the modern artifacts.
+### Why no 2.5.2 artifact
+
+MO2 2.5.2 predates the standalone CMake/vcpkg build. Its `cmake_common`
+(`2_5_x`) `mo2.cmake` requires `BOOST_ROOT`, `FMT_ROOT`, and `PYTHON_ROOT` and
+resolves dependencies against a full `modorganizer_super` umbrella layout (Boost,
+fmt, googletest each built the umbrella way). That environment is produced by
+MO2's classic [`mob`](https://github.com/ModOrganizer2/mob) tool, not by a few CI
+steps — and the modern `build-with-mob-action` doesn't fit it either (`2_5_x`
+ships no `CMakePresets`, and `mob.ini` pins Qt 6.11). Producing a 2.5.2 artifact
+would require a separate, heavyweight mob-based workflow. Given 2.5.2 → 2.5.3 is a
+minor bump, the `beta11` build (uibase `2.5.3-beta.2`) is the closest available.

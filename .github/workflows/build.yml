@@ -19,22 +19,18 @@ permissions:
 jobs:
   build:
     runs-on: windows-2022
-    # 2.5.2 is the old umbrella era (needs Boost/spdlog, no presets); allow it to
-    # fail without blocking the modern (beta11/beta12) artifacts.
-    continue-on-error: ${{ matrix.name == '2.5.2' }}
     strategy:
       fail-fast: false
       matrix:
         include:
           # MO2 label -> approximated official refs. There are no official
           # "beta11"/"beta12" uibase tags; these are the closest published refs.
-          - name: "2.5.2"
-            uibase_ref: "v2.5.2"
-            archive_ref: "master"
-            cmake_common_ref: "2_5_x"
-            qt: "6.7.3"
-            qt_arch: "win64_msvc2019_64"
-            qt_dir: "msvc2019_64"
+          #
+          # NOTE: 2.5.2 is intentionally omitted. That era uses the classic "mob"
+          # umbrella build (mo2.cmake requires BOOST_ROOT + FMT_ROOT + PYTHON_ROOT
+          # and a modorganizer_super layout), which can't be reproduced with a few
+          # CI steps. Building a 2.5.2 artifact would need a separate heavyweight
+          # mob workflow. See BUILDING.md.
           - name: "beta11"
             uibase_ref: "v2.5.3-beta.2"
             archive_ref: "master"
@@ -108,24 +104,6 @@ jobs:
         run: |
           "QT_ROOT=${{ github.workspace }}/Qt/${{ matrix.qt }}/${{ matrix.qt_dir }}" | Out-File -FilePath $env:GITHUB_ENV -Append
           "VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT" | Out-File -FilePath $env:GITHUB_ENV -Append
-
-      - name: Install Boost (2.5.2 umbrella build)
-        if: matrix.name == '2.5.2'
-        id: install-boost
-        uses: MarkusJx/install-boost@v2.5.0
-        with:
-          boost_version: 1.85.0
-          platform_version: 2022
-          toolset: msvc
-
-      - name: Provide Boost + spdlog (2.5.2 umbrella build)
-        if: matrix.name == '2.5.2'
-        shell: pwsh
-        run: |
-          # uibase 2_5_x uses the old umbrella build: Boost via BOOST_ROOT and
-          # spdlog via classic vcpkg (the v2.5.2 tag has no vcpkg manifest).
-          "BOOST_ROOT=${{ steps.install-boost.outputs.BOOST_ROOT }}" | Out-File -FilePath $env:GITHUB_ENV -Append
-          & "$env:VCPKG_ROOT/vcpkg.exe" install "spdlog:x64-windows"
 
       - name: Build uibase + archive from source
         shell: pwsh
