@@ -52,6 +52,23 @@
         "Qt6_DIR": "C:/Qt/6.11.0/msvc2022_64/lib/cmake/Qt6",
         "MO2_PLUGIN_TARGET_DIR": "C:/Twisted Skyrim/plugins"
       }
+    },
+    {
+      "name": "beta12",
+      "inherits": "vcpkg",
+      "displayName": "MO2 2.5.3 beta12 (source-built uibase/archive, Qt 6.11)",
+      "binaryDir": "${sourceDir}/build-beta12",
+      "environment": {
+        "VCPKG_ROOT": "$penv{VCPKG_ROOT}"
+      },
+      "cacheVariables": {
+        "CMAKE_PREFIX_PATH": "$env{MO2_DEPS_INSTALL};${sourceDir}/vcpkg_installed/x64-windows/share;$env{QT_ROOT}",
+        "Qt6_DIR": "$env{QT_ROOT}/lib/cmake/Qt6",
+        "mo2-cmake_DIR": "$env{MO2_CMAKE_COMMON}",
+        "mo2-uibase_DIR": "$env{MO2_DEPS_INSTALL}/lib/cmake/mo2-uibase",
+        "mo2-archive_DIR": "$env{MO2_DEPS_INSTALL}/lib/cmake/mo2-archive",
+        "MO2_PLUGIN_TARGET_DIR": "${sourceDir}/dist/plugins"
+      }
     }
   ]
 }

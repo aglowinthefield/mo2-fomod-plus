@@ -11,8 +11,6 @@ on:
 
 env:
   BUILD_TYPE: RelWithDebInfo
-  SOURCE_ROOT: ${{ github.workspace }}/build/mo2-fomod-plus
-  VCPKG_ROOT: C:\vcpkg
   VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
 
 permissions:
@@ -21,6 +19,34 @@ permissions:
 jobs:
   build:
     runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # MO2 label -> approximated official refs. There are no official
+          # "beta11"/"beta12" uibase tags; these are the closest published refs.
+          - name: "2.5.2"
+            uibase_ref: "v2.5.2"
+            archive_ref: "release_v1.3.11"
+            cmake_common_ref: "v0.1.7"
+            qt: "6.7.3"
+            qt_arch: "win64_msvc2019_64"
+            qt_dir: "msvc2019_64"
+          - name: "beta11"
+            uibase_ref: "v2.5.3-beta.2"
+            archive_ref: "release_v1.3.11"
+            cmake_common_ref: "v2.5.3-beta.2"
+            qt: "6.11.0"
+            qt_arch: "win64_msvc2022_64"
+            qt_dir: "msvc2022_64"
+          - name: "beta12"
+            uibase_ref: "v2.6.0-dev.5"
+            archive_ref: "release_v1.3.11"
+            cmake_common_ref: "v2.6.0-dev.1"
+            qt: "6.11.1"
+            qt_arch: "win64_msvc2022_64"
+            qt_dir: "msvc2022_64"
+
     steps:
       - name: Export GitHub Actions cache environment
         uses: actions/github-script@v7
@@ -29,64 +55,125 @@ jobs:
             core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
-      - name: Cache MO2 dependencies
-        id: mo2-cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ github.workspace }}/install
-          key: mo2-deps-${{ hashFiles('.github/workflows/build.yml') }}
+      - name: Checkout fomod-plus
+        uses: actions/checkout@v4
 
-      - name: Build dependencies
-        if: steps.mo2-cache.outputs.cache-hit != 'true'
-        uses: modorganizer2/build-with-mob-action@master
-        with:
-          mo2-owner: 'ModOrganizer2'
-          mo2-branch: 'master'
-          mo2-dependencies: uibase archive
-          mo2-skip-build: true
-
-      - name: Install Qt
-        if: steps.mo2-cache.outputs.cache-hit == 'true'
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: '6.7.*'
-          cache: true
-
-      - name: Checkout
-        if: steps.mo2-cache.outputs.cache-hit == 'true'
+      - name: Checkout modorganizer-uibase (${{ matrix.uibase_ref }})
         uses: actions/checkout@v4
         with:
-          path: build/mo2-fomod-plus
+          repository: ModOrganizer2/modorganizer-uibase
+          ref: ${{ matrix.uibase_ref }}
+          path: deps/uibase
 
-      - name: Configure (vcpkg preset)
-        run: >
-          cmake --preset vs2022-windows-vcpkg
-          -DCMAKE_PREFIX_PATH="${{ github.workspace }}/install/lib/cmake;${{ github.workspace }}/install/share"
-          -Dmo2-cmake_DIR="${{ github.workspace }}/install/lib/cmake/mo2-cmake"
-          -DFOMOD_PLUS_BUILD_PATCHFINDER=OFF
-        working-directory: ${{env.SOURCE_ROOT}}
+      - name: Checkout modorganizer-archive (${{ matrix.archive_ref }})
+        uses: actions/checkout@v4
+        with:
+          repository: ModOrganizer2/modorganizer-archive
+          ref: ${{ matrix.archive_ref }}
+          path: deps/archive
 
-      - name: Build & Install
+      - name: Checkout cmake_common (${{ matrix.cmake_common_ref }})
+        uses: actions/checkout@v4
+        with:
+          repository: ModOrganizer2/cmake_common
+          ref: ${{ matrix.cmake_common_ref }}
+          path: deps/cmake_common
+
+      - name: Setup MSVC dev environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Cache Qt ${{ matrix.qt }}
+        id: qt-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/Qt/${{ matrix.qt }}
+          key: qt-${{ matrix.qt }}-${{ matrix.qt_arch }}
+
+      - name: Install Qt ${{ matrix.qt }}
+        if: steps.qt-cache.outputs.cache-hit != 'true'
+        shell: pwsh
         run: |
-          cmake --build vsbuild-vcpkg --config ${{env.BUILD_TYPE}} --target package
-          cmake --install vsbuild-vcpkg --config ${{env.BUILD_TYPE}} --prefix ${{env.SOURCE_ROOT}}/install
-        working-directory: ${{env.SOURCE_ROOT}}
+          # The PyPI aqtinstall release cannot resolve Qt 6.11's repository
+          # layout, so install from git master which handles it.
+          python -m pip install --upgrade "git+https://github.com/miurahr/aqtinstall.git@master"
+          python -m aqt install-qt windows desktop ${{ matrix.qt }} ${{ matrix.qt_arch }} --outputdir "${{ github.workspace }}/Qt"
 
-      - name: Upload
+      - name: Set environment paths
+        shell: pwsh
+        run: |
+          "QT_ROOT=${{ github.workspace }}/Qt/${{ matrix.qt }}/${{ matrix.qt_dir }}" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Build uibase + archive from source
+        shell: pwsh
+        run: |
+          $deps = "${{ github.workspace }}/deps"
+          $install = "${{ github.workspace }}/mo2-install"
+          $toolchain = "$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+
+          cmake -S "$deps/uibase" -B build/uibase -G Ninja `
+            -DCMAKE_BUILD_TYPE=$env:BUILD_TYPE `
+            "-DCMAKE_TOOLCHAIN_FILE=$toolchain" `
+            -DVCPKG_TARGET_TRIPLET=x64-windows `
+            -DVCPKG_MANIFEST_FEATURES=standalone `
+            "-Dmo2-cmake_DIR=$deps/cmake_common" `
+            "-DCMAKE_PREFIX_PATH=$env:QT_ROOT" `
+            "-DQt6_DIR=$env:QT_ROOT/lib/cmake/Qt6" `
+            "-DCMAKE_INSTALL_PREFIX=$install" `
+            -DBUILD_TESTING=OFF
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          cmake --build build/uibase --target install
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+          cmake -S "$deps/archive" -B build/archive -G Ninja `
+            -DCMAKE_BUILD_TYPE=$env:BUILD_TYPE `
+            "-DCMAKE_TOOLCHAIN_FILE=$toolchain" `
+            -DVCPKG_TARGET_TRIPLET=x64-windows `
+            "-Dmo2-cmake_DIR=$deps/cmake_common" `
+            "-DCMAKE_PREFIX_PATH=$env:QT_ROOT" `
+            "-DQt6_DIR=$env:QT_ROOT/lib/cmake/Qt6" `
+            "-DCMAKE_INSTALL_PREFIX=$install"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          cmake --build build/archive --target install
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+      - name: Configure & build plugins
+        shell: pwsh
+        run: |
+          $install = "${{ github.workspace }}/mo2-install"
+          $deps = "${{ github.workspace }}/deps"
+          cmake -S . -B build-plugins -G Ninja `
+            -DCMAKE_BUILD_TYPE=$env:BUILD_TYPE `
+            "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" `
+            -DVCPKG_TARGET_TRIPLET=x64-windows `
+            "-DCMAKE_PREFIX_PATH=$install;$env:QT_ROOT" `
+            "-DQt6_DIR=$env:QT_ROOT/lib/cmake/Qt6" `
+            "-Dmo2-cmake_DIR=$deps/cmake_common" `
+            "-Dmo2-uibase_DIR=$install/lib/cmake/mo2-uibase" `
+            "-Dmo2-archive_DIR=$install/lib/cmake/mo2-archive" `
+            "-DMO2_PLUGIN_TARGET_DIR=${{ github.workspace }}/dist/plugins"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          cmake --build build-plugins --config $env:BUILD_TYPE --target package
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mo2-fomod-plus
-          path: |
-            ${{env.SOURCE_ROOT}}/package
-            ${{env.SOURCE_ROOT}}/install/bin
+          name: mo2-fomod-plus-${{ matrix.name }}
+          path: ${{ github.workspace }}/package
 
       - name: Create release archive
         if: github.event_name == 'release'
-        run: 7z a mo2-fomod-plus-${{ github.event.release.tag_name }}.7z ./plugins ./translations
-        working-directory: ${{env.SOURCE_ROOT}}/package
+        shell: pwsh
+        working-directory: ${{ github.workspace }}/package
+        run: 7z a "mo2-fomod-plus-${{ github.event.release.tag_name }}-mo2-${{ matrix.name }}.7z" ./plugins ./translations
 
       - name: Upload release asset
         if: github.event_name == 'release'
-        run: gh release upload ${{ github.event.release.tag_name }} ${{env.SOURCE_ROOT}}/package/mo2-fomod-plus-${{ github.event.release.tag_name }}.7z --clobber --repo ${{ github.repository }}
+        shell: pwsh
+        working-directory: ${{ github.workspace }}/package
         env:
           GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" "mo2-fomod-plus-${{ github.event.release.tag_name }}-mo2-${{ matrix.name }}.7z" --clobber --repo ${{ github.repository }}
