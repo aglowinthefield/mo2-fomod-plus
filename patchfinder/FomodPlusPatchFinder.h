@@ -1,79 +1,69 @@
 #pragma once
 #include "../installer/lib/Logger.h"
+#include "../share/FOMODData/FomodRescan.h"
 #include "lib/PatchFinder.h"
 
-#include <QSet>
 #include <iplugintool.h>
+#include <memory>
+#include <optional>
 #include <qtmetamacros.h>
-
-#include <nlohmann/json.hpp>
-#include <unordered_set>
 
 class QTreeWidget;
 
 using namespace MOBase;
 
 class FomodPlusPatchFinder final : public IPluginTool {
-    Q_OBJECT
-    Q_INTERFACES(MOBase::IPlugin MOBase::IPluginTool)
+  Q_OBJECT
+  Q_INTERFACES(MOBase::IPlugin MOBase::IPluginTool)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-    Q_PLUGIN_METADATA(IID "io.clearing.FomodPlusPatchFinder" FILE "fomodpluspatchfinder.json")
+  Q_PLUGIN_METADATA(IID "io.clearing.FomodPlusPatchFinder" FILE "fomodpluspatchfinder.json")
 #endif
 
-  public:
-    bool init(IOrganizer* organizer) override;
+public:
+  bool init(IOrganizer* organizer) override;
 
-    [[nodiscard]] QString name() const override { return tr("Patch Finder"); };
+  [[nodiscard]] QString name() const override { return tr("Patch Finder"); };
 
-    [[nodiscard]] QString author() const override { return "clearing"; };
+  [[nodiscard]] QString author() const override { return "clearing"; };
 
-    [[nodiscard]] QString description() const override
-    {
-        return tr("Find missing patches from FOMODs in your load order.");
-    };
+  [[nodiscard]] QString description() const override
+  {
+    return tr("Find missing patches from FOMODs in your load order.");
+  };
 
-    [[nodiscard]] VersionInfo version() const override { return { 1, 0, 0, VersionInfo::RELEASE_BETA }; };
+  [[nodiscard]] VersionInfo version() const override { return { 1, 0, 0, VersionInfo::RELEASE_BETA }; };
 
-    [[nodiscard]] QList<PluginSetting> settings() const override { return {}; };
+  [[nodiscard]] QList<PluginSetting> settings() const override { return {}; };
 
-    [[nodiscard]] QString displayName() const override { return tr("Patch Finder"); };
+  [[nodiscard]] QString displayName() const override { return tr("Patch Finder"); };
 
-    [[nodiscard]] QString tooltip() const override
-    {
-        return tr("Find missing patches from FOMODs in your load order.");
-    };
+  [[nodiscard]] QString tooltip() const override { return tr("Find missing patches from FOMODs in your load order."); };
 
-    [[nodiscard]] QIcon icon() const override { return QIcon(":/fomod/hat"); }
+  [[nodiscard]] QIcon icon() const override { return QIcon(":/fomod/hat"); }
 
-    void display() const override;
+  void display() const override;
 
-  private:
-    Logger& log = Logger::getInstance();
-    QDialog* mDialog { nullptr };
-    IOrganizer* mOrganizer { nullptr };
-    mutable std::unique_ptr<PatchFinder> mPatchFinder { nullptr };
-    mutable std::vector<AvailablePatch> mAvailablePatches;
+private:
+  Logger& log = Logger::getInstance();
+  QDialog* mDialog { nullptr };
+  IOrganizer* mOrganizer { nullptr };
+  mutable std::unique_ptr<PatchFinder> mPatchFinder { nullptr };
+  std::optional<RescanResult> mRescanResult;
 
-    // Dismissed patches storage
-    std::unordered_set<std::string> mDismissedPatches;
+  void rebuild() const;
+  void addFreshnessBanner(const PatchView& view) const;
+  void applyAction(PatchAction action) const;
+  void reportAction(const PatchActionResult& result) const;
+  void setupEmptyState() const;
+  void setupPatchList() const;
+  void onRescanClicked();
+  void populateSuggested(QWidget* container, const QString& filter) const;
+  void populateBrowseTree(QTreeWidget* tree, const QString& filter) const;
+  bool reinstall(int modId, const std::string& displayName);
+  bool rescan(FomodDB& workspace);
 
-    void setupEmptyState() const;
-    void setupPatchList() const;
-    void onRescanClicked();
-    void populateSuggested(QWidget* container, const QString& filter) const;
-    void populateBrowseTree(QTreeWidget* tree, const QString& filter) const;
-    void onReinstallClicked(const FomodDbEntry* entry);
-    void onDismissClicked(int modId, const std::string& fileName);
-
-    // Dismiss persistence
-    [[nodiscard]] std::string getDismissedFilePath() const;
-    void loadDismissed();
-    void saveDismissed() const;
-    [[nodiscard]] bool isDismissed(int modId, const std::string& fileName) const;
-    [[nodiscard]] static std::string makeDismissKey(int modId, const std::string& fileName);
-
-    void logMessage(const LogLevel level, const std::string& message) const
-    {
-        log.logMessage(level, "[PATCHFINDER] " + message);
-    }
+  void logMessage(const LogLevel level, const std::string& message) const
+  {
+    log.logMessage(level, "[PATCHFINDER] " + message);
+  }
 };

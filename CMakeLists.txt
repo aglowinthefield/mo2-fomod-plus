@@ -117,6 +117,7 @@ if (_fomod_plus_uses_local_mo2_cmake AND NOT COMMAND mo2_find_libraries
 endif ()
 
 project(fomod_plus)
+enable_testing()
 set(enable_warnings OFF)
 
 # If vcpkg package directories are explicitly provided, use find_package regardless

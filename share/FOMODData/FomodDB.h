@@ -4,7 +4,10 @@
 #include <stringutil.h>
 #include <unordered_map>
 
+#include <optional>
+#include <QCoreApplication>
 #include <QFileInfo>
+#include <QSaveFile>
 
 #include "FomodDBEntry.h"
 
@@ -118,6 +121,49 @@ class FomodDB {
 
     void reload() { loadFromFile(); }
 
+    // Opt-in checked loading: legacy installer callers retain their current behavior.
+    // Construct a private workspace before publishing anything to readers.
+    [[nodiscard]] static FomodDB createEmpty(const std::string& basePath)
+    {
+        FomodDB database;
+        database.dbFilePath = (std::filesystem::path(basePath) / FOMOD_DB_FILE).string();
+        return database;
+    }
+
+    // Absence is distinct from a successfully read, empty database.
+    [[nodiscard]] static std::optional<FomodDB> loadChecked(const std::string& basePath)
+    {
+        auto database = createEmpty(basePath);
+        if (!std::filesystem::exists(database.dbFilePath))
+            return std::nullopt;
+
+        std::ifstream file(database.dbFilePath);
+        if (!file.is_open())
+            throw std::runtime_error(QCoreApplication::translate("FomodDB", "Cannot read FOMOD database: %1")
+                .arg(QString::fromStdString(database.dbFilePath)).toStdString());
+        const auto json = nlohmann::json::parse(file);
+        if (!json.is_array())
+            throw std::runtime_error(QCoreApplication::translate("FomodDB", "FOMOD database must contain an array.").toStdString());
+        for (const auto& entry : json) {
+            if (!entry.is_object() || !entry.contains("options") || !entry.at("options").is_array())
+                throw std::runtime_error(QCoreApplication::translate("FomodDB", "FOMOD database entry must contain an options array.").toStdString());
+            database.entries.push_back(std::make_shared<FomodDbEntry>(entry));
+        }
+        return database;
+    }
+
+    // Atomic replacement: an unsuccessful write never truncates the previous database.
+    void saveChecked() const
+    {
+        QSaveFile file(QString::fromStdString(dbFilePath));
+        const auto data = toJson().dump(2);
+        if (!file.open(QIODevice::WriteOnly)
+            || file.write(data.data(), static_cast<qint64>(data.size())) != static_cast<qint64>(data.size())
+            || !file.commit())
+            throw std::runtime_error(QCoreApplication::translate("FomodDB", "Cannot save FOMOD database: %1")
+                .arg(file.errorString()).toStdString());
+    }
+
     void saveToFile() const
     {
         try {
@@ -145,6 +191,8 @@ class FomodDB {
     }
 
   private:
+    FomodDB() = default;
+
     FOMODDBEntries entries;
     std::string dbFilePath;
 

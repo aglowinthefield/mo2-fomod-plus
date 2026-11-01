@@ -224,9 +224,9 @@ TEST(ConditionEvaluatorTest, ResolveMatchingTypeSkipsNonMatchingFirst)
     EXPECT_EQ(result, "Recommended");
 }
 
-TEST(ConditionEvaluatorTest, ResolveMatchingTypeEmptyDepsStaticFallback)
+TEST(ConditionEvaluatorTest, ResolveMatchingTypeEmptyDepsStaticFallbackIsSkipped)
 {
-    // Static fallback: empty dependencies (no flags) → always matches
+    // Static fallbacks provide no load-order signal, just like flag-only patterns.
     StoredTypePattern p1;
     p1.type                 = "Recommended";
     p1.dependencies.operatorType = "And";
@@ -234,7 +234,7 @@ TEST(ConditionEvaluatorTest, ResolveMatchingTypeEmptyDepsStaticFallback)
 
     auto resolver = makeResolver({});
     auto result   = ConditionEvaluator::resolveMatchingType({ p1 }, resolver);
-    EXPECT_EQ(result, "Recommended");
+    EXPECT_TRUE(result.empty());
 }
 
 TEST(ConditionEvaluatorTest, ResolveMatchingTypeFlagOnlySkipped)

@@ -38,9 +38,11 @@ class FomodRescan {
     /**
      * Scan all mods that have stored FOMOD Plus choices and repopulate the database.
      * @param progressCallback Optional callback for progress updates
+     * @param persist Save the database after scanning (false for a caller-owned workspace).
+     * Progress callbacks may throw to cancel before persistence.
      * @return RescanResult with statistics about the scan
      */
-    RescanResult scanAllModsWithChoices(const ProgressCallback& progressCallback = nullptr)
+    RescanResult scanAllModsWithChoices(const ProgressCallback& progressCallback = nullptr, bool persist = true)
     {
         RescanResult result;
 
@@ -92,7 +94,9 @@ class FomodRescan {
         }
 
         // Save the database
-        mFomodDb->saveToFile();
+        if (persist) {
+            mFomodDb->saveToFile();
+        }
 
         // Log cache effectiveness
         std::cout << "[FomodRescan] Masters cache: " << mastersCache.size() << " unique plugins cached" << std::endl;

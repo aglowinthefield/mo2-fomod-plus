@@ -217,5 +217,107 @@ Issues:</source>
         <source>Find missing patches from FOMODs in your load order.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>The MO2 mod or plugin list is unavailable.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not read mod: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not read files for mod: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This action is no longer available. Please retry.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Suggestions are stale. Refresh failed; showing the last successful results.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Suggestions are unavailable. Refresh failed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Retry</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The rescan was cancelled. No changes were saved.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>FomodDB</name>
+    <message>
+        <source>Cannot read FOMOD database: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>FOMOD database must contain an array.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>FOMOD database entry must contain an options array.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot save FOMOD database: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>PatchFinder</name>
+    <message>
+        <source>FOMOD database is missing. Rescan or restore it, then retry.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot read dismissed patches.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Dismissed patches must contain an array.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot save dismissed patches: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Another Patch Finder action is already running.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Refresh patch suggestions before changing them.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This patch belongs to an obsolete view. Please retry.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reinstall is unavailable.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Rescan is unavailable.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This patch is not an undismissed suggestion.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unknown Patch Finder action.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not refresh patch suggestions.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 </TS>
