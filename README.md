@@ -47,7 +47,7 @@ You'll want to follow all setup instructions for `mob` before proceeding.
 2. Clone this repository inside the generated `<rootDir>/build/modorganizer-super` directory.
 3. Open in your IDE of choice. I prefer CLion and it should be fairly painless.
 
-*Note: I don't have a good setup for building to DLLs within the repo at the moment.*
+For current standalone build profiles, dependency setup, packaging, and isolated tests, see [BUILDING.md](BUILDING.md).
 
 ### Environment Variables
 I recommend setting the following system environment variables to make 
@@ -58,25 +58,26 @@ building super seamless:
 | `Qt6_DIR` | `C:\Qt\6.7.1\msvc2019_64\lib\cmake` |
 
 
-The project is divided into two targets, `fomod_plus_installer` and `fomod_plus_scanner`. Hopefully the 
-distinction is self-explanatory.
+The project builds separate `fomod_plus_installer`, `fomod_plus_scanner`, and optional
+`fomod_plus_patch_finder` DLLs.
 
 ### Using vcpkg
 This repo includes `vcpkg.json` + `vcpkg-configuration.json` pointing at the MO2 registry. With `VCPKG_ROOT`
 set and Qt installed locally (Qt is not pulled via vcpkg), you can configure using the vcpkg preset:
 
 ```
-cmake --preset vs2022-windows-vcpkg
-cmake --build vsbuild-vcpkg --config RelWithDebInfo --target package
+./build.ps1 -Preset vcpkg
+./package.ps1 -Preset vcpkg -SkipBuild
 ```
 
 That preset expects the standard triplet `x64-windows` and uses the vcpkg toolchain at `%VCPKG_ROOT%`.
-It installs the built DLLs to `D:/Modding/Mod.Organizer-2.5.3beta2/plugins` and packages outputs under `package/`.
+Check `MO2_PLUGIN_TARGET_DIR` before building: plugin output may go directly to an MO2 instance.
+Packaging produces `package/plugins`, `package/translations`, and `mo2-fomod-plus.7z`.
 
 ### Presets
-- `vs2022-windows` — builds against an existing MO2 super checkout (set `DEPENDENCIES_DIR`) and installs to `D:/Modding/MO2/plugins`.
-- `vs2022-windows-beta` — targets the MO2 2.5.3 beta sources at `D:/Mod.Organizer-2.5.3beta2-src` and installs to `D:/Modding/Mod.Organizer-2.5.3beta2/plugins`.
-- `vs2022-windows-vcpkg` — fetches MO2 dependencies via vcpkg (MO2 registry), still requires Qt installed locally, installs to `D:/Modding/Mod.Organizer-2.5.3beta2/plugins`.
+The current names are `default`, `beta`, `vcpkg`, and `beta12`; the convenience scripts default
+to `beta12`. See [BUILDING.md](BUILDING.md) for dependency requirements, local overrides,
+configuration isolation, and `-NoPatchFinder` / `-SkipBuild` behavior.
 
 <details>
   <summary>Technical Reasons</summary>

@@ -1,48 +1,44 @@
+#Requires -Version 7.0
 param(
-    [string]$Preset = "vs2022-windows",
-    [string]$Config = "RelWithDebInfo",
+    [string]$Preset = 'beta12',
+    [string]$Config,
     [switch]$Configure,
     [switch]$NoPatchFinder
 )
 
-$ErrorActionPreference = "Stop"
-$buildDir = switch ($Preset) {
-    "vs2022-windows"       { "vsbuild" }
-    "vs2022-windows-beta"  { "vsbuild-beta" }
-    "vs2022-windows-vcpkg" { "vsbuild-vcpkg" }
-    default                { "vsbuild" }
-}
-
-# Resolve MO2 plugin dir from preset to find translations dir
-$presets = Get-Content "$PSScriptRoot/CMakePresets.json" | ConvertFrom-Json
-$pluginDir = ($presets.configurePresets |
-    Where-Object { $_.name -eq $Preset }).cacheVariables.MO2_PLUGIN_TARGET_DIR
-$translationsDir = if ($pluginDir) { "$(Split-Path $pluginDir -Parent)/translations" } else { $null }
-
-# Configure if requested or build dir doesn't exist
-if ($Configure -or !(Test-Path "$PSScriptRoot/$buildDir")) {
-    Write-Host "Configuring with preset: $Preset" -ForegroundColor Cyan
-    cmake --preset $Preset
-    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-}
-
-# Build
-Write-Host "Building ($Config)..." -ForegroundColor Cyan
-$targets = @("fomod_plus_installer", "fomod_plus_scanner")
-if (-not $NoPatchFinder) { $targets += "fomod_plus_patch_finder" }
-cmake --build "$PSScriptRoot/$buildDir" --config $Config --target $targets
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-# Copy .qm files to MO2 translations dir
-if ($translationsDir -and (Test-Path $translationsDir)) {
-    $qmFiles = Get-ChildItem -Recurse -Filter *.qm "$PSScriptRoot/$buildDir"
-    foreach ($qm in $qmFiles) {
-        Copy-Item $qm.FullName "$translationsDir/" -Force
-        Write-Host "  Copied $($qm.Name) -> translations/" -ForegroundColor DarkGray
+$ErrorActionPreference = 'Stop'
+. "$PSScriptRoot/cmake/Profile.ps1"
+Push-Location $PSScriptRoot
+try {
+    $profile = Resolve-Profile $Preset $Config $NoPatchFinder
+    $receipt = "$($profile.Binary)/fomod-receipt.json"
+    if (Test-Path $receipt) { Remove-Item $receipt -Force }
+    $needsConfigure = $Configure
+    try { $null = Assert-Profile $profile } catch { $needsConfigure = $true }
+    if ($needsConfigure) {
+        Invoke-CMake --preset $Preset -B $profile.Binary "-DCMAKE_BUILD_TYPE:STRING=$($profile.Config)" `
+            "-DFOMOD_PLUS_PRESET:STRING=$Preset" "-DFOMOD_PLUS_BUILD_PATCHFINDER:BOOL=$($profile.PatchFinder)"
     }
-    Write-Host "Translations copied to $translationsDir" -ForegroundColor Green
-} else {
-    Write-Host "Skipping translations (no MO2 translations dir found)" -ForegroundColor Yellow
+    $manifest = Assert-Profile $profile
+    # CMake, not PowerShell, applies inherited preset environment to the build.
+    $buildResult = [IO.Path]::GetTempFileName()
+    try {
+        Invoke-CMake --preset $Preset -N "-DFOMOD_BUILD_DIRECTORY:PATH=$($profile.Binary)" `
+            "-DFOMOD_BUILD_RESULT:FILEPATH=$buildResult" -C "$PSScriptRoot/cmake/BuildArtifacts.cmake"
+        $result = (Get-Content $buildResult -Raw)
+        if ($result -cne '0') { throw "Artifact build failed ($result)" }
+    } finally {
+        Remove-Item -LiteralPath $buildResult -Force
+    }
+    # Preserve the existing convenience: copy enabled translations only when the
+    # configured MO2 translations directory already exists. Never create it.
+    if ($manifest.translationDirectory -and (Test-Path $manifest.translationDirectory -PathType Container)) {
+        foreach ($artifact in $manifest.artifacts) {
+            if ($artifact.destination.StartsWith('translations/')) {
+                Copy-Item -LiteralPath $artifact.path -Destination $manifest.translationDirectory -Force
+            }
+        }
+    }
+} finally {
+    Pop-Location
 }
-
-Write-Host "Done!" -ForegroundColor Green
