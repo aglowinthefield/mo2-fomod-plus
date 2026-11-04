@@ -1,20 +1,8 @@
 CompileFlags:
-  Add:
-    - "-ID:/var/mo2-fomod-plus/installer"
-    - "-ID:/var/mo2-fomod-plus/scanner"
-    - "-ID:/var/mo2-fomod-plus/share"
-    - "-ID:/var/mo2-fomod-plus/vsbuild/_deps/pugixml-src/src"
-    - "-ID:/var/mo2-fomod-plus/vsbuild/_deps/json-src/include"
-    - "-ID:/var/vcpkg/packages/mo2-uibase_x64-windows/include"
-    - "-ID:/var/vcpkg/packages/mo2-uibase_x64-windows/include/uibase"
-    - "-ID:/var/vcpkg/packages/mo2-uibase_x64-windows/include/uibase/game_features"
-    - "-IC:/Qt/6.7.3/msvc2022_64/include"
-    - "-IC:/Qt/6.7.3/msvc2022_64/include/QtCore"
-    - "-IC:/Qt/6.7.3/msvc2022_64/include/QtGui"
-    - "-IC:/Qt/6.7.3/msvc2022_64/include/QtWidgets"
-    - "-std=c++20"
+  # The default beta12 preset and the local dev preset share this build tree.
+  # Use CMake's actual Qt/MO2 includes and language standard, not a second list.
+  CompilationDatabase: build-beta12
 
 Diagnostics:
   Suppress:
     - "constexpr_var_init"  # False positive with nlohmann/json on MSVC
-

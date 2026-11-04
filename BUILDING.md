@@ -165,6 +165,31 @@ Qt dialog interaction inside MO2 still requires a manual smoke test.
 The plugins link the source-built import libs but load the MO2 install's own
 `uibase.dll`/`archive.dll` at runtime, so the source must match the MO2 build.
 
+## Neovim
+
+C++ editing uses **clangd** plus CMake's generated compilation database. Install
+`clangd` and `clang-format` through Mason (or put them on PATH); enable clangd
+in your LSP configuration and `clang-format` for C/C++ in your formatter. C/C++
+Treesitter parsers provide highlighting, folds, and syntax-aware text objects.
+
+The repository's `.clangd` reads `build-beta12/compile_commands.json`, generated
+by the `beta12` preset (and the local `dev` preset). It uses the real Qt/MO2
+include paths, compiler definitions, and language standard. Configure/build once
+with the instructions above so dependencies and generated Qt headers exist.
+If using a different build tree, update `CompilationDatabase` in `.clangd` to
+that directory. Do not recreate the include paths by hand.
+
+From the repository root:
+
+```pwsh
+nvim .
+```
+
+Editing works from a normal terminal with the installed Windows toolchain;
+**building still requires the VS developer shell** described above. Formatting
+uses `.clang-format`, including the repository's two-space indentation. No
+Neovim startup command should build or deploy plugins automatically.
+
 ## CI
 
 `.github/workflows/build.yml` builds artifacts for three MO2 lines by compiling

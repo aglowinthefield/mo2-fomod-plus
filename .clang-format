@@ -1,4 +1,5 @@
 ﻿BasedOnStyle: WebKit
+IndentWidth: 2
 AlignConsecutiveAssignments: Consecutive
 AccessModifierOffset: -2
 ColumnLimit: 120
